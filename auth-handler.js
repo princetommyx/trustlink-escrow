@@ -3,7 +3,9 @@ import {
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
     onAuthStateChanged,
-    signOut
+    signOut,
+    GoogleAuthProvider,
+    signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -203,6 +205,41 @@ if (loginForm && window.location.pathname.includes("login.html")) {
             btn.disabled = false;
             btn.textContent = "SIGN IN";
             sessionStorage.removeItem("justAuth");
+        }
+    });
+}
+
+// Handle Google Auth
+const googleBtn = document.getElementById("google-auth-btn");
+if (googleBtn) {
+    googleBtn.addEventListener("click", async () => {
+        try {
+            googleBtn.disabled = true;
+            googleBtn.innerHTML = "Please wait...";
+            
+            // Set justAuth before to prevent onAuthStateChanged from firing a redirect early
+            sessionStorage.setItem("justAuth", "true");
+            
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            
+            // Store or update user in Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                fullName: user.displayName || user.email.split('@')[0],
+                email: user.email,
+                lastLoginAt: new Date()
+            }, { merge: true });
+            
+            sessionStorage.setItem("authToast", `Welcome back, ${user.displayName || 'there'}!`);
+            window.location.href = "index.html";
+        } catch (error) {
+            console.error(error);
+            showError(error.message);
+            googleBtn.disabled = false;
+            sessionStorage.removeItem("justAuth");
+            // The text differs slightly between login/signup but this is fine as a generic reset
+            googleBtn.innerHTML = '<img src="img/google.svg" alt="Google" class="google-icon"> Continue with Google';
         }
     });
 }
