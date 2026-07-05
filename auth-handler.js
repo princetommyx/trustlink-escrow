@@ -5,7 +5,8 @@ import {
     onAuthStateChanged,
     signOut,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -240,6 +241,36 @@ if (googleBtn) {
             sessionStorage.removeItem("justAuth");
             // The text differs slightly between login/signup but this is fine as a generic reset
             googleBtn.innerHTML = '<img src="img/google.svg" alt="Google" class="google-icon"> Continue with Google';
+        }
+    });
+}
+
+// Handle Password Reset
+const resetForm = document.querySelector("form.reset-form");
+if (resetForm && window.location.pathname.includes("reset-password.html")) {
+    resetForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById("reset-email").value;
+        const btn = document.querySelector(".auth-btn");
+
+        btn.disabled = true;
+        btn.textContent = "SENDING...";
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            sessionStorage.setItem("authToast", "Password reset email sent! Check your inbox.");
+            window.location.href = "login.html";
+        } catch (error) {
+            let msg = "Failed to send reset email. Please try again.";
+            if (error.code === 'auth/user-not-found') {
+                msg = "No account found with this email address.";
+            } else if (error.code === 'auth/invalid-email') {
+                msg = "Please enter a valid email address.";
+            }
+            showError(msg);
+            btn.disabled = false;
+            btn.textContent = "SEND RESET LINK";
         }
     });
 }
