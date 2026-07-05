@@ -12,14 +12,14 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: var(--text-main); /* Light background for the left side */
+    background-color: var(--bg-color);
     position: relative;
     overflow: hidden;
-    color: var(--bg-color); /* Dark text color */
+    color: var(--text-main);
 }
 
 .auth-left .logo {
-    color: var(--bg-color);
+    color: var(--text-main);
     font-size: 2.2rem;
     margin-bottom: 4px;
     z-index: 2;
@@ -33,17 +33,17 @@
 .auth-left .logo-icon {
     width: 64px;
     height: 64px;
-    background: var(--primary); /* Blue logo icon */
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
 }
 
 .auth-left .logo-icon::after {
-    background: var(--text-main); /* Inner cutout */
+    background: var(--bg-color);
     width: 32px;
     height: 32px;
 }
 
 .auth-tagline {
-    color: rgba(10, 15, 28, 0.6);
+    color: var(--text-muted);
     font-size: 0.95rem;
     z-index: 2;
     margin-top: 4px;
@@ -51,10 +51,8 @@
     font-style: italic;
 }
 
-/* Tone down the glow blobs on the light side */
 .auth-left .glow-blob {
-    opacity: 0.05;
-    background: var(--primary);
+    opacity: 0.4;
 }
 
 .auth-right {
@@ -65,13 +63,14 @@
     padding: 40px;
     position: relative;
     z-index: 1;
+    background-color: var(--bg-color);
 }
 
 .auth-right::before {
     content: '';
     position: absolute;
     top: 0;
-    left: -15vw; /* Bleed into the left side */
+    left: -15vw;
     right: 0;
     bottom: 0;
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
@@ -105,10 +104,10 @@
 .form-group input {
     width: 100%;
     padding: 14px 16px;
-    border-radius: 4px;
-    background: #ffffff;
-    border: none;
-    color: #333333;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--surface-border);
+    color: var(--text-main);
     font-family: var(--font-body);
     font-size: 0.95rem;
     transition: all 0.3s ease;
@@ -116,11 +115,12 @@
 
 .form-group input:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
 .form-group input::placeholder {
-    color: #999999;
+    color: var(--text-muted);
 }
 
 .password-wrapper {
@@ -188,18 +188,20 @@
     width: 100%;
     font-size: 0.95rem;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    border-radius: 4px;
-    box-shadow: none;
+    border-radius: 8px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    background: #050505;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .auth-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    box-shadow: none;
-    transform: none;
+    background: #111111;
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+    border-color: rgba(255, 215, 0, 0.4);
+    transform: translateY(-2px);
 }
 
 .auth-switch {
