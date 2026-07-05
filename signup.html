@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - TrustLink Escrow</title>
+    <meta name="description" content="Sign Up for TrustLink Escrow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-left">
+            <div class="glow-blob blob-1"></div>
+            <div class="glow-blob blob-2" style="top: auto; bottom: -200px; left: -100px;"></div>
+            <a href="index.html" class="logo auth-logo">
+                <div class="logo-icon auth-logo-icon"></div>
+                TRUSTLINK DASHBOARD
+            </a>
+            <p class="auth-tagline">Secure Escrow for Social Commerce</p>
+        </div>
+        <div class="auth-right">
+            <div class="auth-form-container">
+                <form class="auth-form" action="#">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Your email</label>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Create a password" required>
+                    </div>
+                    <div class="form-options">
+                        <label class="remember-me" style="font-size: 0.85rem;">
+                            <input type="checkbox" required>
+                            <span>I agree to the Terms of Service & Privacy Policy</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large auth-btn">SIGN UP</button>
+                    
+                    <div class="auth-switch">
+                        Already have an account? <a href="login.html">Sign in</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

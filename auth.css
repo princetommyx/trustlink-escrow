@@ -1,0 +1,212 @@
+/* auth.css - Styling for Login and Signup pages */
+
+.auth-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.auth-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--text-main); /* Light background for the left side */
+    position: relative;
+    overflow: hidden;
+    color: var(--bg-color); /* Dark text color */
+}
+
+.auth-left .logo {
+    color: var(--bg-color);
+    font-size: 2.2rem;
+    margin-bottom: 4px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.auth-left .logo-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--primary); /* Blue logo icon */
+}
+
+.auth-left .logo-icon::after {
+    background: var(--text-main); /* Inner cutout */
+    width: 32px;
+    height: 32px;
+}
+
+.auth-tagline {
+    color: rgba(10, 15, 28, 0.6);
+    font-size: 0.95rem;
+    z-index: 2;
+    margin-top: 4px;
+    font-weight: 500;
+    font-style: italic;
+}
+
+/* Tone down the glow blobs on the light side */
+.auth-left .glow-blob {
+    opacity: 0.05;
+    background: var(--primary);
+}
+
+.auth-right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-right::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -15vw; /* Bleed into the left side */
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    z-index: -1;
+    clip-path: polygon(15vw 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.auth-form-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-form-container h2 {
+    margin-bottom: 32px;
+    font-size: 2rem;
+    color: #ffffff;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 4px;
+    background: #ffffff;
+    border: none;
+    color: #333333;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.form-group input::placeholder {
+    color: #999999;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    font-size: 0.85rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.remember-me input {
+    accent-color: var(--primary);
+    width: 14px;
+    height: 14px;
+}
+
+.forgot-password {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.forgot-password:hover {
+    color: #ffffff;
+}
+
+.auth-btn {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border-radius: 4px;
+    box-shadow: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.auth-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: none;
+    transform: none;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.auth-switch a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 992px) {
+    .auth-wrapper {
+        flex-direction: column;
+    }
+    
+    .auth-left {
+        flex: none;
+        padding: 60px 20px;
+    }
+    
+    .auth-right {
+        flex: 1;
+        padding: 40px 20px;
+    }
+    
+    .auth-right::before {
+        left: 0;
+        clip-path: none;
+    }
+}
