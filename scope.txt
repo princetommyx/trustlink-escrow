@@ -1,0 +1,74 @@
+Here is the fully modified, cross-platform blueprint. The scope, stack, and state machine have been adapted from a pure WhatsApp bot into a multi-channel social commerce infrastructure (Instagram DMs, TikTok, X, and WhatsApp status vendors) utilizing dynamic web payment/tracking links.
+
+1. Core Project Scope (Social Commerce Edition)
+The goal is to build an asynchronous, state-driven escrow platform serving social media vendors. Instead of a pure messaging bot, the system generates secure dynamic web checkout and tracking links that sellers can paste into any DM or bio, backed by Moolre's payment processing and multi-channel notification layers.
+
+In-Scope for the Minimum Viable Product (MVP):
+Dynamic Payment Link Generator: A lightweight mobile vendor utility (or WhatsApp shortcut command) allowing sellers to rapidly input item details and generate a shareable trustlink.co/pay/{ref} URL for Instagram, TikTok, or X DMs.
+
+Responsive Web Checkout & Tracking Rooms: A ultra-clean mobile web interface where buyers click the DM link, select their mobile network, initiate a secure Moolre push payment, and track delivery status.
+
+Automated Escrow Collection: Listening for Moolre Payment webhooks to mathematically log and hold funds within your platform's master wallet.
+
+Cross-Channel Milestone Alerts: Triggering real-time updates via Moolre's SMS/WhatsApp APIs to both parties when payments are secured or items are marked as shipped.
+
+Web-Based Dispute Lock: A dedicated button inside the buyer's Web Tracking Room that completely freezes automated payouts and flags the transaction for manual review.
+
+Admin Dashboard: A private portal to view all active escrows, track transaction margins, and execute manual arbitrations (Refunds or Forced Payouts).
+
+Out-of-Scope for V1:
+AI-driven automated dispute resolutions.
+
+Native mobile applications (iOS/Android) or full-fledged seller storefronts.
+
+Multi-currency FX processing (locked to GHS transactions initially).
+
+2. The Tech Stack
+Building a cross-channel fintech engine requires absolute reliability. This architecture pairs a unified PHP core with agile mobile web views to ensure instant load times inside native social media browsers (like the Instagram in-app browser).
+
+Component	Technology	Purpose
+Backend Framework	react	Coordinates deep business logic, generates encrypted URLs, handles asynchronous payment hooks, and runs background cron jobs.
+Database	MySQL / PostgreSQL	Relational storage mapped via Eloquent ORM. Essential for strict data constraints between users, public links, and financial transaction references.
+Frontend UI (Web Views)	Tailwind CSS + Alpine.js	Powers the ultra-fast mobile checkout and tracking rooms that load instantly inside social media in-app browsers.
+Admin Dashboard	Filament PHP v3	Instantly provisions an internal administrative console for platform operators using high-speed TALL-stack data tables.
+Testing Engine	Pest PHP	Runs automated feature tests simulating mock Moolre transaction payloads to guarantee state machine resilience against fraud.
+API Layer	Moolre APIs	POS Payment Links (for web checkout collection), Disbursements (seller transfer payouts), and SMS/WhatsApp (multi-channel notifications).
+Local Proxy	Ngrok	Open-tunnels Moolre sandbox webhook traffic straight to your local workstation environment during active development.
+3. The Cross-Platform Transaction State Machine
+Because transactions happen across fragmented apps, the database must act as the absolute source of truth. Funds are held logically under your central Moolre account using strict relational rows.
+
+[INITIATED] ──> [AWAITING_PAYMENT] ──> [FUNDS_ESCROWED] ──> [ITEM_SHIPPED] ──> [COMPLETED]
+                                                                    │
+                                                                    └──> [DISPUTED] ──> [REFUNDED / FORCED]
+INITIATED: Seller configures the payment parameters. A secure unique token reference is minted.
+
+AWAITING_PAYMENT: The checkout link is live. System is waiting for the buyer to authenticate the Moolre push notification request on their mobile device.
+
+FUNDS_ESCROWED: Moolre webhook received successfully. Money is securely ring-fenced. Seller receives a WhatsApp/SMS alert to dispatch the parcel.
+
+ITEM_SHIPPED: Seller logs onto their link and hits "Mark as Shipped." This officially registers a timestamp and fires the 72-hour auto-release background countdown daemon.
+
+COMPLETED: Buyer taps "Confirm Receipt" in their web view, OR the 72-hour timer elapses without a dispute. Moolre Disbursements API triggers the vendor payout.
+
+DISPUTED: Buyer flags a delivery issue via the web portal. Halts the countdown daemon instantly and locks the ledger state pending admin review.
+
+4. Development Roadmap
+Follow this modified sequence to account for the web checkout interfaces alongside the API engines.
+
+1.Infrastructure & Relational Schemas:Days 1-2.
+Initialize the Laravel 11 foundation and wire up Ngrok. Write the database migrations incorporating fields for buyer_phone, moolre_pos_reference, and precise decimal values (10,2) for processing fees and net payouts.
+
+2.Webhook Receivers & Cryptographic Defense:Days 3-5.
+Build the MoolreWebhookController. Implement strict signature validation to guarantee arriving payloads are authentically signed by Moolre. Use Pest PHP to run automated tests ensuring state jumps (like shifting to FUNDS_ESCROWED) only occur upon verified success arrays.
+
+3.Cross-Platform Checkout UI & Alert Engine:Days 6-8.
+Construct the lightweight web checkout view using Tailwind. Integrate Moolre’s POS API to spin up the checkout flow. Write the NotificationService that leverages Moolre WhatsApp/SMS hooks to alert the parties when milestones change.
+
+4.Payout Integration & Auto-Release Daemons:Days 9-10.
+Integrate Moolre’s Disbursements API for liquidating funds to the seller's wallet. Write a custom Laravel Console Command (trustlink:release-escrows) scheduled to run hourly, checking for non-disputed ITEM_SHIPPED records older than 72 hours.
+
+5.Filament Operations Desk:Days 11-12.
+Install Filament PHP. Generate the TrustLinkResource table showing active transactions. Add custom UI action buttons into the administrative table row to execute a "Manual Refund" or "Force Vendor Payout" directly from the backend dashboard.
+
+5. Next Technical Target
+With the cross-platform scope set, your immediate technical next step is establishing the core database structures to support web checkout tracking references.

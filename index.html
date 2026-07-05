@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustLink Escrow - Secure Social Commerce</title>
+    <meta name="description" content="The ultimate asynchronous escrow platform for social media vendors. Generate secure payment links for Instagram, TikTok, X, and WhatsApp.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="glow-blob blob-1"></div>
+    <div class="glow-blob blob-2"></div>
+
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon"></div>
+                TrustLink
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How it Works</a>
+                <a href="#" class="btn btn-secondary">Login</a>
+                <a href="#" class="btn btn-primary">Get Started</a>
+            </div>
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container hero-container">
+                <div class="hero-content fade-up">
+                    <div class="badge">Powered by Moolre <img src="moolre.webp" alt="Moolre Logo" class="badge-logo"></div>
+                    <h1 class="hero-title">Secure Escrow for <span class="text-gradient">Social Commerce</span></h1>
+                    <p class="hero-subtitle">Turn DMs into secure storefronts. Generate dynamic payment links for Instagram, TikTok, X, and WhatsApp. We handle the trust, you handle the sales.</p>
+                    <div class="hero-cta">
+                        <a href="#" class="btn btn-primary btn-large">Create Payment Link</a>
+                        <a href="#how-it-works" class="btn btn-outline btn-large">See How it Works</a>
+                    </div>
+
+                </div>
+                <div class="hero-visual fade-up" style="transition-delay: 0.2s;">
+                    <div class="glass-card mockup-card">
+                        <div class="mockup-header">
+                            <div class="dot dot-red"></div>
+                            <div class="dot dot-yellow"></div>
+                            <div class="dot dot-green"></div>
+                        </div>
+                        <div class="mockup-body">
+                            <div class="mockup-notification">
+                                <div class="icon-circle success">✓</div>
+                                <div>
+                                    <h4>Payment Secured</h4>
+                                    <p>GH₵ 450.00 is in escrow</p>
+                                </div>
+                            </div>
+                            <div class="mockup-progress">
+                                <div class="step active"></div>
+                                <div class="step-line active"></div>
+                                <div class="step active"></div>
+                                <div class="step-line"></div>
+                                <div class="step"></div>
+                            </div>
+                            <div class="mockup-btn">Mark as Shipped</div>
+                        </div>
+                    </div>
+                    <div class="glass-card floating-card card-1">
+                        <h4>Moolre Push</h4>
+                        <p>Instant buyer checkout</p>
+                    </div>
+                    <div class="glass-card floating-card card-2">
+                        <h4>Auto-Release</h4>
+                        <p>72hr dispute window</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <div class="container">
+                <div class="section-header fade-up">
+                    <h2>Everything you need to sell safely</h2>
+                    <p>Built for the modern fragmented social landscape.</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card glass-card fade-up">
+                        <div class="feature-icon icon-link"></div>
+                        <h3>Dynamic Links</h3>
+                        <p>Lightweight utility to rapidly input item details and generate a shareable trustlink.co/pay/{ref} URL for any DM.</p>
+                    </div>
+                    <div class="feature-card glass-card fade-up" style="transition-delay: 0.1s;">
+                        <div class="feature-icon icon-shield"></div>
+                        <h3>Automated Escrow</h3>
+                        <p>Listens for Moolre Payment webhooks to mathematically log and hold funds within the master wallet.</p>
+                    </div>
+                    <div class="feature-card glass-card fade-up" style="transition-delay: 0.2s;">
+                        <div class="feature-icon icon-bell"></div>
+                        <h3>Cross-Channel Alerts</h3>
+                        <p>Real-time updates via SMS/WhatsApp APIs to both parties when payments are secured or items ship.</p>
+                    </div>
+                    <div class="feature-card glass-card fade-up" style="transition-delay: 0.3s;">
+                        <div class="feature-icon icon-gavel"></div>
+                        <h3>Dispute Lock</h3>
+                        <p>A dedicated button inside the Web Tracking Room that freezes automated payouts pending admin review.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- State Machine / How It Works Section -->
+        <section id="how-it-works" class="state-machine">
+            <div class="container">
+                <div class="section-header fade-up">
+                    <h2>The Cross-Platform Transaction Engine</h2>
+                    <p>Because transactions happen across fragmented apps, we act as the absolute source of truth.</p>
+                </div>
+                
+                <div class="steps-container">
+                    <div class="step-item fade-up">
+                        <div class="step-number">1</div>
+                        <div class="step-content glass-card">
+                            <h3>Initiated</h3>
+                            <p>Seller configures the payment parameters. A secure unique token reference is minted and shared.</p>
+                        </div>
+                    </div>
+                    <div class="step-connector fade-up"></div>
+                    <div class="step-item fade-up">
+                        <div class="step-number">2</div>
+                        <div class="step-content glass-card">
+                            <h3>Awaiting Payment</h3>
+                            <p>Buyer authenticates the Moolre push notification request on their mobile device via the web view.</p>
+                        </div>
+                    </div>
+                    <div class="step-connector fade-up"></div>
+                    <div class="step-item fade-up">
+                        <div class="step-number">3</div>
+                        <div class="step-content glass-card">
+                            <h3>Funds Escrowed</h3>
+                            <p>Moolre webhook received. Money is ring-fenced. Seller receives a WhatsApp alert to dispatch.</p>
+                        </div>
+                    </div>
+                    <div class="step-connector fade-up"></div>
+                    <div class="step-item fade-up">
+                        <div class="step-number">4</div>
+                        <div class="step-content glass-card">
+                            <h3>Item Shipped</h3>
+                            <p>Seller hits "Mark as Shipped." This fires the 72-hour auto-release background countdown daemon.</p>
+                        </div>
+                    </div>
+                    <div class="step-connector fade-up"></div>
+                    <div class="step-item fade-up">
+                        <div class="step-number">5</div>
+                        <div class="step-content glass-card">
+                            <h3>Completed</h3>
+                            <p>Buyer taps "Confirm Receipt" or 72h timer elapses. Moolre Disbursements API triggers vendor payout.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="container">
+                <div class="cta-box glass-card fade-up">
+                    <div class="glow-blob blob-3"></div>
+                    <h2>Ready to revolutionize your social sales?</h2>
+                    <p>Join thousands of vendors using TrustLink to eliminate fraud and build buyer confidence.</p>
+                    <a href="#" class="btn btn-primary btn-large">Get Started Now</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <a href="#" class="logo">
+                    <div class="logo-icon"></div>
+                    TrustLink
+                </a>
+                <p>The asynchronous escrow platform for social media vendors. Powered by Moolre.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-group">
+                    <h4>Platform</h4>
+                    <a href="#">Features</a>
+                    <a href="#">How it Works</a>
+                    <a href="#">Pricing</a>
+                </div>
+                <div class="link-group">
+                    <h4>Resources</h4>
+                    <a href="#">API Documentation</a>
+                    <a href="#">Seller Guide</a>
+                    <a href="#">Support</a>
+                </div>
+                <div class="link-group">
+                    <h4>Legal</h4>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Dispute Policy</a>
+                </div>
+            </div>
+        </div>
+        <div class="container copyright">
+            <p>&copy; 2026 TrustLink Escrow. All rights reserved. Hackathon Project.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

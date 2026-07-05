@@ -1,0 +1,61 @@
+Landing Page / Homepage
+
+Top Navigation Menu: Links, logo, and authentication buttons.
+
+Interactive Hero Widget: Quick-start tool to initiate a transaction directly from the home page.
+
+Trust & Security Badges: Information highlighting platform safety.
+
+Platform Features Overview: Visual summary of benefits.
+
+"How it Works" Flowchart: Step-by-step visual of the escrow process.
+
+Supported Categories Display: Instagram, TikTok etc
+
+Frequently Asked Questions (FAQ): Accordion-style Q&A.
+
+Social Proof & SEO: Testimonials, regional coverage map, and a blog section.
+
+Authentication & Onboarding
+
+Standard Registration: Account creation via username, email, and password.
+
+Mandatory Email Verification: Link verification before account activation.
+
+KYC (Know Your Customer): Government ID upload and verification system.
+
+Bot Protection: Google reCAPTCHA integration on forms.
+
+Admin Dashboard (Platform Owner)
+
+Real-time Statistics: Metrics for users, deposits, withdrawals, and active escrows.
+
+User Management: Ability to view users, verify KYC, and log into user accounts for support.
+
+Category Management: Add or remove tradable service/product categories.
+
+Dispute Resolution: Ability to read buyer/seller chats and manually refund or release funds.
+
+Manual Approvals: Interface to verify payment receipts for manual deposits/withdrawals.
+
+Dynamic Fee Configuration: Set fixed, percentage, or tiered platform fees.
+
+Payment Gateways: Setup for automated (PayPal, etc.) and manual (Bank Transfer) payments.
+
+Support Ticket Helpdesk: Manage and reply to user inquiries.
+
+Front-end CMS: Edit website text, terms, and banners directly.
+
+User Dashboard (Buyer & Seller)
+
+Escrow Contract Creation: Form to invite another party via email, set price, and assign fee splits.
+
+Wallet System: Interface to deposit funds into the platform or request withdrawals.
+
+Milestone Payments: Option to fund contracts in phases rather than all at once.
+
+In-App Messaging: Dedicated chat system attached to specific escrow transactions.
+
+Fund Dispatch (Release): Button for buyers to release funds to the seller upon satisfaction.
+
+Transaction Logs: Complete history of active escrows, deposits, fees, and withdrawals.
