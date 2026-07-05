@@ -123,6 +123,35 @@
     color: #999999;
 }
 
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 64px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    background: none;
+    border: none;
+    color: #666666;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-body);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color 0.3s;
+}
+
+.toggle-password:hover {
+    color: var(--primary);
+}
+
 .form-options {
     display: flex;
     justify-content: space-between;

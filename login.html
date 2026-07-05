@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +8,13 @@
     <meta name="description" content="Login to TrustLink Escrow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth.css">
 </head>
+
 <body>
     <div class="auth-wrapper">
         <div class="auth-left">
@@ -26,12 +30,15 @@
             <div class="auth-form-container">
                 <form class="auth-form" action="#">
                     <div class="form-group">
-                        <label for="email">Your email</label>
-                        <input type="email" id="email" placeholder="Enter your email" required>
+                        <label for="email">Email or Phone Number</label>
+                        <input type="text" id="email" placeholder="Enter your email or phone number" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" placeholder="Enter your password" required>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" placeholder="Enter your password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('password', this)">Show</button>
+                        </div>
                     </div>
                     <div class="form-options">
                         <label class="remember-me">
@@ -41,7 +48,7 @@
                         <a href="#" class="forgot-password">Recover password</a>
                     </div>
                     <button type="submit" class="btn btn-primary btn-large auth-btn">SIGN IN</button>
-                    
+
                     <div class="auth-switch">
                         Don't have an account? <a href="signup.html">Sign up</a>
                     </div>
@@ -49,5 +56,19 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                btn.textContent = 'Show';
+            }
+        }
+    </script>
 </body>
+
 </html>

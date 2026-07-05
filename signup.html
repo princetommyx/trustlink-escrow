@@ -30,12 +30,22 @@
                         <input type="text" id="name" placeholder="Enter your name" required>
                     </div>
                     <div class="form-group">
-                        <label for="email">Your email</label>
-                        <input type="email" id="email" placeholder="Enter your email" required>
+                        <label for="email">Email or Phone Number</label>
+                        <input type="text" id="email" placeholder="Enter your email or phone number" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" placeholder="Create a password" required>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" placeholder="Create a password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('password', this)">Show</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="confirm-password" placeholder="Confirm your password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirm-password', this)">Show</button>
+                        </div>
                     </div>
                     <div class="form-options">
                         <label class="remember-me" style="font-size: 0.85rem;">
@@ -52,5 +62,18 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                btn.textContent = 'Show';
+            }
+        }
+    </script>
 </body>
 </html>
