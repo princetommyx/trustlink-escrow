@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustLink Dashboard - Control Center</title>
+    <!-- Syncing your team's core templates with your new separated style sheet -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Persistent View Switching Dashboard Navigation Header Bar -->
+        <header class="dashboard-header">
+            <h1 class="brand-title">TRUSTLINK DASHBOARD</h1>
+            <button id="view-toggle" class="role-toggle-btn">Switch to Seller Mode</button>
+        </header>
+
+        <!-- PORTALPerspectives INTERFACE 1: THE BUYER ACTIONS HUB -->
+        <div id="buyer-portal" class="portal-card">
+            <h2>Initiate Secure Escrow Deposit</h2>
+            <p class="section-desc">Lock your payment capital safely in the neutral holding pool ledger to fund an active seller agreement.</p>
+            
+            <form onsubmit="event.preventDefault();">
+                <div class="form-group">
+                    <label>Product / Service Description</label>
+                    <input type="text" required placeholder="Enter what you are purchasing...">
+                </div>
+                <div class="form-group">
+                    <label>Contract Value (GH₵)</label>
+                    <input type="number" required placeholder="Enter transaction value amount...">
+                </div>
+                <div class="form-group">
+                    <label>Seller Account ID / Email</label>
+                    
+                </div>
+                <button type="submit" class="action-submit-btn">SECURELY DEPOSIT FUNDS</button>
+            </form>
+        </div>
+
+        <!-- PORTAL INTERFACE 2: THE SELLER TRACKING LEDGER (HIDDEN BY DEFAULT) -->
+        <div id="seller-portal" class="portal-card hidden">
+            <h2>Active Order Fulfillment Ledger</h2>
+            <p class="section-desc">Track active inbound buyer deposits, verify contract parameters, and update delivery milestones to trigger fund releases.</p>
+            
+            <div class="order-ledger-row">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <span style="font-weight: 700; color: #60A5FA;">Order #TL-84729</span>
+                    <span style="background-color: rgba(234, 179, 8, 0.15); color: var(--status-pending); border: 1px solid var(--status-pending); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING DELIVERY</span>
+                </div>
+                <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value Secured:</strong> GH₵ 4,500.00</p>
+                <button class="role-toggle-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="alert('Order milestone state set to Shipped! Requesting authorization codes.');">MARK AS SHIPPED</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modular Interactive View Toggling Script Routine -->
+    <script>
+        const btn = document.getElementById('view-toggle');
+        const buyer = document.getElementById('buyer-portal');
+        const seller = document.getElementById('seller-portal');
+
+        let mode = 'buyer';
+
+        btn.addEventListener('click', () => {
+            if (mode === 'buyer') {
+                buyer.classList.add('hidden');
+                seller.classList.remove('hidden');
+                btn.textContent = 'Switch to Buyer Mode';
+                mode = 'seller';
+            } else {
+                seller.classList.add('hidden');
+                buyer.classList.remove('hidden');
+                btn.textContent = 'Switch to Seller Mode';
+                mode = 'buyer';
+            }
+        });
+    </script>
+</body>
+</html>

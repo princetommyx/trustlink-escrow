@@ -1,0 +1,143 @@
+/* dashboard.css */
+
+:root {
+  --bg-premium-dark: #0b1528; /* Deep dark navy backdrop from signup */
+  --bg-card-dark: #132238;    /* Lighter slate card surface face */
+  --bg-input-dark: #1b2e4b;   /* Inner form text input background fill */
+  --text-main: #ffffff;
+  --text-muted: #94a3b8;
+  --accent-blue: #2563eb;
+  --status-pending: #eab308;
+  --status-success: #22c55e;
+}
+
+body {
+  background-color: var(--bg-premium-dark);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.dashboard-container {
+  max-width: 1000px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.brand-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.role-toggle-btn {
+  background-color: var(--accent-blue);
+  color: var(--text-main);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.role-toggle-btn:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.portal-card {
+  background-color: var(--bg-card-dark);
+  border: 1px solid #1e293b;
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.section-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.form-group input {
+  background-color: var(--bg-input-dark);
+  border: 1px solid #243b5e;
+  color: var(--text-main);
+  padding: 0.85rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  border-color: var(--accent-blue);
+}
+
+.action-submit-btn {
+  background-color: #000000; /* Dark match to your team's button look */
+  color: var(--text-main);
+  border: 1px solid #243b5e;
+  padding: 1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 700;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.2s;
+}
+
+.action-submit-btn:hover {
+  background-color: #111827;
+  border-color: var(--accent-blue);
+}
+
+.order-ledger-row {
+  background-color: var(--bg-input-dark);
+  border: 1px solid #243b5e;
+  padding: 1.5rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
+.hidden {
+  display: none !important;
+}
