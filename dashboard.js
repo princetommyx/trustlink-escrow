@@ -204,16 +204,20 @@ if (formNewEscrow) {
             const docRef = await addDoc(collection(db, "escrows"), newEscrow);
             const escrowId = docRef.id;
 
-            // 2. MOOLRE CHECKOUT (If we wanted the seller to pay, but in this flow, the BUYER pays)
-            // We just trigger Moolre to ensure the API works for our mock, but in reality, the buyer will trigger this on checkout.html.
-            await initiateMoolreCheckout(totalAmount, description, customer);
-            
+            // Note: We no longer call initiateMoolreCheckout here because the payment link 
+            // is generated when the BUYER clicks "Pay" on checkout.html. The seller only sends the SMS.
+
             // 3. SMS INTEGRATION
             if (buyerPhoneInput && buyerPhoneInput.value) {
                 // Generate the public POS checkout URL
                 const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
-                await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
-                alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer with the secure POS checkout link.`);
+                try {
+                    await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
+                    alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer with the secure POS checkout link.`);
+                } catch (smsError) {
+                    console.error("SMS Error caught:", smsError);
+                    alert(`Escrow Created Successfully!\n\nHowever, the SMS failed to send because of a Moolre configuration issue (${smsError.message}).\n\nYou can manually send this checkout link to the buyer:\n${checkoutUrl}`);
+                }
             } else {
                 alert('Escrow Created! However, no phone number was provided.');
             }
