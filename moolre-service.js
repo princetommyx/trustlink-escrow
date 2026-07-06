@@ -4,8 +4,9 @@
 // They are exposed here strictly for MVP/Prototype demonstration purposes.
 export const MOOLRE_SECRET_KEY = "9099172e-5333-42b6-990a-6c2d073f247b";
 export const MOOLRE_API_USER = "DreamersCode";
-export const MOOLRE_ACCOUNT_NUMBER = "YOUR_MOOLRE_ACCOUNT_NUMBER_HERE"; // e.g. "100000157291"
-export const MOOLRE_WHATSAPP_TEMPLATE = "escrow_update"; // e.g. "update" or "promotion"
+export const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; // User-provided real account number
+export const MOOLRE_VAS_KEY = "YOUR_MOOLRE_VAS_KEY_HERE"; // Required for SMS API
+export const MOOLRE_SENDER_ID = "TrustLink"; // Must be an approved Sender ID on Moolre
 
 /**
  * Initiates a Moolre payment gateway checkout session.
@@ -54,34 +55,33 @@ export async function initiateMoolreCheckout(amount, description, customer, exte
 }
 
 /**
- * Sends a WhatsApp notification using the Moolre API Key.
+ * Sends an SMS notification using the Moolre API.
  * 
- * @param {string} phone - The buyer's WhatsApp number.
+ * @param {string} phone - The buyer's phone number.
  * @param {string} checkoutUrl - The public POS checkout URL.
  * @param {string} escrowId - The Escrow reference ID.
  * @returns {Promise<object>}
  */
-export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId) {
+export async function sendSMSNotification(phone, checkoutUrl, escrowId) {
     try {
-        console.log(`[MOOLRE API] Sending WhatsApp link for ${escrowId} to ${phone}`);
+        console.log(`[MOOLRE API] Sending SMS link for ${escrowId} to ${phone}`);
         
         // Remove any '+' or spaces for the API if necessary
         const cleanPhone = phone.replace(/[^0-9]/g, '');
 
-        const response = await fetch("https://api.moolre.com/open/whatsapp/send", {
+        const response = await fetch("https://api.moolre.com/open/sms/send", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-KEY': MOOLRE_SECRET_KEY,
-                'X-API-USER': MOOLRE_API_USER
+                'X-API-VASKEY': MOOLRE_VAS_KEY
             },
             body: JSON.stringify({
-                template_name: MOOLRE_WHATSAPP_TEMPLATE,
-                language: "en",
+                type: 1,
+                senderid: MOOLRE_SENDER_ID,
                 messages: [{
                     recipient: cleanPhone,
                     ref: escrowId,
-                    placeholders: [ checkoutUrl, escrowId ]
+                    message: `TrustLink: An escrow payment has been initiated for you (Ref: ${escrowId}).\n\nPlease securely pay and track your escrow here:\n${checkoutUrl}`
                 }]
             })
         });
@@ -89,13 +89,13 @@ export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId) {
         const data = await response.json();
         
         if (!response.ok || data.status == 0) {
-            console.error(`[MOOLRE API] WhatsApp error:`, data);
-            throw new Error(data.message || "Failed to send WhatsApp message.");
+            console.error(`[MOOLRE API] SMS error:`, data);
+            throw new Error(data.message || "Failed to send SMS message.");
         }
 
         return data;
     } catch (error) {
-        console.error("Moolre WhatsApp integration error:", error);
+        console.error("Moolre SMS integration error:", error);
         throw error;
     }
 }

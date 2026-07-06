@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, sendWhatsAppNotification } from "./moolre-service.js";
+import { initiateMoolreCheckout, sendSMSNotification } from "./moolre-service.js";
 
 let currentUser = null;
 
@@ -208,14 +208,14 @@ if (formNewEscrow) {
             // We just trigger Moolre to ensure the API works for our mock, but in reality, the buyer will trigger this on checkout.html.
             await initiateMoolreCheckout(totalAmount, description, customer);
             
-            // 3. WHATSAPP INTEGRATION
+            // 3. SMS INTEGRATION
             if (buyerPhoneInput && buyerPhoneInput.value) {
                 // Generate the public POS checkout URL
                 const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
-                await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
-                alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer with the secure POS checkout link.`);
+                await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
+                alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer with the secure POS checkout link.`);
             } else {
-                alert('Escrow Created! However, no WhatsApp number was provided.');
+                alert('Escrow Created! However, no phone number was provided.');
             }
 
             // Do not redirect the seller. The buyer will pay via the WhatsApp link!
