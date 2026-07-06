@@ -211,8 +211,13 @@ if (formNewEscrow) {
             if (buyerPhoneInput && buyerPhoneInput.value) {
                 // Generate the public POS checkout URL
                 const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
-                await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
-                alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer with the secure POS checkout link.`);
+                try {
+                    await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
+                    alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer with the secure POS checkout link.`);
+                } catch (smsError) {
+                    console.error("SMS Error caught:", smsError);
+                    alert(`Escrow Created Successfully!\n\nHowever, the SMS failed to send because of a Moolre configuration issue (${smsError.message}).\n\nYou can manually send this checkout link to the buyer:\n${checkoutUrl}`);
+                }
             } else {
                 alert('Escrow Created! However, no phone number was provided.');
             }
