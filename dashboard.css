@@ -698,3 +698,51 @@ input[type=number] {
     overflow: hidden;
 }
 
+/* ==========================================
+   MOBILE RESPONSIVENESS (MAX 768px)
+   ========================================== */
+@media (max-width: 768px) {
+    .dashboard-layout { flex-direction: column; }
+    .dashboard-main { margin-left: 0; margin-bottom: 70px; }
+    .dashboard-topbar { padding: 0 20px; height: 70px; }
+    .topbar-title { font-size: 1.1rem; }
+    .dashboard-content { padding: 20px; }
+    
+    /* Sidebar -> Bottom Nav Bar */
+    .sidebar {
+        width: 100%; height: 70px; flex-direction: row;
+        top: auto; bottom: 0; left: 0; z-index: 1000;
+        border-right: none; border-top: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4); padding: 0;
+    }
+    .sidebar.collapsed { transform: translateY(100%); }
+    .sidebar-header, .sidebar-footer { display: none; }
+    
+    .sidebar-nav {
+        flex-direction: row; justify-content: space-around;
+        padding: 0; width: 100%; gap: 0; align-items: center; overflow: visible;
+    }
+    .nav-item {
+        flex-direction: column; padding: 8px 4px; border-radius: 8px;
+        font-size: 0.7rem; flex: 1; text-align: center; justify-content: center;
+    }
+    .nav-icon { margin-right: 0; margin-bottom: 4px; font-size: 1.1rem; }
+    .nav-item.active { background: transparent; color: var(--primary); box-shadow: none; }
+    .nav-item:hover { transform: none; }
+    .badge { position: absolute; top: 2px; right: 2px; font-size: 0.6rem; }
+    
+    /* Grids & Cards */
+    .stats-grid { grid-template-columns: 1fr; gap: 16px; }
+    .stat-card { padding: 24px; }
+    .portal-card { padding: 24px; }
+    .form-row { flex-direction: column; gap: 0; }
+    .line-item-row { flex-direction: column; align-items: stretch; gap: 8px; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; }
+    .btn-remove-line { width: 100%; height: 40px; margin-top: 8px; }
+    .modal-content { padding: 24px; width: 95vw; border-radius: 16px; }
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-actions button { width: 100%; }
+    
+    /* Tables */
+    .transaction-table th, .transaction-table td { padding: 12px 16px; }
+    .transaction-table { display: block; overflow-x: auto; white-space: nowrap; }
+}

@@ -289,3 +289,17 @@
         clip-path: none;
     }
 }
+
+@media (max-width: 768px) {
+    .auth-left {
+        display: none;
+    }
+    
+    .auth-right {
+        padding: 20px;
+    }
+    
+    .auth-form-container h2 {
+        font-size: 1.7rem;
+    }
+}
