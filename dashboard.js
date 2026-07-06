@@ -1,6 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initiateMoolreCheckout } from "./moolre-service.js";
 
 let currentUser = null;
 
@@ -161,10 +162,45 @@ if (btnNewEscrow) {
 if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
 if (btnCancelEscrow) btnCancelEscrow.addEventListener('click', closeModal);
 if (formNewEscrow) {
-    formNewEscrow.addEventListener('submit', (e) => {
+    formNewEscrow.addEventListener('submit', async (e) => {
         e.preventDefault();
-        alert('This will integrate with the Moolre API soon! Your escrow is ready to be created.');
-        closeModal();
+        
+        const submitBtn = formNewEscrow.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing with Moolre...';
+        
+        try {
+            // Get the total amount calculated in the UI
+            const amountInput = document.getElementById('escrow-amount');
+            const totalAmount = amountInput ? parseFloat(amountInput.value) : 0;
+            
+            if (totalAmount <= 0) {
+                throw new Error("Total escrow amount must be greater than 0");
+            }
+
+            const description = document.getElementById('escrow-terms') ? document.getElementById('escrow-terms').value : "TrustLink Escrow Deposit";
+            
+            const customer = {
+                email: currentUser ? currentUser.email : "guest@example.com",
+                name: currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink User"
+            };
+
+            const paymentData = await initiateMoolreCheckout(totalAmount, description, customer);
+            
+            // Usually, the API returns a checkout URL to redirect the user to
+            if (paymentData && paymentData.checkout_url) {
+                window.location.href = paymentData.checkout_url;
+            } else {
+                alert('Moolre Checkout Session Created! (Mock Success)\nProceeding to payment gateway...');
+                closeModal();
+            }
+        } catch (error) {
+            alert(error.message || "Failed to initialize Moolre Checkout.");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
     });
 }
 
