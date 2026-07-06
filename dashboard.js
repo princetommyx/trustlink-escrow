@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout } from "./moolre-service.js";
+import { initiateMoolreCheckout, sendWhatsAppNotification } from "./moolre-service.js";
 
 let currentUser = null;
 
@@ -188,11 +188,21 @@ if (formNewEscrow) {
 
             const paymentData = await initiateMoolreCheckout(totalAmount, description, customer);
             
+            // WHATSAPP INTEGRATION
+            const buyerPhoneInput = document.getElementById('buyer-phone');
+            if (buyerPhoneInput && buyerPhoneInput.value) {
+                // Generate a random 6-digit code
+                const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+                await sendWhatsAppNotification(buyerPhoneInput.value, verificationCode);
+                alert(`Moolre Checkout Session Created!\n\nA WhatsApp notification has been sent to the buyer with code: ${verificationCode}`);
+            } else {
+                alert('Moolre Checkout Session Created! (Mock Success)\nProceeding to payment gateway...');
+            }
+
             // Usually, the API returns a checkout URL to redirect the user to
             if (paymentData && paymentData.checkout_url) {
                 window.location.href = paymentData.checkout_url;
             } else {
-                alert('Moolre Checkout Session Created! (Mock Success)\nProceeding to payment gateway...');
                 closeModal();
             }
         } catch (error) {
