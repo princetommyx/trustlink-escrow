@@ -3,54 +3,53 @@
 // WARNING: In a real production application, these keys MUST be hidden on a backend server.
 // They are exposed here strictly for MVP/Prototype demonstration purposes.
 export const MOOLRE_SECRET_KEY = "9099172e-5333-42b6-990a-6c2d073f247b";
-export const MOOLRE_API_URL = "https://api.moolre.com/v1/checkout"; // Standardized checkout endpoint
+export const MOOLRE_API_USER = "DreamersCode";
+export const MOOLRE_ACCOUNT_NUMBER = "YOUR_MOOLRE_ACCOUNT_NUMBER_HERE"; // e.g. "100000157291"
+export const MOOLRE_WHATSAPP_TEMPLATE = "escrow_update"; // e.g. "update" or "promotion"
 
 /**
- * Initiates a Moolre payment gateway checkout session for the Escrow.
+ * Initiates a Moolre payment gateway checkout session.
  * 
  * @param {number} amount - The total escrow amount to charge.
  * @param {string} description - The description of the escrow transaction.
  * @param {object} customer - The customer details { email, name }.
- * @returns {Promise<object>} - The Moolre API response (often containing a checkout URL).
+ * @param {string} externalRef - The unique escrow ID for tracking.
+ * @returns {Promise<object>} - The Moolre API response containing the checkout URL.
  */
-export async function initiateMoolreCheckout(amount, description, customer) {
+export async function initiateMoolreCheckout(amount, description, customer, externalRef) {
     try {
-        const response = await fetch(MOOLRE_API_URL, {
+        const response = await fetch("https://api.moolre.com/embed/link", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-API-KEY': MOOLRE_SECRET_KEY,
-                'X-API-USER': 'DreamersCode'
+                'X-API-USER': MOOLRE_API_USER
             },
             body: JSON.stringify({
-                amount: parseFloat(amount),
+                type: 1,
+                amount: parseFloat(amount).toFixed(2),
+                email: customer.email,
+                externalref: externalRef || `ESC-${Date.now()}`,
+                reusable: "0",
                 currency: "GHS",
-                description: description,
-                customer: customer,
-                callback_url: "http://localhost/api/dr"
+                accountnumber: MOOLRE_ACCOUNT_NUMBER,
+                metadata: { description }
             })
         });
 
-        // Since we are mocking the endpoint without the exact docs, this will likely fail 
-        // with a 404 or 401 if the endpoint is slightly different. We handle it gracefully for the UI.
-        if (!response.ok) {
-            console.warn("Moolre API responded with an error, simulating success for MVP testing.", response.status);
-            return {
-                status: 'success',
-                message: 'Mock Checkout Created',
-                checkout_url: null // null triggers the alert success in dashboard.js
-            };
+        // Parse and return the real response
+        const data = await response.json();
+        
+        // If the API fails due to bad keys or missing account number, throw error
+        if (!response.ok || data.status == 0) {
+            console.error("Moolre Checkout API Error:", data);
+            throw new Error(data.message || "Failed to generate Moolre payment link.");
         }
 
-        const data = await response.json();
-        return data; 
+        return data.data; // Should contain { authorization_url, reference }
     } catch (error) {
-        console.error("Moolre integration error, falling back to mock success:", error);
-        return {
-            status: 'success',
-            message: 'Mock Checkout Created via Fallback',
-            checkout_url: null
-        };
+        console.error("Moolre integration error:", error);
+        throw error;
     }
 }
 
@@ -65,30 +64,38 @@ export async function initiateMoolreCheckout(amount, description, customer) {
 export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId) {
     try {
         console.log(`[MOOLRE API] Sending WhatsApp link for ${escrowId} to ${phone}`);
-        // In a real environment, you would hit the Moolre SMS/WhatsApp endpoint.
-        const response = await fetch("https://api.moolre.com/v1/whatsapp/send", {
+        
+        // Remove any '+' or spaces for the API if necessary
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+
+        const response = await fetch("https://api.moolre.com/open/whatsapp/send", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-API-KEY': MOOLRE_SECRET_KEY,
-                'X-API-USER': 'DreamersCode'
+                'X-API-USER': MOOLRE_API_USER
             },
             body: JSON.stringify({
-                to: phone,
-                message: `TrustLink: An escrow payment has been initiated for you (Ref: ${escrowId}).\n\nPlease securely pay and track your escrow here:\n${checkoutUrl}\n\nDo NOT release the funds until you have received and inspected the item.`,
-                channel: "whatsapp"
+                template_name: MOOLRE_WHATSAPP_TEMPLATE,
+                language: "en",
+                messages: [{
+                    recipient: cleanPhone,
+                    ref: escrowId,
+                    placeholders: [ checkoutUrl, escrowId ]
+                }]
             })
         });
 
-        if (!response.ok) {
-            console.warn(`[MOOLRE API] WhatsApp mock endpoint returned ${response.status}. Simulating success.`);
-            return { status: 'mock_success', message: 'WhatsApp message simulated.' };
+        const data = await response.json();
+        
+        if (!response.ok || data.status == 0) {
+            console.error(`[MOOLRE API] WhatsApp error:`, data);
+            throw new Error(data.message || "Failed to send WhatsApp message.");
         }
 
-        return await response.json();
+        return data;
     } catch (error) {
         console.error("Moolre WhatsApp integration error:", error);
-        // Simulate success for UI
-        return { status: 'mock_success', message: 'WhatsApp message simulated on error.' };
+        throw error;
     }
 }
