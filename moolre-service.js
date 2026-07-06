@@ -58,12 +58,13 @@ export async function initiateMoolreCheckout(amount, description, customer) {
  * Sends a WhatsApp notification using the Moolre API Key.
  * 
  * @param {string} phone - The buyer's WhatsApp number.
- * @param {string} code - The 6-digit escrow verification code.
+ * @param {string} checkoutUrl - The public POS checkout URL.
+ * @param {string} escrowId - The Escrow reference ID.
  * @returns {Promise<object>}
  */
-export async function sendWhatsAppNotification(phone, code) {
+export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId) {
     try {
-        console.log(`[MOOLRE API] Sending WhatsApp Code ${code} to ${phone}`);
+        console.log(`[MOOLRE API] Sending WhatsApp link for ${escrowId} to ${phone}`);
         // In a real environment, you would hit the Moolre SMS/WhatsApp endpoint.
         const response = await fetch("https://api.moolre.com/v1/whatsapp/send", {
             method: 'POST',
@@ -74,7 +75,7 @@ export async function sendWhatsAppNotification(phone, code) {
             },
             body: JSON.stringify({
                 to: phone,
-                message: `TrustLink: Your Escrow payment has been initiated. Your verification code is ${code}. Do not share this code until you receive your item.`,
+                message: `TrustLink: An escrow payment has been initiated for you (Ref: ${escrowId}).\n\nPlease securely pay and track your escrow here:\n${checkoutUrl}\n\nDo NOT release the funds until you have received and inspected the item.`,
                 channel: "whatsapp"
             })
         });

@@ -186,25 +186,42 @@ if (formNewEscrow) {
                 name: currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink User"
             };
 
-            const paymentData = await initiateMoolreCheckout(totalAmount, description, customer);
-            
-            // WHATSAPP INTEGRATION
+            const buyerEmail = document.getElementById('buyer-email') ? document.getElementById('buyer-email').value : "";
             const buyerPhoneInput = document.getElementById('buyer-phone');
+            
+            // 1. SAVE TO FIREBASE
+            const newEscrow = {
+                amount: totalAmount,
+                description: description,
+                sellerId: currentUser ? currentUser.uid : "GUEST",
+                sellerName: currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink User",
+                buyerEmail: buyerEmail,
+                buyerPhone: buyerPhoneInput ? buyerPhoneInput.value : "",
+                status: 'PENDING_PAYMENT',
+                createdAt: serverTimestamp()
+            };
+            
+            const docRef = await addDoc(collection(db, "escrows"), newEscrow);
+            const escrowId = docRef.id;
+
+            // 2. MOOLRE CHECKOUT (If we wanted the seller to pay, but in this flow, the BUYER pays)
+            // We just trigger Moolre to ensure the API works for our mock, but in reality, the buyer will trigger this on checkout.html.
+            await initiateMoolreCheckout(totalAmount, description, customer);
+            
+            // 3. WHATSAPP INTEGRATION
             if (buyerPhoneInput && buyerPhoneInput.value) {
-                // Generate a random 6-digit code
-                const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-                await sendWhatsAppNotification(buyerPhoneInput.value, verificationCode);
-                alert(`Moolre Checkout Session Created!\n\nA WhatsApp notification has been sent to the buyer with code: ${verificationCode}`);
+                // Generate the public POS checkout URL
+                const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
+                await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
+                alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer with the secure POS checkout link.`);
             } else {
-                alert('Moolre Checkout Session Created! (Mock Success)\nProceeding to payment gateway...');
+                alert('Escrow Created! However, no WhatsApp number was provided.');
             }
 
-            // Usually, the API returns a checkout URL to redirect the user to
-            if (paymentData && paymentData.checkout_url) {
-                window.location.href = paymentData.checkout_url;
-            } else {
-                closeModal();
-            }
+            // Do not redirect the seller. The buyer will pay via the WhatsApp link!
+            closeModal();
+            // Optionally, refresh the UI here
+            if (typeof fetchProducts === 'function') fetchProducts();
         } catch (error) {
             alert(error.message || "Failed to initialize Moolre Checkout.");
         } finally {
