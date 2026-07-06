@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - TrustLink Escrow</title>
+    <meta name="description" content="Login to TrustLink Escrow">
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link
+        href="https://googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
+</head>
+
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-left">
+            <div class="glow-blob blob-1"></div>
+            <div class="glow-blob blob-2" style="top: auto; bottom: -200px; left: -100px;"></div>
+            <a href="index.html" class="logo auth-logo">
+                <div class="logo-icon auth-logo-icon"></div>
+                TRUSTLINK DASHBOARD
+            </a>
+            <p class="auth-tagline">Secure Escrow for Social Commerce</p>
+        </div>
+        <div class="auth-right">
+            <div class="auth-form-container">
+                <form class="auth-form" id="verify-form" action="#">
+                    <h2 style="font-family: var(--font-heading); margin-bottom: 10px;" id="verify-title">Verify your account</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 30px; font-size: 0.95rem;" id="verify-subtitle">Loading...</p>
+
+                    <div id="phone-verification-section" style="display: none;">
+                        <input type="text" id="otp-input" placeholder="XXXX" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px; padding: 15px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--surface-border); background: var(--bg-dark); color: var(--text-primary); width: 100%; box-sizing: border-box;" required>
+                        <div id="otp-error" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 15px; display: none;">Invalid code. Please try again.</div>
+                        <button type="submit" class="btn btn-primary btn-large auth-btn" id="verify-otp-btn">VERIFY CODE</button>
+                    </div>
+                    
+                    <div id="email-verification-section" style="display: none; text-align: center;">
+                        <img src="img/mail-icon.svg" alt="Mail" style="width: 64px; margin-bottom: 20px; opacity: 0.8;" onerror="this.style.display='none'">
+                        <p style="margin-bottom: 20px;">We have sent a verification link to your email address. Please click the link to verify your account.</p>
+                        <button type="button" class="btn btn-primary btn-large auth-btn" id="check-email-btn">I'VE VERIFIED MY EMAIL</button>
+                    </div>
+
+                    <div class="auth-switch" style="margin-top: 30px;">
+                        Entered wrong details? <a href="signup.html" id="cancel-verify">Go back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="auth-handler.js"></script>
+</body>
+</html>

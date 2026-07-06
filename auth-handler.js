@@ -1,4 +1,5 @@
 import { auth, db } from "./firebase-config.js";
+import { sendMoolreOTP } from "./moolre-service.js";
 import { 
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
@@ -6,7 +7,8 @@ import {
     signOut,
     GoogleAuthProvider,
     signInWithPopup,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -47,7 +49,7 @@ if (pendingToast) {
 
 // Listen to auth state
 onAuthStateChanged(auth, async (user) => {
-    const isAuthPage = window.location.pathname.includes("login.html") || window.location.pathname.includes("signup.html");
+    const isAuthPage = window.location.pathname.includes("login.html") || window.location.pathname.includes("signup.html") || window.location.pathname.includes("verify.html");
     
     if (user) {
         // If user visits login/signup while already logged in, redirect them
@@ -173,23 +175,44 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
         }
 
         btn.disabled = true;
-        btn.textContent = "SIGNING UP...";
+        btn.textContent = "VERIFYING...";
 
         try {
-            sessionStorage.setItem("justAuth", "true");
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            
-            // Store additional user data in Firestore
-            await setDoc(doc(db, "users", user.uid), {
-                fullName: name,
-                email: email,
-                originalIdentifier: rawEmailOrPhone,
-                createdAt: new Date()
-            });
+            if (email.endsWith("@phone.trustlink.app")) {
+                const phone = rawEmailOrPhone.replace(/\D/g, '');
+                const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
+                
+                await sendMoolreOTP(phone, generatedOtp);
+                
+                // Store pending data and redirect
+                sessionStorage.setItem("pendingSignup", JSON.stringify({
+                    type: "phone",
+                    name, email, rawEmailOrPhone, password, otp: generatedOtp
+                }));
+                window.location.href = "verify.html";
+                return;
+            } else {
+                // Email signup
+                sessionStorage.setItem("justAuth", "true");
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                await sendEmailVerification(user);
+                
+                // Store additional user data in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    fullName: name,
+                    email: email,
+                    originalIdentifier: rawEmailOrPhone,
+                    createdAt: new Date(),
+                    emailVerified: false
+                });
 
-            sessionStorage.setItem("authToast", "Account created successfully! Welcome to TrustLink.");
-            window.location.href = "dashboard.html";
+                // Store pending state for redirect
+                sessionStorage.setItem("pendingSignup", JSON.stringify({ type: "email" }));
+                window.location.href = "verify.html";
+                return;
+            }
         } catch (error) {
             showError(error.message);
             btn.disabled = false;
@@ -291,4 +314,89 @@ if (resetForm && window.location.pathname.includes("reset-password.html")) {
             btn.textContent = "SEND RESET LINK";
         }
     });
+}
+
+// Handle Verify Page
+const verifyForm = document.getElementById("verify-form");
+if (verifyForm && window.location.pathname.includes("verify.html")) {
+    const pendingDataStr = sessionStorage.getItem("pendingSignup");
+    if (!pendingDataStr) {
+        window.location.href = "signup.html";
+    } else {
+        const pendingData = JSON.parse(pendingDataStr);
+
+        const phoneSection = document.getElementById("phone-verification-section");
+        const emailSection = document.getElementById("email-verification-section");
+        const title = document.getElementById("verify-title");
+        const subtitle = document.getElementById("verify-subtitle");
+
+        if (pendingData.type === "phone") {
+            phoneSection.style.display = "block";
+            title.textContent = "Verify Phone Number";
+            subtitle.textContent = `We sent a 4-digit code to ${pendingData.rawEmailOrPhone}.`;
+            
+            const verifyBtn = document.getElementById("verify-otp-btn");
+            const otpInput = document.getElementById("otp-input");
+            const otpError = document.getElementById("otp-error");
+
+            verifyBtn.addEventListener("click", async (e) => {
+                e.preventDefault();
+                if (otpInput.value === pendingData.otp) {
+                    verifyBtn.disabled = true;
+                    verifyBtn.textContent = "VERIFYING...";
+                    
+                    try {
+                        sessionStorage.setItem("justAuth", "true");
+                        const userCredential = await createUserWithEmailAndPassword(auth, pendingData.email, pendingData.password);
+                        const user = userCredential.user;
+                        
+                        await setDoc(doc(db, "users", user.uid), {
+                            fullName: pendingData.name,
+                            email: pendingData.email,
+                            originalIdentifier: pendingData.rawEmailOrPhone,
+                            createdAt: new Date(),
+                            phoneVerified: true
+                        });
+                        
+                        sessionStorage.removeItem("pendingSignup");
+                        sessionStorage.setItem("authToast", "Phone verified! Account created successfully.");
+                        window.location.href = "dashboard.html";
+                    } catch (error) {
+                        showError(error.message);
+                        verifyBtn.disabled = false;
+                        verifyBtn.textContent = "VERIFY CODE";
+                    }
+                } else {
+                    otpError.style.display = "block";
+                }
+            });
+
+        } else if (pendingData.type === "email") {
+            emailSection.style.display = "block";
+            title.textContent = "Verify Email Address";
+            subtitle.style.display = "none";
+            
+            const checkEmailBtn = document.getElementById("check-email-btn");
+            checkEmailBtn.addEventListener("click", async (e) => {
+                e.preventDefault();
+                checkEmailBtn.disabled = true;
+                checkEmailBtn.textContent = "CHECKING...";
+                
+                if (auth.currentUser) {
+                    await auth.currentUser.reload();
+                    if (auth.currentUser.emailVerified) {
+                        sessionStorage.removeItem("pendingSignup");
+                        sessionStorage.setItem("authToast", "Email verified! Account created successfully.");
+                        window.location.href = "dashboard.html";
+                    } else {
+                        showError("Email not verified yet. Please check your inbox and click the link.");
+                        checkEmailBtn.disabled = false;
+                        checkEmailBtn.textContent = "I'VE VERIFIED MY EMAIL";
+                    }
+                } else {
+                    window.location.href = "login.html";
+                }
+            });
+        }
+    }
 }
