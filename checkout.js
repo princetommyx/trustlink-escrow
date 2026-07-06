@@ -57,14 +57,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     try {
                         const customer = { email: escrow.buyerEmail || "buyer@example.com", name: "Buyer" };
-                        // Mock hitting Moolre API
-                        await initiateMoolreCheckout(escrow.amount, escrow.description, customer);
                         
-                        // Update Firestore to FUNDED
-                        await updateDoc(docRef, { status: 'FUNDED' });
+                        // Call Moolre API to generate the Hosted Checkout link
+                        const result = await initiateMoolreCheckout(escrow.amount, escrow.description, customer, escrowId);
                         
-                        alert("Payment Successful! Funds are now securely locked in Escrow.");
-                        window.location.reload();
+                        if (result && result.authorization_url) {
+                            // Update Firestore so the seller knows the buyer is on the payment page
+                            // (We don't set to FUNDED until the Moolre webhook confirms it, but for MVP we will keep it simple)
+                            
+                            // Redirect the buyer to Moolre POS
+                            window.location.href = result.authorization_url;
+                        } else {
+                            throw new Error("Moolre did not return a valid checkout link.");
+                        }
                     } catch(err) {
                         alert("Payment failed: " + err.message);
                         btn.disabled = false;

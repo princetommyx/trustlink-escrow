@@ -2,10 +2,10 @@
 
 // WARNING: In a real production application, these keys MUST be hidden on a backend server.
 // They are exposed here strictly for MVP/Prototype demonstration purposes.
-export const MOOLRE_SECRET_KEY = "9099172e-5333-42b6-990a-6c2d073f247b";
+export const MOOLRE_SECRET_KEY = "9pEmlgXWujrGG2n0k0zZs54rEJWiOlIYprKKSgALn4Vzt3jVF4MGvSzQCgEU13P6";
 export const MOOLRE_API_USER = "DreamersCode";
 export const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; // User-provided real account number
-export const MOOLRE_VAS_KEY = "YOUR_MOOLRE_VAS_KEY_HERE"; // Required for SMS API
+export const MOOLRE_VAS_KEY = "9pEmlgXWujrGG2n0k0zZs54rEJWiOlIYprKKSgALn4Vzt3jVF4MGvSzQCgEU13P6"; // Assuming Private Key acts as VAS Key
 export const MOOLRE_SENDER_ID = "TrustLink"; // Must be an approved Sender ID on Moolre
 
 /**
