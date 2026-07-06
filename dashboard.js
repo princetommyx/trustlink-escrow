@@ -1,0 +1,388 @@
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+let currentUser = null;
+
+// Navigation Logic
+const navItems = document.querySelectorAll('.nav-item');
+const views = document.querySelectorAll('.view-section');
+const topbarTitle = document.getElementById('current-view-title');
+
+navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Remove active class from all
+        navItems.forEach(nav => nav.classList.remove('active'));
+        views.forEach(view => view.classList.add('hidden'));
+        
+        // Add active to clicked
+        item.classList.add('active');
+        const targetId = item.getAttribute('data-target');
+        document.getElementById(targetId).classList.remove('hidden');
+        
+        // Update Title
+        topbarTitle.textContent = item.querySelector('.nav-text').textContent.trim();
+    });
+});
+
+// Collapse Sidebar Logic
+const collapseBtn = document.getElementById('btn-collapse');
+const topbarMenuToggle = document.getElementById('topbar-menu-toggle');
+const sidebar = document.querySelector('.sidebar');
+
+if (collapseBtn) {
+    collapseBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+    });
+}
+
+if (topbarMenuToggle) {
+    topbarMenuToggle.addEventListener('click', () => {
+        sidebar.classList.remove('collapsed');
+    });
+}
+
+// Initial GSAP Animations
+if (typeof gsap !== 'undefined') {
+    // Removed stagger for nav-items as it causes rendering misalignment bugs on Windows
+    // Animate stats cards
+    gsap.from('.stat-card', { opacity: 0, y: 30, duration: 0.8, stagger: 0.1, ease: 'power3.out', delay: 0.2 });
+    // Animate portals
+    gsap.from('.portal-card', { opacity: 0, y: 20, duration: 0.8, ease: 'power3.out', delay: 0.4 });
+}
+
+// Escrow Toggles (Buyer / Seller)
+const toggleBuyer = document.getElementById('toggle-buyer');
+const toggleSeller = document.getElementById('toggle-seller');
+const buyerEscrows = document.getElementById('buyer-escrows');
+const sellerEscrows = document.getElementById('seller-escrows');
+
+if(toggleBuyer && toggleSeller) {
+    toggleBuyer.addEventListener('click', () => {
+        toggleBuyer.classList.add('active');
+        toggleSeller.classList.remove('active');
+        buyerEscrows.classList.remove('hidden');
+        sellerEscrows.classList.add('hidden');
+    });
+
+    toggleSeller.addEventListener('click', () => {
+        toggleSeller.classList.add('active');
+        toggleBuyer.classList.remove('active');
+        sellerEscrows.classList.remove('hidden');
+        buyerEscrows.classList.add('hidden');
+    });
+}
+
+// Authentication Protection & User Data
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = "login.html";
+        return;
+    }
+    
+    // Check if Admin
+    if (user.email === 'admin@trustlink.com') {
+        window.location.href = "admin-dashboard.html";
+        return;
+    }
+    
+    try {
+        const docSnap = await getDoc(doc(db, "users", user.uid));
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.role === 'admin') {
+                window.location.href = "admin-dashboard.html";
+                return;
+            }
+            document.getElementById('user-name').textContent = data.fullName;
+            currentUser = user;
+            fetchProducts();
+        } else {
+            document.getElementById('user-name').textContent = user.email.split('@')[0];
+        }
+    } catch(e) {
+        document.getElementById('user-name').textContent = user.email.split('@')[0];
+    }
+    
+    // In case user document doesn't exist but auth does
+    if(!currentUser) {
+        currentUser = user;
+        fetchProducts();
+    }
+});
+
+document.getElementById('btn-signout').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = "login.html";
+});
+
+// New Escrow Modal Logic
+const btnNewEscrow = document.getElementById('btn-new-escrow');
+const modalOverlay = document.getElementById('new-escrow-modal');
+const btnCloseModal = document.getElementById('close-escrow-modal');
+const btnCancelEscrow = document.getElementById('btn-cancel-escrow');
+const formNewEscrow = document.getElementById('new-escrow-form');
+
+const openModal = () => {
+    modalOverlay.classList.remove('hidden');
+    // Allow display:block to apply before animating opacity
+    setTimeout(() => {
+        modalOverlay.classList.add('active');
+        if(typeof gsap !== 'undefined') {
+            gsap.fromTo('#new-escrow-modal .modal-content', { scale: 0.95, y: 20, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.4, ease: 'back.out(1.5)' });
+        }
+    }, 10);
+};
+
+const closeModal = () => {
+    if(typeof gsap !== 'undefined') {
+        gsap.to('#new-escrow-modal .modal-content', { scale: 0.95, y: 10, opacity: 0, duration: 0.3, ease: 'power2.in', onComplete: () => {
+            modalOverlay.classList.remove('active');
+            setTimeout(() => modalOverlay.classList.add('hidden'), 300);
+        }});
+    } else {
+        modalOverlay.classList.remove('active');
+        setTimeout(() => modalOverlay.classList.add('hidden'), 300);
+    }
+};
+
+if (btnNewEscrow) {
+    btnNewEscrow.addEventListener('click', () => {
+        const escrowLineItems = document.getElementById('escrow-line-items');
+        if(escrowLineItems && !escrowLineItems.innerHTML.trim()) {
+            // Will define injectSingleLineItem below
+            if(typeof injectSingleLineItem !== 'undefined') injectSingleLineItem('');
+        }
+        openModal();
+    });
+}
+if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+if (btnCancelEscrow) btnCancelEscrow.addEventListener('click', closeModal);
+if (formNewEscrow) {
+    formNewEscrow.addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert('This will integrate with the Moolre API soon! Your escrow is ready to be created.');
+        closeModal();
+    });
+}
+
+// ==========================================
+// SELLER PRODUCTS LOGIC (FIRESTORE)
+// ==========================================
+let myProducts = [];
+
+const productsGrid = document.getElementById('products-grid');
+const escrowLineItems = document.getElementById('escrow-line-items');
+const escrowAmount = document.getElementById('escrow-amount');
+const escrowTerms = document.getElementById('escrow-terms');
+const btnAddLineItem = document.getElementById('btn-add-line-item');
+
+let lineItemCounter = 0;
+
+const createLineItemHTML = (selectedId = '') => {
+    lineItemCounter++;
+    let optionsHTML = '<option value="">Choose a product...</option>';
+    myProducts.forEach(prod => {
+        optionsHTML += `<option value="${prod.id}" ${prod.id == selectedId ? 'selected' : ''}>${prod.name} - GH₵ ${parseFloat(prod.price).toLocaleString()}</option>`;
+    });
+
+    return `
+        <div class="line-item-row" data-id="${lineItemCounter}">
+            <div class="form-group" style="flex: 2;">
+                <label>Product/Service</label>
+                <select class="escrow-product-select" required style="background: rgba(0, 0, 0, 0.3);">
+                    ${optionsHTML}
+                </select>
+            </div>
+            <div class="form-group" style="flex: 0.5;">
+                <label>Qty</label>
+                <input type="number" class="escrow-qty" value="1" min="1" required style="background: rgba(0, 0, 0, 0.3);">
+            </div>
+            ${lineItemCounter > 1 
+                ? `<button type="button" class="btn-remove-line"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>` 
+                : `<div style="width: 48px; height: 48px; flex-shrink: 0;"></div>`
+            }
+        </div>
+    `;
+};
+
+window.injectSingleLineItem = (productId) => {
+    lineItemCounter = 0;
+    if(escrowLineItems) {
+        escrowLineItems.innerHTML = createLineItemHTML(productId);
+        updateEscrowTotal();
+    }
+};
+
+const fetchProducts = async () => {
+    if (!currentUser) return;
+    try {
+        const q = query(collection(db, "products"), where("userId", "==", currentUser.uid));
+        const querySnapshot = await getDocs(q);
+        myProducts = [];
+        querySnapshot.forEach((doc) => {
+            myProducts.push({ id: doc.id, ...doc.data() });
+        });
+        renderProducts();
+        
+        // Initial setup for line items if it's empty
+        if(escrowLineItems && !escrowLineItems.innerHTML.trim()) {
+            injectSingleLineItem('');
+        }
+    } catch (e) {
+        console.error("Error fetching products: ", e);
+    }
+};
+
+const renderProducts = () => {
+    if(productsGrid) {
+        // Render Grid
+        productsGrid.innerHTML = '';
+        myProducts.forEach(prod => {
+            productsGrid.innerHTML += `
+                <div class="product-item">
+                    <h3>${prod.name}</h3>
+                    <h2 class="product-price">GH₵ ${parseFloat(prod.price).toLocaleString()}</h2>
+                    <p class="product-desc">${prod.desc}</p>
+                    <button class="btn btn-outline" style="width: 100%; border-color: var(--primary); color: var(--primary);" onclick="document.getElementById('btn-new-escrow').click(); setTimeout(() => { injectSingleLineItem('${prod.id}'); }, 100);">Sell this Item</button>
+                </div>
+            `;
+        });
+    }
+
+    // Update existing Selects in Modal
+    if(escrowLineItems) {
+        const selects = escrowLineItems.querySelectorAll('.escrow-product-select');
+        selects.forEach(select => {
+            const currentVal = select.value;
+            let optionsHTML = '<option value="">Choose a product...</option>';
+            myProducts.forEach(prod => {
+                optionsHTML += `<option value="${prod.id}" ${prod.id == currentVal ? 'selected' : ''}>${prod.name} - GH₵ ${parseFloat(prod.price).toLocaleString()}</option>`;
+            });
+            select.innerHTML = optionsHTML;
+        });
+    }
+};
+
+// Escrow Auto-Calculation
+const updateEscrowTotal = () => {
+    if(!escrowLineItems) return;
+    
+    let total = 0;
+    let terms = [];
+    
+    const rows = escrowLineItems.querySelectorAll('.line-item-row');
+    rows.forEach(row => {
+        const select = row.querySelector('.escrow-product-select');
+        const qty = row.querySelector('.escrow-qty');
+        
+        if (select && qty && select.value) {
+            const prod = myProducts.find(p => p.id === select.value);
+            if (prod) {
+                total += (prod.price * parseInt(qty.value || 1));
+                terms.push(`- ${prod.name}: ${prod.desc}`);
+            }
+        }
+    });
+    
+    if(escrowAmount) escrowAmount.value = total > 0 ? total.toFixed(2) : '';
+    if(escrowTerms && document.activeElement !== escrowTerms) {
+        escrowTerms.value = terms.length > 0 ? terms.join('\n') : '';
+    }
+};
+
+// Event Delegation for Line Items
+if(escrowLineItems) {
+    escrowLineItems.addEventListener('change', (e) => {
+        if(e.target.classList.contains('escrow-product-select')) updateEscrowTotal();
+    });
+    escrowLineItems.addEventListener('input', (e) => {
+        if(e.target.classList.contains('escrow-qty')) updateEscrowTotal();
+    });
+    escrowLineItems.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-remove-line');
+        if(btn) {
+            btn.closest('.line-item-row').remove();
+            updateEscrowTotal();
+        }
+    });
+}
+
+// Ensure Add Button works via document delegation
+document.addEventListener('click', (e) => {
+    if (e.target.closest('#btn-add-line-item')) {
+        const container = document.getElementById('escrow-line-items');
+        if (container) {
+            container.insertAdjacentHTML('beforeend', createLineItemHTML());
+        }
+    }
+});
+
+// Add Product Modal
+const btnAddProduct = document.getElementById('btn-add-product');
+const productModal = document.getElementById('new-product-modal');
+const btnCloseProd = document.getElementById('close-product-modal');
+const btnCancelProd = document.getElementById('btn-cancel-product');
+const formNewProd = document.getElementById('new-product-form');
+
+const openProdModal = () => {
+    productModal.classList.remove('hidden');
+    setTimeout(() => {
+        productModal.classList.add('active');
+        if(typeof gsap !== 'undefined') gsap.fromTo('#new-product-modal .modal-content', { scale: 0.95, y: 20, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.4, ease: 'back.out(1.5)' });
+    }, 10);
+};
+
+const closeProdModal = () => {
+    if(typeof gsap !== 'undefined') {
+        gsap.to('#new-product-modal .modal-content', { scale: 0.95, y: 10, opacity: 0, duration: 0.3, ease: 'power2.in', onComplete: () => {
+            productModal.classList.remove('active');
+            setTimeout(() => productModal.classList.add('hidden'), 300);
+        }});
+    } else {
+        productModal.classList.remove('active');
+        setTimeout(() => productModal.classList.add('hidden'), 300);
+    }
+};
+
+if(btnAddProduct) btnAddProduct.addEventListener('click', openProdModal);
+if(btnCloseProd) btnCloseProd.addEventListener('click', closeProdModal);
+if(btnCancelProd) btnCancelProd.addEventListener('click', closeProdModal);
+
+if(formNewProd) {
+    formNewProd.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if(!currentUser) {
+            alert('You must be logged in to add products.');
+            return;
+        }
+        
+        const btnSubmit = formNewProd.querySelector('button[type="submit"]');
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Saving...';
+        
+        try {
+            const newProd = {
+                name: document.getElementById('new-prod-name').value,
+                price: parseFloat(document.getElementById('new-prod-price').value),
+                desc: document.getElementById('new-prod-desc').value,
+                userId: currentUser.uid,
+                createdAt: serverTimestamp()
+            };
+            
+            await addDoc(collection(db, "products"), newProd);
+            await fetchProducts(); // Re-fetch to get Firestore IDs and render
+            
+            closeProdModal();
+            formNewProd.reset();
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            alert("Error adding product.");
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = 'Save Product';
+        }
+    });
+}

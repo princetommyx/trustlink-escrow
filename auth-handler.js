@@ -44,6 +44,18 @@ if (pendingToast) {
     sessionStorage.removeItem("authToast");
 }
 
+// Helper to determine dashboard route
+async function getDashboardRoute(user) {
+    if (user.email === 'admin@trustlink.com') return 'admin-dashboard.html';
+    try {
+        const docSnap = await getDoc(doc(db, "users", user.uid));
+        if (docSnap.exists() && docSnap.data().role === 'admin') {
+            return 'admin-dashboard.html';
+        }
+    } catch(e) {}
+    return 'dashboard.html';
+}
+
 // Listen to auth state
 onAuthStateChanged(auth, async (user) => {
     const isAuthPage = window.location.pathname.includes("login.html") || window.location.pathname.includes("signup.html");
@@ -51,7 +63,10 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         // If user visits login/signup while already logged in, redirect them
         if (isAuthPage && !sessionStorage.getItem("justAuth")) {
-            window.location.href = "index.html"; 
+            getDashboardRoute(user).then(route => {
+                window.location.href = route;
+            });
+            return;
         }
         
         // If on a main page with navbar, update the navbar to show Profile
@@ -82,24 +97,27 @@ onAuthStateChanged(auth, async (user) => {
             if (!navLinks.querySelector(".profile-menu")) {
                 const profileMenu = document.createElement("div");
                 profileMenu.className = "profile-menu";
-                profileMenu.innerHTML = `
-                    <button class="profile-btn">
-                        <div class="avatar" style="width: 24px; height: 24px; margin: 0; background: linear-gradient(135deg, var(--primary), var(--secondary));"></div>
-                        ${displayName}
-                    </button>
-                    <div class="profile-dropdown">
-                        <a href="#" class="dropdown-item">Dashboard (Coming Soon)</a>
-                        <a href="#" class="dropdown-item">Settings</a>
-                        <hr style="border-color: var(--surface-border); margin: 5px 0;">
-                        <button class="dropdown-item danger" id="sign-out-btn">Sign Out</button>
-                    </div>
-                `;
-                navLinks.appendChild(profileMenu);
                 
-                document.getElementById("sign-out-btn").addEventListener("click", async () => {
-                    await signOut(auth);
-                    sessionStorage.setItem("authToast", "Successfully signed out.");
-                    window.location.reload();
+                getDashboardRoute(user).then(dashboardUrl => {
+                    profileMenu.innerHTML = `
+                        <button class="profile-btn">
+                            <div class="avatar" style="width: 24px; height: 24px; margin: 0; background: linear-gradient(135deg, var(--primary), var(--secondary));"></div>
+                            ${displayName}
+                        </button>
+                        <div class="profile-dropdown">
+                            <a href="${dashboardUrl}" class="dropdown-item">Dashboard</a>
+                            <a href="#" class="dropdown-item">Settings</a>
+                            <hr style="border-color: var(--surface-border); margin: 5px 0;">
+                            <button class="dropdown-item danger" id="sign-out-btn">Sign Out</button>
+                        </div>
+                    `;
+                    navLinks.appendChild(profileMenu);
+                    
+                    document.getElementById("sign-out-btn").addEventListener("click", async () => {
+                        await signOut(auth);
+                        sessionStorage.setItem("authToast", "Successfully signed out.");
+                        window.location.reload();
+                    });
                 });
             }
         }
@@ -168,11 +186,12 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
             await setDoc(doc(db, "users", user.uid), {
                 fullName: name,
                 email: email,
+                role: 'user', // Default role
                 createdAt: new Date()
             });
 
             sessionStorage.setItem("authToast", "Account created successfully! Welcome to TrustLink.");
-            window.location.href = "index.html";
+            window.location.href = await getDashboardRoute(user);
         } catch (error) {
             showError(error.message);
             btn.disabled = false;
@@ -197,9 +216,9 @@ if (loginForm && window.location.pathname.includes("login.html")) {
 
         try {
             sessionStorage.setItem("justAuth", "true");
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
             sessionStorage.setItem("authToast", "Successfully signed in! Welcome back.");
-            window.location.href = "index.html";
+            window.location.href = await getDashboardRoute(userCredential.user);
         } catch (error) {
             showError("Invalid email or password.");
             btn.disabled = false;
@@ -232,7 +251,7 @@ if (googleBtn) {
             }, { merge: true });
             
             sessionStorage.setItem("authToast", `Welcome back, ${user.displayName || 'there'}!`);
-            window.location.href = "index.html";
+            window.location.href = await getDashboardRoute(user);
         } catch (error) {
             console.error(error);
             showError(error.message);

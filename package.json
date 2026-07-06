@@ -1,5 +1,26 @@
 {
   "dependencies": {
-    "firebase": "^12.15.0"
-  }
+    "firebase": "^12.15.0",
+    "gsap": "^3.15.0",
+    "lucide": "^1.23.0"
+  },
+  "name": "trustlink-escrow",
+  "version": "1.0.0",
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "main": "admin-dashboard.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/princetommyx/trustlink-escrow.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/princetommyx/trustlink-escrow/issues"
+  },
+  "homepage": "https://github.com/princetommyx/trustlink-escrow#readme"
 }
