@@ -52,7 +52,7 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         // If user visits login/signup while already logged in, redirect them
         if (isAuthPage && !sessionStorage.getItem("justAuth")) {
-            window.location.href = "index.html"; 
+            window.location.href = "dashboard.html"; 
         }
         
         // If on a main page with navbar, update the navbar to show Profile
@@ -89,7 +89,7 @@ onAuthStateChanged(auth, async (user) => {
                         ${displayName}
                     </button>
                     <div class="profile-dropdown">
-                        <a href="#" class="dropdown-item">Dashboard (Coming Soon)</a>
+                        <a href="dashboard.html" class="dropdown-item">Dashboard</a>
                         <a href="#" class="dropdown-item">Settings</a>
                         <hr style="border-color: var(--surface-border); margin: 5px 0;">
                         <button class="dropdown-item danger" id="sign-out-btn">Sign Out</button>
@@ -173,7 +173,7 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
             });
 
             sessionStorage.setItem("authToast", "Account created successfully! Welcome to TrustLink.");
-            window.location.href = "index.html";
+            window.location.href = "dashboard.html";
         } catch (error) {
             showError(error.message);
             btn.disabled = false;
@@ -200,7 +200,7 @@ if (loginForm && window.location.pathname.includes("login.html")) {
             sessionStorage.setItem("justAuth", "true");
             await signInWithEmailAndPassword(auth, email, password);
             sessionStorage.setItem("authToast", "Successfully signed in! Welcome back.");
-            window.location.href = "index.html";
+            window.location.href = "dashboard.html";
         } catch (error) {
             showError("Invalid email or password.");
             btn.disabled = false;
@@ -233,7 +233,7 @@ if (googleBtn) {
             }, { merge: true });
             
             sessionStorage.setItem("authToast", `Welcome back, ${user.displayName || 'there'}!`);
-            window.location.href = "index.html";
+            window.location.href = "dashboard.html";
         } catch (error) {
             console.error(error);
             showError(error.message);
