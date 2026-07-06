@@ -2,7 +2,9 @@
 
 // WARNING: In a real production application, these keys MUST be hidden on a backend server.
 // They are exposed here strictly for MVP/Prototype demonstration purposes.
-export const MOOLRE_SECRET_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2YXNpZCI6OTc1MSwiZXhwIjoxOTU2NTI3OTk5fQ.DoSYIamMCWbKgNEi13wc3VqqdM0JcArGIzAKO48ITZQ.";
+export const MOOLRE_SECRET_KEY = "dcef1bbe-49aa-4416-8934-b9983a3c42a2";
+export const MOOLRE_PUBLIC_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOjEwOTIzMiwiZXhwIjoxOTU2NTQ1OTk5fQ.RvCuvZoYLSLl2BqqwoKDDg_55N3Xj0elQHp5pc44Pns";
+export const MOOLRE_PRIVATE_KEY = "Zo5h0DYYzWwmtcwZicvQQWkU3X7KIeQ2P5mU8KQKxk6Ayb1uMR8bC0dokt8715ez";
 export const MOOLRE_API_URL = "https://api.moolre.com/v1/checkout"; // Standardized checkout endpoint
 
 /**
@@ -34,8 +36,8 @@ export async function sendMoolreOTP(phone, otp) {
 }
 export const MOOLRE_API_USER = "DreamersCode";
 export const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; // User-provided real account number
-export const MOOLRE_VAS_KEY = "9pEmlgXWujrGG2n0k0zZs54rEJWiOlIYprKKSgALn4Vzt3jVF4MGvSzQCgEU13P6"; // Assuming Private Key acts as VAS Key
-export const MOOLRE_SENDER_ID = "TrustLink"; // Must be an approved Sender ID on Moolre
+export const MOOLRE_VAS_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2YXNpZCI6OTc5NywiZXhwIjoxOTU2NTI3OTk5fQ.rV4eU8maadNobhcBmr2GJMyb9BxsGK23InEL97pR3xg"; 
+export const MOOLRE_SENDER_ID = "566"; // Must be an approved Sender ID on Moolre
 
 /**
  * Initiates a Moolre payment gateway checkout session.
@@ -52,7 +54,8 @@ export async function initiateMoolreCheckout(amount, description, customer, exte
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-KEY': MOOLRE_SECRET_KEY,
+                'X-API-KEY': MOOLRE_PRIVATE_KEY,
+                'X-API-PUBKEY': MOOLRE_PUBLIC_KEY,
                 'X-API-USER': MOOLRE_API_USER
             },
             body: JSON.stringify({
