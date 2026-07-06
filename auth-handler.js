@@ -141,6 +141,20 @@ function showError(message) {
     errorDiv.textContent = message;
 }
 
+// Helper to normalize email or phone number input
+function normalizeIdentifier(input) {
+    input = input.trim();
+    if (input.includes('@')) {
+        return input;
+    }
+    // If no @, treat as phone number, strip non-digits and append domain
+    const normalized = input.replace(/\D/g, '');
+    if (normalized.length > 0) {
+        return `${normalized}@phone.trustlink.app`;
+    }
+    return `${input}@phone.trustlink.app`;
+}
+
 // Handle Signup
 const signupForm = document.querySelector("form.auth-form");
 if (signupForm && window.location.pathname.includes("signup.html")) {
@@ -148,7 +162,8 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
         e.preventDefault();
         
         const name = document.getElementById("name").value;
-        const email = document.getElementById("email").value;
+        const rawEmailOrPhone = document.getElementById("email").value;
+        const email = normalizeIdentifier(rawEmailOrPhone);
         const password = document.getElementById("password").value;
         const confirmPassword = document.getElementById("confirm-password").value;
         const btn = document.querySelector(".auth-btn");
@@ -169,6 +184,7 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
             await setDoc(doc(db, "users", user.uid), {
                 fullName: name,
                 email: email,
+                originalIdentifier: rawEmailOrPhone,
                 createdAt: new Date()
             });
 
@@ -189,7 +205,8 @@ if (loginForm && window.location.pathname.includes("login.html")) {
     loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         
-        const email = document.getElementById("email").value;
+        const rawEmailOrPhone = document.getElementById("email").value;
+        const email = normalizeIdentifier(rawEmailOrPhone);
         const password = document.getElementById("password").value;
         const btn = document.querySelector(".auth-btn");
 
@@ -251,7 +268,8 @@ if (resetForm && window.location.pathname.includes("reset-password.html")) {
     resetForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         
-        const email = document.getElementById("reset-email").value;
+        const rawEmailOrPhone = document.getElementById("reset-email").value;
+        const email = normalizeIdentifier(rawEmailOrPhone);
         const btn = document.querySelector(".auth-btn");
 
         btn.disabled = true;
@@ -264,9 +282,9 @@ if (resetForm && window.location.pathname.includes("reset-password.html")) {
         } catch (error) {
             let msg = "Failed to send reset email. Please try again.";
             if (error.code === 'auth/user-not-found') {
-                msg = "No account found with this email address.";
+                msg = "No account found with this email address or phone number.";
             } else if (error.code === 'auth/invalid-email') {
-                msg = "Please enter a valid email address.";
+                msg = "Please enter a valid email address or phone number.";
             }
             showError(msg);
             btn.disabled = false;
