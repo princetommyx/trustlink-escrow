@@ -5,348 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrustLink Dashboard - Control Center</title>
     <!-- Syncing your team's core templates with your new separated style sheet -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <div class="dashboard-layout">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <a href="index.html" class="logo" style="font-size: 1.2rem; flex-direction: row; margin: 0; color: var(--text-main);">
-                    <div class="logo-icon" style="width: 24px; height: 24px;"></div>
-                    <span class="logo-text">TrustLink</span>
-                </a>
-                <button id="btn-collapse" class="btn-icon" style="padding: 4px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
-            </div>
+
+    <div class="dashboard-container">
+        <!-- Persistent View Switching Dashboard Navigation Header Bar -->
+        <header class="dashboard-header">
+            <h1 class="brand-title">TRUSTLINK DASHBOARD</h1>
+            <button id="view-toggle" class="role-toggle-btn">Switch to Seller Mode</button>
+        </header>
+
+        <!-- PORTALPerspectives INTERFACE 1: THE BUYER ACTIONS HUB -->
+        <div id="buyer-portal" class="portal-card">
+            <h2>Initiate Secure Escrow Deposit</h2>
+            <p class="section-desc">Lock your payment capital safely in the neutral holding pool ledger to fund an active seller agreement.</p>
             
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-target="view-overview">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg></span> <span class="nav-text">Overview</span>
-                </a>
-                <a href="#" class="nav-item" data-target="view-escrows">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg></span> <span class="nav-text">Escrow Contracts</span>
-                </a>
-                <a href="#" class="nav-item" data-target="view-products">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" /></svg></span> <span class="nav-text">My Products</span>
-                </a>
-                <a href="#" class="nav-item" data-target="view-wallet">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" /></svg></span> <span class="nav-text">Wallet</span>
-                </a>
-                <a href="#" class="nav-item" data-target="view-messages">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" /></svg></span> <span class="nav-text">Messages</span>
-                    <span class="badge">2</span>
-                </a>
-                <a href="#" class="nav-item" data-target="view-transactions">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg></span> <span class="nav-text">Transaction Logs</span>
-                </a>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="user-card">
-                    <div class="avatar" id="user-avatar" style="width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%;"></div>
-                    <div class="user-info">
-                        <span class="user-name" id="user-name">Loading...</span>
-                        <span class="user-role">User</span>
-                    </div>
-                </div>
-                <button class="btn btn-outline" id="btn-signout" style="width: 100%; margin-top: 16px; padding: 10px; font-size: 0.85rem;">Sign Out</button>
-            </div>
-        </aside>
-
-        <main class="dashboard-main">
-            <header class="dashboard-topbar">
-                <div style="display: flex; align-items: center;">
-                    <button id="topbar-menu-toggle" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
-                    <h1 class="topbar-title" id="current-view-title">Overview</h1>
-                </div>
-                <div class="topbar-actions">
-                    <button class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg></button>
-                    <button id="btn-new-escrow" class="btn btn-primary btn-sm">+ New Escrow</button>
-                </div>
-            </header>
-            
-            <div class="dashboard-content">
-                <!-- Overview View -->
-                <div id="view-overview" class="view-section active">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-label">Total Balance</span>
-                            <h3 class="stat-value">GH₵ 4,500.00</h3>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Active Escrows</span>
-                            <h3 class="stat-value">3</h3>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Pending Releases</span>
-                            <h3 class="stat-value">1</h3>
-                        </div>
-                    </div>
-                    
-                    <div class="recent-activity-container">
-                        <h2>Recent Activity</h2>
-                        <div class="activity-list">
-                            <div class="activity-item">
-                                <div class="activity-icon bg-success"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" /></svg></div>
-                                <div class="activity-details">
-                                    <h4>Deposit Successful</h4>
-                                    <p>GH₵ 2,000 added via Mobile Money</p>
-                                </div>
-                                <div class="activity-time">2 hours ago</div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon bg-primary"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg></div>
-                                <div class="activity-details">
-                                    <h4>Escrow Initiated</h4>
-                                    <p>Website Design Service with @seller123</p>
-                                </div>
-                                <div class="activity-time">Yesterday</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Escrows View -->
-                <div id="view-escrows" class="view-section hidden">
-                    <div class="view-header">
-                        <h2>Escrow Contracts</h2>
-                        <div class="view-toggles">
-                            <button class="toggle-btn active" id="toggle-buyer">I am Buying</button>
-                            <button class="toggle-btn" id="toggle-seller">I am Selling</button>
-                        </div>
-                    </div>
-                    
-                    <div class="portal-card" id="buyer-escrows">
-                        <div class="order-ledger-row">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                                <span style="font-weight: 700; color: #60A5FA;">Website Design - #TL-84729</span>
-                                <span style="background-color: rgba(234, 179, 8, 0.15); color: var(--status-pending); border: 1px solid var(--status-pending); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING DELIVERY</span>
-                            </div>
-                            <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value Secured:</strong> GH₵ 4,500.00 <span class="badge" style="margin-left: 10px;">Milestone 1/3 Funded</span></p>
-                            <div style="display: flex; gap: 10px;">
-                                <button class="btn btn-primary" onclick="alert('Funds Released to Seller!')">RELEASE FUNDS</button>
-                                <button class="btn btn-outline" onclick="alert('Dispute initiated')">RAISE DISPUTE</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="portal-card hidden" id="seller-escrows">
-                        <div class="order-ledger-row">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                                <span style="font-weight: 700; color: #60A5FA;">Logo Animation - #TL-99120</span>
-                                <span style="background-color: rgba(34, 197, 94, 0.15); color: var(--success); border: 1px solid var(--success); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">FUNDS SECURED</span>
-                            </div>
-                            <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ 1,200.00</p>
-                            <button class="btn btn-primary" onclick="alert('Order milestone state set to Shipped!')">MARK AS DELIVERED</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Products View -->
-                <div id="view-products" class="view-section hidden">
-                    <div class="view-header">
-                        <h2>My Products & Services</h2>
-                        <button id="btn-add-product" class="btn btn-primary">+ Add Product</button>
-                    </div>
-                    <div class="products-grid" id="products-grid">
-                        <!-- Products injected via JS -->
-                    </div>
-                </div>
-
-                <!-- Wallet View -->
-                <div id="view-wallet" class="view-section hidden">
-                    <h2>Wallet & Funds</h2>
-                    <div class="portal-card" style="margin-bottom: 24px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <p style="color: var(--text-muted); margin: 0 0 8px;">Available Balance</p>
-                                <h1 style="margin: 0; font-size: 2.5rem;">GH₵ 4,500.00</h1>
-                            </div>
-                            <div style="display: flex; gap: 16px;">
-                                <button class="btn btn-primary" onclick="alert('Deposit Modal Opened')">Deposit Funds</button>
-                                <button class="btn btn-outline" onclick="alert('Withdrawal Request Opened')">Withdraw</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Messages View -->
-                <div id="view-messages" class="view-section hidden">
-                    <h2>In-App Messaging</h2>
-                    <div class="portal-card chat-container">
-                        <div class="chat-sidebar">
-                            <div class="chat-contact active">
-                                <div class="avatar" style="background: #2563EB; width: 40px; height: 40px; border-radius: 50%;"></div>
-                                <div class="contact-info">
-                                    <h4>@seller123</h4>
-                                    <p>Website Design (#TL-84729)</p>
-                                </div>
-                            </div>
-                            <div class="chat-contact">
-                                <div class="avatar" style="background: #9333EA; width: 40px; height: 40px; border-radius: 50%;"></div>
-                                <div class="contact-info">
-                                    <h4>@buyer456</h4>
-                                    <p>Logo Animation</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chat-main">
-                            <div class="chat-header">
-                                <h3 style="margin: 0;">@seller123 - Website Design</h3>
-                                <span class="status-badge" style="background: rgba(34,197,94,0.1); color: var(--success); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">Escrow Active</span>
-                            </div>
-                            <div class="chat-messages">
-                                <div class="message received">
-                                    <p>Hi! I've started working on the first milestone for the homepage design.</p>
-                                    <span class="time">10:45 AM</span>
-                                </div>
-                                <div class="message sent">
-                                    <p>Great! Let me know if you need any brand assets.</p>
-                                    <span class="time">10:50 AM</span>
-                                </div>
-                                <div class="system-message">
-                                    Funds for Milestone 1 have been securely locked in Escrow.
-                                </div>
-                            </div>
-                            <div class="chat-input-area">
-                                <input type="text" placeholder="Type a message...">
-                                <button class="btn btn-primary">Send</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Transactions View -->
-                <div id="view-transactions" class="view-section hidden">
-                    <h2>Transaction Logs</h2>
-                    <div class="portal-card" style="padding: 0; overflow: hidden;">
-                        <table class="transaction-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Reference ID</th>
-                                    <th>Description</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Oct 24, 2026</td>
-                                    <td>TRX-00192</td>
-                                    <td>Deposit via Mobile Money</td>
-                                    <td class="text-success">+ GH₵ 2,000.00</td>
-                                    <td><span class="badge-status badge-success">Completed</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Oct 23, 2026</td>
-                                    <td>ESC-84729</td>
-                                    <td>Escrow Funded (Milestone 1)</td>
-                                    <td class="text-danger">- GH₵ 1,500.00</td>
-                                    <td><span class="badge-status badge-warning">Held in Escrow</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Oct 20, 2026</td>
-                                    <td>FEE-99120</td>
-                                    <td>Platform Fee (Logo Animation)</td>
-                                    <td class="text-danger">- GH₵ 24.00</td>
-                                    <td><span class="badge-status badge-success">Completed</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-            </div>
-        </main>
-    </div>
-
-    <!-- New Escrow Modal -->
-    <div id="new-escrow-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Create New Escrow</h2>
-                <button id="close-escrow-modal" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
-            </div>
-            <form id="new-escrow-form" class="modal-form">
-                <div id="escrow-line-items">
-                    <!-- Line items will be injected here via JS -->
-                </div>
-                <button type="button" id="btn-add-line-item" class="btn btn-outline" style="width: 100%; border-style: dashed; margin-bottom: 24px; padding: 12px; color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.2);">
-                    <i class="fa-solid fa-plus"></i> Add Another Product
-                </button>
-                
+            <form onsubmit="event.preventDefault();">
                 <div class="form-group">
-                    <label>Total Amount (GH₵)</label>
-                    <input type="number" id="escrow-amount" placeholder="0.00" min="0" step="0.01" required readonly style="background: rgba(0,0,0,0.5); cursor: not-allowed; color: var(--success); font-weight: bold; font-size: 1.2rem;">
+                    <label>Product / Service Description</label>
+                    <input type="text" required placeholder="Enter what you are purchasing...">
                 </div>
-                
                 <div class="form-group">
-                    <label>Counterparty Email (Buyer)</label>
-                    <input type="email" placeholder="buyer@example.com" required>
+                    <label>Contract Value (GH₵)</label>
+                    <input type="number" required placeholder="Enter transaction value amount...">
                 </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Platform Fee Allocation</label>
-                        <select required>
-                            <option value="split">Split 50/50</option>
-                            <option value="buyer">Buyer Pays 100%</option>
-                            <option value="seller">Seller Pays 100%</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Inspection Period (Days)</label>
-                        <input type="number" placeholder="3" min="1" max="30" required>
-                    </div>
-                </div>
-
                 <div class="form-group">
-                    <label>Terms of Agreement</label>
-                    <textarea id="escrow-terms" placeholder="Terms will be auto-filled based on your product..." rows="4" required></textarea>
+                    <label>Seller Account ID / Email</label>
+                    
                 </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-outline" id="btn-cancel-escrow">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Initiate Escrow</button>
-                </div>
+                <button type="submit" class="action-submit-btn">SECURELY DEPOSIT FUNDS</button>
             </form>
+        </div>
+
+        <!-- PORTAL INTERFACE 2: THE SELLER TRACKING LEDGER (HIDDEN BY DEFAULT) -->
+        <div id="seller-portal" class="portal-card hidden">
+            <h2>Active Order Fulfillment Ledger</h2>
+            <p class="section-desc">Track active inbound buyer deposits, verify contract parameters, and update delivery milestones to trigger fund releases.</p>
+            
+            <div class="order-ledger-row">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <span style="font-weight: 700; color: #60A5FA;">Order #TL-84729</span>
+                    <span style="background-color: rgba(234, 179, 8, 0.15); color: var(--status-pending); border: 1px solid var(--status-pending); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING DELIVERY</span>
+                </div>
+                <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value Secured:</strong> GH₵ 4,500.00</p>
+                <button class="role-toggle-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="alert('Order milestone state set to Shipped! Requesting authorization codes.');">MARK AS SHIPPED</button>
+            </div>
         </div>
     </div>
 
-    <!-- New Product Modal -->
-    <div id="new-product-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add New Product / Service</h2>
-                <button id="close-product-modal" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
-            </div>
-            <form id="new-product-form" class="modal-form">
-                <div class="form-group">
-                    <label>Product Name</label>
-                    <input type="text" id="new-prod-name" placeholder="e.g. Basic Website Design" required>
-                </div>
-                <div class="form-group">
-                    <label>Default Price (GH₵)</label>
-                    <input type="number" id="new-prod-price" placeholder="0.00" min="0" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label>Description / Terms</label>
-                    <textarea id="new-prod-desc" placeholder="Describe the item or service specs..." rows="3" required></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-outline" id="btn-cancel-product">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Product</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Modular Interactive View Toggling Script Routine -->
+    <script>
+        const btn = document.getElementById('view-toggle');
+        const buyer = document.getElementById('buyer-portal');
+        const seller = document.getElementById('seller-portal');
 
-    <!-- GSAP for animations -->
-    <script src="node_modules/gsap/dist/gsap.min.js"></script>
-    <!-- Firebase SDKs -->
-    <script type="module" src="dashboard.js"></script>
+        let mode = 'buyer';
+
+        btn.addEventListener('click', () => {
+            if (mode === 'buyer') {
+                buyer.classList.add('hidden');
+                seller.classList.remove('hidden');
+                btn.textContent = 'Switch to Buyer Mode';
+                mode = 'seller';
+            } else {
+                seller.classList.add('hidden');
+                buyer.classList.remove('hidden');
+                btn.textContent = 'Switch to Seller Mode';
+                mode = 'buyer';
+            }
+        });
+    </script>
 </body>
 </html>
