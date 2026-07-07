@@ -3,7 +3,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Firebase configuration
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyA2kBaKsu5WtboFBmOWJTLzESkbh776ij0",
   authDomain: "trustlink-escrow.firebaseapp.com",
   projectId: "trustlink-escrow",

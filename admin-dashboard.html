@@ -61,46 +61,181 @@
                 </div>
                 <div class="topbar-actions">
                     <button class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg></button>
+                    <button id="btn-signout-top" class="btn btn-outline btn-sm" style="margin-left: 8px; border-color: var(--danger); color: var(--danger);">Sign Out</button>
                     <button class="btn btn-primary btn-sm" style="background: #9333ea; border-color: #9333ea;" onclick="alert('Generate Report')">Generate Report</button>
                 </div>
             </header>
             
             <div class="dashboard-content">
                 <!-- Analytics View -->
-                <div id="view-overview" class="view-section active">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-label">Total Platform Volume</span>
-                            <h3 class="stat-value">GH₵ 1.2M</h3>
+                <div id="view-overview" class="view-section active" style="gap: 32px; display: flex; flex-direction: column;">
+                    
+                    <!-- Charts Section -->
+                    <div class="charts-grid-2">
+                        <div class="chart-card-modern">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Deposit & Withdraw Report</h3>
+                                <div class="chart-actions">
+                                    <select class="chart-date-filter">
+                                        <option>Feb 23, 2025 - Mar 9, 2025</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="depositWithdrawChart"></canvas>
+                            </div>
                         </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Active Users</span>
-                            <h3 class="stat-value">4,291</h3>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Total Escrows Held</span>
-                            <h3 class="stat-value">GH₵ 452K</h3>
+                        <div class="chart-card-modern">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Transactions Report</h3>
+                                <div class="chart-actions">
+                                    <select class="chart-date-filter">
+                                        <option>Feb 23, 2025 - Mar 9, 2025</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="transactionsChart"></canvas>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="recent-activity-container">
-                        <h2>Platform Health Alerts</h2>
-                        <div class="activity-list">
-                            <div class="activity-item">
-                                <div class="activity-icon bg-danger"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" /></svg></div>
-                                <div class="activity-details">
-                                    <h4>New Dispute Escalated</h4>
-                                    <p>Ticket #88192 requires admin mediation.</p>
+
+                    <!-- Users Section -->
+                    <div>
+                        <h2 class="admin-section-title">Users Analytics</h2>
+                        <div class="stats-grid-4">
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Total Users</span>
+                                    <h3 class="stat-value" id="stat-total-users">...</h3>
                                 </div>
-                                <div class="activity-time">10 mins ago</div>
+                                <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg></div>
                             </div>
-                            <div class="activity-item">
-                                <div class="activity-icon bg-warning" style="font-size: 0.8rem; font-weight: bold;">KYC</div>
-                                <div class="activity-details">
-                                    <h4>Pending Verifications</h4>
-                                    <p>12 new users submitted KYC documents.</p>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Active Users</span>
+                                    <h3 class="stat-value" id="stat-active-users">...</h3>
                                 </div>
-                                <div class="activity-time">1 hour ago</div>
+                                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--success);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Email Unverified Users</span>
+                                    <h3 class="stat-value" id="stat-email-unverified-users">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Mobile Unverified Users</span>
+                                    <h3 class="stat-value" id="stat-mobile-unverified-users">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deposits Section -->
+                    <div>
+                        <h2 class="admin-section-title">Deposits Analytics</h2>
+                        <div class="stats-grid-4">
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Total Deposited</span>
+                                    <h3 class="stat-value" id="stat-total-deposits">...</h3>
+                                </div>
+                                <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Pending Deposits</span>
+                                    <h3 class="stat-value" id="stat-pending-deposits">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Rejected Deposits</span>
+                                    <h3 class="stat-value" id="stat-rejected-deposits">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Deposited Charge</span>
+                                    <h3 class="stat-value" id="stat-deposit-charges">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--success);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Withdrawals Section -->
+                    <div>
+                        <h2 class="admin-section-title">Withdrawals Analytics</h2>
+                        <div class="stats-grid-4">
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Total Withdrawn</span>
+                                    <h3 class="stat-value" id="stat-total-withdrawals">...</h3>
+                                </div>
+                                <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Pending Withdrawals</span>
+                                    <h3 class="stat-value" id="stat-pending-withdrawals">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Rejected Withdrawals</span>
+                                    <h3 class="stat-value" id="stat-rejected-withdrawals">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Withdrawal Charge</span>
+                                    <h3 class="stat-value" id="stat-withdrawal-charges">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--success);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Escrow Section -->
+                    <div>
+                        <h2 class="admin-section-title">Escrow Analytics</h2>
+                        <div class="stats-grid-4">
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Total Escrowed</span>
+                                    <h3 class="stat-value" id="stat-total-escrowed">...</h3>
+                                </div>
+                                <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Escrowed Funded</span>
+                                    <h3 class="stat-value" id="stat-escrowed-funded">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--success);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Canceled Escrow</span>
+                                    <h3 class="stat-value" id="stat-canceled-escrow">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg></div>
+                            </div>
+                            <div class="stat-card-modern">
+                                <div class="stat-info">
+                                    <span class="stat-label">Disputed Escrow</span>
+                                    <h3 class="stat-value" id="stat-disputed-escrow">...</h3>
+                                </div>
+                                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" /></svg></div>
                             </div>
                         </div>
                     </div>
@@ -112,7 +247,7 @@
                         <h2>User Management</h2>
                         <input type="text" placeholder="Search by email or ID..." style="background: rgba(0,0,0,0.2); border: 1px solid var(--surface-border); padding: 8px 16px; border-radius: 8px; color: white;">
                     </div>
-                    <div class="portal-card" style="padding: 0; overflow: hidden;">
+                    <div class="portal-card admin-table-white" style="padding: 0; overflow: hidden;">
                         <table class="transaction-table">
                             <thead>
                                 <tr>
@@ -123,27 +258,8 @@
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="display: flex; align-items: center; gap: 10px;">
-                                        <div class="avatar" style="width: 32px; height: 32px; background: #3b82f6; border-radius: 50%;"></div>
-                                        <strong>@johndoe</strong>
-                                    </td>
-                                    <td>john@example.com</td>
-                                    <td>Oct 20, 2026</td>
-                                    <td><span class="badge-status badge-success">Verified</span></td>
-                                    <td><button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.8rem;" onclick="alert('Logging into user account...')">Log In As User</button></td>
-                                </tr>
-                                <tr>
-                                    <td style="display: flex; align-items: center; gap: 10px;">
-                                        <div class="avatar" style="width: 32px; height: 32px; background: #eab308; border-radius: 50%;"></div>
-                                        <strong>@seller123</strong>
-                                    </td>
-                                    <td>seller123@gmail.com</td>
-                                    <td>Oct 22, 2026</td>
-                                    <td><span class="badge-status badge-warning">Pending Review</span></td>
-                                    <td><button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.8rem;" onclick="alert('Opened KYC Review...')">Review KYC</button></td>
-                                </tr>
+                            <tbody id="admin-users-list">
+                                <!-- Users will be loaded dynamically -->
                             </tbody>
                         </table>
                     </div>
@@ -151,35 +267,19 @@
 
                 <!-- Disputes View -->
                 <div id="view-disputes" class="view-section hidden">
-                    <h2>Dispute Resolution</h2>
-                    <div class="portal-card chat-container">
-                        <div class="chat-sidebar">
-                            <div class="chat-contact active">
-                                <div class="contact-info">
-                                    <h4>#TL-84729 (Website Design)</h4>
-                                    <p>Amount: GH₵ 4,500.00</p>
-                                    <span class="badge-status badge-warning" style="margin-top: 5px; display: inline-block;">Escalated</span>
-                                </div>
-                            </div>
+                    <h2 style="margin-bottom: 24px;">Dispute Resolution</h2>
+                    <div class="portal-card chat-container admin-chat-white">
+                        <div class="chat-sidebar" id="admin-disputes-list">
+                            <!-- Dispute list will load here -->
                         </div>
                         <div class="chat-main">
                             <div class="chat-header">
-                                <h3 style="margin: 0;">Dispute log: @buyer456 vs @seller123</h3>
+                                <h3 id="dispute-title" style="margin: 0;">Select a dispute</h3>
                             </div>
-                            <div class="chat-messages">
-                                <div class="message received">
-                                    <span style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 2px;">@buyer456</span>
-                                    <p>The design delivered is completely different from the agreed specs.</p>
-                                </div>
-                                <div class="message sent">
-                                    <span style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 2px;">@seller123</span>
-                                    <p>I followed the brief exactly. Please see the attached moodboard.</p>
-                                </div>
-                                <div class="system-message" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
-                                    Dispute Escalated to Admin
-                                </div>
+                            <div class="chat-messages" id="admin-dispute-messages">
+                                <!-- Chat will load here -->
                             </div>
-                            <div class="chat-input-area" style="background: rgba(0,0,0,0.3); justify-content: space-between;">
+                            <div class="chat-input-area" style="background: #f8fafc; border-top: 1px solid #e2e8f0; justify-content: space-between;">
                                 <button class="btn btn-outline" style="border-color: var(--danger); color: var(--danger);" onclick="alert('Refunded to Buyer')">Refund Buyer</button>
                                 <button class="btn btn-primary" style="background: var(--success); border-color: var(--success);" onclick="alert('Released to Seller')">Release to Seller</button>
                             </div>
@@ -191,44 +291,115 @@
                 <div id="view-approvals" class="view-section hidden">
                     <h2>Manual Deposit Approvals</h2>
                     <p style="color: var(--text-muted); margin-bottom: 24px;">Verify bank transfer receipts before crediting user wallets.</p>
-                    <div class="portal-card">
-                        <div class="order-ledger-row" style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <h4 style="margin: 0 0 8px 0;">Deposit Request #DEP-112</h4>
-                                <p style="margin: 0; color: var(--text-muted);">User: @johndoe | Method: Bank Transfer</p>
-                            </div>
-                            <div style="text-align: right;">
-                                <h3 style="margin: 0 0 8px 0; color: var(--success);">GH₵ 5,000.00</h3>
-                                <button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.85rem;" onclick="alert('Viewing receipt...')">View Receipt</button>
-                                <button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.85rem;" onclick="alert('Funds Credited')">Approve Deposit</button>
-                            </div>
-                        </div>
+                    <div class="portal-card admin-table-white" id="admin-approvals-list" style="padding: 24px;">
+                        <!-- Deposit approvals will load here -->
                     </div>
                 </div>
 
                 <!-- Settings View -->
                 <div id="view-settings" class="view-section hidden">
-                    <h2>Platform Configuration</h2>
-                    <div class="portal-card" style="margin-bottom: 24px;">
+                    <h2 style="margin-bottom: 24px;">Platform Configuration</h2>
+                    <div class="settings-card">
                         <h3>Dynamic Fee Configuration</h3>
-                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Set the percentage fee taken from escrow transactions.</p>
+                        <p style="margin-bottom: 20px;">Set the percentage fee taken from escrow transactions.</p>
                         
                         <div class="form-group" style="max-width: 300px;">
                             <label>Platform Fee (%)</label>
-                            <input type="number" value="2.5" step="0.1" style="background: rgba(0,0,0,0.2); border: 1px solid var(--surface-border); color: white; padding: 10px; border-radius: 6px;">
+                            <input type="number" value="2.5" step="0.1" style="padding: 10px; border-radius: 6px;">
                         </div>
-                        <button class="btn btn-primary" onclick="alert('Fees Updated')">Save Changes</button>
+                        <button class="btn btn-primary" onclick="alert('Fees Updated')" style="max-width: 150px;">Save Changes</button>
                     </div>
                     
-                    <div class="portal-card">
+                    <div class="settings-card">
                         <h3>Tradable Categories</h3>
-                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Manage services allowed on the platform.</p>
+                        <p style="margin-bottom: 20px;">Manage services allowed on the platform.</p>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <span class="badge" style="background: rgba(255,255,255,0.1); padding: 8px 16px; font-size: 0.9rem;">Social Media Accounts ✕</span>
-                            <span class="badge" style="background: rgba(255,255,255,0.1); padding: 8px 16px; font-size: 0.9rem;">Web Domains ✕</span>
-                            <span class="badge" style="background: rgba(255,255,255,0.1); padding: 8px 16px; font-size: 0.9rem;">Freelance Services ✕</span>
-                            <button class="badge" style="background: transparent; border: 1px dashed var(--text-muted); color: var(--text-main); padding: 8px 16px; font-size: 0.9rem; cursor: pointer;">+ Add Category</button>
+                            <span class="category-tag" style="background: rgba(0,0,0,0.6); padding: 8px 16px; font-size: 0.9rem;">Social Media Accounts ✕</span>
+                            <span class="category-tag" style="background: rgba(0,0,0,0.6); padding: 8px 16px; font-size: 0.9rem;">Web Domains ✕</span>
+                            <span class="category-tag" style="background: rgba(0,0,0,0.6); padding: 8px 16px; font-size: 0.9rem;">Freelance Services ✕</span>
+                            <button class="category-tag" style="background: transparent; border: 1px dashed var(--text-muted); color: var(--text-muted); padding: 8px 16px; font-size: 0.9rem; cursor: pointer;">+ Add Category</button>
                         </div>
+                    </div>
+
+                    <h2 style="margin-top: 40px; margin-bottom: 24px;">Admin Management & Security</h2>
+                    <div class="settings-grid">
+                        <div class="settings-card" style="margin-bottom: 0;">
+                            <h3>Add System Administrator</h3>
+                            <p style="margin-bottom: 20px;">Invite a new admin or support staff.</p>
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="new-admin-name" placeholder="e.g. Jane Doe" style="padding: 10px; border-radius: 6px;">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="new-admin-email" placeholder="admin@trustlink.com" style="padding: 10px; border-radius: 6px;">
+                            </div>
+                            <div class="form-group">
+                                <label>Temporary Password</label>
+                                <input type="password" id="new-admin-password" placeholder="Min. 8 characters" style="padding: 10px; border-radius: 6px;">
+                            </div>
+                            <div class="form-group">
+                                <label>Role</label>
+                                <select id="new-admin-role" style="padding: 10px; border-radius: 6px;">
+                                    <option value="admin">Super Admin</option>
+                                    <option value="support">Support Agent</option>
+                                </select>
+                            </div>
+                            <button id="btn-create-admin" class="btn btn-primary" style="margin-top: 10px;">Create Administrator</button>
+                        </div>
+
+                        <div class="settings-card" style="margin-bottom: 0;">
+                            <h3>Change Password</h3>
+                            <p style="margin-bottom: 20px;">Update your current administrative password.</p>
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" placeholder="Enter current password" style="padding: 10px; border-radius: 6px;">
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" placeholder="Enter new password" style="padding: 10px; border-radius: 6px;">
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm New Password</label>
+                                <input type="password" placeholder="Re-enter new password" style="padding: 10px; border-radius: 6px;">
+                            </div>
+                            <button class="btn btn-primary" onclick="alert('Password updated successfully.')" style="margin-top: auto;">Update Password</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Role Management</h3>
+                        <p style="margin-bottom: 20px;">View and manage existing administrators.</p>
+                        <table class="transaction-table" style="color: #1a1a1a;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid #cbd5e1; color: #475569;">
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #e2e8f0;">
+                                    <td><strong>Super Admin</strong></td>
+                                    <td>admin@trustlink.com</td>
+                                    <td>Super Admin</td>
+                                    <td><span class="badge-status badge-success">Active</span></td>
+                                    <td><button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.8rem; border-color: #cbd5e1; color: #334155;">Edit Role</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Test Support</strong></td>
+                                    <td>test@trustlink.com</td>
+                                    <td>Support Agent</td>
+                                    <td><span class="badge-status badge-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.8rem; border-color: #cbd5e1; color: #334155;">Edit Role</button>
+                                        <button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.8rem; border-color: #ef4444; color: #ef4444; margin-left: 8px;">Revoke</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -236,8 +407,45 @@
         </main>
     </div>
 
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="modal-backdrop hidden">
+        <div class="modal" style="max-width: 400px; padding: 24px;">
+            <div class="modal-header" style="margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 1.2rem; color: #1e293b;">Edit User</h3>
+                <button id="close-user-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Email (Read-only)</label>
+                <input type="text" id="edit-user-email" disabled style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f1f5f9; color: #64748b;">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Full Name</label>
+                <input type="text" id="edit-user-name" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Role</label>
+                <select id="edit-user-role" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                    <option value="user">User</option>
+                    <option value="support">Support</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; cursor: pointer;">
+                    <input type="checkbox" id="edit-user-verified" style="width: 18px; height: 18px;">
+                    Email Verified
+                </label>
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button id="cancel-user-edit" class="btn btn-outline" style="padding: 8px 16px; border-color: #cbd5e1; color: #334155;">Cancel</button>
+                <button id="save-user-edit" class="btn btn-primary" style="padding: 8px 16px;">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- GSAP for animations -->
     <script src="node_modules/gsap/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="admin-dashboard.js"></script>
 </body>
 </html>

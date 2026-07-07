@@ -246,23 +246,21 @@ body {
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
     padding: 32px;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .stat-label {
-    color: rgba(255,255,255,0.5);
+    color: #475569;
     font-size: 0.95rem;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -274,9 +272,7 @@ body {
     margin: 12px 0 0 0;
     font-family: var(--font-heading);
     font-weight: 700;
-    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #0f172a;
 }
 
 /* Activity List */
@@ -286,17 +282,18 @@ body {
 }
 
 .activity-list {
-    background: var(--surface-color);
-    border: 1px solid var(--surface-border);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 12px 24px;
+    color: #1a1a1a;
 }
 
 .activity-item {
     display: flex;
     align-items: center;
     padding: 16px 0;
-    border-bottom: 1px solid var(--surface-border);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .activity-item:last-child {
@@ -320,17 +317,18 @@ body {
 .activity-details h4 {
     margin: 0 0 4px 0;
     font-size: 1rem;
+    color: #1a1a1a;
 }
 
 .activity-details p {
     margin: 0;
-    color: var(--text-muted);
+    color: #475569;
     font-size: 0.9rem;
 }
 
 .activity-time {
     margin-left: auto;
-    color: var(--text-muted);
+    color: #64748b;
     font-size: 0.85rem;
 }
 
@@ -745,4 +743,63 @@ input[type=number] {
     /* Tables */
     .transaction-table th, .transaction-table td { padding: 12px 16px; }
     .transaction-table { display: block; overflow-x: auto; white-space: nowrap; }
+
+    /* Chat UI Mobile */
+    .chat-container {
+        flex-direction: column;
+        height: 70vh;
+        min-height: 500px;
+    }
+    
+    .chat-sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--surface-border);
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    
+    .chat-sidebar::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .chat-contact {
+        flex-direction: column;
+        border-bottom: none;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 12px;
+        min-width: 80px;
+        justify-content: center;
+        gap: 6px;
+    }
+    
+    .chat-contact .activity-icon {
+        margin-right: 0;
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    
+    .contact-info {
+        text-align: center;
+    }
+    
+    .contact-info p {
+        display: none; /* Hide message preview on mobile to save space */
+    }
+
+    .chat-main {
+        height: 100%;
+    }
+
+    .chat-messages {
+        padding: 16px;
+    }
+
+    .message {
+        max-width: 85%;
+    }
 }

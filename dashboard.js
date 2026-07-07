@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, sendSMSNotification } from "./moolre-service.js";
+import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification } from "./moolre-service.js";
 
 let currentUser = null;
 
@@ -84,7 +84,7 @@ onAuthStateChanged(auth, async (user) => {
     }
     
     // Check if Admin
-    if (user.email === 'admin@trustlink.com') {
+    if (user.email === 'admin@trustlink.com' || user.email === 'test@trustlink.com') {
         window.location.href = "admin-dashboard.html";
         return;
     }
@@ -115,9 +115,25 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 document.getElementById('btn-signout').addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.href = "login.html";
+    try {
+        await signOut(auth);
+        window.location.href = "login.html";
+    } catch (error) {
+        console.error("Sign out error", error);
+    }
 });
+
+const topSignoutBtn = document.getElementById('btn-signout-top');
+if (topSignoutBtn) {
+    topSignoutBtn.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            window.location.href = "login.html";
+        } catch (error) {
+            console.error("Sign out error", error);
+        }
+    });
+}
 
 // New Escrow Modal Logic
 const btnNewEscrow = document.getElementById('btn-new-escrow');
@@ -204,16 +220,24 @@ if (formNewEscrow) {
             const docRef = await addDoc(collection(db, "escrows"), newEscrow);
             const escrowId = docRef.id;
 
-            // 3. SMS INTEGRATION
+            // 3. SMS/WHATSAPP INTEGRATION
             if (buyerPhoneInput && buyerPhoneInput.value) {
                 // Generate the public POS checkout URL
                 const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
                 try {
-                    await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
-                    alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer with the secure POS checkout link.`);
+                    // Try WhatsApp first
+                    try {
+                        await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
+                        alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer with the secure POS checkout link.`);
+                    } catch (waError) {
+                        console.warn("WhatsApp failed, falling back to SMS...", waError);
+                        // Fall back to SMS
+                        await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
+                        alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer with the secure POS checkout link.`);
+                    }
                 } catch (smsError) {
-                    console.error("SMS Error caught:", smsError);
-                    alert(`Escrow Created Successfully! (SMS failed: ${smsError.message}).\n\nOpening checkout page manually for testing.`);
+                    console.error("Both WhatsApp and SMS Error caught:", smsError);
+                    alert(`Escrow Created Successfully! (Messages failed: ${smsError.message}).\n\nOpening checkout page manually for testing.`);
                     // Automatically open the checkout page for the user to test the buyer flow
                     window.open(checkoutUrl, '_blank');
                 }

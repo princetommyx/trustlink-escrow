@@ -54,7 +54,24 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         // If user visits login/signup while already logged in, redirect them
         if (isAuthPage && !sessionStorage.getItem("justAuth")) {
-            window.location.href = "dashboard.html"; 
+            let isAdmin = false;
+            if (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com") {
+                isAdmin = true;
+            } else {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        if (data.role === "admin" || data.role === "support") isAdmin = true;
+                    }
+                } catch(e) {}
+            }
+
+            if (isAdmin) {
+                window.location.href = "admin-dashboard.html"; 
+            } else {
+                window.location.href = "dashboard.html"; 
+            }
         }
         
         // If on a main page with navbar, update the navbar to show Profile
@@ -197,7 +214,11 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 
-                await sendEmailVerification(user);
+                const isAdmin = (email === "admin@trustlink.com" || email === "test@trustlink.com");
+                
+                if (!isAdmin) {
+                    await sendEmailVerification(user);
+                }
                 
                 // Store additional user data in Firestore
                 await setDoc(doc(db, "users", user.uid), {
@@ -205,8 +226,14 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
                     email: email,
                     originalIdentifier: rawEmailOrPhone,
                     createdAt: new Date(),
-                    emailVerified: false
+                    emailVerified: isAdmin ? true : false,
+                    role: isAdmin ? "admin" : "user"
                 });
+
+                if (isAdmin) {
+                    window.location.href = "admin-dashboard.html";
+                    return;
+                }
 
                 // Store pending state for redirect
                 sessionStorage.setItem("pendingSignup", JSON.stringify({ type: "email" }));
@@ -238,9 +265,28 @@ if (loginForm && window.location.pathname.includes("login.html")) {
 
         try {
             sessionStorage.setItem("justAuth", "true");
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
             sessionStorage.setItem("authToast", "Successfully signed in! Welcome back.");
-            window.location.href = "dashboard.html";
+            
+            let isAdmin = false;
+            if (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com") {
+                isAdmin = true;
+            } else {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        if (data.role === "admin" || data.role === "support") isAdmin = true;
+                    }
+                } catch(e) {}
+            }
+            
+            if (isAdmin) {
+                window.location.href = "admin-dashboard.html";
+            } else {
+                window.location.href = "dashboard.html";
+            }
         } catch (error) {
             showError("Invalid email or password.");
             btn.disabled = false;
