@@ -291,7 +291,7 @@
                 <div id="view-approvals" class="view-section hidden">
                     <h2>Manual Deposit Approvals</h2>
                     <p style="color: var(--text-muted); margin-bottom: 24px;">Verify bank transfer receipts before crediting user wallets.</p>
-                    <div class="portal-card" id="admin-approvals-list">
+                    <div class="portal-card admin-table-white" id="admin-approvals-list" style="padding: 24px;">
                         <!-- Deposit approvals will load here -->
                     </div>
                 </div>
@@ -405,6 +405,42 @@
 
             </div>
         </main>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="modal-backdrop hidden">
+        <div class="modal" style="max-width: 400px; padding: 24px;">
+            <div class="modal-header" style="margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 1.2rem; color: #1e293b;">Edit User</h3>
+                <button id="close-user-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Email (Read-only)</label>
+                <input type="text" id="edit-user-email" disabled style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f1f5f9; color: #64748b;">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Full Name</label>
+                <input type="text" id="edit-user-name" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Role</label>
+                <select id="edit-user-role" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                    <option value="user">User</option>
+                    <option value="support">Support</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; cursor: pointer;">
+                    <input type="checkbox" id="edit-user-verified" style="width: 18px; height: 18px;">
+                    Email Verified
+                </label>
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button id="cancel-user-edit" class="btn btn-outline" style="padding: 8px 16px; border-color: #cbd5e1; color: #334155;">Cancel</button>
+                <button id="save-user-edit" class="btn btn-primary" style="padding: 8px 16px;">Save Changes</button>
+            </div>
+        </div>
     </div>
 
     <!-- GSAP for animations -->

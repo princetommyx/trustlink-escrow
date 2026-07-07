@@ -361,7 +361,7 @@ const loadUsersList = async () => {
                 <td>${dateStr}</td>
                 <td>${isVerified}</td>
                 <td>
-                    <button class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 0.8rem;" onclick="alert('View details for ${email}')">View</button>
+                    <button class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 0.8rem;" onclick="window.openEditUserModal('${userDoc.id}', '${name.replace(/'/g, "\\'")}', '${email}', '${data.role || 'user'}', ${data.emailVerified || false})">View / Edit</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -370,6 +370,57 @@ const loadUsersList = async () => {
         console.error("Error loading users:", error);
     }
 };
+
+// User Modal Logic
+let currentEditUserId = null;
+const editUserModal = document.getElementById('edit-user-modal');
+
+window.openEditUserModal = (id, name, email, role, verified) => {
+    currentEditUserId = id;
+    document.getElementById('edit-user-email').value = email;
+    document.getElementById('edit-user-name').value = name;
+    document.getElementById('edit-user-role').value = role;
+    document.getElementById('edit-user-verified').checked = verified;
+    
+    editUserModal.classList.remove('hidden');
+};
+
+document.getElementById('close-user-modal').addEventListener('click', () => {
+    editUserModal.classList.add('hidden');
+});
+document.getElementById('cancel-user-edit').addEventListener('click', () => {
+    editUserModal.classList.add('hidden');
+});
+
+document.getElementById('save-user-edit').addEventListener('click', async () => {
+    if (!currentEditUserId) return;
+    
+    const saveBtn = document.getElementById('save-user-edit');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+    
+    try {
+        const newName = document.getElementById('edit-user-name').value;
+        const newRole = document.getElementById('edit-user-role').value;
+        const newVerified = document.getElementById('edit-user-verified').checked;
+        
+        await updateDoc(doc(db, "users", currentEditUserId), {
+            fullName: newName,
+            role: newRole,
+            emailVerified: newVerified
+        });
+        
+        alert("User details updated successfully!");
+        editUserModal.classList.add('hidden');
+        loadUsersList(); // Refresh the list
+    } catch (error) {
+        console.error("Error updating user:", error);
+        alert("Failed to update user: " + error.message);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+    }
+});
 
 // Initialize when document loads
 document.addEventListener('DOMContentLoaded', () => {
