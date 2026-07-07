@@ -40,9 +40,10 @@ Because the core API is returning `AIN01`, buyers may end up on a **Static POS L
 - **The Result:** The Render server receives the "Payment Successful" ping, but does not know *which* Firebase document to update to `FUNDED`. 
 - **✅ UPDATE (July 7, 2026):** `checkout.js` now tries `initiateMoolreCheckout()` (with the escrow ID as `externalref`) **first**, and only falls back to the static POS link if the API call fails. Once Moolre unblocks the authentication error, dynamic checkout links will start working automatically — **no code change needed**. The static link now lives in one place: `MOOLRE_STATIC_POS_LINK` in `moolre-service.js`.
 
-### 3. SMS Sender ID is Pending
-- We set the `MOOLRE_SENDER_ID` to `"566"`.
-- However, the Moolre dashboard shows this ID is in **"Pending"** status. Until the Moolre team manually approves it, all SMS requests will fail.
+### 3. SMS Sender ID is Pending — ✅ RESOLVED (July 8, 2026)
+- The old sender ID `"566"` was ultimately **Rejected** by Moolre (confirmed via the `/open/sms/status` API).
+- The sender ID **`Trustlink` is now Approved**, and the code already uses it (`MOOLRE_SENDER_ID = "Trustlink"`).
+- The VAS key authenticates correctly (it was unaffected by the account/key mismatch in blocker #1), so SMS notifications should now send successfully.
 
 ---
 
