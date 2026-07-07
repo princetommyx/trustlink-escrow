@@ -1,6 +1,6 @@
 import { db } from "./firebase-config.js";
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout } from "./moolre-service.js";
+import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK } from "./moolre-service.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Extract ID from URL
@@ -54,15 +54,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const btn = e.target;
                     btn.disabled = true;
                     btn.textContent = "Connecting to Moolre...";
-                    
+
+                    // Try the dynamic checkout API first: it carries the escrow ID as
+                    // externalref, which lets the webhook auto-mark this escrow FUNDED.
+                    // While Moolre keeps returning AIN01 (see HANDOFF.md) we fall back
+                    // to the static POS link so the buyer flow stays testable.
                     try {
-                        // Bypass the broken API for now and use the static POS link
-                        const staticPosLink = "https://pos.moolre.com/k91Dp2VHFArnB0uCUytiNfW7ls5daw";
-                        window.location.href = staticPosLink;
+                        const customer = {
+                            email: escrow.buyerEmail || "buyer@trustlink.com",
+                            name: escrow.sellerName || "TrustLink Buyer"
+                        };
+                        const checkout = await initiateMoolreCheckout(escrow.amount, escrow.description, customer, escrowId);
+                        const payUrl = checkout && (checkout.authorization_url || checkout.url || checkout.link);
+                        if (!payUrl) throw new Error("Moolre response did not include a checkout URL.");
+                        window.location.href = payUrl;
                     } catch(err) {
-                        alert("Payment failed: " + err.message);
-                        btn.disabled = false;
-                        btn.textContent = "Pay securely via Moolre";
+                        console.warn("Dynamic Moolre checkout unavailable, falling back to static POS link:", err.message);
+                        window.location.href = MOOLRE_STATIC_POS_LINK;
                     }
                 });
 

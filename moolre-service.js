@@ -36,6 +36,11 @@ export async function sendMoolreOTP(phone, otp) {
 }
 export const MOOLRE_API_USER = "DreamersCode";
 export const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; // User-provided real account number
+
+// Fallback checkout used while the dynamic /embed/link API returns AIN01 (see HANDOFF.md).
+// NOTE: payments through this link cannot carry an externalref, so the webhook
+// cannot auto-match them to an escrow — it exists purely to keep the buyer flow testable.
+export const MOOLRE_STATIC_POS_LINK = "https://pos.moolre.com/k91Dp2VHFArnB0uCUytiNfW7ls5daw";
 export const MOOLRE_VAS_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2YXNpZCI6OTc5NywiZXhwIjoxOTU2NTI3OTk5fQ.rV4eU8maadNobhcBmr2GJMyb9BxsGK23InEL97pR3xg"; 
 export const MOOLRE_SENDER_ID = "566"; // Must be an approved Sender ID on Moolre
 

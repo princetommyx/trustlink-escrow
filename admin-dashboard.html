@@ -31,7 +31,7 @@
                 </a>
                 <a href="#" class="nav-item" data-target="view-disputes">
                     <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" /></svg></span> <span class="nav-text">Disputes</span>
-                    <span class="badge" style="background: var(--danger);">3</span>
+                    <span class="badge" id="disputes-badge" style="background: var(--danger); display: none;">0</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-approvals">
                     <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span> <span class="nav-text">Approvals</span>
@@ -76,8 +76,10 @@
                             <div class="chart-header">
                                 <h3 class="chart-title">Deposit & Withdraw Report</h3>
                                 <div class="chart-actions">
-                                    <select class="chart-date-filter">
-                                        <option>Feb 23, 2025 - Mar 9, 2025</option>
+                                    <select class="chart-date-filter" id="dw-chart-range">
+                                        <option value="7">Last 7 days</option>
+                                        <option value="14" selected>Last 14 days</option>
+                                        <option value="30">Last 30 days</option>
                                     </select>
                                 </div>
                             </div>
@@ -89,8 +91,10 @@
                             <div class="chart-header">
                                 <h3 class="chart-title">Transactions Report</h3>
                                 <div class="chart-actions">
-                                    <select class="chart-date-filter">
-                                        <option>Feb 23, 2025 - Mar 9, 2025</option>
+                                    <select class="chart-date-filter" id="tx-chart-range">
+                                        <option value="7">Last 7 days</option>
+                                        <option value="14" selected>Last 14 days</option>
+                                        <option value="30">Last 30 days</option>
                                     </select>
                                 </div>
                             </div>
@@ -245,7 +249,7 @@
                 <div id="view-users" class="view-section hidden">
                     <div class="view-header">
                         <h2>User Management</h2>
-                        <input type="text" placeholder="Search by email or ID..." style="background: rgba(0,0,0,0.2); border: 1px solid var(--surface-border); padding: 8px 16px; border-radius: 8px; color: white;">
+                        <input type="text" id="user-search" placeholder="Search by name or email..." style="background: rgba(0,0,0,0.2); border: 1px solid var(--surface-border); padding: 8px 16px; border-radius: 8px; color: white;">
                     </div>
                     <div class="portal-card admin-table-white" style="padding: 0; overflow: hidden;">
                         <table class="transaction-table">
@@ -280,8 +284,8 @@
                                 <!-- Chat will load here -->
                             </div>
                             <div class="chat-input-area" style="background: #f8fafc; border-top: 1px solid #e2e8f0; justify-content: space-between;">
-                                <button class="btn btn-outline" style="border-color: var(--danger); color: var(--danger);" onclick="alert('Refunded to Buyer')">Refund Buyer</button>
-                                <button class="btn btn-primary" style="background: var(--success); border-color: var(--success);" onclick="alert('Released to Seller')">Release to Seller</button>
+                                <button class="btn btn-outline" id="btn-refund-buyer" disabled style="border-color: var(--danger); color: var(--danger);">Refund Buyer</button>
+                                <button class="btn btn-primary" id="btn-release-seller" disabled style="background: var(--success); border-color: var(--success);">Release to Seller</button>
                             </div>
                         </div>
                     </div>
@@ -305,9 +309,9 @@
                         
                         <div class="form-group" style="max-width: 300px;">
                             <label>Platform Fee (%)</label>
-                            <input type="number" value="2.5" step="0.1" style="padding: 10px; border-radius: 6px;">
+                            <input type="number" id="platform-fee" value="2.5" step="0.1" min="0" max="100" style="padding: 10px; border-radius: 6px;">
                         </div>
-                        <button class="btn btn-primary" onclick="alert('Fees Updated')" style="max-width: 150px;">Save Changes</button>
+                        <button class="btn btn-primary" id="btn-save-fee" style="max-width: 150px;">Save Changes</button>
                     </div>
                     
                     <div class="settings-card">
@@ -380,24 +384,8 @@
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr style="border-bottom: 1px solid #e2e8f0;">
-                                    <td><strong>Super Admin</strong></td>
-                                    <td>admin@trustlink.com</td>
-                                    <td>Super Admin</td>
-                                    <td><span class="badge-status badge-success">Active</span></td>
-                                    <td><button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.8rem; border-color: #cbd5e1; color: #334155;">Edit Role</button></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Test Support</strong></td>
-                                    <td>test@trustlink.com</td>
-                                    <td>Support Agent</td>
-                                    <td><span class="badge-status badge-success">Active</span></td>
-                                    <td>
-                                        <button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.8rem; border-color: #cbd5e1; color: #334155;">Edit Role</button>
-                                        <button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.8rem; border-color: #ef4444; color: #ef4444; margin-left: 8px;">Revoke</button>
-                                    </td>
-                                </tr>
+                            <tbody id="admin-roles-list">
+                                <tr><td colspan="5" style="text-align: center; color: #64748b;">Loading administrators...</td></tr>
                             </tbody>
                         </table>
                     </div>

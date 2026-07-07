@@ -28,10 +28,10 @@ The core Moolre API for generating dynamic checkout links (`https://api.moolre.c
 - **Next Steps for Team:** Contact Moolre integration support to find out why the keys are returning `AIN01` for `uyahya566`.
 
 ### 2. The Webhook Callback Cannot Match Escrows
-Because the core API is returning `AIN01`, we are temporarily redirecting buyers to a **Static POS Link**. 
+Because the core API is returning `AIN01`, buyers may end up on a **Static POS Link**. 
 - **The Issue:** Static POS links do not accept the unique `externalref` (Escrow ID). When the buyer pays on the POS link, Moolre fires the webhook to our Render server, but the JSON payload does not contain the `externalref`.
 - **The Result:** The Render server receives the "Payment Successful" ping, but does not know *which* Firebase document to update to `FUNDED`. 
-- **The Fix:** Once Moolre unblocks the API Authentication Error, the team must switch `checkout.js` back to using the `initiateMoolreCheckout()` function instead of the static POS link.
+- **✅ UPDATE (July 7, 2026):** `checkout.js` now tries `initiateMoolreCheckout()` (with the escrow ID as `externalref`) **first**, and only falls back to the static POS link if the API call fails. Once Moolre unblocks the authentication error, dynamic checkout links will start working automatically — **no code change needed**. The static link now lives in one place: `MOOLRE_STATIC_POS_LINK` in `moolre-service.js`.
 
 ### 3. SMS Sender ID is Pending
 - We set the `MOOLRE_SENDER_ID` to `"566"`.
@@ -43,4 +43,31 @@ Because the core API is returning `AIN01`, we are temporarily redirecting buyers
 
 - **Webhook Backend Repo:** `https://github.com/Uyahya566/trustlinkBackend`
 - **Moolre Service Logic:** `moolre-service.js` (Contains all keys, checkout API logic, and SMS API logic).
-- **Buyer Checkout Logic:** `checkout.js` (Currently hardcoded to redirect to the static POS link; needs to be reverted to the API call once Moolre fixes the auth issue).
+- **Buyer Checkout Logic:** `checkout.js` (Tries the dynamic Moolre API first, auto-falls back to the static POS link — self-heals once Moolre fixes the auth issue).
+
+---
+
+## 🛠️ Work Completed on July 7, 2026
+
+1. **Modern UI refresh (all pages)**
+   - New electric blue → cyan design system in `styles.css` (`--primary: #3B82F6`, `--secondary: #06B6D4`). Everything inherits from CSS variables, so the whole site updated consistently.
+   - Auth pages redesigned: deep-navy gradient panel and gradient submit button in `auth.css` (replaced the old black/gold button).
+   - Fixed broken Google Fonts URLs (`googleapis.com` → `fonts.googleapis.com`) in `signup.html` and `admin-login.html` — those pages were silently rendering fallback fonts.
+
+2. **Admin dashboard functional upgrades (`admin-dashboard.js` / `admin-dashboard.html`)**
+   - **Charts now use real Firestore data** (escrows + transactions bucketed per day) with working "Last 7/14/30 days" range selectors. Previously they always plotted zeros.
+   - **User Management search box works** (filters by name/email as you type).
+   - **Role Management table is live** — lists real admins/support from Firestore, with Edit Role and Revoke (self-revoke is blocked).
+   - **Disputes view is live** — lists escrows with status `DISPUTED`, shows dispute details, and the Refund Buyer / Release to Seller buttons actually update the escrow (`REFUNDED` / `RELEASED`, with `resolvedAt`/`resolvedBy`). The sidebar disputes badge count is now real (was hardcoded "3").
+   - **Platform fee is persisted** to Firestore at `settings/platform` (`feePercent`) instead of a fake alert.
+   - **Bug fix:** stats compared statuses in lowercase (`'funded'`) but escrows store uppercase (`'FUNDED'`) — status comparisons are now case-insensitive, so Escrow Analytics cards show real numbers.
+   - **Security fix:** user-supplied names/emails are now HTML-escaped before rendering (was vulnerable to HTML/script injection via a user's display name).
+
+3. **Checkout self-healing fallback** — see the ✅ UPDATE under blocker #2 above.
+
+### ⚠️ Still outstanding
+- Moolre `AIN01` auth error — waiting on Moolre support (likely IP whitelisting / live API activation for `uyahya566`).
+- SMS Sender ID `566` still **Pending** approval on the Moolre dashboard.
+- "Change Password", "Generate Report", and category tags in admin Settings are still UI placeholders.
+- API keys are still hardcoded in `moolre-service.js` and exposed client-side — must move to a backend before production.
+- `admin-dashboard.js` still has two hardcoded bypass admin emails (`admin@trustlink.com`, `test@trustlink.com`) — remove once role-based access is fully trusted, and remember client-side checks are cosmetic; real enforcement must be in `firestore.rules`.
