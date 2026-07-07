@@ -15,11 +15,11 @@ export const MOOLRE_API_URL = "https://api.moolre.com/v1/checkout"; // Standardi
 export async function sendMoolreOTP(phone, otp) {
     try {
         console.log(`[MOOLRE API] Sending OTP ${otp} to ${phone}`);
-        const response = await fetch(`https://api.moolre.com/open/sms/send?recipient=${phone}&message=Your+TrustLink+OTP+is+${otp}&senderid=TrustLink`, {
+        const response = await fetch(`https://api.moolre.com/open/sms/send?recipient=${phone}&message=Your+TrustLink+OTP+is+${otp}&senderid=${MOOLRE_SENDER_ID}`, {
             method: 'GET',
             headers: {
                 'X-API-KEY': MOOLRE_SECRET_KEY,
-                'X-API-USER': 'TrustLink'
+                'X-API-USER': MOOLRE_API_USER
             }
         });
 
