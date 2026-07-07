@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Execute immediately since script is placed at end of body
     // Mobile Menu Toggle
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const navLinks = document.querySelector('.nav-links');
@@ -83,4 +83,3 @@ document.addEventListener('DOMContentLoaded', () => {
             
         }, 3000);
     }
-});

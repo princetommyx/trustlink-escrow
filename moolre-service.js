@@ -301,7 +301,8 @@ export async function initiateUSSDPushPayment(phone, amount, channel, escrowId) 
             headers: {
                 'Content-Type': 'application/json',
                 'X-API-USER': MOOLRE_API_USER,
-                'X-API-KEY': MOOLRE_PRIVATE_KEY
+                'X-API-KEY': MOOLRE_PRIVATE_KEY,
+                'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
             },
             body: JSON.stringify({
                 type: 1,
