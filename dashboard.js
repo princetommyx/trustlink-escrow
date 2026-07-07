@@ -84,7 +84,7 @@ onAuthStateChanged(auth, async (user) => {
     }
     
     // Check if Admin
-    if (user.email === 'admin@trustlink.com') {
+    if (user.email === 'admin@trustlink.com' || user.email === 'test@trustlink.com') {
         window.location.href = "admin-dashboard.html";
         return;
     }

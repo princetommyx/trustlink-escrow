@@ -202,9 +202,10 @@ h1, h2, h3, h4 {
 .logo-icon {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: linear-gradient(135deg, #3b82f6, #9333ea);
     border-radius: 8px;
     position: relative;
+    box-shadow: 0 0 15px rgba(147, 51, 234, 0.4);
 }
 
 .logo-icon::after {
@@ -213,9 +214,9 @@ h1, h2, h3, h4 {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 16px;
-    height: 16px;
-    background: var(--bg-color);
+    width: 14px;
+    height: 14px;
+    background: #ffffff;
     border-radius: 4px;
 }
 

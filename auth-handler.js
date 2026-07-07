@@ -54,7 +54,11 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         // If user visits login/signup while already logged in, redirect them
         if (isAuthPage && !sessionStorage.getItem("justAuth")) {
-            window.location.href = "dashboard.html"; 
+            if (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com") {
+                window.location.href = "admin-dashboard.html"; 
+            } else {
+                window.location.href = "dashboard.html"; 
+            }
         }
         
         // If on a main page with navbar, update the navbar to show Profile
@@ -240,7 +244,12 @@ if (loginForm && window.location.pathname.includes("login.html")) {
             sessionStorage.setItem("justAuth", "true");
             await signInWithEmailAndPassword(auth, email, password);
             sessionStorage.setItem("authToast", "Successfully signed in! Welcome back.");
-            window.location.href = "dashboard.html";
+            
+            if (email === "admin@trustlink.com" || email === "test@trustlink.com") {
+                window.location.href = "admin-dashboard.html";
+            } else {
+                window.location.href = "dashboard.html";
+            }
         } catch (error) {
             showError("Invalid email or password.");
             btn.disabled = false;
