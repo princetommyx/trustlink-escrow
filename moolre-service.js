@@ -4,7 +4,7 @@
 // They are exposed here strictly for MVP/Prototype demonstration purposes.
 export const MOOLRE_SECRET_KEY = "dcef1bbe-49aa-4416-8934-b9983a3c42a2";
 export const MOOLRE_PUBLIC_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOjEwOTIzMiwiZXhwIjoxOTU2NTQ1OTk5fQ.RvCuvZoYLSLl2BqqwoKDDg_55N3Xj0elQHp5pc44Pns";
-export const MOOLRE_PRIVATE_KEY = "Zo5h0DYYzWwmtcwZicvQQWkU3X7KIeQ2P5mU8KQKxk6Ayb1uMR8bC0dokt8715ez";
+export const MOOLRE_PRIVATE_KEY = "dZGZS7cYLxCjWRyAwy3g4J2GFuqFkkQL2DG0ZTbQFIkNaX50M6B46qzEzsmrqa8F";
 export const MOOLRE_API_URL = "https://api.moolre.com/v1/checkout"; // Standardized checkout endpoint
 
 /**
@@ -15,12 +15,23 @@ export const MOOLRE_API_URL = "https://api.moolre.com/v1/checkout"; // Standardi
 export async function sendMoolreOTP(phone, otp) {
     try {
         console.log(`[MOOLRE API] Sending OTP ${otp} to ${phone}`);
-        const response = await fetch(`https://api.moolre.com/open/sms/send?recipient=${phone}&message=Your+TrustLink+OTP+is+${otp}&senderid=${MOOLRE_SENDER_ID}`, {
-            method: 'GET',
+        // Remove any '+' or spaces for the API if necessary
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+
+        const response = await fetch("https://api.moolre.com/open/sms/send", {
+            method: 'POST',
             headers: {
-                'X-API-KEY': MOOLRE_SECRET_KEY,
-                'X-API-USER': MOOLRE_API_USER
-            }
+                'Content-Type': 'application/json',
+                'X-API-VASKEY': MOOLRE_VAS_KEY
+            },
+            body: JSON.stringify({
+                type: 1,
+                senderid: MOOLRE_SENDER_ID,
+                messages: [{
+                    recipient: cleanPhone,
+                    message: `Your TrustLink OTP is ${otp}`
+                }]
+            })
         });
 
         if (!response.ok) {
@@ -42,7 +53,7 @@ export const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; // User-provided real acc
 // cannot auto-match them to an escrow — it exists purely to keep the buyer flow testable.
 export const MOOLRE_STATIC_POS_LINK = "https://pos.moolre.com/k91Dp2VHFArnB0uCUytiNfW7ls5daw";
 export const MOOLRE_VAS_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2YXNpZCI6OTc5NywiZXhwIjoxOTU2NTI3OTk5fQ.rV4eU8maadNobhcBmr2GJMyb9BxsGK23InEL97pR3xg"; 
-export const MOOLRE_SENDER_ID = "566"; // Must be an approved Sender ID on Moolre
+export const MOOLRE_SENDER_ID = "Trustlink"; // Must be an approved Sender ID on Moolre
 
 /**
  * Initiates a Moolre payment gateway checkout session.
@@ -51,9 +62,10 @@ export const MOOLRE_SENDER_ID = "566"; // Must be an approved Sender ID on Moolr
  * @param {string} description - The description of the escrow transaction.
  * @param {object} customer - The customer details { email, name }.
  * @param {string} externalRef - The unique escrow ID for tracking.
+ * @param {string} callbackUrl - The URL to redirect to after successful payment.
  * @returns {Promise<object>} - The Moolre API response containing the checkout URL.
  */
-export async function initiateMoolreCheckout(amount, description, customer, externalRef) {
+export async function initiateMoolreCheckout(amount, description, customer, externalRef, callbackUrl) {
     try {
         const response = await fetch("https://api.moolre.com/embed/link", {
             method: 'POST',
@@ -71,6 +83,7 @@ export async function initiateMoolreCheckout(amount, description, customer, exte
                 reusable: "0",
                 currency: "GHS",
                 accountnumber: MOOLRE_ACCOUNT_NUMBER,
+                callback_url: callbackUrl || "",
                 metadata: { description }
             })
         });
@@ -87,6 +100,44 @@ export async function initiateMoolreCheckout(amount, description, customer, exte
         return data.data; // Should contain { authorization_url, reference }
     } catch (error) {
         console.error("Moolre integration error:", error);
+        throw error;
+    }
+}
+
+/**
+ * Verifies a Moolre payment status using the Moolre transaction status API.
+ * 
+ * @param {string} escrowId - The escrow ID used as the externalref.
+ * @returns {Promise<object>} - The verification result.
+ */
+export async function verifyMoolrePayment(escrowId) {
+    try {
+        const response = await fetch(`https://api.moolre.com/open/transact/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-USER': MOOLRE_API_USER,
+                'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
+            },
+            body: JSON.stringify({
+                type: 1,
+                idtype: "1", // 1 = Unique externalref
+                id: escrowId,
+                accountnumber: MOOLRE_ACCOUNT_NUMBER
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok || data.status == 0) {
+            console.error("Moolre Verification Error:", data);
+            throw new Error(data.message || "Failed to verify Moolre payment.");
+        }
+
+        // Return the inner data object
+        return data.data; 
+    } catch (error) {
+        console.error("Moolre verification integration error:", error);
         throw error;
     }
 }

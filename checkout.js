@@ -1,6 +1,6 @@
 import { db } from "./firebase-config.js";
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK } from "./moolre-service.js";
+import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK, verifyMoolrePayment } from "./moolre-service.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Extract ID from URL
@@ -25,6 +25,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const escrow = docSnap.data();
         
+        // Handle Moolre Callback / Redirect
+        const paymentStatus = urlParams.get('payment');
+        if (paymentStatus === 'success' && escrow.status === 'PENDING_PAYMENT') {
+            document.getElementById('loading-text').textContent = "Verifying Payment with Moolre...";
+            try {
+                // Verify the transaction securely with Moolre
+                const verificationResult = await verifyMoolrePayment(escrowId);
+                
+                // Moolre txstatus: 1 means Success
+                if (verificationResult && verificationResult.txstatus == 1) {
+                    // Update Firestore
+                    await updateDoc(docRef, { status: 'FUNDED' });
+                    escrow.status = 'FUNDED';
+                } else {
+                    throw new Error("Moolre says the transaction is not fully successful yet.");
+                }
+                
+                // Clear URL params to prevent re-triggering on reload
+                window.history.replaceState({}, document.title, window.location.pathname + "?id=" + escrowId);
+            } catch (err) {
+                console.error("Payment Verification Failed:", err);
+                alert("Payment verification failed or is still processing. If you have been charged, please wait a moment and refresh.");
+            }
+        }
+        
         // Hide loader, show content
         document.getElementById('loader').style.display = 'none';
         document.getElementById('loading-text').style.display = 'none';
@@ -47,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 statusBadge.classList.add('status-pending');
                 
                 actionButtons.innerHTML = `
-                    <button id="btn-pay" class="btn btn-primary btn-large" style="width: 100%;">Pay securely via Moolre</button>
+                    <button id="btn-pay" class="btn btn-primary btn-large" style="width: 100%; margin-bottom: 8px;">Pay securely via Moolre</button>
                 `;
                 
                 document.getElementById('btn-pay').addEventListener('click', async (e) => {
@@ -64,7 +89,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             email: escrow.buyerEmail || "buyer@trustlink.com",
                             name: escrow.sellerName || "TrustLink Buyer"
                         };
-                        const checkout = await initiateMoolreCheckout(escrow.amount, escrow.description, customer, escrowId);
+                        const callbackUrl = window.location.origin + window.location.pathname + "?id=" + escrowId + "&payment=success";
+                        const checkout = await initiateMoolreCheckout(escrow.amount, escrow.description, customer, escrowId, callbackUrl);
                         const payUrl = checkout && (checkout.authorization_url || checkout.url || checkout.link);
                         if (!payUrl) throw new Error("Moolre response did not include a checkout URL.");
                         window.location.href = payUrl;
@@ -91,9 +117,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 document.getElementById('btn-release').addEventListener('click', async () => {
                     if(confirm("Are you sure you want to release the funds to the seller? This action cannot be undone.")) {
-                        await updateDoc(docRef, { status: 'COMPLETED' });
-                        alert("Funds Released! Thank you for using TrustLink Escrow.");
-                        window.location.reload();
+                        try {
+                            const sellerId = escrow.sellerId;
+                            const amount = parseFloat(escrow.amount);
+                            
+                            // 1. Complete the Escrow
+                            await updateDoc(docRef, { status: 'COMPLETED' });
+                            
+                            // 2. Add to Seller Wallet Balance
+                            const sellerRef = doc(db, "users", sellerId);
+                            const sellerSnap = await getDoc(sellerRef);
+                            if (sellerSnap.exists()) {
+                                const currentBalance = parseFloat(sellerSnap.data().walletBalance || 0);
+                                await updateDoc(sellerRef, { walletBalance: currentBalance + amount });
+                            }
+                            
+                            alert("Funds Released! Thank you for using TrustLink Escrow.");
+                            window.location.reload();
+                        } catch (err) {
+                            alert("Error releasing funds: " + err.message);
+                        }
                     }
                 });
                 
@@ -108,7 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else if (status === 'COMPLETED') {
                 statusBadge.textContent = 'Status: Completed';
                 statusBadge.classList.add('status-completed');
-                actionButtons.innerHTML = `<p style="color: var(--success); font-weight: 600;">This escrow has been successfully completed and funds were released.</p>`;
+                actionButtons.innerHTML = `<p style="color: var(--success); font-weight: 600;">This escrow has been successfully completed and funds were released to the seller.</p>`;
             } else if (status === 'DISPUTED') {
                 statusBadge.textContent = 'Status: Disputed';
                 statusBadge.classList.add('status-pending'); // Yellow/warning
@@ -117,6 +160,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         updateStatusUI(escrow.status);
+
+        };
 
     } catch (error) {
         console.error("Error fetching escrow:", error);

@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification } from "./moolre-service.js";
 
 let currentUser = null;
@@ -90,29 +90,271 @@ onAuthStateChanged(auth, async (user) => {
     }
     
     try {
-        const docSnap = await getDoc(doc(db, "users", user.uid));
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.role === 'admin') {
-                window.location.href = "admin-dashboard.html";
-                return;
+        onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.role === 'admin') {
+                    window.location.href = "admin-dashboard.html";
+                    return;
+                }
+                document.getElementById('user-name').textContent = data.fullName;
+                const balance = parseFloat(data.walletBalance || 0).toFixed(2);
+                document.getElementById('overview-balance').textContent = `GH₵ ${balance}`;
+                if(document.getElementById('wallet-available-balance')) {
+                    document.getElementById('wallet-available-balance').textContent = `GH₵ ${balance}`;
+                }
+                
+                if(!currentUser) {
+                    currentUser = user;
+                    fetchProducts();
+                    loadEscrows();
+                }
+            } else {
+                document.getElementById('user-name').textContent = user.email.split('@')[0];
+                if(!currentUser) {
+                    currentUser = user;
+                    fetchProducts();
+                    loadEscrows();
+                }
             }
-            document.getElementById('user-name').textContent = data.fullName;
-            currentUser = user;
-            fetchProducts();
-        } else {
-            document.getElementById('user-name').textContent = user.email.split('@')[0];
-        }
+        });
     } catch(e) {
         document.getElementById('user-name').textContent = user.email.split('@')[0];
-    }
-    
-    // In case user document doesn't exist but auth does
-    if(!currentUser) {
-        currentUser = user;
-        fetchProducts();
+        if(!currentUser) {
+            currentUser = user;
+            fetchProducts();
+            loadEscrows();
+        }
     }
 });
+
+let escrowStats = { activeSeller: 0, activeBuyer: 0, pendingSeller: 0, pendingBuyer: 0 };
+let recentActivities = [];
+
+function updateOverviewStats() {
+    const totalActive = escrowStats.activeSeller + escrowStats.activeBuyer;
+    const totalPending = escrowStats.pendingSeller + escrowStats.pendingBuyer;
+    if(document.getElementById('overview-active-escrows')) document.getElementById('overview-active-escrows').textContent = totalActive;
+    if(document.getElementById('overview-pending-releases')) document.getElementById('overview-pending-releases').textContent = totalPending;
+    
+    // Sort recent activities by timestamp (descending)
+    recentActivities.sort((a, b) => b.time - a.time);
+    const activityContainer = document.getElementById('recent-activity-list');
+    if(activityContainer) {
+        if(recentActivities.length === 0) {
+            activityContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px;">No recent activity</p>';
+        } else {
+            activityContainer.innerHTML = '';
+            recentActivities.slice(0, 5).forEach(act => {
+                activityContainer.innerHTML += `
+                    <div class="activity-item">
+                        <div class="activity-icon bg-primary"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                        <div class="activity-details">
+                            <h4>${act.title}</h4>
+                            <p>${act.description}</p>
+                        </div>
+                        <div class="activity-time">${new Date(act.time).toLocaleString()}</div>
+                    </div>
+                `;
+            });
+        }
+    }
+}
+
+// Load Escrows
+function loadEscrows() {
+    if (!currentUser) return;
+    
+    // We will use two listeners to populate Seller and Buyer tabs
+    // Note: To query by buyerPhone, we would need to know the current user's phone.
+    // For now, we query by buyerEmail if it matches the current user.
+    // (If the buyer clicks the public checkout link, they see it there anyway).
+
+    const sellerQ = query(collection(db, "escrows"), where("sellerId", "==", currentUser.uid));
+    
+    onSnapshot(sellerQ, (snapshot) => {
+        const sellerEscrowsContainer = document.getElementById('seller-escrows');
+        if (!sellerEscrowsContainer) return;
+        
+        if (snapshot.empty) {
+            sellerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have not created any escrows as a seller.</p>';
+        } else {
+            sellerEscrowsContainer.innerHTML = '';
+            escrowStats.activeSeller = 0;
+            escrowStats.pendingSeller = 0;
+            // Remove old seller activities
+            recentActivities = recentActivities.filter(a => a.type !== 'seller');
+            
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const escrowId = docSnap.id;
+                
+                if (data.status !== 'COMPLETED' && data.status !== 'DISPUTED') escrowStats.activeSeller++;
+                if (data.status === 'FUNDED' || data.status === 'DISPATCHED') escrowStats.pendingSeller++;
+                
+                if(data.createdAt) {
+                    recentActivities.push({
+                        type: 'seller',
+                        time: data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now(),
+                        title: `Escrow ${data.status.replace('_', ' ')}`,
+                        description: `Selling: ${data.description} (GH₵ ${data.amount})`
+                    });
+                }
+                
+                let statusUI = '';
+                let actionBtn = '';
+                
+                if (data.status === 'PENDING_PAYMENT') {
+                    statusUI = `<span style="background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING PAYMENT</span>`;
+                } else if (data.status === 'FUNDED') {
+                    statusUI = `<span style="background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid #3b82f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">FUNDED - DISPATCH NOW</span>`;
+                    actionBtn = `<button class="btn btn-primary" onclick="window.dispatchItem('${escrowId}')">MARK AS DISPATCHED</button>`;
+                } else if (data.status === 'DISPATCHED') {
+                    statusUI = `<span style="background-color: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">DISPATCHED</span>`;
+                } else if (data.status === 'COMPLETED') {
+                    statusUI = `<span style="background-color: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">COMPLETED</span>`;
+                } else if (data.status === 'DISPUTED') {
+                    statusUI = `<span style="background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">DISPUTED</span>`;
+                }
+
+                sellerEscrowsContainer.innerHTML += `
+                    <div class="order-ledger-row">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <span style="font-weight: 700; color: #60A5FA;">${data.description} - #${escrowId.substring(0, 8).toUpperCase()}</span>
+                            ${statusUI}
+                        </div>
+                        <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}</p>
+                        ${actionBtn}
+                    </div>
+                `;
+            });
+            updateOverviewStats();
+        }
+    });
+
+    const buyerQ = query(collection(db, "escrows"), where("buyerEmail", "==", currentUser.email));
+    
+    onSnapshot(buyerQ, (snapshot) => {
+        const buyerEscrowsContainer = document.getElementById('buyer-escrows');
+        if (!buyerEscrowsContainer) return;
+        
+        if (snapshot.empty) {
+            buyerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have no active escrows as a buyer.</p>';
+        } else {
+            buyerEscrowsContainer.innerHTML = '';
+            escrowStats.activeBuyer = 0;
+            escrowStats.pendingBuyer = 0;
+            // Remove old buyer activities
+            recentActivities = recentActivities.filter(a => a.type !== 'buyer');
+            
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const escrowId = docSnap.id;
+                
+                if (data.status !== 'COMPLETED' && data.status !== 'DISPUTED') escrowStats.activeBuyer++;
+                if (data.status === 'FUNDED' || data.status === 'DISPATCHED') escrowStats.pendingBuyer++;
+                
+                if(data.createdAt) {
+                    recentActivities.push({
+                        type: 'buyer',
+                        time: data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now(),
+                        title: `Escrow ${data.status.replace('_', ' ')}`,
+                        description: `Buying: ${data.description} (GH₵ ${data.amount})`
+                    });
+                }
+                
+                let statusUI = '';
+                let actionBtn = '';
+                
+                if (data.status === 'PENDING_PAYMENT') {
+                    statusUI = `<span style="background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">PAYMENT REQUIRED</span>`;
+                    actionBtn = `<a href="checkout.html?id=${escrowId}" target="_blank" class="btn btn-primary">PAY NOW</a>`;
+                } else if (data.status === 'FUNDED') {
+                    statusUI = `<span style="background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid #3b82f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING DISPATCH</span>`;
+                } else if (data.status === 'DISPATCHED') {
+                    statusUI = `<span style="background-color: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">DISPATCHED</span>`;
+                    actionBtn = `
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="window.releaseFunds('${escrowId}')">RELEASE FUNDS</button>
+                            <button class="btn btn-outline" style="border-color: var(--danger); color: var(--danger);" onclick="window.raiseDispute('${escrowId}')">RAISE DISPUTE</button>
+                        </div>
+                    `;
+                } else if (data.status === 'COMPLETED') {
+                    statusUI = `<span style="background-color: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">COMPLETED</span>`;
+                } else if (data.status === 'DISPUTED') {
+                    statusUI = `<span style="background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">DISPUTED</span>`;
+                }
+
+                buyerEscrowsContainer.innerHTML += `
+                    <div class="order-ledger-row">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <span style="font-weight: 700; color: #60A5FA;">${data.description} - #${escrowId.substring(0, 8).toUpperCase()}</span>
+                            ${statusUI}
+                        </div>
+                        <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}</p>
+                        ${actionBtn}
+                    </div>
+                `;
+            });
+            updateOverviewStats();
+        }
+    });
+}
+
+// Global functions for inline HTML event handlers
+window.dispatchItem = async (escrowId) => {
+    if(confirm("Are you sure you want to mark this item as dispatched?")) {
+        try {
+            await updateDoc(doc(db, "escrows", escrowId), { status: 'DISPATCHED' });
+            alert("Item marked as dispatched!");
+        } catch (error) {
+            console.error("Error dispatching:", error);
+            alert("Error: " + error.message);
+        }
+    }
+};
+
+window.releaseFunds = async (escrowId) => {
+    if(confirm("Are you sure you want to release the funds to the seller? This cannot be undone.")) {
+        try {
+            const escrowRef = doc(db, "escrows", escrowId);
+            const escrowSnap = await getDoc(escrowRef);
+            if (!escrowSnap.exists()) return;
+            
+            const escrowData = escrowSnap.data();
+            const sellerId = escrowData.sellerId;
+            const amount = parseFloat(escrowData.amount);
+            
+            // 1. Mark escrow as COMPLETED
+            await updateDoc(escrowRef, { status: 'COMPLETED' });
+            
+            // 2. Increment Seller's Wallet Balance
+            const sellerRef = doc(db, "users", sellerId);
+            const sellerSnap = await getDoc(sellerRef);
+            if (sellerSnap.exists()) {
+                const currentBalance = parseFloat(sellerSnap.data().walletBalance || 0);
+                await updateDoc(sellerRef, { walletBalance: currentBalance + amount });
+            }
+            
+            alert("Funds Released! Thank you for using TrustLink.");
+        } catch (error) {
+            console.error("Error releasing funds:", error);
+            alert("Error: " + error.message);
+        }
+    }
+};
+
+window.raiseDispute = async (escrowId) => {
+    if(confirm("Are you sure you want to raise a dispute? Escrow funds will remain locked.")) {
+        try {
+            await updateDoc(doc(db, "escrows", escrowId), { status: 'DISPUTED' });
+            alert("Dispute Raised. Support will contact you shortly.");
+        } catch (error) {
+            console.error("Error raising dispute:", error);
+            alert("Error: " + error.message);
+        }
+    }
+};
 
 document.getElementById('btn-signout').addEventListener('click', async () => {
     try {
