@@ -1,10 +1,11 @@
 :root {
-    --bg-color: #0A0F1C;
-    --surface-color: rgba(23, 30, 46, 0.65);
+    --bg-color: #060A13;
+    --surface-color: rgba(17, 24, 39, 0.6);
     --surface-border: rgba(255, 255, 255, 0.08);
-    --primary: #1A365D;
-    --primary-glow: rgba(26, 54, 93, 0.5);
-    --secondary: #0B192C;
+    --primary: #3B82F6;
+    --primary-glow: rgba(59, 130, 246, 0.35);
+    --secondary: #06B6D4;
+    --accent: #22D3EE;
     --text-main: #F8FAFC;
     --text-muted: #94A3B8;
     --success: #10B981;
@@ -49,7 +50,7 @@ h1, h2, h3, h4 {
 }
 
 .text-gradient {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    background: linear-gradient(135deg, #60A5FA 0%, #22D3EE 60%, #A78BFA 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -63,7 +64,7 @@ h1, h2, h3, h4 {
     border-radius: 50%;
     filter: blur(120px);
     z-index: -1;
-    opacity: 0.5;
+    opacity: 0.18;
     animation: float 10s ease-in-out infinite;
 }
 
@@ -103,13 +104,14 @@ h1, h2, h3, h4 {
     border: 1px solid var(--surface-border);
     border-radius: 24px;
     padding: 32px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass-card:hover {
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(59, 130, 246, 0.35);
     transform: translateY(-5px);
+    box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.4), 0 0 30px rgba(59, 130, 246, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* Buttons */
@@ -133,14 +135,15 @@ h1, h2, h3, h4 {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
     color: #fff;
-    box-shadow: 0 4px 15px var(--primary-glow);
+    box-shadow: 0 4px 15px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 8px 25px var(--primary-glow);
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     transform: translateY(-2px);
+    filter: brightness(1.08);
 }
 
 .btn-secondary {
@@ -285,12 +288,12 @@ h1, h2, h3, h4 {
 
 @keyframes badge-pulse {
     0%, 60%, 100% {
-        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
         border-color: var(--surface-border);
     }
     80% {
-        box-shadow: 0 0 25px 5px rgba(255, 215, 0, 0.5);
-        border-color: rgba(255, 215, 0, 0.8);
+        box-shadow: 0 0 25px 5px rgba(34, 211, 238, 0.35);
+        border-color: rgba(34, 211, 238, 0.7);
     }
 }
 
