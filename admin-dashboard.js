@@ -1,7 +1,7 @@
 import { auth, db, firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { onAuthStateChanged, signOut, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, setDoc, getDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, setDoc, getDoc, updateDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Navigation Logic
 const navItems = document.querySelectorAll('.nav-item');
@@ -399,23 +399,50 @@ if (btnCreateAdmin) {
             const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
             const secondaryAuth = getAuth(secondaryApp);
 
-            // Create the new user
-            const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
-            const newUser = userCredential.user;
+            let isUpgrade = false;
+            try {
+                // Try to create the new user
+                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                const newUser = userCredential.user;
 
-            // Add the user to Firestore with the selected role
-            await setDoc(doc(db, "users", newUser.uid), {
-                fullName: name,
-                email: email,
-                role: role,
-                createdAt: new Date(),
-                emailVerified: true // Admins created by an admin are automatically verified
-            });
+                // Add the user to Firestore with the selected role
+                await setDoc(doc(db, "users", newUser.uid), {
+                    fullName: name,
+                    email: email,
+                    role: role,
+                    createdAt: new Date(),
+                    emailVerified: true // Admins created by an admin are automatically verified
+                });
+            } catch (err) {
+                if (err.code === 'auth/email-already-in-use') {
+                    // Upgrade existing user instead
+                    const q = query(collection(db, "users"), where("email", "==", email));
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (querySnapshot.empty) {
+                        throw new Error("Email is in use, but user record not found in database. Cannot upgrade.");
+                    }
+                    
+                    const existingUserDoc = querySnapshot.docs[0];
+                    await updateDoc(doc(db, "users", existingUserDoc.id), {
+                        role: role,
+                        emailVerified: true
+                    });
+                    
+                    isUpgrade = true;
+                } else {
+                    throw err; // Re-throw if it's a different error
+                }
+            }
 
             // Sign out the secondary instance
             await signOut(secondaryAuth);
 
-            alert("Administrator successfully created!");
+            if (isUpgrade) {
+                alert("This user already existed in the system. They have been successfully upgraded to " + role + "!");
+            } else {
+                alert("Administrator successfully created!");
+            }
             
             // Clear inputs
             document.getElementById('new-admin-name').value = '';
