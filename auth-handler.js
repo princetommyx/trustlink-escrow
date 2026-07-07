@@ -54,7 +54,20 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         // If user visits login/signup while already logged in, redirect them
         if (isAuthPage && !sessionStorage.getItem("justAuth")) {
+            let isAdmin = false;
             if (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com") {
+                isAdmin = true;
+            } else {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        if (data.role === "admin" || data.role === "support") isAdmin = true;
+                    }
+                } catch(e) {}
+            }
+
+            if (isAdmin) {
                 window.location.href = "admin-dashboard.html"; 
             } else {
                 window.location.href = "dashboard.html"; 
@@ -252,10 +265,24 @@ if (loginForm && window.location.pathname.includes("login.html")) {
 
         try {
             sessionStorage.setItem("justAuth", "true");
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
             sessionStorage.setItem("authToast", "Successfully signed in! Welcome back.");
             
-            if (email === "admin@trustlink.com" || email === "test@trustlink.com") {
+            let isAdmin = false;
+            if (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com") {
+                isAdmin = true;
+            } else {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        if (data.role === "admin" || data.role === "support") isAdmin = true;
+                    }
+                } catch(e) {}
+            }
+            
+            if (isAdmin) {
                 window.location.href = "admin-dashboard.html";
             } else {
                 window.location.href = "dashboard.html";
