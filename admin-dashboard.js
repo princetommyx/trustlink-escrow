@@ -55,7 +55,7 @@ if (typeof gsap !== 'undefined') {
 // Authentication Protection
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
-        window.location.href = "login.html";
+        window.location.href = "admin-login.html";
         return;
     }
     
