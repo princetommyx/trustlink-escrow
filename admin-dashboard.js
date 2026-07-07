@@ -361,7 +361,7 @@ const loadUsersList = async () => {
                 <td>${dateStr}</td>
                 <td>${isVerified}</td>
                 <td>
-                    <button class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 0.8rem;" onclick="window.openEditUserModal('${userDoc.id}', '${name.replace(/'/g, "\\'")}', '${email}', '${data.role || 'user'}', ${data.emailVerified || false})">View / Edit</button>
+                    <button class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 0.8rem; border-color: #cbd5e1; color: #334155;" onclick="window.openEditUserModal('${userDoc.id}', '${name.replace(/'/g, "\\'")}', '${email}', '${data.role || 'user'}', ${data.emailVerified || false})">View / Edit</button>
                 </td>
             `;
             tbody.appendChild(tr);
