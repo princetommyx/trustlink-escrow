@@ -70,8 +70,9 @@ export async function initiateMoolreCheckout(amount, description, customer, exte
         const response = await fetch("https://api.moolre.com/embed/link", {
             method: 'POST',
             headers: {
+                // Per docs.moolre.com, /embed/link authenticates with ONLY the
+                // username + public key. Do not add X-API-KEY (private) here.
                 'Content-Type': 'application/json',
-                'X-API-KEY': MOOLRE_PRIVATE_KEY,
                 'X-API-PUBKEY': MOOLRE_PUBLIC_KEY,
                 'X-API-USER': MOOLRE_API_USER
             },
