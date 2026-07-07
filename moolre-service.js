@@ -45,7 +45,7 @@ export async function sendMoolreOTP(phone, otp) {
         return { status: 'mock_success', message: 'OTP message simulated on error.' };
     }
 }
-export const MOOLRE_API_USER = "DreamersCode";
+export const MOOLRE_API_USER = "sasulabs";
 export const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; // User-provided real account number
 
 // Fallback checkout used while the dynamic /embed/link API returns AIN01 (see HANDOFF.md).
