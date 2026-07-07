@@ -332,9 +332,49 @@ const fetchAdminStats = async () => {
     }
 };
 
+const loadUsersList = async () => {
+    try {
+        const usersCol = collection(db, 'users');
+        const usersSnap = await getDocs(usersCol);
+        const tbody = document.getElementById('admin-users-list');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        if (usersSnap.empty) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No users found</td></tr>';
+            return;
+        }
+
+        usersSnap.forEach(userDoc => {
+            const data = userDoc.data();
+            const email = data.email || 'N/A';
+            const name = data.fullName || email.split('@')[0];
+            const dateStr = data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Unknown';
+            const isVerified = data.emailVerified ? '<span style="color: #10b981; font-weight: bold; font-size: 0.85rem;">Verified</span>' : '<span style="color: #f59e0b; font-weight: bold; font-size: 0.85rem;">Unverified</span>';
+            const role = (data.role === 'admin' || data.role === 'support') ? `<span style="color: #9333ea; font-size: 0.8rem; margin-left: 8px;">(${data.role})</span>` : '';
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${name}</strong> ${role}</td>
+                <td>${email}</td>
+                <td>${dateStr}</td>
+                <td>${isVerified}</td>
+                <td>
+                    <button class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 0.8rem;" onclick="alert('View details for ${email}')">View</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (error) {
+        console.error("Error loading users:", error);
+    }
+};
+
 // Initialize when document loads
 document.addEventListener('DOMContentLoaded', () => {
     fetchAdminStats();
+    loadUsersList();
 });
 
 // Admin Creation Logic using secondary app
