@@ -21,7 +21,14 @@
 
 ## 🔴 Specific Issues Faced (Blockers)
 
-### 1. Moolre API Authentication Errors (`AIN01`)
+### 1. Moolre API Authentication Errors (`AIN01`) — ✅ RESOLVED (July 8, 2026)
+**Root cause found:** the API keys and the `X-API-USER` username belonged to two different Moolre accounts. The old public key was issued to user ID `109232`, but requests were authenticated under a different username. Moolre validates that the keys belong to the username's account, so every call failed with `AIN01`. No IP whitelisting or live activation was required.
+
+**Fix:** fresh keys generated under the `sasulabs` account (user ID `107834`) and set `MOOLRE_API_USER = "sasulabs"`. Verified working: `/embed/link` returns `POS09` with a real `authorization_url`, and `/open/transact/status` authenticates correctly.
+
+**⚠️ Remaining:** the VAS key (SMS/WhatsApp) is still from the old account — generate a new VAS key under `sasulabs` and re-approve the SMS Sender ID (`Trustlink`) on that account, or messaging will keep failing. Original notes below for history:
+
+
 The core Moolre API for generating dynamic checkout links (`https://api.moolre.com/embed/link`) strictly returns a `{"code": "AIN01", "message": "Authentication Error"}`. 
 - **What was tested:** We tested using the Secret Key, the Private Key, and multiple variations of the `X-API-USER` (including the internal ID `109232`, `DreamersCode`, and the login username `uyahya566`). All returned `AIN01`.
 - **Root Cause Analysis:** Since the wallet is verified, this almost certainly means that **Moolre requires our server IP address to be whitelisted** in their developer portal, OR the account has not been explicitly activated for Live API access. 
