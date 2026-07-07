@@ -1,6 +1,7 @@
-import { auth, db } from "./firebase-config.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, getDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { auth, db, firebaseConfig } from "./firebase-config.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { onAuthStateChanged, signOut, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, setDoc, getDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Navigation Logic
 const navItems = document.querySelectorAll('.nav-item');
@@ -335,3 +336,58 @@ const fetchAdminStats = async () => {
 document.addEventListener('DOMContentLoaded', () => {
     fetchAdminStats();
 });
+
+// Admin Creation Logic using secondary app
+const btnCreateAdmin = document.getElementById('btn-create-admin');
+if (btnCreateAdmin) {
+    btnCreateAdmin.addEventListener('click', async () => {
+        const name = document.getElementById('new-admin-name').value.trim();
+        const email = document.getElementById('new-admin-email').value.trim();
+        const password = document.getElementById('new-admin-password').value;
+        const role = document.getElementById('new-admin-role').value;
+
+        if (!name || !email || !password) {
+            alert("Please fill in all fields to create an admin.");
+            return;
+        }
+
+        btnCreateAdmin.textContent = "Creating...";
+        btnCreateAdmin.disabled = true;
+
+        try {
+            // Initialize a secondary app to avoid logging out the current admin
+            const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+            const secondaryAuth = getAuth(secondaryApp);
+
+            // Create the new user
+            const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+            const newUser = userCredential.user;
+
+            // Add the user to Firestore with the selected role
+            await setDoc(doc(db, "users", newUser.uid), {
+                fullName: name,
+                email: email,
+                role: role,
+                createdAt: new Date(),
+                emailVerified: true // Admins created by an admin are automatically verified
+            });
+
+            // Sign out the secondary instance
+            await signOut(secondaryAuth);
+
+            alert("Administrator successfully created!");
+            
+            // Clear inputs
+            document.getElementById('new-admin-name').value = '';
+            document.getElementById('new-admin-email').value = '';
+            document.getElementById('new-admin-password').value = '';
+            
+        } catch (error) {
+            console.error("Error creating admin:", error);
+            alert("Failed to create admin: " + error.message);
+        } finally {
+            btnCreateAdmin.textContent = "Create Administrator";
+            btnCreateAdmin.disabled = false;
+        }
+    });
+}

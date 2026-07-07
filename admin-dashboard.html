@@ -328,24 +328,24 @@
                             <p style="margin-bottom: 20px;">Invite a new admin or support staff.</p>
                             <div class="form-group">
                                 <label>Full Name</label>
-                                <input type="text" placeholder="e.g. Jane Doe" style="padding: 10px; border-radius: 6px;">
+                                <input type="text" id="new-admin-name" placeholder="e.g. Jane Doe" style="padding: 10px; border-radius: 6px;">
                             </div>
                             <div class="form-group">
                                 <label>Email Address</label>
-                                <input type="email" placeholder="admin@trustlink.com" style="padding: 10px; border-radius: 6px;">
+                                <input type="email" id="new-admin-email" placeholder="admin@trustlink.com" style="padding: 10px; border-radius: 6px;">
                             </div>
                             <div class="form-group">
                                 <label>Temporary Password</label>
-                                <input type="password" placeholder="Min. 8 characters" style="padding: 10px; border-radius: 6px;">
+                                <input type="password" id="new-admin-password" placeholder="Min. 8 characters" style="padding: 10px; border-radius: 6px;">
                             </div>
                             <div class="form-group">
                                 <label>Role</label>
-                                <select style="padding: 10px; border-radius: 6px;">
+                                <select id="new-admin-role" style="padding: 10px; border-radius: 6px;">
                                     <option value="admin">Super Admin</option>
                                     <option value="support">Support Agent</option>
                                 </select>
                             </div>
-                            <button class="btn btn-primary" onclick="alert('Admin invitation process initiated.')" style="margin-top: 10px;">Create Administrator</button>
+                            <button id="btn-create-admin" class="btn btn-primary" style="margin-top: 10px;">Create Administrator</button>
                         </div>
 
                         <div class="settings-card" style="margin-bottom: 0;">
