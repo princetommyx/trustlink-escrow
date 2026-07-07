@@ -201,7 +201,11 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 
-                await sendEmailVerification(user);
+                const isAdmin = (email === "admin@trustlink.com" || email === "test@trustlink.com");
+                
+                if (!isAdmin) {
+                    await sendEmailVerification(user);
+                }
                 
                 // Store additional user data in Firestore
                 await setDoc(doc(db, "users", user.uid), {
@@ -209,8 +213,14 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
                     email: email,
                     originalIdentifier: rawEmailOrPhone,
                     createdAt: new Date(),
-                    emailVerified: false
+                    emailVerified: isAdmin ? true : false,
+                    role: isAdmin ? "admin" : "user"
                 });
+
+                if (isAdmin) {
+                    window.location.href = "admin-dashboard.html";
+                    return;
+                }
 
                 // Store pending state for redirect
                 sessionStorage.setItem("pendingSignup", JSON.stringify({ type: "email" }));
