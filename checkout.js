@@ -1,6 +1,6 @@
 import { db } from "./firebase-config.js";
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK, verifyMoolrePayment } from "./moolre-service.js";
+import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK, verifyMoolrePayment, initiateUSSDPushPayment } from "./moolre-service.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Extract ID from URL
@@ -100,6 +100,67 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 });
 
+                // Handle USSD Push Payment
+                const btnUssd = document.getElementById('btn-pay-ussd');
+                if (btnUssd) {
+                    btnUssd.addEventListener('click', async () => {
+                        const network = document.getElementById('ussd-network').value;
+                        const phone = document.getElementById('ussd-phone').value;
+                        
+                        if(!phone) {
+                            alert("Please enter a valid phone number.");
+                            return;
+                        }
+                        
+                        btnUssd.textContent = "Sending Prompt...";
+                        btnUssd.disabled = true;
+                        
+                        try {
+                            await initiateUSSDPushPayment(phone, escrow.amount, network, escrowId);
+                            alert(`A prompt has been sent to ${phone}. Please check your phone and enter your PIN to approve the payment.\n\nClick OK once you have paid.`);
+                            
+                            document.getElementById('loading-text').textContent = "Verifying Payment with Moolre...";
+                            document.getElementById('loader').style.display = 'block';
+                            document.getElementById('loading-text').style.display = 'block';
+                            document.getElementById('escrow-content').classList.add('hidden');
+                            
+                            // Check status after they click OK
+                            let verificationResult = await verifyMoolrePayment(escrowId);
+                            
+                            if (verificationResult && verificationResult.txstatus == 1) {
+                                await updateDoc(docRef, { status: 'FUNDED' });
+                                alert("Payment Successful! Funds are now securely held in escrow.");
+                                window.location.reload();
+                            } else {
+                                // Let's poll for up to 30 seconds
+                                let attempts = 0;
+                                let interval = setInterval(async () => {
+                                    attempts++;
+                                    try {
+                                        verificationResult = await verifyMoolrePayment(escrowId);
+                                        if (verificationResult && verificationResult.txstatus == 1) {
+                                            clearInterval(interval);
+                                            await updateDoc(docRef, { status: 'FUNDED' });
+                                            alert("Payment Successful! Funds are now securely held in escrow.");
+                                            window.location.reload();
+                                        }
+                                    } catch(e) { }
+                                    
+                                    if (attempts > 6) {
+                                        clearInterval(interval);
+                                        alert("Payment verification timed out. If you already paid, the status will automatically update shortly.");
+                                        window.location.reload();
+                                    }
+                                }, 5000);
+                            }
+                        } catch (error) {
+                            btnUssd.textContent = "Send USSD Prompt to Phone";
+                            btnUssd.disabled = false;
+                            alert("Failed to send USSD Prompt: " + error.message);
+                        }
+                    });
+                }
+
             } else if (status === 'FUNDED') {
                 statusBadge.textContent = 'Status: Paid (Awaiting Dispatch)';
                 statusBadge.classList.add('status-funded');
@@ -160,8 +221,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         updateStatusUI(escrow.status);
-
-        };
 
     } catch (error) {
         console.error("Error fetching escrow:", error);

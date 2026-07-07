@@ -146,13 +146,17 @@ export async function verifyMoolrePayment(escrowId) {
  * Sends an SMS notification using the Moolre API.
  * 
  * @param {string} phone - The buyer's phone number.
- * @param {string} checkoutUrl - The public POS checkout URL.
- * @param {string} escrowId - The Escrow reference ID.
+ * @param {string} checkoutUrl - The secure POS checkout link.
+ * @param {string} escrowId - The escrow ID for reference.
+ * @param {string} paymentId - (Optional) The Moolre Payment ID for USSD pull.
  * @returns {Promise<object>}
  */
-export async function sendSMSNotification(phone, checkoutUrl, escrowId) {
+export async function sendSMSNotification(phone, checkoutUrl, escrowId, paymentId = "") {
     try {
         console.log(`[MOOLRE API] Sending SMS link for ${escrowId} to ${phone}`);
+        
+        const ussdText = paymentId ? ` or dial *203*${paymentId}# to pay via USSD` : "";
+        const message = `TrustLink: A new secure escrow (#${escrowId.substring(0, 8)}) has been created for you. Click here to pay securely: ${checkoutUrl}${ussdText}.`;
         
         // Remove any '+' or spaces for the API if necessary
         const cleanPhone = phone.replace(/[^0-9]/g, '');
@@ -169,7 +173,7 @@ export async function sendSMSNotification(phone, checkoutUrl, escrowId) {
                 messages: [{
                     recipient: cleanPhone,
                     ref: escrowId,
-                    message: `TrustLink: An escrow payment has been initiated for you (Ref: ${escrowId}).\n\nPlease securely pay and track your escrow here:\n${checkoutUrl}`
+                    message: message
                 }]
             })
         });
@@ -193,14 +197,18 @@ export async function sendSMSNotification(phone, checkoutUrl, escrowId) {
  * NOTE: The exact endpoint URL and payload structure must be confirmed with Moolre API documentation.
  * 
  * @param {string} phone - The buyer's phone number.
- * @param {string} checkoutUrl - The public POS checkout URL.
- * @param {string} escrowId - The Escrow reference ID.
+ * @param {string} checkoutUrl - The secure POS checkout link.
+ * @param {string} escrowId - The escrow ID for reference.
+ * @param {string} paymentId - (Optional) The Moolre Payment ID for USSD pull.
  * @returns {Promise<object>}
  */
-export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId) {
+export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId, paymentId = "") {
     try {
         console.log(`[MOOLRE API] Sending WhatsApp link for ${escrowId} to ${phone}`);
         
+        const ussdText = paymentId ? `\n\nAlternatively, you can dial *203*${paymentId}# to pay via USSD.` : "";
+        const message = `TrustLink Escrow\n\nA new secure escrow transaction (#${escrowId.substring(0, 8)}) has been initiated for you.\n\nPlease complete your payment securely using the following link:\n${checkoutUrl}${ussdText}`;
+
         // Remove any '+' or spaces for the API if necessary
         const cleanPhone = phone.replace(/[^0-9]/g, '');
 
@@ -233,6 +241,89 @@ export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId) {
         return data;
     } catch (error) {
         console.error("Moolre WhatsApp integration error:", error);
+        throw error;
+    }
+}
+
+/**
+ * Generates a unique Moolre Payment ID for USSD dial payments (*203*paymentid#)
+ * 
+ * @param {string} phone - Buyer's phone number
+ * @param {string} name - Buyer's name or a unique ID
+ * @param {string} escrowId - The escrow ID used as externalref
+ * @returns {Promise<string>} - The generated payment ID
+ */
+export async function generateMoolrePaymentID(phone, name, escrowId) {
+    try {
+        const response = await fetch("https://api.moolre.com/open/account/create", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-USER': MOOLRE_API_USER,
+                'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
+            },
+            body: JSON.stringify({
+                type: 2,
+                phone: phone,
+                name: name,
+                currency: "GHS",
+                externalref: escrowId,
+                accountnumber: MOOLRE_ACCOUNT_NUMBER
+            })
+        });
+
+        const data = await response.json();
+        if (!response.ok || data.status == 0) {
+            console.error("Moolre Payment ID Error:", data);
+            throw new Error(data.message || "Failed to create Moolre Payment ID");
+        }
+        
+        return data.data.paymentid;
+    } catch (error) {
+        console.error("Error creating Moolre Payment ID:", error);
+        throw error;
+    }
+}
+
+/**
+ * Initiates a Push USSD Payment prompt on the buyer's phone.
+ * 
+ * @param {string} phone - Buyer's phone number
+ * @param {string} amount - Amount to collect
+ * @param {string} channel - Network channel (13=MTN, 6=Telecel, 7=AT)
+ * @param {string} escrowId - Escrow ID (externalref)
+ * @returns {Promise<object>} - Response indicating prompt was sent
+ */
+export async function initiateUSSDPushPayment(phone, amount, channel, escrowId) {
+    try {
+        const response = await fetch("https://api.moolre.com/open/transact/payment", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-USER': MOOLRE_API_USER,
+                'X-API-KEY': MOOLRE_PRIVATE_KEY
+            },
+            body: JSON.stringify({
+                type: 1,
+                channel: channel,
+                currency: "GHS",
+                payer: phone,
+                amount: amount.toString(),
+                externalref: escrowId,
+                accountnumber: MOOLRE_ACCOUNT_NUMBER
+            })
+        });
+
+        const data = await response.json();
+        // status 1 with code TR099 or TP14 usually indicates success/prompt sent
+        if (!response.ok || data.status == 0) {
+            console.error("Moolre USSD Push Error:", data);
+            throw new Error(data.message || "Failed to push USSD prompt");
+        }
+        
+        return data;
+    } catch (error) {
+        console.error("Error initiating USSD push:", error);
         throw error;
     }
 }

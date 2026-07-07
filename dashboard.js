@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification } from "./moolre-service.js";
+import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID } from "./moolre-service.js";
 
 let currentUser = null;
 
@@ -461,6 +461,14 @@ if (formNewEscrow) {
             
             const docRef = await addDoc(collection(db, "escrows"), newEscrow);
             const escrowId = docRef.id;
+            
+            // 2. Generate Moolre Payment ID for USSD Pull (Option B)
+            let moolrePaymentId = "";
+            try {
+                moolrePaymentId = await generateMoolrePaymentID(buyerPhoneInput ? buyerPhoneInput.value : "0000000000", "TrustLink Buyer", escrowId);
+            } catch (err) {
+                console.warn("Failed to generate USSD Payment ID, proceeding without it.", err);
+            }
 
             // 3. SMS/WHATSAPP INTEGRATION
             if (buyerPhoneInput && buyerPhoneInput.value) {
@@ -469,22 +477,20 @@ if (formNewEscrow) {
                 try {
                     // Try WhatsApp first
                     try {
-                        await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
-                        alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer with the secure POS checkout link.`);
+                        await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId);
+                        alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer with the secure POS checkout link${moolrePaymentId ? ' and USSD code' : ''}.`);
                     } catch (waError) {
                         console.warn("WhatsApp failed, falling back to SMS...", waError);
                         // Fall back to SMS
-                        await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId);
-                        alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer with the secure POS checkout link.`);
+                        await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId);
+                        alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer with the secure POS checkout link${moolrePaymentId ? ' and USSD code' : ''}.`);
                     }
                 } catch (smsError) {
-                    console.error("Both WhatsApp and SMS Error caught:", smsError);
-                    alert(`Escrow Created Successfully! (Messages failed: ${smsError.message}).\n\nOpening checkout page manually for testing.`);
-                    // Automatically open the checkout page for the user to test the buyer flow
-                    window.open(checkoutUrl, '_blank');
+                    console.warn("SMS failed.", smsError);
+                    alert("Escrow Created! (Failed to send SMS/WhatsApp, please share link manually)");
                 }
             } else {
-                alert('Escrow Created! However, no phone number was provided.');
+                alert("Escrow Created Successfully! Please share the link manually.");
             }
 
             // Do not redirect the seller. The buyer will pay via the WhatsApp link!
@@ -619,9 +625,11 @@ const updateEscrowTotal = () => {
         }
     });
     
-    if(escrowAmount) escrowAmount.value = total > 0 ? total.toFixed(2) : '';
-    if(escrowTerms && document.activeElement !== escrowTerms) {
-        escrowTerms.value = terms.length > 0 ? terms.join('\n') : '';
+    if (total > 0) {
+        if(escrowAmount) escrowAmount.value = total.toFixed(2);
+        if(escrowTerms && document.activeElement !== escrowTerms) {
+            escrowTerms.value = terms.join('\n');
+        }
     }
 };
 

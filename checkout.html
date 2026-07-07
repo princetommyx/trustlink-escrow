@@ -82,6 +82,26 @@
             
             <div class="escrow-amount" id="escrow-amount">GH₵ 0.00</div>
             
+            <div class="checkout-actions">
+                <button id="btn-pay-card" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem; margin-bottom: 12px;">Pay Securely via Moolre Web</button>
+                
+                <div class="ussd-divider" style="text-align: center; margin: 16px 0; color: #888;">OR PAY VIA USSD PUSH</div>
+
+                <div class="ussd-form" style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <label style="display: block; margin-bottom: 8px; color: #ccc;">Select Network</label>
+                    <select id="ussd-network" class="input-field" style="width: 100%; margin-bottom: 12px; padding: 10px; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;">
+                        <option value="13">MTN Mobile Money</option>
+                        <option value="6">Telecel Cash</option>
+                        <option value="7">AT Money</option>
+                    </select>
+                    
+                    <label style="display: block; margin-bottom: 8px; color: #ccc;">Phone Number</label>
+                    <input type="tel" id="ussd-phone" class="input-field" placeholder="e.g. 0541234567" style="width: 100%; margin-bottom: 16px; padding: 10px; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;">
+                    
+                    <button id="btn-pay-ussd" class="btn btn-outline" style="width: 100%; padding: 12px;">Send USSD Prompt to Phone</button>
+                </div>
+            </div>
+            
             <div class="checkout-details">
                 <p><strong>Seller:</strong> <span id="seller-name">Loading...</span></p>
                 <p><strong>Description:</strong> <span id="escrow-desc">Loading...</span></p>
