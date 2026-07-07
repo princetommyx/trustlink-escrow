@@ -92,9 +92,25 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 document.getElementById('btn-signout').addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.href = "login.html";
+    try {
+        await signOut(auth);
+        window.location.href = "admin-login.html";
+    } catch (error) {
+        console.error("Sign out error", error);
+    }
 });
+
+const topSignoutBtn = document.getElementById('btn-signout-top');
+if (topSignoutBtn) {
+    topSignoutBtn.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            window.location.href = "admin-login.html";
+        } catch (error) {
+            console.error("Sign out error", error);
+        }
+    });
+}
 
 // -------------------------------------------------------------
 // Chart.js Implementations
