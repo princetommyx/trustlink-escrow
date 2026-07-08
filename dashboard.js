@@ -481,35 +481,28 @@ if (formNewEscrow) {
             }
 
             // 3. SMS/WHATSAPP INTEGRATION
-            if (buyerPhoneInput && buyerPhoneInput.value) {
-                // Generate the public POS checkout URL
-                const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
-                
-                // Automatically copy to clipboard as a fallback
-                try {
-                    await navigator.clipboard.writeText(checkoutUrl);
-                } catch(e) { console.warn("Clipboard write failed silently."); }
+            const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
+            try {
+                await navigator.clipboard.writeText(checkoutUrl);
+            } catch(e) { console.warn("Clipboard write failed silently."); }
 
+            if (buyerPhoneInput && buyerPhoneInput.value) {
                 try {
                     // Try WhatsApp first
                     try {
                         await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId);
-                        alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer. The payment link was also copied to your clipboard just in case!`);
+                        alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer. The payment link was also copied to your clipboard!`);
                     } catch (waError) {
                         console.warn("WhatsApp failed, falling back to SMS...", waError);
                         // Fall back to SMS
                         await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId);
-                        alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer. The payment link was also copied to your clipboard just in case!`);
+                        alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer. The payment link was also copied to your clipboard!`);
                     }
                 } catch (smsError) {
                     console.warn("SMS failed.", smsError);
                     alert("Escrow Created! (Moolre SMS blocked by AIN01 API Key issue).\n\nThe payment link has been COPIED TO YOUR CLIPBOARD. Please paste it to the buyer directly.");
                 }
             } else {
-                const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
-                try {
-                    await navigator.clipboard.writeText(checkoutUrl);
-                } catch(e) {}
                 alert("Escrow Created Successfully!\n\nThe payment link has been COPIED TO YOUR CLIPBOARD. Please send it to the buyer.");
             }
 
