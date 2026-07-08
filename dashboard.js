@@ -206,6 +206,7 @@ function loadEscrows() {
                 
                 if (data.status === 'PENDING_PAYMENT') {
                     statusUI = `<span style="background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING PAYMENT</span>`;
+                    actionBtn = `<button class="btn btn-outline" style="border-color: var(--primary); color: var(--primary);" onclick="window.copyToClipboard('${window.location.origin}/checkout.html?id=${escrowId}')">COPY LINK</button>`;
                 } else if (data.status === 'FUNDED') {
                     statusUI = `<span style="background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid #3b82f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">FUNDED - DISPATCH NOW</span>`;
                     actionBtn = `<button class="btn btn-primary" onclick="window.dispatchItem('${escrowId}')">MARK AS DISPATCHED</button>`;
@@ -302,6 +303,15 @@ function loadEscrows() {
 }
 
 // Global functions for inline HTML event handlers
+window.copyToClipboard = async (text) => {
+    try {
+        await navigator.clipboard.writeText(text);
+        alert("Payment link copied to clipboard! You can now paste and send it to the buyer.");
+    } catch (err) {
+        prompt("Copy the link below:", text);
+    }
+};
+
 window.dispatchItem = async (escrowId) => {
     if(confirm("Are you sure you want to mark this item as dispatched?")) {
         try {
@@ -474,23 +484,33 @@ if (formNewEscrow) {
             if (buyerPhoneInput && buyerPhoneInput.value) {
                 // Generate the public POS checkout URL
                 const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
+                
+                // Automatically copy to clipboard as a fallback
+                try {
+                    await navigator.clipboard.writeText(checkoutUrl);
+                } catch(e) { console.warn("Clipboard write failed silently."); }
+
                 try {
                     // Try WhatsApp first
                     try {
                         await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId);
-                        alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer with the secure POS checkout link${moolrePaymentId ? ' and USSD code' : ''}.`);
+                        alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer. The payment link was also copied to your clipboard just in case!`);
                     } catch (waError) {
                         console.warn("WhatsApp failed, falling back to SMS...", waError);
                         // Fall back to SMS
                         await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId);
-                        alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer with the secure POS checkout link${moolrePaymentId ? ' and USSD code' : ''}.`);
+                        alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer. The payment link was also copied to your clipboard just in case!`);
                     }
                 } catch (smsError) {
                     console.warn("SMS failed.", smsError);
-                    alert("Escrow Created! (Failed to send SMS/WhatsApp, please share link manually)");
+                    alert("Escrow Created! (Moolre SMS blocked by AIN01 API Key issue).\n\nThe payment link has been COPIED TO YOUR CLIPBOARD. Please paste it to the buyer directly.");
                 }
             } else {
-                alert("Escrow Created Successfully! Please share the link manually.");
+                const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
+                try {
+                    await navigator.clipboard.writeText(checkoutUrl);
+                } catch(e) {}
+                alert("Escrow Created Successfully!\n\nThe payment link has been COPIED TO YOUR CLIPBOARD. Please send it to the buyer.");
             }
 
             // Do not redirect the seller. The buyer will pay via the WhatsApp link!
