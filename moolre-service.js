@@ -46,7 +46,7 @@ export async function sendMoolreOTP(phone, otp) {
     }
 }
 export const MOOLRE_API_USER = "DreamersCode";
-export const MOOLRE_ACCOUNT_NUMBER = "10923206072619"; // DreamersCode real account number
+export const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; // DreamersCode real account number
 
 // Fallback checkout used while the dynamic /embed/link API returns AIN01 (see HANDOFF.md).
 // NOTE: payments through this link cannot carry an externalref, so the webhook
