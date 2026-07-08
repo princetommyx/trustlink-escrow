@@ -500,7 +500,7 @@ if (formNewEscrow) {
                     }
                 } catch (smsError) {
                     console.warn("SMS failed.", smsError);
-                    alert("Escrow Created! (Moolre SMS blocked by AIN01 API Key issue).\n\nThe payment link has been COPIED TO YOUR CLIPBOARD. Please paste it to the buyer directly.");
+                    alert("Escrow Created! (Failed to send automatic SMS/WhatsApp).\n\nThe payment link has been COPIED TO YOUR CLIPBOARD. Please paste it to the buyer directly.");
                 }
             } else {
                 alert("Escrow Created Successfully!\n\nThe payment link has been COPIED TO YOUR CLIPBOARD. Please send it to the buyer.");

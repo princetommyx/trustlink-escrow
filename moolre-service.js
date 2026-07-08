@@ -3,8 +3,8 @@
 // WARNING: In a real production application, these keys MUST be hidden on a backend server.
 // They are exposed here strictly for MVP/Prototype demonstration purposes.
 export const MOOLRE_SECRET_KEY = "dcef1bbe-49aa-4416-8934-b9983a3c42a2";
-export const MOOLRE_PUBLIC_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOjEwNzgzNCwiZXhwIjoxOTU2NTQ1OTk5fQ.ZPgxaR7PP6FZH5msdXkWSQX6lbjp27mTywLgMhAeaPc";
-export const MOOLRE_PRIVATE_KEY = "tDA79UwhA1PLoCsBNXzcmk08qOXNvd25xKVjKPN93i2RVqa1VNoUWN7jXR91v39C";
+export const MOOLRE_PUBLIC_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOjEwOTIzMiwiZXhwIjoxOTU2NTQ1OTk5fQ.RvCuvZoYLSLl2BqqwoKDDg_55N3Xj0elQHp5pc44Pns";
+export const MOOLRE_PRIVATE_KEY = "dZGZS7cYLxCjWRyAwy3g4J2GFuqFkkQL2DG0ZTbQFIkNaX50M6B46qzEzsmrqa8F";
 export const MOOLRE_API_URL = "https://api.moolre.com/v1/checkout"; // Standardized checkout endpoint
 
 /**
@@ -45,8 +45,8 @@ export async function sendMoolreOTP(phone, otp) {
         return { status: 'mock_success', message: 'OTP message simulated on error.' };
     }
 }
-export const MOOLRE_API_USER = "sasulabs";
-export const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; // User-provided real account number
+export const MOOLRE_API_USER = "DreamersCode";
+export const MOOLRE_ACCOUNT_NUMBER = "10923206072619"; // DreamersCode real account number
 
 // Fallback checkout used while the dynamic /embed/link API returns AIN01 (see HANDOFF.md).
 // NOTE: payments through this link cannot carry an externalref, so the webhook
