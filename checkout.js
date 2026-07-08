@@ -1,5 +1,5 @@
 import { db } from "./firebase-config.js";
-import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK, verifyMoolrePayment, initiateUSSDPushPayment } from "./moolre-service.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -96,7 +96,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const checkout = await initiateMoolreCheckout(escrow.amount, escrow.description, customer, escrowId, callbackUrl);
                         const payUrl = checkout && (checkout.authorization_url || checkout.url || checkout.link);
                         if (!payUrl) throw new Error("Moolre response did not include a checkout URL.");
-                        window.location.href = payUrl;
+                        
+                        // Open Moolre POS in a new tab so TrustLink can listen for the webhook!
+                        window.open(payUrl, "_blank");
+                        btn.textContent = "Awaiting Payment Confirmation...";
                     } catch(err) {
                         console.error("Moolre Dynamic Checkout Failed:", err);
                         alert("Failed to generate Dynamic Checkout Link. Moolre returned: " + err.message + "\n\nPlease ensure your Moolre account is activated for Live API access.");
@@ -226,6 +229,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         updateStatusUI(escrow.status);
+
+        // Listen for real-time updates (e.g. from the Moolre Webhook)
+        onSnapshot(docRef, (snap) => {
+            if (snap.exists()) {
+                const updatedData = snap.data();
+                if (updatedData.status !== escrow.status) {
+                    escrow.status = updatedData.status;
+                    updateStatusUI(escrow.status);
+                    
+                    if (escrow.status === 'FUNDED') {
+                        alert("Payment Successful! Your funds are now securely held in escrow.");
+                    }
+                }
+            }
+        });
 
     } catch (error) {
         console.error("Error fetching escrow:", error);
