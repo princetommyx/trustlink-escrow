@@ -4,7 +4,7 @@
 // They are exposed here strictly for MVP/Prototype demonstration purposes.
 export const MOOLRE_SECRET_KEY = "dcef1bbe-49aa-4416-8934-b9983a3c42a2";
 export const MOOLRE_PUBLIC_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOjEwOTIzMiwiZXhwIjoxOTU2NTQ1OTk5fQ.RvCuvZoYLSLl2BqqwoKDDg_55N3Xj0elQHp5pc44Pns";
-export const MOOLRE_PRIVATE_KEY = "dZGZS7cYLxCjWRyAwy3g4J2GFuqFkkQL2DG0ZTbQFIkNaX50M6B46qzEzsmrqa8F";
+export const MOOLRE_PRIVATE_KEY = "SyxZLkipLcrjJeD4ixOyWzuaCjIDwbN83MLZfuKGQdfYrnYes0fcAFtNWnFcS73F";
 export const MOOLRE_API_URL = "https://api.moolre.com/v1/checkout"; // Standardized checkout endpoint
 
 /**
@@ -51,7 +51,7 @@ export const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; // DreamersCode real acco
 // Fallback checkout used while the dynamic /embed/link API returns AIN01 (see HANDOFF.md).
 // NOTE: payments through this link cannot carry an externalref, so the webhook
 // cannot auto-match them to an escrow — it exists purely to keep the buyer flow testable.
-export const MOOLRE_STATIC_POS_LINK = "https://pos.moolre.com/k91Dp2VHFArnB0uCUytiNfW7ls5daw";
+export const MOOLRE_STATIC_POS_LINK = "https://pos.moolre.com/vtin8o2P6bBcESNMkVylmTOx5dLfeD";
 export const MOOLRE_VAS_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2YXNpZCI6OTc5NywiZXhwIjoxOTU2NTI3OTk5fQ.rV4eU8maadNobhcBmr2GJMyb9BxsGK23InEL97pR3xg"; 
 export const MOOLRE_SENDER_ID = "Trustlink"; // Must be an approved Sender ID on Moolre
 

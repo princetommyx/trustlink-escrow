@@ -101,10 +101,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         window.open(payUrl, "_blank");
                         btn.textContent = "Awaiting Payment Confirmation...";
                     } catch(err) {
-                        console.error("Moolre Dynamic Checkout Failed:", err);
-                        alert("Failed to generate Dynamic Checkout Link. Moolre returned: " + err.message + "\n\nPlease ensure your Moolre account is activated for Live API access.");
-                        btn.disabled = false;
-                        btn.textContent = "Pay via Moolre POS";
+                        console.warn("Moolre API Failed, falling back to static POS link.", err.message);
+                        window.open(MOOLRE_STATIC_POS_LINK, "_blank");
+                        btn.disabled = true;
+                        btn.textContent = "Awaiting Payment Confirmation...";
                     }
                 });
 
