@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Update Firestore
                     await updateDoc(docRef, { status: 'FUNDED' });
                     escrow.status = 'FUNDED';
+                    alert("Payment Successful! Your funds are now securely held in escrow.");
                 } else {
                     throw new Error("Moolre says the transaction is not fully successful yet.");
                 }
@@ -89,14 +90,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                             email: escrow.buyerEmail || "buyer@trustlink.com",
                             name: escrow.sellerName || "TrustLink Buyer"
                         };
-                        const callbackUrl = window.location.origin + window.location.pathname + "?id=" + escrowId + "&payment=success";
+                        // We are explicitly setting the callback URL to the Render backend
+                        // as requested, so the webhook receives the payment notification.
+                        const callbackUrl = "https://trustlinkbackend.onrender.com";
                         const checkout = await initiateMoolreCheckout(escrow.amount, escrow.description, customer, escrowId, callbackUrl);
                         const payUrl = checkout && (checkout.authorization_url || checkout.url || checkout.link);
                         if (!payUrl) throw new Error("Moolre response did not include a checkout URL.");
                         window.location.href = payUrl;
                     } catch(err) {
-                        console.warn("Dynamic Moolre checkout unavailable, falling back to static POS link:", err.message);
-                        window.location.href = MOOLRE_STATIC_POS_LINK;
+                        console.error("Moolre Dynamic Checkout Failed:", err);
+                        alert("Failed to generate Dynamic Checkout Link. Moolre returned: " + err.message + "\n\nPlease ensure your Moolre account is activated for Live API access.");
+                        btn.disabled = false;
+                        btn.textContent = "Pay via Moolre POS";
                     }
                 });
 

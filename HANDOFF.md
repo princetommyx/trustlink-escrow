@@ -26,6 +26,8 @@
 
 **Fix:** fresh keys generated under the `sasulabs` account (user ID `107834`) and set `MOOLRE_API_USER = "sasulabs"`. Verified working: `/embed/link` returns `POS09` with a real `authorization_url`, and `/open/transact/status` authenticates correctly.
 
+**⚠️ UPDATE (July 8, 2026):** We are currently encountering the `AIN01` error again when testing with the `DreamersCode` account credentials. Support has been contacted to verify Live activation/IP whitelisting.
+
 **⚠️ Remaining:** the VAS key (SMS/WhatsApp) is still from the old account — generate a new VAS key under `sasulabs` and re-approve the SMS Sender ID (`Trustlink`) on that account, or messaging will keep failing. Original notes below for history:
 
 
@@ -40,10 +42,13 @@ Because the core API is returning `AIN01`, buyers may end up on a **Static POS L
 - **The Result:** The Render server receives the "Payment Successful" ping, but does not know *which* Firebase document to update to `FUNDED`. 
 - **✅ UPDATE (July 7, 2026):** `checkout.js` now tries `initiateMoolreCheckout()` (with the escrow ID as `externalref`) **first**, and only falls back to the static POS link if the API call fails. Once Moolre unblocks the authentication error, dynamic checkout links will start working automatically — **no code change needed**. The static link now lives in one place: `MOOLRE_STATIC_POS_LINK` in `moolre-service.js`.
 
-### 3. SMS Sender ID is Pending — ✅ RESOLVED (July 8, 2026)
+### 3. SMS Sender ID is Pending — ⚠️ REVERTED TO PENDING (July 8, 2026)
 - The old sender ID `"566"` was ultimately **Rejected** by Moolre (confirmed via the `/open/sms/status` API).
-- The sender ID **`Trustlink` is now Approved**, and the code already uses it (`MOOLRE_SENDER_ID = "Trustlink"`).
-- The VAS key authenticates correctly (it was unaffected by the account/key mismatch in blocker #1), so SMS notifications should now send successfully.
+- The new sender ID **`Trustlink`** is currently showing as **Pending** approval in the Moolre dashboard. Until Moolre manually approves this Sender ID, all SMS verification and USSD push codes will fail to deliver.
+- We must wait for Moolre to approve the Sender ID before SMS delivery can be successfully tested in production.
+
+### 4. Moolre Callback URL updated (July 8, 2026)
+- The `callbackUrl` passed to `initiateMoolreCheckout` has been updated to use the deployed Render backend endpoint (`https://trustlinkbackend.onrender.com`) instead of dynamically returning the user to the local UI. Moolre will now redirect/ping this URL upon completion of a dynamic link transaction.
 
 ---
 
