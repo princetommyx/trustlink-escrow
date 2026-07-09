@@ -59,6 +59,12 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .hidden { display: none; }
+
+        @media (max-width: 480px) {
+            .confirm-card { padding: 24px 16px; border-radius: 16px; }
+            .confirm-amount { font-size: 2rem; }
+            .confirm-details { padding: 16px; }
+        }
     </style>
 </head>
 <body class="auth-wrapper" style="justify-content: center; padding: 20px;">

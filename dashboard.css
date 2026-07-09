@@ -802,4 +802,67 @@ input[type=number] {
     .message {
         max-width: 85%;
     }
+
+    /* Topbar: let it breathe instead of colliding */
+    .dashboard-topbar {
+        height: auto;
+        min-height: 60px;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 16px;
+    }
+    .topbar-actions {
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+    .topbar-actions .btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+    /* The notification bell is decorative for now - reclaim the space */
+    .topbar-actions > .btn-icon { display: none; }
+
+    /* View headers (title + search/toggles) stack instead of squeezing */
+    .view-header {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .view-header input[type="text"] {
+        width: 100%;
+        order: 2;
+    }
+
+    /* Chart cards: header wraps, date filter drops below the title */
+    .chart-header { flex-wrap: wrap; gap: 8px; }
+    .chart-body { height: 240px; }
+
+    /* Big money figures scale down instead of overflowing */
+    .stat-value { font-size: 1.8rem; }
+    #view-wallet h1 { font-size: 1.8rem !important; }
+
+    /* Wallet action buttons stack on narrow screens */
+    #view-wallet .portal-card > div {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    /* Escrow ledger rows: status badge wraps under the title cleanly */
+    .order-ledger-row { padding: 16px; }
+    .order-ledger-row > div:first-child {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Settings/admin cards inherit sane spacing */
+    .settings-card { padding: 16px; }
+    .stats-grid-4 { gap: 12px; }
+}
+
+/* Very small phones */
+@media (max-width: 400px) {
+    .dashboard-content { padding: 12px; }
+    .portal-card { padding: 16px; }
+    .topbar-title { font-size: 1rem; }
 }
