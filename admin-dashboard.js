@@ -80,16 +80,52 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    // Set Admin Name
+    // Set Admin Name + populate profile form
     try {
         const docSnap = await getDoc(doc(db, "users", user.uid));
-        if (docSnap.exists() && docSnap.data().fullName) {
-            document.getElementById('user-name').textContent = docSnap.data().fullName;
+        const data = docSnap.exists() ? docSnap.data() : {};
+        if (data.fullName) {
+            document.getElementById('user-name').textContent = data.fullName;
         } else {
             document.getElementById('user-name').textContent = 'Admin (' + user.email.split('@')[0] + ')';
         }
+        const pName = document.getElementById('admin-profile-name');
+        const pEmail = document.getElementById('admin-profile-email');
+        const pPhone = document.getElementById('admin-profile-phone');
+        if (pName) pName.value = data.fullName || '';
+        if (pEmail) pEmail.value = data.email || user.email || '';
+        if (pPhone) pPhone.value = data.phone || pickUserPhone(data) || '';
     } catch(e) {
         document.getElementById('user-name').textContent = 'Admin (' + user.email.split('@')[0] + ')';
+    }
+});
+
+document.getElementById('btn-save-admin-profile')?.addEventListener('click', async () => {
+    if (!auth.currentUser) return;
+    const btn = document.getElementById('btn-save-admin-profile');
+    const name = document.getElementById('admin-profile-name').value.trim();
+    const phone = document.getElementById('admin-profile-phone').value.trim();
+
+    if (!name) {
+        alert("Please enter your name.");
+        return;
+    }
+    if (phone && phone.replace(/[^0-9]/g, '').length < 9) {
+        alert("Please enter a valid phone number.");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    try {
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { fullName: name, phone: phone });
+        document.getElementById('user-name').textContent = name;
+        btn.textContent = 'Saved ✓';
+        setTimeout(() => { btn.textContent = 'Save Profile'; btn.disabled = false; }, 1500);
+    } catch (error) {
+        alert("Failed to save profile: " + error.message);
+        btn.textContent = 'Save Profile';
+        btn.disabled = false;
     }
 });
 

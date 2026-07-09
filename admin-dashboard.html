@@ -373,7 +373,25 @@
 
                 <!-- Settings View -->
                 <div id="view-settings" class="view-section hidden">
-                    <h2 style="margin-bottom: 24px;">Platform Configuration</h2>
+                    <h2 style="margin-bottom: 24px;">My Profile</h2>
+                    <div class="settings-card" style="max-width: 560px;">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="admin-profile-name" placeholder="Your name" style="padding: 10px; border-radius: 6px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="admin-profile-email" disabled style="padding: 10px; border-radius: 6px; opacity: 0.7;">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="admin-profile-phone" placeholder="e.g. 0551234567" style="padding: 10px; border-radius: 6px;">
+                            <span style="font-size: 0.8rem; color: #64748b; margin-top: 6px; display: block;">Used for SMS alerts about your account.</span>
+                        </div>
+                        <button class="btn btn-primary" id="btn-save-admin-profile" style="max-width: 180px;">Save Profile</button>
+                    </div>
+
+                    <h2 style="margin: 40px 0 24px;">Platform Configuration</h2>
                     <div class="settings-card">
                         <h3>Dynamic Fee Configuration</h3>
                         <p style="margin-bottom: 20px;">Set the percentage fee taken from escrow transactions.</p>
