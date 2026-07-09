@@ -90,9 +90,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             email: escrow.buyerEmail || "buyer@trustlink.com",
                             name: escrow.sellerName || "TrustLink Buyer"
                         };
-                        // We are explicitly setting the callback URL to the Render backend /callback route
-                        // so the backend can handle Moolre's redirect and then forward the user back to Vercel.
-                        const callbackUrl = "https://trustlinkbackend.onrender.com/callback?id=" + escrowId;
+                        // Send the buyer straight back to THIS checkout page after payment.
+                        // The ?payment=success flag triggers verifyMoolrePayment() on load,
+                        // which confirms with Moolre and marks the escrow FUNDED.
+                        const callbackUrl = window.location.origin + window.location.pathname + "?id=" + escrowId + "&payment=success";
                         const checkout = await initiateMoolreCheckout(escrow.amount, escrow.description, customer, escrowId, callbackUrl);
                         const payUrl = checkout && (checkout.authorization_url || checkout.url || checkout.link);
                         if (!payUrl) throw new Error("Moolre response did not include a checkout URL.");

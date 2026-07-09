@@ -86,7 +86,11 @@ export async function initiateMoolreCheckout(amount, description, customer, exte
                 reusable: "0",
                 currency: "GHS",
                 accountnumber: MOOLRE_ACCOUNT_NUMBER,
-                callback_url: callbackUrl || "",
+                // Moolre's /embed/link fields (there is NO "callback_url" field):
+                // - redirect: where the buyer's browser goes after payment
+                // - callback: server webhook Moolre POSTs the payment result to
+                redirect: callbackUrl || "",
+                callback: "https://trustlinkbackend.onrender.com/webhook/moolre",
                 metadata: { description }
             })
         });
