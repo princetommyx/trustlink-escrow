@@ -38,6 +38,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         const itemLabel = (escrow.description || 'your item').replace(/\s+/g, ' ').trim().substring(0, 60);
 
+        // Buyer receipt SMS: Moolre only sends its generic deposit alert, so
+        // we send our own with the actual purchase details.
+        const notifyBuyerSMS = async () => {
+            try {
+                if (!escrow.buyerPhone) return;
+                const trackUrl = window.location.origin + window.location.pathname + "?id=" + escrowId;
+                await sendEscrowStatusSMS(escrow.buyerPhone, `TrustLink: Payment received! GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}" is now held safely in escrow. It will only be released to the seller after you confirm delivery. Track your order: ${trackUrl}`, `${escrowId}-receipt`);
+            } catch (smsErr) {
+                console.warn("Buyer receipt SMS failed:", smsErr);
+            }
+        };
+
         // Handle Moolre Callback / Redirect
         const paymentStatus = urlParams.get('payment');
         if (paymentStatus === 'success' && escrow.status === 'PENDING_PAYMENT') {
@@ -51,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Update Firestore
                     await updateDoc(docRef, { status: 'FUNDED' });
                     escrow.status = 'FUNDED';
-                    await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
+                    await notifyBuyerSMS(); await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
                     alert("Payment Successful! Your funds are now securely held in escrow.");
                 } else {
                     throw new Error("Moolre says the transaction is not fully successful yet.");
@@ -160,7 +172,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             
                             if (verificationResult && verificationResult.txstatus == 1) {
                                 await updateDoc(docRef, { status: 'FUNDED' });
-                                await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
+                                await notifyBuyerSMS(); await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
                                 alert("Payment Successful! Funds are now securely held in escrow.");
                                 window.location.reload();
                             } else {
@@ -173,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                         if (verificationResult && verificationResult.txstatus == 1) {
                                             clearInterval(interval);
                                             await updateDoc(docRef, { status: 'FUNDED' });
-                                            await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
+                                            await notifyBuyerSMS(); await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
                                             alert("Payment Successful! Funds are now securely held in escrow.");
                                             window.location.reload();
                                         }

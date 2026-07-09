@@ -263,32 +263,51 @@ if (loginForm && window.location.pathname.includes("login.html")) {
         btn.disabled = true;
         btn.textContent = "SIGNING IN...";
 
+        // Guard against a request that never resolves (slow network / Firestore
+        // stall) - don't leave the button stuck on "SIGNING IN..." forever.
+        const withTimeout = (promise, ms, label) => Promise.race([
+            promise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error(label)), ms))
+        ]);
+
         try {
             sessionStorage.setItem("justAuth", "true");
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await withTimeout(
+                signInWithEmailAndPassword(auth, email, password),
+                20000,
+                "Sign-in timed out. Please check your connection and try again."
+            );
             const user = userCredential.user;
             sessionStorage.setItem("authToast", "Successfully signed in! Welcome back.");
-            
+
             let isAdmin = false;
-            if (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com") {
+            if (window.location.pathname.includes("admin-login")) {
+                // Skip the extra role lookup: go straight to the admin dashboard,
+                // which validates the role itself and kicks out non-admins.
+                isAdmin = true;
+            } else if (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com") {
                 isAdmin = true;
             } else {
                 try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    const userDoc = await withTimeout(getDoc(doc(db, "users", user.uid)), 5000, "role lookup timed out");
                     if (userDoc.exists()) {
                         const data = userDoc.data();
                         if (data.role === "admin" || data.role === "support") isAdmin = true;
                     }
-                } catch(e) {}
+                } catch(e) { /* default to the regular dashboard */ }
             }
-            
+
+            sessionStorage.removeItem("justAuth");
             if (isAdmin) {
                 window.location.href = "admin-dashboard.html";
             } else {
                 window.location.href = "dashboard.html";
             }
         } catch (error) {
-            showError("Invalid email or password.");
+            const message = (error && error.message && error.message.includes("timed out"))
+                ? error.message
+                : "Invalid email or password.";
+            showError(message);
             btn.disabled = false;
             btn.textContent = "SIGN IN";
             sessionStorage.removeItem("justAuth");
