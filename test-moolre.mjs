@@ -1,15 +1,17 @@
-const MOOLRE_SECRET_KEY = "dcef1bbe-49aa-4416-8934-b9983a3c42a2";
-const MOOLRE_PUBLIC_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOjEwOTIzMiwiZXhwIjoxOTU2NTQ1OTk5fQ.RvCuvZoYLSLl2BqqwoKDDg_55N3Xj0elQHp5pc44Pns";
-const MOOLRE_PRIVATE_KEY = "dZGZS7cYLxCjWRyAwy3g4J2GFuqFkkQL2DG0ZTbQFIkNaX50M6B46qzEzsmrqa8F";
-const MOOLRE_API_USER = "DreamersCode";
-const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; 
+// IMPORTANT: username and keys MUST come from the SAME Moolre account,
+// otherwise every endpoint returns AIN01 (Authentication Error).
+// Working pair verified July 8, 2026: sasulabs account (user ID 107834).
+const MOOLRE_PUBLIC_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOjEwNzgzNCwiZXhwIjoxOTU2NTQ1OTk5fQ.ZPgxaR7PP6FZH5msdXkWSQX6lbjp27mTywLgMhAeaPc";
+const MOOLRE_PRIVATE_KEY = "tDA79UwhA1PLoCsBNXzcmk08qOXNvd25xKVjKPN93i2RVqa1VNoUWN7jXR91v39C";
+const MOOLRE_API_USER = "sasulabs";
+const MOOLRE_ACCOUNT_NUMBER = "10783406072616";
 
 async function initiateMoolreCheckout(amount, description, customer, externalRef, callbackUrl) {
     const response = await fetch("https://api.moolre.com/embed/link", {
         method: 'POST',
         headers: {
+            // Per docs.moolre.com /embed/link wants ONLY username + public key
             'Content-Type': 'application/json',
-            'X-API-KEY': MOOLRE_PRIVATE_KEY,
             'X-API-PUBKEY': MOOLRE_PUBLIC_KEY,
             'X-API-USER': MOOLRE_API_USER
         },
@@ -36,10 +38,10 @@ async function initiateUSSDPushPayment(phone, amount, channel, escrowId) {
     const response = await fetch("https://api.moolre.com/open/transact/payment", {
         method: 'POST',
         headers: {
+            // Per docs.moolre.com /open/transact/payment wants username + PRIVATE key
             'Content-Type': 'application/json',
             'X-API-USER': MOOLRE_API_USER,
-            'X-API-KEY': MOOLRE_PRIVATE_KEY,
-            'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
+            'X-API-KEY': MOOLRE_PRIVATE_KEY
         },
         body: JSON.stringify({
             type: 1,
@@ -70,12 +72,19 @@ async function runTests() {
         console.log("❌ Failed:", err.message);
     }
 
-    try {
-        console.log("\n2. Testing /open/transact/payment (USSD Push)...");
-        const ussd = await initiateUSSDPushPayment("0551234567", 5, 13, "TEST-ESC-123");
-        console.log("✅ Success! USSD Data:", ussd);
-    } catch (err) {
-        console.log("❌ Failed:", err.message);
+    // USSD push sends a REAL payment prompt to a REAL phone, so it only runs
+    // if you pass a phone number: node test-moolre.mjs 05XXXXXXXX
+    const testPhone = process.argv[2];
+    if (testPhone) {
+        try {
+            console.log(`\n2. Testing /open/transact/payment (USSD Push) to ${testPhone}...`);
+            const ussd = await initiateUSSDPushPayment(testPhone, 1, 13, "TEST-ESC-" + Date.now());
+            console.log("✅ Success! USSD Data:", ussd);
+        } catch (err) {
+            console.log("❌ Failed:", err.message);
+        }
+    } else {
+        console.log("\n2. Skipping USSD Push test (pass a phone number to run it: node test-moolre.mjs 05XXXXXXXX)");
     }
 }
 
