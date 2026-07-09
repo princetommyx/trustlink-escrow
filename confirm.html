@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustLink Escrow - Confirm Delivery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
+    <style>
+        .confirm-card {
+            background: rgba(10, 15, 28, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 460px;
+            width: 100%;
+            margin: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .confirm-icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+        }
+        .confirm-amount {
+            font-size: 2.5rem;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--success);
+            margin: 16px 0;
+        }
+        .confirm-details {
+            text-align: left;
+            margin: 24px 0;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .confirm-details p { margin: 8px 0; color: rgba(255,255,255,0.8); }
+        .confirm-details strong { color: #fff; }
+        .expiry-note {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 16px;
+        }
+        .error-state h2 { color: var(--danger); }
+        .success-state h2 { color: var(--success); }
+        .loader {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="auth-wrapper" style="justify-content: center; padding: 20px;">
+
+    <div class="confirm-card">
+        <!-- Loading -->
+        <div id="state-loading">
+            <div class="loader"></div>
+            <h2>Verifying your link...</h2>
+        </div>
+
+        <!-- Valid: ask for confirmation -->
+        <div id="state-confirm" class="hidden">
+            <div class="confirm-icon">📦</div>
+            <h2 style="font-family: var(--font-heading);">Confirm Your Delivery</h2>
+            <p style="color: var(--text-muted); margin-top: 8px;">Only confirm once you have received and inspected your item. This releases the payment to the seller and cannot be undone.</p>
+            <div class="confirm-amount" id="confirm-amount">GH₵ 0.00</div>
+            <div class="confirm-details">
+                <p><strong>Item:</strong> <span id="confirm-item"></span></p>
+                <p><strong>Seller:</strong> <span id="confirm-seller"></span></p>
+                <p><strong>Ref:</strong> <span id="confirm-ref"></span></p>
+            </div>
+            <button id="btn-confirm-delivery" class="btn btn-primary btn-large" style="width: 100%;">✓ Yes, I received my package</button>
+            <button id="btn-report-problem" class="btn btn-outline" style="width: 100%; margin-top: 12px; border-color: var(--danger); color: var(--danger);">Report a problem instead</button>
+            <p class="expiry-note" id="expiry-note"></p>
+        </div>
+
+        <!-- Success -->
+        <div id="state-success" class="success-state hidden">
+            <div class="confirm-icon">✅</div>
+            <h2 style="font-family: var(--font-heading);">Delivery Confirmed!</h2>
+            <p style="color: var(--text-muted); margin-top: 12px;">The payment has been released to the seller. Thank you for using TrustLink Escrow.</p>
+            <p class="expiry-note">This link has now expired — you can close this page.</p>
+        </div>
+
+        <!-- Dispute raised -->
+        <div id="state-disputed" class="hidden">
+            <div class="confirm-icon">⚖️</div>
+            <h2 style="font-family: var(--font-heading); color: var(--warning);">Dispute Raised</h2>
+            <p style="color: var(--text-muted); margin-top: 12px;">Your funds remain safely locked in escrow. Our support team will review the case and contact you.</p>
+            <p class="expiry-note">You can close this page.</p>
+        </div>
+
+        <!-- Error -->
+        <div id="state-error" class="error-state hidden">
+            <div class="confirm-icon">🔒</div>
+            <h2 style="font-family: var(--font-heading);" id="error-title">Invalid Link</h2>
+            <p style="color: var(--text-muted); margin-top: 12px;" id="error-message">This confirmation link is not valid.</p>
+        </div>
+    </div>
+
+    <script type="module" src="confirm.js"></script>
+</body>
+</html>

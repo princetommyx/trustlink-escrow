@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID } from "./moolre-service.js";
+import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS } from "./moolre-service.js";
 
 let currentUser = null;
 
@@ -315,8 +315,37 @@ window.copyToClipboard = async (text) => {
 window.dispatchItem = async (escrowId) => {
     if(confirm("Are you sure you want to mark this item as dispatched?")) {
         try {
-            await updateDoc(doc(db, "escrows", escrowId), { status: 'DISPATCHED' });
-            alert("Item marked as dispatched!");
+            // Mint a private one-time confirmation link for the buyer.
+            // Only the SHA-256 hash is stored, so the link cannot be forged
+            // by anyone reading the database. Valid 72h, single use.
+            const token = generateSecureToken();
+            const tokenHash = await sha256Hex(token);
+            const expiresAt = Date.now() + 72 * 60 * 60 * 1000;
+
+            await updateDoc(doc(db, "escrows", escrowId), {
+                status: 'DISPATCHED',
+                confirmTokenHash: tokenHash,
+                confirmTokenExpiresAt: expiresAt,
+                confirmTokenUsed: false,
+                dispatchedAt: serverTimestamp()
+            });
+
+            const confirmUrl = `${window.location.origin}/confirm.html?id=${escrowId}&token=${token}`;
+
+            // SMS the buyer their private confirmation link
+            const escrowSnap = await getDoc(doc(db, "escrows", escrowId));
+            const buyerPhone = escrowSnap.exists() ? escrowSnap.data().buyerPhone : "";
+            if (buyerPhone) {
+                try {
+                    await sendDeliveryConfirmationSMS(buyerPhone, confirmUrl, escrowId);
+                    alert("Item marked as dispatched!\n\nThe buyer has been sent a private one-time link to confirm delivery.");
+                } catch (smsErr) {
+                    console.warn("Confirmation SMS failed:", smsErr);
+                    prompt("Dispatched! SMS failed, so share this private confirmation link with the buyer yourself:", confirmUrl);
+                }
+            } else {
+                prompt("Dispatched! No buyer phone on file - share this private confirmation link with the buyer:", confirmUrl);
+            }
         } catch (error) {
             console.error("Error dispatching:", error);
             alert("Error: " + error.message);

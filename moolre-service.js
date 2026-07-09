@@ -23,6 +23,61 @@ export function normalizePhone(phone) {
 }
 
 /**
+ * Generates a cryptographically random hex token (for one-time links).
+ * @param {number} bytes - Number of random bytes (default 16 = 32 hex chars).
+ */
+export function generateSecureToken(bytes = 16) {
+    const arr = new Uint8Array(bytes);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * SHA-256 hash of a string, returned as hex. Used so only the token HASH is
+ * stored in Firestore — someone reading the database cannot reconstruct the link.
+ */
+export async function sha256Hex(text) {
+    const data = new TextEncoder().encode(text);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * SMS the buyer their private one-time delivery confirmation link.
+ * @param {string} phone - The buyer's phone number.
+ * @param {string} confirmUrl - The single-use confirm.html link.
+ * @param {string} escrowId - The escrow reference.
+ */
+export async function sendDeliveryConfirmationSMS(phone, confirmUrl, escrowId) {
+    const cleanPhone = normalizePhone(phone);
+    const message = `TrustLink: Your order (#${escrowId.substring(0, 8)}) has been dispatched! Once it arrives, confirm receipt with your private link (valid 72h, one-time use): ${confirmUrl}`;
+
+    const response = await fetch("https://api.moolre.com/open/sms/send", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-API-VASKEY': MOOLRE_VAS_KEY
+        },
+        body: JSON.stringify({
+            type: 1,
+            senderid: MOOLRE_SENDER_ID,
+            messages: [{
+                recipient: cleanPhone,
+                ref: `${escrowId}-confirm`,
+                message: message
+            }]
+        })
+    });
+
+    const data = await response.json();
+    if (!response.ok || data.status == 0) {
+        console.error("[MOOLRE API] Confirmation SMS error:", data);
+        throw new Error(data.message || "Failed to send confirmation SMS.");
+    }
+    return data;
+}
+
+/**
  * Sends a One-Time Password (OTP) via Moolre SMS API.
  * @param {string} phone - The recipient's phone number.
  * @param {string} otp - The OTP code to send.
