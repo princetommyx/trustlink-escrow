@@ -1,6 +1,6 @@
 import { db } from "./firebase-config.js";
 import { doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK, verifyMoolrePayment, initiateUSSDPushPayment } from "./moolre-service.js";
+import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK, verifyMoolrePayment, initiateUSSDPushPayment, computeFeeSplit } from "./moolre-service.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Extract ID from URL
@@ -56,8 +56,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('loading-text').style.display = 'none';
         document.getElementById('escrow-content').classList.remove('hidden');
 
+        // Platform fee: buyer's share is added on top of the item amount.
+        // Old escrows without feePercent are charged no fee.
+        const fees = computeFeeSplit(escrow.amount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
+
         // Populate Data
-        document.getElementById('escrow-amount').textContent = `GH₵ ${parseFloat(escrow.amount).toFixed(2)}`;
+        document.getElementById('escrow-amount').textContent = `GH₵ ${fees.buyerTotal.toFixed(2)}`;
+        if (fees.buyerFee > 0) {
+            document.getElementById('escrow-amount').insertAdjacentHTML('afterend',
+                `<p style="color: var(--text-muted); font-size: 0.85rem; margin: -12px 0 16px;">Item: GH₵ ${parseFloat(escrow.amount).toFixed(2)} + GH₵ ${fees.buyerFee.toFixed(2)} platform fee</p>`);
+        }
         document.getElementById('seller-name').textContent = escrow.sellerName || 'Verified Vendor';
         document.getElementById('escrow-desc').textContent = escrow.description || 'Secure Transaction';
         document.getElementById('escrow-id-display').textContent = escrowId;
@@ -94,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // The ?payment=success flag triggers verifyMoolrePayment() on load,
                         // which confirms with Moolre and marks the escrow FUNDED.
                         const callbackUrl = window.location.origin + window.location.pathname + "?id=" + escrowId + "&payment=success";
-                        const checkout = await initiateMoolreCheckout(escrow.amount, escrow.description, customer, escrowId, callbackUrl);
+                        const checkout = await initiateMoolreCheckout(fees.buyerTotal, escrow.description, customer, escrowId, callbackUrl);
                         const payUrl = checkout && (checkout.authorization_url || checkout.url || checkout.link);
                         if (!payUrl) throw new Error("Moolre response did not include a checkout URL.");
                         
@@ -125,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         btnUssd.disabled = true;
                         
                         try {
-                            await initiateUSSDPushPayment(phone, escrow.amount, network, escrowId);
+                            await initiateUSSDPushPayment(phone, fees.buyerTotal, network, escrowId);
                             alert(`A prompt has been sent to ${phone}. Please check your phone and enter your PIN to approve the payment.\n\nClick OK once you have paid.`);
                             
                             document.getElementById('loading-text').textContent = "Verifying Payment with Moolre...";

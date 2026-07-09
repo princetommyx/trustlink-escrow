@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS } from "./moolre-service.js";
+import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS, computeFeeSplit } from "./moolre-service.js";
 
 let currentUser = null;
 let currentBalance = 0;
@@ -379,8 +379,10 @@ window.releaseFunds = async (escrowId) => {
             
             const escrowData = escrowSnap.data();
             const sellerId = escrowData.sellerId;
-            const amount = parseFloat(escrowData.amount);
-            
+
+            // Seller receives the amount minus their share of the platform fee
+            const fees = computeFeeSplit(escrowData.amount, escrowData.feePercent || 0, escrowData.feeAllocation || 'split');
+
             // 1. Mark escrow as COMPLETED
             await updateDoc(escrowRef, { status: 'COMPLETED' });
 
@@ -389,15 +391,15 @@ window.releaseFunds = async (escrowId) => {
             const sellerSnap = await getDoc(sellerRef);
             if (sellerSnap.exists()) {
                 const sellerBalance = parseFloat(sellerSnap.data().walletBalance || 0);
-                await updateDoc(sellerRef, { walletBalance: sellerBalance + amount });
+                await updateDoc(sellerRef, { walletBalance: sellerBalance + fees.sellerNet });
             }
 
-            // 3. Record the wallet credit in the transaction log
+            // 3. Record the wallet credit (and the platform's fee) in the log
             await addDoc(collection(db, "transactions"), {
                 userId: sellerId,
                 type: 'deposit',
-                amount: amount,
-                fee: 0,
+                amount: fees.sellerNet,
+                fee: fees.totalFee,
                 status: 'completed',
                 description: `Escrow release: ${escrowData.description || escrowId}`,
                 escrowId: escrowId,
@@ -631,7 +633,19 @@ if (formNewEscrow) {
 
             const buyerEmail = document.getElementById('buyer-email') ? document.getElementById('buyer-email').value : "";
             const buyerPhoneInput = document.getElementById('buyer-phone');
-            
+
+            // Snapshot the platform fee rate at creation time so later changes
+            // in admin Settings don't retroactively alter existing escrows.
+            let feePercent = 2.5;
+            try {
+                const feeSnap = await getDoc(doc(db, "settings", "platform"));
+                if (feeSnap.exists() && feeSnap.data().feePercent !== undefined) {
+                    feePercent = parseFloat(feeSnap.data().feePercent) || 0;
+                }
+            } catch (feeErr) {
+                console.warn("Could not load platform fee, using default:", feeErr);
+            }
+
             // 1. SAVE TO FIREBASE
             const newEscrow = {
                 amount: totalAmount,
@@ -641,6 +655,7 @@ if (formNewEscrow) {
                 buyerEmail: buyerEmail,
                 buyerPhone: buyerPhoneInput ? buyerPhoneInput.value : "",
                 feeAllocation: document.getElementById('escrow-fee-allocation') ? document.getElementById('escrow-fee-allocation').value : 'split',
+                feePercent: feePercent,
                 status: 'PENDING_PAYMENT',
                 createdAt: serverTimestamp()
             };

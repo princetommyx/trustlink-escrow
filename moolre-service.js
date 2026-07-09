@@ -23,6 +23,32 @@ export function normalizePhone(phone) {
 }
 
 /**
+ * Splits the platform fee between buyer and seller based on the escrow's
+ * fee allocation ('buyer' | 'seller' | 'split').
+ * Buyer pays: amount + buyerFee. Seller receives: amount - sellerFee.
+ * @returns {{ totalFee, buyerFee, sellerFee, buyerTotal, sellerNet }}
+ */
+export function computeFeeSplit(amount, feePercent, allocation) {
+    const amt = parseFloat(amount) || 0;
+    const pct = (parseFloat(feePercent) || 0) / 100;
+    const totalFee = Math.round(amt * pct * 100) / 100;
+    let buyerFee = 0, sellerFee = 0;
+    if (allocation === 'buyer') buyerFee = totalFee;
+    else if (allocation === 'seller') sellerFee = totalFee;
+    else {
+        buyerFee = Math.round(totalFee / 2 * 100) / 100;
+        sellerFee = Math.round((totalFee - buyerFee) * 100) / 100;
+    }
+    return {
+        totalFee,
+        buyerFee,
+        sellerFee,
+        buyerTotal: Math.round((amt + buyerFee) * 100) / 100,
+        sellerNet: Math.round((amt - sellerFee) * 100) / 100
+    };
+}
+
+/**
  * Generates a cryptographically random hex token (for one-time links).
  * @param {number} bytes - Number of random bytes (default 16 = 32 hex chars).
  */
