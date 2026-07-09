@@ -118,6 +118,15 @@ onAuthStateChanged(auth, async (user) => {
                     return;
                 }
                 document.getElementById('user-name').textContent = data.fullName;
+
+                // Keep the profile form in sync (don't overwrite while typing)
+                const profileName = document.getElementById('profile-name');
+                const profilePhone = document.getElementById('profile-phone');
+                const profileEmail = document.getElementById('profile-email');
+                if (profileEmail) profileEmail.value = data.email || user.email || '';
+                if (profileName && document.activeElement !== profileName) profileName.value = data.fullName || '';
+                if (profilePhone && document.activeElement !== profilePhone) profilePhone.value = data.phone || pickUserPhone(data) || '';
+
                 currentBalance = parseFloat(data.walletBalance || 0);
                 const balance = currentBalance.toFixed(2);
                 document.getElementById('overview-balance').textContent = `GH₵ ${balance}`;
@@ -474,6 +483,40 @@ window.raiseDispute = async (escrowId) => {
         }
     }
 };
+
+// ==========================================
+// PROFILE
+// ==========================================
+document.getElementById('btn-save-profile')?.addEventListener('click', async () => {
+    if (!currentUser) return;
+    const btn = document.getElementById('btn-save-profile');
+    const name = document.getElementById('profile-name').value.trim();
+    const phone = document.getElementById('profile-phone').value.trim();
+
+    if (!name) {
+        alert("Please enter your name.");
+        return;
+    }
+    if (phone && phone.replace(/[^0-9]/g, '').length < 9) {
+        alert("Please enter a valid phone number.");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), {
+            fullName: name,
+            phone: phone
+        });
+        btn.textContent = 'Saved ✓';
+        setTimeout(() => { btn.textContent = 'Save Profile'; btn.disabled = false; }, 1500);
+    } catch (error) {
+        alert("Failed to save profile: " + error.message);
+        btn.textContent = 'Save Profile';
+        btn.disabled = false;
+    }
+});
 
 // ==========================================
 // TRANSACTION LOGS (real data)
@@ -836,6 +879,16 @@ const renderProducts = () => {
     if(productsGrid) {
         // Render Grid
         productsGrid.innerHTML = '';
+        if (myProducts.length === 0) {
+            productsGrid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px;"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg></div>
+                    <h3>No products yet</h3>
+                    <p>Add the items or services you sell so you can create escrows in one tap.</p>
+                    <button class="btn btn-primary" onclick="document.getElementById('btn-add-product').click()">+ Add your first product</button>
+                </div>
+            `;
+        }
         myProducts.forEach(prod => {
             productsGrid.innerHTML += `
                 <div class="product-item">

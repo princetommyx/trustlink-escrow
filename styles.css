@@ -507,16 +507,19 @@ h1, h2, h3, h4 {
     width: 56px;
     height: 56px;
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.15));
+    border: 1px solid rgba(59, 130, 246, 0.25);
     margin-bottom: 24px;
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #60A5FA;
 }
 
-/* Simple CSS Icons */
-.icon-link::after { content: '🔗'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; }
-.icon-shield::after { content: '🛡️'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; }
-.icon-bell::after { content: '🔔'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; }
-.icon-gavel::after { content: '⚖️'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; }
+.feature-icon svg {
+    width: 26px;
+    height: 26px;
+}
 
 .feature-card h3 {
     font-size: 1.25rem;

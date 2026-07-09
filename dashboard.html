@@ -41,6 +41,9 @@
                 <a href="#" class="nav-item" data-target="view-transactions">
                     <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg></span> <span class="nav-text">Transaction Logs</span>
                 </a>
+                <a href="#" class="nav-item" data-target="view-profile">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg></span> <span class="nav-text">Profile</span>
+                </a>
             </nav>
             
             <div class="sidebar-footer">
@@ -170,6 +173,27 @@
                     </div>
                 </div>
                 
+                <!-- Profile View -->
+                <div id="view-profile" class="view-section hidden">
+                    <h2>My Profile</h2>
+                    <div class="portal-card" style="max-width: 560px;">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="profile-name" placeholder="Your name">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="profile-email" disabled style="opacity: 0.6;">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="profile-phone" placeholder="e.g. 0551234567">
+                            <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Used for SMS alerts: payment received, delivery confirmed, and withdrawal updates.</span>
+                        </div>
+                        <button class="btn btn-primary" id="btn-save-profile" style="margin-top: 8px; max-width: 200px;">Save Profile</button>
+                    </div>
+                </div>
+
                 <!-- Transactions View -->
                 <div id="view-transactions" class="view-section hidden">
                     <h2>Transaction Logs</h2>

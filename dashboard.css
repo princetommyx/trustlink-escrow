@@ -379,8 +379,31 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.05);
     padding: 24px 32px;
     border-radius: 16px;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, border-color 0.3s ease;
+    margin-bottom: 16px;
 }
+.order-ledger-row:last-child { margin-bottom: 0; }
+.order-ledger-row:hover { border-color: rgba(59, 130, 246, 0.25); }
+
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+}
+.empty-state .empty-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(6, 182, 212, 0.12));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #60A5FA;
+}
+.empty-state h3 { color: var(--text-main); margin-bottom: 8px; font-size: 1.1rem; }
+.empty-state p { font-size: 0.9rem; margin-bottom: 20px; }
 .order-ledger-row:hover {
     background: rgba(0, 0, 0, 0.4);
 }
