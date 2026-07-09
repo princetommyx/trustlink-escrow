@@ -279,6 +279,36 @@
     color: #d97706;
 }
 
+/* Edit User Modal (these classes were previously undefined, so the modal
+   rendered as invisible unstyled markup at the bottom of the page) */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 5, 10, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-backdrop .modal {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    color: #1e293b;
+}
+
+@media (max-width: 480px) {
+    .modal-backdrop { padding: 12px; }
+    .modal-backdrop .modal { padding: 16px !important; }
+}
+
 /* Admin Table White Variant */
 .admin-table-white {
     background: #ffffff !important;

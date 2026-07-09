@@ -557,6 +557,36 @@ document.getElementById('cancel-user-edit').addEventListener('click', () => {
     editUserModal.classList.add('hidden');
 });
 
+document.getElementById('delete-user-btn')?.addEventListener('click', async () => {
+    if (!currentEditUserId) return;
+    const email = document.getElementById('edit-user-email').value;
+
+    if (auth.currentUser && email === auth.currentUser.email) {
+        alert("You cannot delete your own account while signed in.");
+        return;
+    }
+    if (!confirm(`Permanently delete ${email}?\n\nTheir profile, role, and wallet record will be removed. This cannot be undone.`)) return;
+
+    const btn = document.getElementById('delete-user-btn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting...';
+
+    try {
+        await deleteDoc(doc(db, "users", currentEditUserId));
+        currentEditUserId = null;
+        editUserModal.classList.add('hidden');
+        alert("User deleted. Note: their sign-in account still exists in Firebase Authentication - remove it from the Firebase console if needed.");
+        loadUsersList();
+        fetchAdminStats();
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        alert("Failed to delete user: " + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Delete User';
+    }
+});
+
 document.getElementById('save-user-edit').addEventListener('click', async () => {
     if (!currentEditUserId) return;
 
