@@ -10,6 +10,19 @@ export const MOOLRE_PRIVATE_KEY = "tDA79UwhA1PLoCsBNXzcmk08qOXNvd25xKVjKPN93i2RV
 export const MOOLRE_API_URL = "https://api.moolre.com/v1/checkout"; // Standardized checkout endpoint
 
 /**
+ * Normalizes a Ghanaian phone number to international format (233XXXXXXXXX),
+ * which the SMS gateway requires for delivery. Accepts "055 123 4567",
+ * "+233551234567", "0551234567" etc.
+ * @param {string} phone - The phone number in any common format.
+ * @returns {string} The digits-only international number.
+ */
+export function normalizePhone(phone) {
+    let p = String(phone || '').replace(/[^0-9]/g, '');
+    if (p.startsWith('0')) p = '233' + p.slice(1);
+    return p;
+}
+
+/**
  * Sends a One-Time Password (OTP) via Moolre SMS API.
  * @param {string} phone - The recipient's phone number.
  * @param {string} otp - The OTP code to send.
@@ -18,7 +31,7 @@ export async function sendMoolreOTP(phone, otp) {
     try {
         console.log(`[MOOLRE API] Sending OTP ${otp} to ${phone}`);
         // Remove any '+' or spaces for the API if necessary
-        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const cleanPhone = normalizePhone(phone);
 
         const response = await fetch("https://api.moolre.com/open/sms/send", {
             method: 'POST',
@@ -166,7 +179,7 @@ export async function sendSMSNotification(phone, checkoutUrl, escrowId, paymentI
         const message = `TrustLink: A new secure escrow (#${escrowId.substring(0, 8)}) has been created for you. Click here to pay securely: ${checkoutUrl}${ussdText}.`;
         
         // Remove any '+' or spaces for the API if necessary
-        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const cleanPhone = normalizePhone(phone);
 
         const response = await fetch("https://api.moolre.com/open/sms/send", {
             method: 'POST',
@@ -217,7 +230,7 @@ export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId, pay
         const message = `TrustLink Escrow\n\nA new secure escrow transaction (#${escrowId.substring(0, 8)}) has been initiated for you.\n\nPlease complete your payment securely using the following link:\n${checkoutUrl}${ussdText}`;
 
         // Remove any '+' or spaces for the API if necessary
-        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const cleanPhone = normalizePhone(phone);
 
         // Assuming endpoint based on SMS endpoint structure. 
         // User/Moolre must confirm the exact WhatsApp endpoint.
