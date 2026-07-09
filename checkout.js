@@ -1,6 +1,6 @@
 import { db } from "./firebase-config.js";
 import { doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK, verifyMoolrePayment, initiateUSSDPushPayment, computeFeeSplit } from "./moolre-service.js";
+import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK, verifyMoolrePayment, initiateUSSDPushPayment, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone } from "./moolre-service.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Extract ID from URL
@@ -24,7 +24,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const escrow = docSnap.data();
-        
+
+        // Best-effort SMS to the seller when their escrow changes state
+        const notifySellerSMS = async (text) => {
+            try {
+                if (!escrow.sellerId) return;
+                const sellerSnap = await getDoc(doc(db, "users", escrow.sellerId));
+                const sellerPhone = pickUserPhone(sellerSnap.exists() ? sellerSnap.data() : null);
+                if (sellerPhone) await sendEscrowStatusSMS(sellerPhone, text, `${escrowId}-status`);
+            } catch (smsErr) {
+                console.warn("Seller status SMS failed:", smsErr);
+            }
+        };
+        const itemLabel = (escrow.description || 'your item').replace(/\s+/g, ' ').trim().substring(0, 60);
+
         // Handle Moolre Callback / Redirect
         const paymentStatus = urlParams.get('payment');
         if (paymentStatus === 'success' && escrow.status === 'PENDING_PAYMENT') {
@@ -38,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Update Firestore
                     await updateDoc(docRef, { status: 'FUNDED' });
                     escrow.status = 'FUNDED';
+                    await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
                     alert("Payment Successful! Your funds are now securely held in escrow.");
                 } else {
                     throw new Error("Moolre says the transaction is not fully successful yet.");
@@ -146,6 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             
                             if (verificationResult && verificationResult.txstatus == 1) {
                                 await updateDoc(docRef, { status: 'FUNDED' });
+                                await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
                                 alert("Payment Successful! Funds are now securely held in escrow.");
                                 window.location.reload();
                             } else {
@@ -158,6 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                         if (verificationResult && verificationResult.txstatus == 1) {
                                             clearInterval(interval);
                                             await updateDoc(docRef, { status: 'FUNDED' });
+                                            await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
                                             alert("Payment Successful! Funds are now securely held in escrow.");
                                             window.location.reload();
                                         }

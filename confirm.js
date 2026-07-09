@@ -4,7 +4,7 @@
 // after dispatch. Every failure mode gets an explicit error screen.
 import { db } from "./firebase-config.js";
 import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { sha256Hex, computeFeeSplit } from "./moolre-service.js";
+import { sha256Hex, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone } from "./moolre-service.js";
 
 const show = (stateId) => {
     ['state-loading', 'state-confirm', 'state-success', 'state-disputed', 'state-error'].forEach(id => {
@@ -101,6 +101,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (sellerSnap.exists()) {
                         const sellerBalance = parseFloat(sellerSnap.data().walletBalance || 0);
                         await updateDoc(sellerRef, { walletBalance: sellerBalance + fees.sellerNet });
+
+                        // Let the seller know their money has arrived
+                        const sellerPhone = pickUserPhone(sellerSnap.data());
+                        if (sellerPhone) {
+                            try {
+                                const itemLabel = (escrow.description || 'your item').replace(/\s+/g, ' ').trim().substring(0, 60);
+                                await sendEscrowStatusSMS(sellerPhone, `TrustLink: The buyer confirmed delivery of "${itemLabel}". GH₵ ${fees.sellerNet.toFixed(2)} has been credited to your TrustLink wallet. Withdraw anytime from your dashboard.`, `${escrowId}-released`);
+                            } catch (smsErr) {
+                                console.warn("Seller release SMS failed:", smsErr);
+                            }
+                        }
                     }
                     await addDoc(collection(db, "transactions"), {
                         userId: escrow.sellerId,

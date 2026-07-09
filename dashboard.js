@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS, computeFeeSplit } from "./moolre-service.js";
+import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone } from "./moolre-service.js";
 
 let currentUser = null;
 let currentBalance = 0;
@@ -57,6 +57,21 @@ if (typeof gsap !== 'undefined') {
     gsap.from('.stat-card', { opacity: 0, y: 30, duration: 0.8, stagger: 0.1, ease: 'power3.out', delay: 0.2 });
     // Animate portals
     gsap.from('.portal-card', { opacity: 0, y: 20, duration: 0.8, ease: 'power3.out', delay: 0.4 });
+}
+
+// Notification bell dropdown
+const notifBtn = document.getElementById('btn-notifications');
+const notifDropdown = document.getElementById('notif-dropdown');
+if (notifBtn && notifDropdown) {
+    notifBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        notifDropdown.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+        if (!notifDropdown.classList.contains('hidden') && !notifDropdown.contains(e.target)) {
+            notifDropdown.classList.add('hidden');
+        }
+    });
 }
 
 // Escrow Toggles (Buyer / Seller)
@@ -148,6 +163,28 @@ function updateOverviewStats() {
     
     // Sort recent activities by timestamp (descending)
     recentActivities.sort((a, b) => b.time - a.time);
+
+    // Notification bell: dot when something needs attention, dropdown = recent activity
+    const notifDot = document.getElementById('notif-dot');
+    if (notifDot) notifDot.classList.toggle('hidden', totalPending === 0);
+    const notifList = document.getElementById('notif-list');
+    if (notifList) {
+        if (recentActivities.length === 0) {
+            notifList.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+        } else {
+            notifList.innerHTML = '';
+            recentActivities.slice(0, 6).forEach(act => {
+                notifList.innerHTML += `
+                    <div class="notif-item">
+                        <h5>${act.title}</h5>
+                        <p>${act.description}</p>
+                        <p style="font-size: 0.7rem; margin-top: 4px;">${new Date(act.time).toLocaleString()}</p>
+                    </div>
+                `;
+            });
+        }
+    }
+
     const activityContainer = document.getElementById('recent-activity-list');
     if(activityContainer) {
         if(recentActivities.length === 0) {
@@ -352,9 +389,10 @@ window.dispatchItem = async (escrowId) => {
             // SMS the buyer their private confirmation link
             const escrowSnap = await getDoc(doc(db, "escrows", escrowId));
             const buyerPhone = escrowSnap.exists() ? escrowSnap.data().buyerPhone : "";
+            const itemDesc = escrowSnap.exists() ? escrowSnap.data().description : "";
             if (buyerPhone) {
                 try {
-                    await sendDeliveryConfirmationSMS(buyerPhone, confirmUrl, escrowId);
+                    await sendDeliveryConfirmationSMS(buyerPhone, confirmUrl, escrowId, itemDesc);
                     alert("Item marked as dispatched!\n\nThe buyer has been sent a private one-time link to confirm delivery.");
                 } catch (smsErr) {
                     console.warn("Confirmation SMS failed:", smsErr);
@@ -392,6 +430,17 @@ window.releaseFunds = async (escrowId) => {
             if (sellerSnap.exists()) {
                 const sellerBalance = parseFloat(sellerSnap.data().walletBalance || 0);
                 await updateDoc(sellerRef, { walletBalance: sellerBalance + fees.sellerNet });
+
+                // SMS the seller that their money has arrived
+                const sellerPhone = pickUserPhone(sellerSnap.data());
+                if (sellerPhone) {
+                    try {
+                        const itemLabel = (escrowData.description || 'your item').replace(/\s+/g, ' ').trim().substring(0, 60);
+                        await sendEscrowStatusSMS(sellerPhone, `TrustLink: The buyer released payment for "${itemLabel}". GH₵ ${fees.sellerNet.toFixed(2)} has been credited to your TrustLink wallet. Withdraw anytime from your dashboard.`, `${escrowId}-released`);
+                    } catch (smsErr) {
+                        console.warn("Seller release SMS failed:", smsErr);
+                    }
+                }
             }
 
             // 3. Record the wallet credit (and the platform's fee) in the log
@@ -678,15 +727,20 @@ if (formNewEscrow) {
             } catch(e) { console.warn("Clipboard write failed silently."); }
 
             if (buyerPhoneInput && buyerPhoneInput.value) {
+                const smsDetails = {
+                    description: description,
+                    amount: totalAmount,
+                    sellerName: newEscrow.sellerName
+                };
                 try {
                     // Try WhatsApp first
                     try {
-                        await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId);
+                        await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId, smsDetails);
                         alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer. The payment link was also copied to your clipboard!`);
                     } catch (waError) {
                         console.warn("WhatsApp failed, falling back to SMS...", waError);
                         // Fall back to SMS
-                        await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId);
+                        await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId, smsDetails);
                         alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer. The payment link was also copied to your clipboard!`);
                     }
                 } catch (smsError) {

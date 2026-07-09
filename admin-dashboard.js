@@ -2,6 +2,7 @@ import { auth, db, firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { onAuthStateChanged, signOut, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { sendEscrowStatusSMS, pickUserPhone } from "./moolre-service.js";
 
 // Navigation Logic
 const navItems = document.querySelectorAll('.nav-item');
@@ -646,6 +647,8 @@ const loadDisputes = async () => {
             badge.textContent = disputes.length;
             badge.style.display = disputes.length > 0 ? '' : 'none';
         }
+        adminAlerts.disputes = disputes.length;
+        renderAdminNotifs();
 
         listEl.innerHTML = '';
         currentDisputeId = null;
@@ -727,6 +730,201 @@ const resolveDispute = async (newStatus, confirmMsg) => {
 
 refundBtn?.addEventListener('click', () => resolveDispute('REFUNDED', 'Refund the escrowed funds to the buyer? This closes the dispute.'));
 releaseBtn?.addEventListener('click', () => resolveDispute('RELEASED', 'Release the escrowed funds to the seller? This closes the dispute.'));
+
+// -------------------------------------------------------------
+// Notification bell: open disputes + pending withdrawals
+// -------------------------------------------------------------
+const adminAlerts = { disputes: 0, withdrawals: 0 };
+
+const goToView = (targetId) => {
+    document.querySelector(`.nav-item[data-target="${targetId}"]`)?.click();
+    document.getElementById('notif-dropdown')?.classList.add('hidden');
+};
+
+const renderAdminNotifs = () => {
+    const dot = document.getElementById('notif-dot');
+    const list = document.getElementById('notif-list');
+    if (!list) return;
+    const total = adminAlerts.disputes + adminAlerts.withdrawals;
+    if (dot) dot.classList.toggle('hidden', total === 0);
+
+    list.innerHTML = '';
+    if (total === 0) {
+        list.innerHTML = '<div class="notif-empty">All clear 🎉</div>';
+        return;
+    }
+    if (adminAlerts.disputes > 0) {
+        const item = document.createElement('div');
+        item.className = 'notif-item';
+        item.innerHTML = `<h5>⚖️ ${adminAlerts.disputes} open dispute${adminAlerts.disputes === 1 ? '' : 's'}</h5><p>Buyers are waiting for a resolution. Tap to review.</p>`;
+        item.addEventListener('click', () => goToView('view-disputes'));
+        list.appendChild(item);
+    }
+    if (adminAlerts.withdrawals > 0) {
+        const item = document.createElement('div');
+        item.className = 'notif-item';
+        item.innerHTML = `<h5>💸 ${adminAlerts.withdrawals} pending withdrawal${adminAlerts.withdrawals === 1 ? '' : 's'}</h5><p>Sellers are waiting for their payout. Tap to process.</p>`;
+        item.addEventListener('click', () => goToView('view-approvals'));
+        list.appendChild(item);
+    }
+};
+
+const notifBtn = document.getElementById('btn-notifications');
+const notifDropdown = document.getElementById('notif-dropdown');
+if (notifBtn && notifDropdown) {
+    notifBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        notifDropdown.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+        if (!notifDropdown.classList.contains('hidden') && !notifDropdown.contains(e.target)) {
+            notifDropdown.classList.add('hidden');
+        }
+    });
+}
+
+// -------------------------------------------------------------
+// Payouts: withdrawal requests + full transaction log
+// -------------------------------------------------------------
+const NETWORK_NAMES = { '13': 'MTN MoMo', '6': 'Telecel Cash', '7': 'AT Money' };
+
+const userEmailById = (uid) => {
+    const u = allUsers.find(x => x.id === uid);
+    return u ? (u.email || u.fullName || uid) : (uid || 'Unknown');
+};
+
+const loadPayoutsAdmin = async () => {
+    const wBody = document.getElementById('admin-withdrawals-list');
+    const tBody = document.getElementById('admin-transactions-list');
+    if (!wBody && !tBody) return;
+    try {
+        const snap = await getDocs(collection(db, 'transactions'));
+        const all = [];
+        snap.forEach(d => all.push({ id: d.id, ...d.data() }));
+        all.sort((a, b) => {
+            const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+            const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+            return tb - ta;
+        });
+
+        // ---- Pending withdrawal requests ----
+        if (wBody) {
+            const pending = all.filter(t => normStatus(t.type) === 'withdrawal' && normStatus(t.status) === 'pending');
+            adminAlerts.withdrawals = pending.length;
+            renderAdminNotifs();
+            wBody.innerHTML = '';
+            if (pending.length === 0) {
+                wBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">No pending withdrawal requests.</td></tr>';
+            }
+            pending.forEach(t => {
+                const created = toDate(t.createdAt);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${created ? created.toLocaleString() : '—'}</td>
+                    <td>${escapeHtml(userEmailById(t.userId))}</td>
+                    <td><strong>${formatGHS(parseFloat(t.amount) || 0)}</strong></td>
+                    <td>${escapeHtml(t.momoNumber || '—')}</td>
+                    <td>${NETWORK_NAMES[t.network] || escapeHtml(t.network || '—')}</td>
+                    <td></td>
+                `;
+                const actions = tr.querySelector('td:last-child');
+
+                const approveBtn = document.createElement('button');
+                approveBtn.className = 'btn btn-primary';
+                approveBtn.style.cssText = 'padding: 4px 12px; font-size: 0.8rem; background: var(--success); border-color: var(--success);';
+                approveBtn.textContent = 'Approve';
+                approveBtn.addEventListener('click', async () => {
+                    if (!confirm(`Approve payout of ${formatGHS(parseFloat(t.amount) || 0)} to ${t.momoNumber} (${NETWORK_NAMES[t.network] || t.network})?\n\nConfirm AFTER sending the money from the Moolre wallet.`)) return;
+                    approveBtn.disabled = true;
+                    try {
+                        await updateDoc(doc(db, "transactions", t.id), {
+                            status: 'completed',
+                            processedAt: new Date(),
+                            processedBy: auth.currentUser ? auth.currentUser.email : 'admin'
+                        });
+                        // SMS the seller that their payout is on its way
+                        try {
+                            if (t.momoNumber) {
+                                await sendEscrowStatusSMS(t.momoNumber, `TrustLink: Your withdrawal of ${formatGHS(parseFloat(t.amount) || 0)} has been approved and sent to your ${NETWORK_NAMES[t.network] || 'mobile money'} wallet (${t.momoNumber}).`, `${t.id}-payout`);
+                            }
+                        } catch (smsErr) { console.warn("Payout SMS failed:", smsErr); }
+                        loadPayoutsAdmin();
+                        fetchAdminStats();
+                    } catch (error) {
+                        alert("Failed to approve: " + error.message);
+                        approveBtn.disabled = false;
+                    }
+                });
+                actions.appendChild(approveBtn);
+
+                const rejectBtn = document.createElement('button');
+                rejectBtn.className = 'btn btn-outline';
+                rejectBtn.style.cssText = 'padding: 4px 12px; font-size: 0.8rem; border-color: #ef4444; color: #ef4444; margin-left: 8px;';
+                rejectBtn.textContent = 'Reject';
+                rejectBtn.addEventListener('click', async () => {
+                    if (!confirm(`Reject this withdrawal? ${formatGHS(parseFloat(t.amount) || 0)} will be refunded to the user's TrustLink balance.`)) return;
+                    rejectBtn.disabled = true;
+                    try {
+                        await updateDoc(doc(db, "transactions", t.id), {
+                            status: 'rejected',
+                            processedAt: new Date(),
+                            processedBy: auth.currentUser ? auth.currentUser.email : 'admin'
+                        });
+                        // Refund the reserved funds
+                        const userRef = doc(db, "users", t.userId);
+                        const userSnap = await getDoc(userRef);
+                        if (userSnap.exists()) {
+                            const bal = parseFloat(userSnap.data().walletBalance || 0);
+                            await updateDoc(userRef, { walletBalance: bal + (parseFloat(t.amount) || 0) });
+                        }
+                        // Tell the seller their funds were returned
+                        try {
+                            if (t.momoNumber) {
+                                await sendEscrowStatusSMS(t.momoNumber, `TrustLink: Your withdrawal request of ${formatGHS(parseFloat(t.amount) || 0)} was declined. The full amount has been refunded to your TrustLink wallet balance. Contact support for details.`, `${t.id}-payout`);
+                            }
+                        } catch (smsErr) { console.warn("Rejection SMS failed:", smsErr); }
+                        loadPayoutsAdmin();
+                        fetchAdminStats();
+                    } catch (error) {
+                        alert("Failed to reject: " + error.message);
+                        rejectBtn.disabled = false;
+                    }
+                });
+                actions.appendChild(rejectBtn);
+
+                wBody.appendChild(tr);
+            });
+        }
+
+        // ---- Full transaction log ----
+        if (tBody) {
+            tBody.innerHTML = '';
+            if (all.length === 0) {
+                tBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #64748b;">No transactions yet.</td></tr>';
+                return;
+            }
+            const statusColors = { completed: '#10b981', pending: '#f59e0b', rejected: '#ef4444' };
+            all.slice(0, 100).forEach(t => {
+                const created = toDate(t.createdAt);
+                const isCredit = normStatus(t.type) === 'deposit';
+                const color = statusColors[normStatus(t.status)] || '#64748b';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${created ? created.toLocaleString() : '—'}</td>
+                    <td>${escapeHtml(userEmailById(t.userId))}</td>
+                    <td style="text-transform: capitalize;">${escapeHtml(t.type || '—')}</td>
+                    <td>${escapeHtml(t.description || '—')}</td>
+                    <td style="color: ${isCredit ? '#10b981' : '#ef4444'}; font-weight: 600;">${isCredit ? '+' : '-'} ${formatGHS(parseFloat(t.amount) || 0)}</td>
+                    <td>${formatGHS(parseFloat(t.fee) || 0)}</td>
+                    <td><span style="color: ${color}; font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">${escapeHtml(t.status || '—')}</span></td>
+                `;
+                tBody.appendChild(tr);
+            });
+        }
+    } catch (error) {
+        console.error("Error loading payouts:", error);
+    }
+};
 
 // -------------------------------------------------------------
 // Escrow Management (view + delete test data)
@@ -854,12 +1052,13 @@ document.getElementById('btn-save-fee')?.addEventListener('click', async () => {
 });
 
 // Initialize when document loads
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initCharts();
     fetchAdminStats();
-    loadUsersList();
+    await loadUsersList(); // payouts need the user list to show emails
     loadDisputes();
     loadEscrowsAdmin();
+    loadPayoutsAdmin();
     loadPlatformSettings();
 });
 

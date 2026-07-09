@@ -69,14 +69,57 @@ export async function sha256Hex(text) {
 }
 
 /**
+ * Best-effort extraction of a user's phone number from their profile.
+ * Phone signups store the number in originalIdentifier.
+ */
+export function pickUserPhone(userData) {
+    if (!userData) return "";
+    if (userData.phone) return userData.phone;
+    const oi = String(userData.originalIdentifier || '');
+    if (/^[+0-9 ()-]{9,}$/.test(oi)) return oi;
+    return "";
+}
+
+/**
+ * Sends a plain escrow status update SMS (payment received, delivery
+ * confirmed, etc.) to any party.
+ */
+export async function sendEscrowStatusSMS(phone, message, ref = "") {
+    const cleanPhone = normalizePhone(phone);
+    const response = await fetch("https://api.moolre.com/open/sms/send", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-API-VASKEY': MOOLRE_VAS_KEY
+        },
+        body: JSON.stringify({
+            type: 1,
+            senderid: MOOLRE_SENDER_ID,
+            messages: [{
+                recipient: cleanPhone,
+                ref: ref || `status-${Date.now()}`,
+                message: message
+            }]
+        })
+    });
+    const data = await response.json();
+    if (!response.ok || data.status == 0) {
+        console.error("[MOOLRE API] Status SMS error:", data);
+        throw new Error(data.message || "Failed to send status SMS.");
+    }
+    return data;
+}
+
+/**
  * SMS the buyer their private one-time delivery confirmation link.
  * @param {string} phone - The buyer's phone number.
  * @param {string} confirmUrl - The single-use confirm.html link.
  * @param {string} escrowId - The escrow reference.
  */
-export async function sendDeliveryConfirmationSMS(phone, confirmUrl, escrowId) {
+export async function sendDeliveryConfirmationSMS(phone, confirmUrl, escrowId, description = "") {
     const cleanPhone = normalizePhone(phone);
-    const message = `TrustLink: Your order (#${escrowId.substring(0, 8)}) has been dispatched! Once it arrives, confirm receipt with your private link (valid 72h, one-time use): ${confirmUrl}`;
+    const item = description ? `"${String(description).replace(/\s+/g, ' ').trim().substring(0, 60)}"` : `order #${escrowId.substring(0, 8)}`;
+    const message = `TrustLink: Your ${item} has been dispatched! Once it arrives, confirm receipt with your private link (valid 72h, one-time use): ${confirmUrl}`;
 
     const response = await fetch("https://api.moolre.com/open/sms/send", {
         method: 'POST',
@@ -252,12 +295,16 @@ export async function verifyMoolrePayment(escrowId) {
  * @param {string} paymentId - (Optional) The Moolre Payment ID for USSD pull.
  * @returns {Promise<object>}
  */
-export async function sendSMSNotification(phone, checkoutUrl, escrowId, paymentId = "") {
+export async function sendSMSNotification(phone, checkoutUrl, escrowId, paymentId = "", details = {}) {
     try {
         console.log(`[MOOLRE API] Sending SMS link for ${escrowId} to ${phone}`);
-        
-        const ussdText = paymentId ? ` or dial *203*${paymentId}# to pay via USSD` : "";
-        const message = `TrustLink: A new secure escrow (#${escrowId.substring(0, 8)}) has been created for you. Click here to pay securely: ${checkoutUrl}${ussdText}.`;
+
+        // Tell the buyer WHAT they're paying for, not just a reference
+        const item = details.description ? `"${String(details.description).replace(/\s+/g, ' ').trim().substring(0, 60)}"` : `order #${escrowId.substring(0, 8)}`;
+        const amountText = details.amount ? ` for GH₵ ${parseFloat(details.amount).toFixed(2)}` : "";
+        const sellerText = details.sellerName ? ` by ${String(details.sellerName).substring(0, 25)}` : "";
+        const ussdText = paymentId ? ` Or dial *203*${paymentId}# to pay via USSD.` : "";
+        const message = `TrustLink: A secure escrow${sellerText} was created for ${item}${amountText}. Your money stays protected until you confirm delivery. Pay securely: ${checkoutUrl}${ussdText}`;
         
         // Remove any '+' or spaces for the API if necessary
         const cleanPhone = normalizePhone(phone);
@@ -303,12 +350,15 @@ export async function sendSMSNotification(phone, checkoutUrl, escrowId, paymentI
  * @param {string} paymentId - (Optional) The Moolre Payment ID for USSD pull.
  * @returns {Promise<object>}
  */
-export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId, paymentId = "") {
+export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId, paymentId = "", details = {}) {
     try {
         console.log(`[MOOLRE API] Sending WhatsApp link for ${escrowId} to ${phone}`);
-        
+
+        const item = details.description ? `"${String(details.description).replace(/\s+/g, ' ').trim().substring(0, 80)}"` : `order #${escrowId.substring(0, 8)}`;
+        const amountText = details.amount ? `\nAmount: GH₵ ${parseFloat(details.amount).toFixed(2)}` : "";
+        const sellerText = details.sellerName ? `\nSeller: ${String(details.sellerName).substring(0, 30)}` : "";
         const ussdText = paymentId ? `\n\nAlternatively, you can dial *203*${paymentId}# to pay via USSD.` : "";
-        const message = `TrustLink Escrow\n\nA new secure escrow transaction (#${escrowId.substring(0, 8)}) has been initiated for you.\n\nPlease complete your payment securely using the following link:\n${checkoutUrl}${ussdText}`;
+        const message = `TrustLink Escrow\n\nA secure escrow was created for you:\nItem: ${item}${amountText}${sellerText}\n\nYour money stays protected until you confirm delivery. Pay securely here:\n${checkoutUrl}${ussdText}`;
 
         // Remove any '+' or spaces for the API if necessary
         const cleanPhone = normalizePhone(phone);
@@ -327,7 +377,7 @@ export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId, pay
                 messages: [{
                     recipient: cleanPhone,
                     ref: escrowId,
-                    message: `TrustLink: An escrow payment has been initiated for you (Ref: ${escrowId}).\n\nPlease securely pay and track your escrow here:\n${checkoutUrl}`
+                    message: message
                 }]
             })
         });

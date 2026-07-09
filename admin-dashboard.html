@@ -37,7 +37,7 @@
                     <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg></span> <span class="nav-text">Escrows</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-approvals">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span> <span class="nav-text">Approvals</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span> <span class="nav-text">Payouts</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-settings">
                     <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077l1.41-.513m14.095-5.13l1.41-.513M5.106 17.785l1.15-.964m11.49-9.642l1.149-.964M7.501 19.79l.867-1.23M15.631 5.44l.867-1.23M10.5 21l.513-1.41m2.974-14.095l.513-1.41m-2.974 15.505l-.964-1.15m5.142-11.49l-.964-1.149m-5.142 12.64l-1.23-.867m7.41-10.45l-1.23-.867" /></svg></span> <span class="nav-text">Settings</span>
@@ -63,7 +63,13 @@
                     <h1 class="topbar-title" id="current-view-title">Overview</h1>
                 </div>
                 <div class="topbar-actions">
-                    <button class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg></button>
+                    <div class="notif-wrapper">
+                        <button class="btn-icon" id="btn-notifications" aria-label="Notifications"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg><span id="notif-dot" class="notif-dot hidden"></span></button>
+                        <div id="notif-dropdown" class="notif-dropdown hidden">
+                            <div class="notif-header">Needs your attention</div>
+                            <div id="notif-list"><div class="notif-empty">All clear 🎉</div></div>
+                        </div>
+                    </div>
                     <button id="btn-signout-top" class="btn btn-outline btn-sm" style="margin-left: 8px; border-color: var(--danger); color: var(--danger);">Sign Out</button>
                     <button class="btn btn-primary btn-sm" style="background: #9333ea; border-color: #9333ea;" onclick="alert('Generate Report')">Generate Report</button>
                 </div>
@@ -321,12 +327,47 @@
                     </div>
                 </div>
 
-                <!-- Approvals View -->
+                <!-- Approvals / Payouts View -->
                 <div id="view-approvals" class="view-section hidden">
-                    <h2>Manual Deposit Approvals</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 24px;">Verify bank transfer receipts before crediting user wallets.</p>
-                    <div class="portal-card admin-table-white" id="admin-approvals-list" style="padding: 24px;">
-                        <!-- Deposit approvals will load here -->
+                    <h2>Withdrawal Requests</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 24px;">Sellers' pending withdrawal requests. Approve after sending the mobile money payout from the Moolre wallet; rejecting refunds the seller's TrustLink balance.</p>
+                    <div class="portal-card admin-table-white" style="padding: 0; overflow: hidden; margin-bottom: 32px;">
+                        <table class="transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>Requested</th>
+                                    <th>User</th>
+                                    <th>Amount</th>
+                                    <th>Pay To</th>
+                                    <th>Network</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-withdrawals-list">
+                                <tr><td colspan="6" style="text-align: center; color: #64748b;">Loading requests...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h2>All Transactions</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 24px;">Every wallet movement on the platform: escrow payouts, withdrawals, and fees.</p>
+                    <div class="portal-card admin-table-white" style="padding: 0; overflow: hidden;">
+                        <table class="transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>User</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Fee</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-transactions-list">
+                                <tr><td colspan="7" style="text-align: center; color: #64748b;">Loading transactions...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
