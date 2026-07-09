@@ -33,6 +33,9 @@
                     <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" /></svg></span> <span class="nav-text">Disputes</span>
                     <span class="badge" id="disputes-badge" style="background: var(--danger); display: none;">0</span>
                 </a>
+                <a href="#" class="nav-item" data-target="view-escrows-admin">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg></span> <span class="nav-text">Escrows</span>
+                </a>
                 <a href="#" class="nav-item" data-target="view-approvals">
                     <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span> <span class="nav-text">Approvals</span>
                 </a>
@@ -288,6 +291,33 @@
                                 <button class="btn btn-primary" id="btn-release-seller" disabled style="background: var(--success); border-color: var(--success);">Release to Seller</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Escrow Management View -->
+                <div id="view-escrows-admin" class="view-section hidden">
+                    <div class="view-header">
+                        <h2>Escrow Management</h2>
+                        <input type="text" id="escrow-search" placeholder="Search by item, buyer, or seller..." style="background: rgba(0,0,0,0.2); border: 1px solid var(--surface-border); padding: 8px 16px; border-radius: 8px; color: white;">
+                    </div>
+                    <p style="color: var(--text-muted); margin-bottom: 16px;">All escrows on the platform. Deleting an escrow removes it from analytics permanently — use this to clean up test data.</p>
+                    <div class="portal-card admin-table-white" style="padding: 0; overflow: hidden;">
+                        <table class="transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Amount</th>
+                                    <th>Seller</th>
+                                    <th>Buyer</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-escrows-list">
+                                <tr><td colspan="7" style="text-align: center; color: #64748b;">Loading escrows...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 

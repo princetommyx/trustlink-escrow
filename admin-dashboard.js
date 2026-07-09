@@ -1,7 +1,7 @@
 import { auth, db, firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { onAuthStateChanged, signOut, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, setDoc, getDoc, updateDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Navigation Logic
 const navItems = document.querySelectorAll('.nav-item');
@@ -699,6 +699,95 @@ refundBtn?.addEventListener('click', () => resolveDispute('REFUNDED', 'Refund th
 releaseBtn?.addEventListener('click', () => resolveDispute('RELEASED', 'Release the escrowed funds to the seller? This closes the dispute.'));
 
 // -------------------------------------------------------------
+// Escrow Management (view + delete test data)
+// -------------------------------------------------------------
+let allEscrows = [];
+
+const loadEscrowsAdmin = async () => {
+    const tbody = document.getElementById('admin-escrows-list');
+    if (!tbody) return;
+    try {
+        const snap = await getDocs(collection(db, 'escrows'));
+        allEscrows = [];
+        snap.forEach(d => allEscrows.push({ id: d.id, ...d.data() }));
+        renderEscrowsAdmin();
+    } catch (error) {
+        console.error("Error loading escrows:", error);
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #ef4444;">Failed to load escrows</td></tr>';
+    }
+};
+
+const ESCROW_STATUS_COLORS = {
+    pending_payment: '#f59e0b', funded: '#3b82f6', dispatched: '#10b981',
+    completed: '#10b981', disputed: '#ef4444', refunded: '#ef4444', released: '#10b981'
+};
+
+const renderEscrowsAdmin = () => {
+    const tbody = document.getElementById('admin-escrows-list');
+    if (!tbody) return;
+    const term = (document.getElementById('escrow-search')?.value || '').trim().toLowerCase();
+    const list = allEscrows.filter(e =>
+        !term ||
+        (e.description || '').toLowerCase().includes(term) ||
+        (e.sellerName || '').toLowerCase().includes(term) ||
+        (e.buyerEmail || '').toLowerCase().includes(term) ||
+        (e.buyerPhone || '').toLowerCase().includes(term)
+    );
+
+    tbody.innerHTML = '';
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b;">${term ? 'No escrows match your search' : 'No escrows found'}</td></tr>`;
+        return;
+    }
+
+    // Newest first
+    list.sort((a, b) => {
+        const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+        const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+        return tb - ta;
+    });
+
+    list.forEach(e => {
+        const created = toDate(e.createdAt);
+        const status = normStatus(e.status);
+        const color = ESCROW_STATUS_COLORS[status] || '#64748b';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${escapeHtml(e.description || 'Escrow ' + e.id.slice(0, 6))}</strong></td>
+            <td>${formatGHS(parseFloat(e.amount) || 0)}</td>
+            <td>${escapeHtml(e.sellerName || e.sellerId || '—')}</td>
+            <td>${escapeHtml(e.buyerEmail || e.buyerPhone || '—')}</td>
+            <td><span style="color: ${color}; font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">${escapeHtml(e.status || 'unknown')}</span></td>
+            <td>${created ? created.toLocaleDateString() : '—'}</td>
+            <td></td>
+        `;
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-outline';
+        delBtn.style.cssText = 'padding: 4px 12px; font-size: 0.8rem; border-color: #ef4444; color: #ef4444;';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', async () => {
+            if (!confirm(`Permanently delete this escrow?\n\n"${e.description || e.id}" — ${formatGHS(parseFloat(e.amount) || 0)}\n\nThis cannot be undone and it will disappear from analytics.`)) return;
+            delBtn.disabled = true;
+            delBtn.textContent = 'Deleting...';
+            try {
+                await deleteDoc(doc(db, "escrows", e.id));
+                await loadEscrowsAdmin();
+                fetchAdminStats();
+                loadDisputes();
+            } catch (error) {
+                alert("Failed to delete escrow: " + error.message);
+                delBtn.disabled = false;
+                delBtn.textContent = 'Delete';
+            }
+        });
+        tr.querySelector('td:last-child').appendChild(delBtn);
+        tbody.appendChild(tr);
+    });
+};
+
+document.getElementById('escrow-search')?.addEventListener('input', renderEscrowsAdmin);
+
+// -------------------------------------------------------------
 // Platform settings (fee configuration)
 // -------------------------------------------------------------
 const loadPlatformSettings = async () => {
@@ -740,6 +829,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAdminStats();
     loadUsersList();
     loadDisputes();
+    loadEscrowsAdmin();
     loadPlatformSettings();
 });
 
