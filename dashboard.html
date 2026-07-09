@@ -37,7 +37,6 @@
                 </a>
                 <a href="#" class="nav-item" data-target="view-messages">
                     <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" /></svg></span> <span class="nav-text">Messages</span>
-                    <span class="badge">2</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-transactions">
                     <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg></span> <span class="nav-text">Transaction Logs</span>
@@ -136,8 +135,8 @@
                                 <h1 style="margin: 0; font-size: 2.5rem;" id="wallet-available-balance">GH₵ 0.00</h1>
                             </div>
                             <div style="display: flex; gap: 16px;">
-                                <button class="btn btn-primary" onclick="if(document.getElementById('btn-new-escrow')) document.getElementById('btn-new-escrow').click();">Deposit Funds</button>
-                                <button class="btn btn-outline" onclick="alert('Withdrawal Request Opened')">Withdraw</button>
+                                <button class="btn btn-primary" onclick="if(document.getElementById('btn-new-escrow')) document.getElementById('btn-new-escrow').click();">New Escrow</button>
+                                <button class="btn btn-outline" id="btn-withdraw">Withdraw</button>
                             </div>
                         </div>
                     </div>
@@ -152,15 +151,14 @@
                         </div>
                         <div class="chat-main">
                             <div class="chat-header">
-                                <h3 style="margin: 0;">@seller123 - Website Design</h3>
-                                <span class="status-badge" style="background: rgba(34,197,94,0.1); color: var(--success); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">Escrow Active</span>
+                                <h3 style="margin: 0;" id="chat-title">No chat selected</h3>
                             </div>
                             <div class="chat-messages" id="chat-messages">
-                                <p style="text-align: center; color: var(--text-muted); padding: 20px;">Select a chat to view messages.</p>
+                                <p style="text-align: center; color: var(--text-muted); padding: 20px;">In-app messaging is coming soon. For now, buyers and sellers are connected automatically via SMS notifications.</p>
                             </div>
                             <div class="chat-input-area">
-                                <input type="text" placeholder="Type a message...">
-                                <button class="btn btn-primary">Send</button>
+                                <input type="text" placeholder="Messaging coming soon..." disabled>
+                                <button class="btn btn-primary" disabled>Send</button>
                             </div>
                         </div>
                     </div>
@@ -224,7 +222,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Platform Fee Allocation</label>
-                        <select required>
+                        <select id="escrow-fee-allocation" required>
                             <option value="split">Split 50/50</option>
                             <option value="buyer">Buyer Pays 100%</option>
                             <option value="seller">Seller Pays 100%</option>
@@ -267,6 +265,40 @@
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" id="btn-cancel-product">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdraw-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Withdraw Funds</h2>
+                <button id="close-withdraw-modal" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <form id="withdraw-form" class="modal-form">
+                <p style="color: var(--text-muted); margin-bottom: 16px;">Available: <strong id="withdraw-available" style="color: var(--success);">GH₵ 0.00</strong></p>
+                <div class="form-group">
+                    <label>Amount (GH₵)</label>
+                    <input type="number" id="withdraw-amount" placeholder="0.00" min="1" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Mobile Money Network</label>
+                    <select id="withdraw-network" required>
+                        <option value="13">MTN Mobile Money</option>
+                        <option value="6">Telecel Cash</option>
+                        <option value="7">AT Money</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mobile Money Number</label>
+                    <input type="tel" id="withdraw-phone" placeholder="e.g. 0551234567" required>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Withdrawals are reviewed and paid out to your mobile money wallet. Funds are deducted from your balance immediately and refunded if the request is rejected.</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="btn-cancel-withdraw">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Request Withdrawal</button>
                 </div>
             </form>
         </div>

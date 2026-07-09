@@ -4,6 +4,11 @@ import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp
 import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS } from "./moolre-service.js";
 
 let currentUser = null;
+let currentBalance = 0;
+
+const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+));
 
 // Navigation Logic
 const navItems = document.querySelectorAll('.nav-item');
@@ -98,16 +103,18 @@ onAuthStateChanged(auth, async (user) => {
                     return;
                 }
                 document.getElementById('user-name').textContent = data.fullName;
-                const balance = parseFloat(data.walletBalance || 0).toFixed(2);
+                currentBalance = parseFloat(data.walletBalance || 0);
+                const balance = currentBalance.toFixed(2);
                 document.getElementById('overview-balance').textContent = `GH₵ ${balance}`;
                 if(document.getElementById('wallet-available-balance')) {
                     document.getElementById('wallet-available-balance').textContent = `GH₵ ${balance}`;
                 }
-                
+
                 if(!currentUser) {
                     currentUser = user;
                     fetchProducts();
                     loadEscrows();
+                    loadTransactionLogs();
                 }
             } else {
                 document.getElementById('user-name').textContent = user.email.split('@')[0];
@@ -115,6 +122,7 @@ onAuthStateChanged(auth, async (user) => {
                     currentUser = user;
                     fetchProducts();
                     loadEscrows();
+                    loadTransactionLogs();
                 }
             }
         });
@@ -124,6 +132,7 @@ onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             fetchProducts();
             loadEscrows();
+            loadTransactionLogs();
         }
     }
 });
@@ -178,6 +187,10 @@ function loadEscrows() {
         
         if (snapshot.empty) {
             sellerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have not created any escrows as a seller.</p>';
+            escrowStats.activeSeller = 0;
+            escrowStats.pendingSeller = 0;
+            recentActivities = recentActivities.filter(a => a.type !== 'seller');
+            updateOverviewStats();
         } else {
             sellerEscrowsContainer.innerHTML = '';
             escrowStats.activeSeller = 0;
@@ -196,8 +209,8 @@ function loadEscrows() {
                     recentActivities.push({
                         type: 'seller',
                         time: data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now(),
-                        title: `Escrow ${data.status.replace('_', ' ')}`,
-                        description: `Selling: ${data.description} (GH₵ ${data.amount})`
+                        title: `Escrow ${escapeHtml(data.status).replace('_', ' ')}`,
+                        description: `Selling: ${escapeHtml(data.description)} (GH₵ ${data.amount})`
                     });
                 }
                 
@@ -221,7 +234,7 @@ function loadEscrows() {
                 sellerEscrowsContainer.innerHTML += `
                     <div class="order-ledger-row">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <span style="font-weight: 700; color: #60A5FA;">${data.description} - #${escrowId.substring(0, 8).toUpperCase()}</span>
+                            <span style="font-weight: 700; color: #60A5FA;">${escapeHtml(data.description)} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
                         </div>
                         <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}</p>
@@ -241,6 +254,10 @@ function loadEscrows() {
         
         if (snapshot.empty) {
             buyerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have no active escrows as a buyer.</p>';
+            escrowStats.activeBuyer = 0;
+            escrowStats.pendingBuyer = 0;
+            recentActivities = recentActivities.filter(a => a.type !== 'buyer');
+            updateOverviewStats();
         } else {
             buyerEscrowsContainer.innerHTML = '';
             escrowStats.activeBuyer = 0;
@@ -259,8 +276,8 @@ function loadEscrows() {
                     recentActivities.push({
                         type: 'buyer',
                         time: data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now(),
-                        title: `Escrow ${data.status.replace('_', ' ')}`,
-                        description: `Buying: ${data.description} (GH₵ ${data.amount})`
+                        title: `Escrow ${escapeHtml(data.status).replace('_', ' ')}`,
+                        description: `Buying: ${escapeHtml(data.description)} (GH₵ ${data.amount})`
                     });
                 }
                 
@@ -289,7 +306,7 @@ function loadEscrows() {
                 buyerEscrowsContainer.innerHTML += `
                     <div class="order-ledger-row">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <span style="font-weight: 700; color: #60A5FA;">${data.description} - #${escrowId.substring(0, 8).toUpperCase()}</span>
+                            <span style="font-weight: 700; color: #60A5FA;">${escapeHtml(data.description)} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
                         </div>
                         <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}</p>
@@ -366,15 +383,27 @@ window.releaseFunds = async (escrowId) => {
             
             // 1. Mark escrow as COMPLETED
             await updateDoc(escrowRef, { status: 'COMPLETED' });
-            
+
             // 2. Increment Seller's Wallet Balance
             const sellerRef = doc(db, "users", sellerId);
             const sellerSnap = await getDoc(sellerRef);
             if (sellerSnap.exists()) {
-                const currentBalance = parseFloat(sellerSnap.data().walletBalance || 0);
-                await updateDoc(sellerRef, { walletBalance: currentBalance + amount });
+                const sellerBalance = parseFloat(sellerSnap.data().walletBalance || 0);
+                await updateDoc(sellerRef, { walletBalance: sellerBalance + amount });
             }
-            
+
+            // 3. Record the wallet credit in the transaction log
+            await addDoc(collection(db, "transactions"), {
+                userId: sellerId,
+                type: 'deposit',
+                amount: amount,
+                fee: 0,
+                status: 'completed',
+                description: `Escrow release: ${escrowData.description || escrowId}`,
+                escrowId: escrowId,
+                createdAt: serverTimestamp()
+            });
+
             alert("Funds Released! Thank you for using TrustLink.");
         } catch (error) {
             console.error("Error releasing funds:", error);
@@ -394,6 +423,123 @@ window.raiseDispute = async (escrowId) => {
         }
     }
 };
+
+// ==========================================
+// TRANSACTION LOGS (real data)
+// ==========================================
+function loadTransactionLogs() {
+    if (!currentUser) return;
+    const tbody = document.getElementById('transaction-logs-body');
+    if (!tbody) return;
+
+    const txQ = query(collection(db, "transactions"), where("userId", "==", currentUser.uid));
+    onSnapshot(txQ, (snapshot) => {
+        if (snapshot.empty) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 20px;">No transactions yet. Withdrawals and escrow payouts will appear here.</td></tr>';
+            return;
+        }
+        const rows = [];
+        snapshot.forEach(txDoc => {
+            const tx = txDoc.data();
+            const date = tx.createdAt && tx.createdAt.toMillis ? tx.createdAt.toMillis() : 0;
+            rows.push({ id: txDoc.id, date, ...tx });
+        });
+        rows.sort((a, b) => b.date - a.date);
+
+        tbody.innerHTML = '';
+        rows.forEach(tx => {
+            const isCredit = tx.type === 'deposit';
+            const amountUI = `<span style="color: ${isCredit ? 'var(--success)' : 'var(--danger)'}; font-weight: 600;">${isCredit ? '+' : '-'} GH₵ ${parseFloat(tx.amount).toFixed(2)}</span>`;
+            const statusColors = { completed: 'var(--success)', pending: 'var(--warning)', rejected: 'var(--danger)' };
+            const statusColor = statusColors[tx.status] || 'var(--text-muted)';
+            const statusUI = `<span style="color: ${statusColor}; font-weight: 600; text-transform: uppercase; font-size: 0.8rem;">${escapeHtml(tx.status)}</span>`;
+            tbody.innerHTML += `
+                <tr>
+                    <td>${tx.date ? new Date(tx.date).toLocaleString() : '—'}</td>
+                    <td>#${tx.id.substring(0, 8).toUpperCase()}</td>
+                    <td>${escapeHtml(tx.description || (isCredit ? 'Wallet credit' : 'Withdrawal'))}</td>
+                    <td>${amountUI}</td>
+                    <td>${statusUI}</td>
+                </tr>
+            `;
+        });
+    });
+}
+
+// ==========================================
+// WITHDRAW FLOW
+// ==========================================
+const withdrawModal = document.getElementById('withdraw-modal');
+const btnWithdraw = document.getElementById('btn-withdraw');
+const withdrawForm = document.getElementById('withdraw-form');
+
+const openWithdrawModal = () => {
+    document.getElementById('withdraw-available').textContent = `GH₵ ${currentBalance.toFixed(2)}`;
+    withdrawModal.classList.remove('hidden');
+    setTimeout(() => {
+        withdrawModal.classList.add('active');
+        if(typeof gsap !== 'undefined') gsap.fromTo('#withdraw-modal .modal-content', { scale: 0.95, y: 20, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.4, ease: 'back.out(1.5)' });
+    }, 10);
+};
+
+const closeWithdrawModal = () => {
+    withdrawModal.classList.remove('active');
+    setTimeout(() => withdrawModal.classList.add('hidden'), 300);
+};
+
+if (btnWithdraw) btnWithdraw.addEventListener('click', openWithdrawModal);
+document.getElementById('close-withdraw-modal')?.addEventListener('click', closeWithdrawModal);
+document.getElementById('btn-cancel-withdraw')?.addEventListener('click', closeWithdrawModal);
+
+if (withdrawForm) {
+    withdrawForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById('withdraw-amount').value);
+        const phone = document.getElementById('withdraw-phone').value.trim();
+        const network = document.getElementById('withdraw-network').value;
+
+        if (isNaN(amount) || amount <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+        if (amount > currentBalance) {
+            alert(`Insufficient balance. You can withdraw up to GH₵ ${currentBalance.toFixed(2)}.`);
+            return;
+        }
+
+        const submitBtn = withdrawForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        try {
+            // Lock the funds immediately, then record the pending request.
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                walletBalance: currentBalance - amount
+            });
+            await addDoc(collection(db, "transactions"), {
+                userId: currentUser.uid,
+                type: 'withdrawal',
+                amount: amount,
+                fee: 0,
+                status: 'pending',
+                description: `Withdrawal to ${phone}`,
+                momoNumber: phone,
+                network: network,
+                createdAt: serverTimestamp()
+            });
+
+            alert("Withdrawal request submitted!\n\nYour funds have been reserved and will be paid to your mobile money wallet once the request is processed.");
+            withdrawForm.reset();
+            closeWithdrawModal();
+        } catch (error) {
+            console.error("Withdrawal error:", error);
+            alert("Failed to submit withdrawal: " + error.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Request Withdrawal';
+        }
+    });
+}
 
 document.getElementById('btn-signout').addEventListener('click', async () => {
     try {
@@ -494,6 +640,7 @@ if (formNewEscrow) {
                 sellerName: currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink User",
                 buyerEmail: buyerEmail,
                 buyerPhone: buyerPhoneInput ? buyerPhoneInput.value : "",
+                feeAllocation: document.getElementById('escrow-fee-allocation') ? document.getElementById('escrow-fee-allocation').value : 'split',
                 status: 'PENDING_PAYMENT',
                 createdAt: serverTimestamp()
             };
@@ -565,7 +712,7 @@ const createLineItemHTML = (selectedId = '') => {
     lineItemCounter++;
     let optionsHTML = '<option value="">Choose a product...</option>';
     myProducts.forEach(prod => {
-        optionsHTML += `<option value="${prod.id}" ${prod.id == selectedId ? 'selected' : ''}>${prod.name} - GH₵ ${parseFloat(prod.price).toLocaleString()}</option>`;
+        optionsHTML += `<option value="${prod.id}" ${prod.id == selectedId ? 'selected' : ''}>${escapeHtml(prod.name)} - GH₵ ${parseFloat(prod.price).toLocaleString()}</option>`;
     });
 
     return `
@@ -623,9 +770,9 @@ const renderProducts = () => {
         myProducts.forEach(prod => {
             productsGrid.innerHTML += `
                 <div class="product-item">
-                    <h3>${prod.name}</h3>
+                    <h3>${escapeHtml(prod.name)}</h3>
                     <h2 class="product-price">GH₵ ${parseFloat(prod.price).toLocaleString()}</h2>
-                    <p class="product-desc">${prod.desc}</p>
+                    <p class="product-desc">${escapeHtml(prod.desc)}</p>
                     <button class="btn btn-outline" style="width: 100%; border-color: var(--primary); color: var(--primary);" onclick="document.getElementById('btn-new-escrow').click(); setTimeout(() => { injectSingleLineItem('${prod.id}'); }, 100);">Sell this Item</button>
                 </div>
             `;
@@ -639,7 +786,7 @@ const renderProducts = () => {
             const currentVal = select.value;
             let optionsHTML = '<option value="">Choose a product...</option>';
             myProducts.forEach(prod => {
-                optionsHTML += `<option value="${prod.id}" ${prod.id == currentVal ? 'selected' : ''}>${prod.name} - GH₵ ${parseFloat(prod.price).toLocaleString()}</option>`;
+                optionsHTML += `<option value="${prod.id}" ${prod.id == currentVal ? 'selected' : ''}>${escapeHtml(prod.name)} - GH₵ ${parseFloat(prod.price).toLocaleString()}</option>`;
             });
             select.innerHTML = optionsHTML;
         });

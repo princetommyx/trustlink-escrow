@@ -3,7 +3,7 @@
 // escrow, so links cannot be forged. Each link is single-use and expires 72h
 // after dispatch. Every failure mode gets an explicit error screen.
 import { db } from "./firebase-config.js";
-import { doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { sha256Hex } from "./moolre-service.js";
 
 const show = (stateId) => {
@@ -89,6 +89,34 @@ document.addEventListener('DOMContentLoaded', async () => {
                 confirmTokenUsed: true,
                 confirmedAt: serverTimestamp()
             });
+
+            // Credit the seller's wallet and log the payout (same as the
+            // dashboard's releaseFunds flow)
+            const amount = parseFloat(escrow.amount) || 0;
+            if (escrow.sellerId && amount > 0) {
+                try {
+                    const sellerRef = doc(db, "users", escrow.sellerId);
+                    const sellerSnap = await getDoc(sellerRef);
+                    if (sellerSnap.exists()) {
+                        const sellerBalance = parseFloat(sellerSnap.data().walletBalance || 0);
+                        await updateDoc(sellerRef, { walletBalance: sellerBalance + amount });
+                    }
+                    await addDoc(collection(db, "transactions"), {
+                        userId: escrow.sellerId,
+                        type: 'deposit',
+                        amount: amount,
+                        fee: 0,
+                        status: 'completed',
+                        description: `Escrow release: ${escrow.description || escrowId}`,
+                        escrowId: escrowId,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (walletErr) {
+                    // The escrow itself is completed; wallet credit is best-effort here
+                    console.warn("Could not credit seller wallet from confirm page:", walletErr);
+                }
+            }
+
             show('state-success');
         } catch (err) {
             console.error("Error confirming delivery:", err);
