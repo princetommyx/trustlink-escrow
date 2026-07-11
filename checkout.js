@@ -95,6 +95,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('seller-name').textContent = escrow.sellerName || 'Verified Vendor';
         document.getElementById('escrow-desc').textContent = escrow.description || 'Secure Transaction';
         document.getElementById('escrow-id-display').textContent = escrowId;
+        if (escrow.deliveryDate) {
+            const deliveryRow = document.getElementById('escrow-delivery-row');
+            const deliverySpan = document.getElementById('escrow-delivery');
+            if (deliveryRow && deliverySpan) {
+                const dd = new Date(escrow.deliveryDate + 'T00:00:00');
+                deliverySpan.textContent = isNaN(dd) ? escrow.deliveryDate : dd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                deliveryRow.style.display = '';
+            }
+        }
 
         // Render based on Status
         const statusBadge = document.getElementById('escrow-status');

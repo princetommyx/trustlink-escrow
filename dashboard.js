@@ -164,6 +164,43 @@ onAuthStateChanged(auth, async (user) => {
 let escrowStats = { activeSeller: 0, activeBuyer: 0, pendingSeller: 0, pendingBuyer: 0 };
 let recentActivities = [];
 
+// ==========================================
+// DELIVERY-DAY REMINDERS
+// Runs whenever escrows load: if today is (or is past) the expected
+// delivery date and no reminder has gone out yet, SMS the buyer to go
+// collect the item, confirm delivery, and settle any outstanding payment.
+// ==========================================
+const deliveryDateLabel = (d) => {
+    if (!d) return '';
+    const date = new Date(d + 'T00:00:00');
+    return isNaN(date) ? d : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+const maybeSendDeliveryReminder = async (escrowId, data) => {
+    try {
+        if (!data.deliveryDate || data.deliveryReminderSent || !data.buyerPhone) return;
+        if (!['PENDING_PAYMENT', 'FUNDED', 'DISPATCHED'].includes(data.status)) return;
+        const due = new Date(data.deliveryDate + 'T00:00:00');
+        if (isNaN(due) || Date.now() < due.getTime()) return;
+
+        // Mark as sent FIRST so two dashboards loading at once can't double-text
+        await updateDoc(doc(db, "escrows", escrowId), { deliveryReminderSent: true });
+
+        const item = (data.description || 'your item').replace(/\s+/g, ' ').trim().substring(0, 60);
+        const trackUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
+        let message;
+        if (data.status === 'PENDING_PAYMENT') {
+            message = `TrustLink: Today is the scheduled delivery date for "${item}", but your payment is still outstanding. Complete it now to receive your product: ${trackUrl}`;
+        } else {
+            message = `TrustLink: Today is the delivery date for "${item}"! Go collect your product, then confirm receipt so the seller gets paid: ${trackUrl}`;
+        }
+        await sendEscrowStatusSMS(data.buyerPhone, message, `${escrowId}-delivery`);
+        console.log(`[REMINDER] Delivery-day SMS sent for escrow ${escrowId}`);
+    } catch (err) {
+        console.warn("Delivery reminder failed for", escrowId, err);
+    }
+};
+
 function updateOverviewStats() {
     const totalActive = escrowStats.activeSeller + escrowStats.activeBuyer;
     const totalPending = escrowStats.pendingSeller + escrowStats.pendingBuyer;
@@ -247,7 +284,8 @@ function loadEscrows() {
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const escrowId = docSnap.id;
-                
+                maybeSendDeliveryReminder(escrowId, data);
+
                 if (data.status !== 'COMPLETED' && data.status !== 'DISPUTED') escrowStats.activeSeller++;
                 if (data.status === 'FUNDED' || data.status === 'DISPATCHED') escrowStats.pendingSeller++;
                 
@@ -283,7 +321,7 @@ function loadEscrows() {
                             <span style="font-weight: 700; color: #60A5FA;">${escapeHtml(data.description)} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
                         </div>
-                        <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}</p>
+                        <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}${data.deliveryDate ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDate)}` : ``}</p>
                         ${actionBtn}
                     </div>
                 `;
@@ -314,7 +352,8 @@ function loadEscrows() {
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const escrowId = docSnap.id;
-                
+                maybeSendDeliveryReminder(escrowId, data);
+
                 if (data.status !== 'COMPLETED' && data.status !== 'DISPUTED') escrowStats.activeBuyer++;
                 if (data.status === 'FUNDED' || data.status === 'DISPATCHED') escrowStats.pendingBuyer++;
                 
@@ -355,7 +394,7 @@ function loadEscrows() {
                             <span style="font-weight: 700; color: #60A5FA;">${escapeHtml(data.description)} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
                         </div>
-                        <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}</p>
+                        <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}${data.deliveryDate ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDate)}` : ``}</p>
                         ${actionBtn}
                     </div>
                 `;
@@ -748,6 +787,8 @@ if (formNewEscrow) {
                 buyerPhone: buyerPhoneInput ? buyerPhoneInput.value : "",
                 feeAllocation: document.getElementById('escrow-fee-allocation') ? document.getElementById('escrow-fee-allocation').value : 'split',
                 feePercent: feePercent,
+                deliveryDate: document.getElementById('escrow-delivery-date') ? document.getElementById('escrow-delivery-date').value : "",
+                deliveryReminderSent: false,
                 status: 'PENDING_PAYMENT',
                 createdAt: serverTimestamp()
             };
