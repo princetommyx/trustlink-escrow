@@ -817,19 +817,12 @@ if (formNewEscrow) {
                     sellerName: newEscrow.sellerName
                 };
                 try {
-                    // Try WhatsApp first
-                    try {
-                        await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId, smsDetails);
-                        showModernToast("Escrow Created Successfully!", "A WhatsApp notification has been sent to the buyer. The payment link was also copied to your clipboard!");
-                    } catch (waError) {
-                        console.warn("WhatsApp failed, falling back to SMS...", waError);
-                        // Fall back to SMS
-                        await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId, smsDetails);
-                        showModernToast("Escrow Created Successfully!", "An SMS notification has been sent to the buyer. The payment link was also copied to your clipboard!");
-                    }
+                    // Only use SMS, as requested (WhatsApp is not configured)
+                    await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId, smsDetails);
+                    showModernToast("Escrow Created Successfully!", "An SMS notification has been sent to the buyer. The payment link was also copied to your clipboard!");
                 } catch (smsError) {
                     console.warn("SMS failed.", smsError);
-                    showModernToast("Escrow Created!", "Failed to send automatic SMS/WhatsApp. The payment link has been COPIED TO YOUR CLIPBOARD. Please paste it to the buyer directly.", "warning");
+                    showModernToast("Escrow Created!", "Failed to send automatic SMS. The payment link has been COPIED TO YOUR CLIPBOARD. Please paste it to the buyer directly.", "warning");
                 }
             } else {
                 showModernToast("Escrow Created Successfully!", "The payment link has been COPIED TO YOUR CLIPBOARD. Please send it to the buyer.");
