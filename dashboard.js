@@ -932,7 +932,7 @@ const renderProducts = () => {
         }
         myProducts.forEach(prod => {
             productsGrid.innerHTML += `
-                <div class="product-item">
+                <div class="product-item portal-card-white">
                     <h3>${escapeHtml(prod.name)}</h3>
                     <h2 class="product-price">GH₵ ${parseFloat(prod.price).toLocaleString()}</h2>
                     <p class="product-desc">${escapeHtml(prod.desc)}</p>

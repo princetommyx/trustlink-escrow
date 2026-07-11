@@ -808,7 +808,7 @@ h1, h2, h3, h4 {
 /* Modern Toast UI */
 #modern-toast-container {
     position: fixed;
-    bottom: 30px;
+    top: 100px;
     right: 30px;
     z-index: 10000;
     display: flex;

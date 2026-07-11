@@ -108,18 +108,18 @@
                 <!-- Escrows View -->
                 <div id="view-escrows" class="view-section hidden">
                     <div class="view-header">
-                        <h2>Escrow Contracts</h2>
-                        <div class="view-toggles">
+                        <h2 style="margin-bottom: 24px;">Escrow Contracts</h2>
+                        <div class="view-toggles" style="margin-bottom: 24px;">
                             <button class="toggle-btn active" id="toggle-buyer">I am Buying</button>
                             <button class="toggle-btn" id="toggle-seller">I am Selling</button>
                         </div>
                     </div>
                     
-                    <div class="portal-card" id="buyer-escrows">
+                    <div class="portal-card portal-card-white" id="buyer-escrows">
                         <!-- Dynamic content for buyer escrows will go here -->
                     </div>
                     
-                    <div class="portal-card hidden" id="seller-escrows">
+                    <div class="portal-card portal-card-white hidden" id="seller-escrows">
                         <!-- Dynamic content for seller escrows will go here -->
                     </div>
                 </div>
@@ -127,8 +127,8 @@
                 <!-- Products View -->
                 <div id="view-products" class="view-section hidden">
                     <div class="view-header">
-                        <h2>My Products & Services</h2>
-                        <button id="btn-add-product" class="btn btn-primary">+ Add Product</button>
+                        <h2 style="margin-bottom: 24px;">My Products & Services</h2>
+                        <button id="btn-add-product" class="btn btn-primary" style="margin-bottom: 24px;">+ Add Product</button>
                     </div>
                     <div class="products-grid" id="products-grid">
                         <!-- Products injected via JS -->
@@ -137,8 +137,8 @@
 
                 <!-- Wallet View -->
                 <div id="view-wallet" class="view-section hidden">
-                    <h2>Wallet & Funds</h2>
-                    <div class="portal-card" style="margin-bottom: 24px;">
+                    <h2 style="margin-bottom: 24px;">Wallet & Funds</h2>
+                    <div class="portal-card portal-card-white" style="margin-bottom: 24px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <p style="color: var(--text-muted); margin: 0 0 8px;">Available Balance</p>
@@ -154,8 +154,8 @@
                 
                 <!-- Messages View -->
                 <div id="view-messages" class="view-section hidden">
-                    <h2>In-App Messaging</h2>
-                    <div class="portal-card chat-container">
+                    <h2 style="margin-bottom: 24px;">In-App Messaging</h2>
+                    <div class="portal-card portal-card-white chat-container">
                         <div class="chat-sidebar" id="chat-contacts">
                             <p style="padding: 16px; color: var(--text-muted); font-size: 0.9rem;">No active chats.</p>
                         </div>
@@ -176,8 +176,8 @@
                 
                 <!-- Profile View -->
                 <div id="view-profile" class="view-section hidden">
-                    <h2>My Profile</h2>
-                    <div class="portal-card" style="max-width: 560px;">
+                    <h2 style="margin-bottom: 24px;">My Profile</h2>
+                    <div class="portal-card portal-card-white" style="margin-bottom: 40px;">
                         <div class="form-group">
                             <label>Full Name</label>
                             <input type="text" id="profile-name" placeholder="Your name">
@@ -193,12 +193,31 @@
                         </div>
                         <button class="btn btn-primary" id="btn-save-profile" style="margin-top: 8px; max-width: 200px;">Save Profile</button>
                     </div>
+
+                    <h2 style="margin-bottom: 24px;">Security</h2>
+                    <div class="portal-card portal-card-white">
+                        <form id="change-password-form">
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" id="current-password" placeholder="Enter current password" required>
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" id="new-password" placeholder="Min. 8 characters" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm New Password</label>
+                                <input type="password" id="confirm-new-password" placeholder="Re-enter new password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="btn-change-password" style="margin-top: 8px; max-width: 200px;">Change Password</button>
+                        </form>
+                    </div>
                 </div>
 
                 <!-- Transactions View -->
                 <div id="view-transactions" class="view-section hidden">
-                    <h2>Transaction Logs</h2>
-                    <div class="portal-card" style="padding: 0; overflow: hidden;">
+                    <h2 style="margin-bottom: 24px;">Transaction Logs</h2>
+                    <div class="portal-card portal-card-white" style="padding: 0; overflow: hidden;">
                         <table class="transaction-table">
                             <thead>
                                 <tr>
