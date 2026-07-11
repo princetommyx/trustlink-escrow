@@ -320,7 +320,7 @@ export async function sendSMSNotification(phone, checkoutUrl, escrowId, paymentI
                 senderid: MOOLRE_SENDER_ID,
                 messages: [{
                     recipient: cleanPhone,
-                    ref: escrowId,
+                    ref: escrowId + '-SMS',
                     message: message
                 }]
             })
@@ -376,7 +376,7 @@ export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId, pay
                 senderid: MOOLRE_SENDER_ID,
                 messages: [{
                     recipient: cleanPhone,
-                    ref: escrowId,
+                    ref: escrowId + '-WA',
                     message: message
                 }]
             })
