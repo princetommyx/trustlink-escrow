@@ -959,3 +959,64 @@ input[type=number] {
     .portal-card { padding: 16px; }
     .topbar-title { font-size: 1rem; }
 }
+
+/* ==========================================
+   MOBILE BOTTOM NAV — decluttered
+   Short labels via data-short, one line each,
+   evenly spaced icons, cleaner active state.
+   ========================================== */
+@media (max-width: 768px) {
+    .sidebar { height: 64px; }
+    .dashboard-main { margin-bottom: 64px; }
+
+    .sidebar-nav {
+        gap: 0;
+        padding: 4px 2px 6px;
+    }
+
+    .nav-item {
+        padding: 6px 2px;
+        gap: 0;
+        min-width: 0;
+        overflow: hidden;
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    .nav-icon {
+        margin-bottom: 2px;
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Swap long labels for their short mobile versions */
+    .nav-text {
+        font-size: 0;
+        line-height: 1;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+    .nav-text::after {
+        content: attr(data-short);
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+    }
+
+    .nav-item.active {
+        color: #60A5FA;
+    }
+    .nav-item.active .nav-icon {
+        background: rgba(59, 130, 246, 0.15);
+        border-radius: 10px;
+        padding: 2px 10px;
+        width: auto;
+    }
+
+    /* Keep the disputes badge visible but tidy */
+    .nav-item .badge {
+        top: 0;
+        right: calc(50% - 20px);
+        padding: 1px 5px;
+        font-size: 0.55rem;
+    }
+}

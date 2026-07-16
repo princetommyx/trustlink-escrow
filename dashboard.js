@@ -853,6 +853,59 @@ if (formNewEscrow) {
 // ==========================================
 let myProducts = [];
 
+// Firebase Storage isn't available on the free plan, so product images are
+// downscaled in the browser and stored inline (data URL) on the product doc.
+// Firestore documents cap at 1MB, hence the aggressive compression.
+const fileToCompressedDataURL = (file, maxDim = 640, quality = 0.72) => new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = (e) => { URL.revokeObjectURL(url); reject(new Error("Could not read that image file.")); };
+    img.src = url;
+});
+
+let newProductImage = ""; // compressed data URL waiting to be saved
+
+document.getElementById('new-prod-image')?.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    const preview = document.getElementById('new-prod-preview');
+    newProductImage = "";
+    if (!file) {
+        preview?.classList.add('hidden');
+        return;
+    }
+    try {
+        let dataUrl = await fileToCompressedDataURL(file);
+        if (dataUrl.length > 900000) {
+            // Too big for a Firestore doc - compress harder
+            dataUrl = await fileToCompressedDataURL(file, 420, 0.6);
+        }
+        if (dataUrl.length > 900000) {
+            alert("That image is too large even after compression. Please choose a smaller one.");
+            e.target.value = "";
+            preview?.classList.add('hidden');
+            return;
+        }
+        newProductImage = dataUrl;
+        if (preview) {
+            preview.src = dataUrl;
+            preview.classList.remove('hidden');
+        }
+    } catch (err) {
+        alert(err.message || "Could not process that image.");
+        e.target.value = "";
+        preview?.classList.add('hidden');
+    }
+});
+
 const productsGrid = document.getElementById('products-grid');
 const escrowLineItems = document.getElementById('escrow-line-items');
 const escrowAmount = document.getElementById('escrow-amount');
@@ -931,8 +984,13 @@ const renderProducts = () => {
             `;
         }
         myProducts.forEach(prod => {
+            // Only render images we stored ourselves (inline data URLs)
+            const imgHTML = (prod.image && prod.image.startsWith('data:image/'))
+                ? `<img src="${prod.image}" alt="${escapeHtml(prod.name)}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.08);">`
+                : '';
             productsGrid.innerHTML += `
                 <div class="product-item">
+                    ${imgHTML}
                     <h3>${escapeHtml(prod.name)}</h3>
                     <h2 class="product-price">GH₵ ${parseFloat(prod.price).toLocaleString()}</h2>
                     <p class="product-desc">${escapeHtml(prod.desc)}</p>
@@ -1060,15 +1118,18 @@ if(formNewProd) {
                 name: document.getElementById('new-prod-name').value,
                 price: parseFloat(document.getElementById('new-prod-price').value),
                 desc: document.getElementById('new-prod-desc').value,
+                image: newProductImage || "",
                 userId: currentUser.uid,
                 createdAt: serverTimestamp()
             };
-            
+
             await addDoc(collection(db, "products"), newProd);
             await fetchProducts(); // Re-fetch to get Firestore IDs and render
-            
+
             closeProdModal();
             formNewProd.reset();
+            newProductImage = "";
+            document.getElementById('new-prod-preview')?.classList.add('hidden');
         } catch (error) {
             console.error("Error adding document: ", error);
             alert("Error adding product.");
