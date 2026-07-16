@@ -817,22 +817,15 @@ if (formNewEscrow) {
                     sellerName: newEscrow.sellerName
                 };
                 try {
-                    // Try WhatsApp first
-                    try {
-                        await sendWhatsAppNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId, smsDetails);
-                        alert(`Escrow Created Successfully!\n\nA WhatsApp notification has been sent to the buyer. The payment link was also copied to your clipboard!`);
-                    } catch (waError) {
-                        console.warn("WhatsApp failed, falling back to SMS...", waError);
-                        // Fall back to SMS
-                        await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId, smsDetails);
-                        alert(`Escrow Created Successfully!\n\nAn SMS notification has been sent to the buyer. The payment link was also copied to your clipboard!`);
-                    }
+                    // Only use SMS, as requested (WhatsApp is not configured)
+                    await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId, smsDetails);
+                    showModernToast("Escrow Created Successfully!", "An SMS notification has been sent to the buyer. The payment link was also copied to your clipboard!");
                 } catch (smsError) {
                     console.warn("SMS failed.", smsError);
-                    alert("Escrow Created! (Failed to send automatic SMS/WhatsApp).\n\nThe payment link has been COPIED TO YOUR CLIPBOARD. Please paste it to the buyer directly.");
+                    showModernToast("Escrow Created!", "Failed to send automatic SMS. The payment link has been COPIED TO YOUR CLIPBOARD. Please paste it to the buyer directly.", "warning");
                 }
             } else {
-                alert("Escrow Created Successfully!\n\nThe payment link has been COPIED TO YOUR CLIPBOARD. Please send it to the buyer.");
+                showModernToast("Escrow Created Successfully!", "The payment link has been COPIED TO YOUR CLIPBOARD. Please send it to the buyer.");
             }
 
             // Do not redirect the seller. The buyer will pay via the WhatsApp link!
@@ -989,7 +982,7 @@ const renderProducts = () => {
                 ? `<img src="${prod.image}" alt="${escapeHtml(prod.name)}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.08);">`
                 : '';
             productsGrid.innerHTML += `
-                <div class="product-item">
+                <div class="product-item portal-card-white">
                     ${imgHTML}
                     <h3>${escapeHtml(prod.name)}</h3>
                     <h2 class="product-price">GH₵ ${parseFloat(prod.price).toLocaleString()}</h2>
@@ -1065,10 +1058,57 @@ document.addEventListener('click', (e) => {
     if (e.target.closest('#btn-add-line-item')) {
         const container = document.getElementById('escrow-line-items');
         if (container) {
-            container.insertAdjacentHTML('beforeend', createLineItemHTML());
+            container.insertAdjacentHTML('beforeend', createLineItemHTML(''));
+            updateEscrowTotal();
         }
     }
 });
+
+// Modern Toast Notification
+window.showModernToast = function(title, message, type = "success") {
+    let container = document.getElementById("modern-toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "modern-toast-container";
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `modern-toast modern-toast-${type}`;
+    
+    let iconSvg = '';
+    if (type === "success") {
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #10B981;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+    } else {
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #F59E0B;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+    }
+
+    toast.innerHTML = `
+        <div class="modern-toast-icon">${iconSvg}</div>
+        <div class="modern-toast-content">
+            <h4>${escapeHtml(title)}</h4>
+            <p>${escapeHtml(message)}</p>
+        </div>
+        <button class="modern-toast-close" onclick="this.parentElement.classList.add('hide'); setTimeout(() => this.parentElement.remove(), 400);">&times;</button>
+        <div class="modern-toast-progress"></div>
+    `;
+
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.add("show");
+    });
+
+    setTimeout(() => {
+        if(toast.parentElement) {
+            toast.classList.remove("show");
+            toast.classList.add("hide");
+            setTimeout(() => {
+                if(toast.parentElement) toast.remove();
+            }, 400);
+        }
+    }, 6000);
+};
 
 // Add Product Modal
 const btnAddProduct = document.getElementById('btn-add-product');

@@ -789,6 +789,44 @@ input[type=number] {
     font-size: 0.85rem;
 }
 
+/* White Theme Overrides */
+.portal-card-white .btn-outline {
+    border-color: #cbd5e1;
+    color: #1a1a1a;
+}
+.portal-card-white .btn-outline:hover {
+    background: #f1f5f9;
+}
+
+.portal-card-white .order-ledger-row {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+.portal-card-white .order-ledger-row:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+.portal-card-white .order-ledger-row p, 
+.portal-card-white .order-ledger-row span,
+.portal-card-white .order-ledger-row h4 {
+    color: #1a1a1a;
+}
+.portal-card-white .order-ledger-row .text-muted {
+    color: #64748b !important;
+}
+
+.product-item.portal-card-white {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    color: #1a1a1a;
+}
+.product-item.portal-card-white h3 {
+    color: #1a1a1a;
+}
+.product-item.portal-card-white .product-desc {
+    color: #64748b;
+}
+
 /* ==========================================
    MOBILE RESPONSIVENESS (MAX 768px)
    ========================================== */
@@ -798,6 +836,14 @@ input[type=number] {
     .dashboard-topbar { padding: 0 20px; height: 70px; }
     .topbar-title { font-size: 1.1rem; }
     .dashboard-content { padding: 20px; }
+    
+    .notif-dropdown {
+        position: fixed;
+        top: 70px;
+        right: 5vw;
+        width: 90vw;
+        max-width: 90vw;
+    }
     
     /* Sidebar -> Bottom Nav Bar */
     .sidebar {
@@ -1019,4 +1065,74 @@ input[type=number] {
         padding: 1px 5px;
         font-size: 0.55rem;
     }
+}
+
+/* White version of portal card for specific views */
+.portal-card-white {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    color: #1a1a1a;
+}
+.portal-card-white .form-group label {
+    color: #475569;
+}
+.portal-card-white .form-group input, 
+.portal-card-white .form-group select, 
+.portal-card-white .form-group textarea {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #1a1a1a;
+}
+.portal-card-white .form-group input:focus, 
+.portal-card-white .form-group select:focus, 
+.portal-card-white .form-group textarea:focus {
+    border-color: #3b82f6;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+.portal-card-white .transaction-table th {
+    background: #f8fafc;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+}
+.portal-card-white .transaction-table td {
+    border-bottom: 1px solid #e2e8f0;
+    color: #1a1a1a;
+}
+.portal-card-white .text-muted {
+    color: #64748b !important;
+}
+
+/* White version of chat UI */
+.portal-card-white.chat-container .chat-sidebar {
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+}
+.portal-card-white.chat-container .chat-contact {
+    border-bottom: 1px solid #e2e8f0;
+}
+.portal-card-white.chat-container .chat-contact:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+.portal-card-white.chat-container .chat-contact.active {
+    background: rgba(59, 130, 246, 0.1);
+}
+.portal-card-white.chat-container .chat-header {
+    border-bottom: 1px solid #e2e8f0;
+}
+.portal-card-white.chat-container .chat-input-area {
+    border-top: 1px solid #e2e8f0;
+}
+.portal-card-white.chat-container .chat-input-area input {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #1a1a1a;
+}
+.portal-card-white.chat-container .chat-input-area input:focus {
+    background: #ffffff;
+    border-color: #3b82f6;
+}
+.portal-card-white.chat-container h3,
+.portal-card-white.chat-container h4 {
+    color: #1a1a1a;
 }

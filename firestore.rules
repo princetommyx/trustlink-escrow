@@ -1,6 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Allow public access to escrows so unauthenticated buyers can checkout
+    match /escrows/{escrowId} {
+      allow read, write: if true;
+    }
+    // Allow public access to users so checkout.js can update the seller's wallet balance
+    match /users/{userId} {
+      allow read, write: if true;
+    }
     match /{document=**} {
       allow read, write: if request.auth != null;
     }
