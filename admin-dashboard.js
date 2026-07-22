@@ -132,6 +132,7 @@ document.getElementById('btn-save-admin-profile')?.addEventListener('click', asy
 document.getElementById('btn-signout').addEventListener('click', async () => {
     try {
         await signOut(auth);
+        sessionStorage.setItem("authToast", "Logged out successfully");
         window.location.href = "admin-login.html";
     } catch (error) {
         console.error("Sign out error", error);
@@ -143,6 +144,7 @@ if (topSignoutBtn) {
     topSignoutBtn.addEventListener('click', async () => {
         try {
             await signOut(auth);
+            sessionStorage.setItem("authToast", "Logged out successfully");
             window.location.href = "admin-login.html";
         } catch (error) {
             console.error("Sign out error", error);

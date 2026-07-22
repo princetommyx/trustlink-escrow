@@ -677,6 +677,7 @@ if (withdrawForm) {
 document.getElementById('btn-signout').addEventListener('click', async () => {
     try {
         await signOut(auth);
+        sessionStorage.setItem("authToast", "Logged out successfully");
         window.location.href = "login.html";
     } catch (error) {
         console.error("Sign out error", error);
@@ -688,6 +689,7 @@ if (topSignoutBtn) {
     topSignoutBtn.addEventListener('click', async () => {
         try {
             await signOut(auth);
+            sessionStorage.setItem("authToast", "Logged out successfully");
             window.location.href = "login.html";
         } catch (error) {
             console.error("Sign out error", error);
