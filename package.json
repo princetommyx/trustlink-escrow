@@ -6,8 +6,6 @@
   },
   "name": "trustlink-escrow",
   "version": "1.0.0",
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
-  "main": "admin-dashboard.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
