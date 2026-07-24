@@ -30,13 +30,6 @@ navItems.forEach(item => {
         
         // Update Title
         topbarTitle.textContent = item.querySelector('.nav-text').textContent.trim();
-        
-        // Close sidebar on mobile after clicking a link
-        if (window.innerWidth <= 768) {
-            sidebar.classList.remove('mobile-open');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (overlay) overlay.classList.add('hidden');
-        }
     });
 });
 
@@ -47,34 +40,13 @@ const sidebar = document.querySelector('.sidebar');
 
 if (collapseBtn) {
     collapseBtn.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-            sidebar.classList.remove('mobile-open');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (overlay) overlay.classList.add('hidden');
-        } else {
-            sidebar.classList.toggle('collapsed');
-        }
+        sidebar.classList.toggle('collapsed');
     });
 }
 
 if (topbarMenuToggle) {
     topbarMenuToggle.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-            sidebar.classList.add('mobile-open');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (overlay) overlay.classList.remove('hidden');
-        } else {
-            sidebar.classList.remove('collapsed');
-        }
-    });
-}
-
-// Overlay click to close
-const sidebarOverlay = document.getElementById('sidebar-overlay');
-if (sidebarOverlay) {
-    sidebarOverlay.addEventListener('click', () => {
-        sidebar.classList.remove('mobile-open');
-        sidebarOverlay.classList.add('hidden');
+        sidebar.classList.remove('collapsed');
     });
 }
 
@@ -333,7 +305,7 @@ function loadEscrows() {
                     statusUI = `<span style="background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING PAYMENT</span>`;
                     actionBtn = `<button class="btn btn-outline" style="border-color: var(--primary); color: var(--primary);" onclick="window.copyToClipboard('${window.location.origin}/checkout.html?id=${escrowId}')">COPY LINK</button>`;
                 } else if (data.status === 'FUNDED') {
-                    statusUI = `<span style="background-color: rgba(108, 76, 241, 0.15); color: #6c4cf1; border: 1px solid #6c4cf1; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">FUNDED - DISPATCH NOW</span>`;
+                    statusUI = `<span style="background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid #3b82f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">FUNDED - DISPATCH NOW</span>`;
                     actionBtn = `<button class="btn btn-primary" onclick="window.dispatchItem('${escrowId}')">MARK AS DISPATCHED</button>`;
                 } else if (data.status === 'DISPATCHED') {
                     statusUI = `<span style="background-color: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">DISPATCHED</span>`;
@@ -346,7 +318,7 @@ function loadEscrows() {
                 sellerEscrowsContainer.innerHTML += `
                     <div class="order-ledger-row">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <span style="font-weight: 700; color: #6C4CF1;">${escapeHtml(data.description)} - #${escrowId.substring(0, 8).toUpperCase()}</span>
+                            <span style="font-weight: 700; color: #60A5FA;">${escapeHtml(data.description)} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
                         </div>
                         <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}${data.deliveryDate ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDate)}` : ``}</p>
@@ -401,7 +373,7 @@ function loadEscrows() {
                     statusUI = `<span style="background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">PAYMENT REQUIRED</span>`;
                     actionBtn = `<a href="checkout.html?id=${escrowId}" target="_blank" class="btn btn-primary">PAY NOW</a>`;
                 } else if (data.status === 'FUNDED') {
-                    statusUI = `<span style="background-color: rgba(108, 76, 241, 0.15); color: #6c4cf1; border: 1px solid #6c4cf1; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING DISPATCH</span>`;
+                    statusUI = `<span style="background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid #3b82f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING DISPATCH</span>`;
                 } else if (data.status === 'DISPATCHED') {
                     statusUI = `<span style="background-color: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">DISPATCHED</span>`;
                     actionBtn = `
@@ -419,7 +391,7 @@ function loadEscrows() {
                 buyerEscrowsContainer.innerHTML += `
                     <div class="order-ledger-row">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <span style="font-weight: 700; color: #6C4CF1;">${escapeHtml(data.description)} - #${escrowId.substring(0, 8).toUpperCase()}</span>
+                            <span style="font-weight: 700; color: #60A5FA;">${escapeHtml(data.description)} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
                         </div>
                         <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}${data.deliveryDate ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDate)}` : ``}</p>
@@ -948,13 +920,13 @@ const createLineItemHTML = (selectedId = '') => {
         <div class="line-item-row" data-id="${lineItemCounter}">
             <div class="form-group" style="flex: 2;">
                 <label>Product/Service</label>
-                <select class="escrow-product-select" required>
+                <select class="escrow-product-select" required style="background: rgba(0, 0, 0, 0.3);">
                     ${optionsHTML}
                 </select>
             </div>
             <div class="form-group" style="flex: 0.5;">
                 <label>Qty</label>
-                <input type="number" class="escrow-qty" value="1" min="1" required>
+                <input type="number" class="escrow-qty" value="1" min="1" required style="background: rgba(0, 0, 0, 0.3);">
             </div>
             ${lineItemCounter > 1 
                 ? `<button type="button" class="btn-remove-line"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>` 
@@ -1108,9 +1080,9 @@ window.showModernToast = function(title, message, type = "success") {
     
     let iconSvg = '';
     if (type === "success") {
-        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #6C4CF1;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #10B981;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
     } else {
-        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #6C4CF1;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #F59E0B;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
     }
 
     toast.innerHTML = `

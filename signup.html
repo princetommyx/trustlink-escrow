@@ -1,181 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - TrustLink Escrow</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236C4CF1'/%3E%3Cstop offset='1' stop-color='%238B5CF6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Crect x='10' y='10' width='12' height='12' rx='3' fill='white'/%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233B82F6'/%3E%3Cstop offset='1' stop-color='%2306B6D4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Crect x='10' y='10' width='12' height='12' rx='3' fill='white'/%3E%3C/svg%3E">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth.css">
+    <!-- SEO Metadata -->
+    <meta name="description" content="TrustLink Escrow: Secure asynchronous escrow platform for social media vendors. Create secure payment links for safe commerce.">
+    <meta property="og:title" content="TrustLink Escrow - Secure Social Commerce">
+    <meta property="og:description" content="The ultimate asynchronous escrow platform for social media vendors. Generate secure payment links for Instagram, TikTok, X, and WhatsApp.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://trustlink.co">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TrustLink Escrow - Secure Social Commerce">
+    <meta name="twitter:description" content="The ultimate asynchronous escrow platform for social media vendors. Generate secure payment links for Instagram, TikTok, X, and WhatsApp.">
 </head>
-<body class="auth-body">
+
+<body>
     <div class="auth-wrapper">
-        <!-- Left Section - Illustration & Branding -->
         <div class="auth-left">
-            <div class="auth-left-content">
-                <!-- Escrow Illustration Placeholder (Shield/Lock) -->
-                <svg class="auth-illustration" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9" />
-                            <stop offset="100%" stop-color="#E2E8F0" stop-opacity="0.5" />
-                        </linearGradient>
-                    </defs>
-                    <path d="M200 40 L100 80 L100 160 C100 230 140 280 200 310 C260 280 300 230 300 160 L300 80 Z" fill="url(#shieldGrad)" />
-                    <circle cx="200" cy="160" r="40" fill="#6C4CF1" />
-                    <path d="M185 160 L195 170 L220 145" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                    <rect x="50" y="200" width="80" height="20" rx="10" fill="#FFFFFF" opacity="0.6" />
-                    <rect x="280" y="100" width="60" height="20" rx="10" fill="#FFFFFF" opacity="0.6" />
-                </svg>
-                
-                <h2>Protected Payments</h2>
-                <p>Join TrustLink today and experience secure transactions between buyers and sellers.</p>
-            </div>
+            <div class="glow-blob blob-1"></div>
+            <div class="glow-blob blob-2" style="top: auto; bottom: -200px; left: -100px;"></div>
+            <a href="index.html" class="logo auth-logo">
+                <div class="logo-icon auth-logo-icon"></div>
+                TRUSTLINK DASHBOARD
+            </a>
+            <p class="auth-tagline">Secure Escrow for Social Commerce</p>
         </div>
-
-        <!-- Right Section - Auth Form -->
         <div class="auth-right">
-            <div class="auth-card">
-                <div class="auth-header">
-                    <a href="index.html" class="auth-logo">
-                        <div class="auth-logo-icon">
-                            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        </div>
-                        TrustLink
-                    </a>
-                    <h1>Create Account</h1>
-                    <p>Start your secure escrow journey</p>
-                </div>
-
+            <div class="auth-form-container">
                 <form class="auth-form" action="dashboard.html">
                     <div class="form-group">
                         <label for="name">Full Name</label>
-                        <div class="input-wrapper">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                            <input type="text" id="name" placeholder="John Doe" required>
-                        </div>
+                        <input type="text" id="name" placeholder="Enter your name" required>
                     </div>
-
                     <div class="form-group">
                         <label for="email">Email or Phone Number</label>
-                        <div class="input-wrapper">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                            <input type="text" id="email" placeholder="name@example.com" required>
-                        </div>
+                        <input type="text" id="email" placeholder="Enter your email or phone number" required>
                     </div>
-
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <div class="input-wrapper">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            <input type="password" id="password" placeholder="Create a strong password" required oninput="checkPasswordStrength(this.value)">
-                            <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="Toggle password visibility">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                            </button>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" placeholder="Create a password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('password', this)">Show</button>
                         </div>
-                        <div class="password-strength">
-                            <div class="strength-bar" id="str-1"></div>
-                            <div class="strength-bar" id="str-2"></div>
-                            <div class="strength-bar" id="str-3"></div>
-                            <div class="strength-bar" id="str-4"></div>
-                        </div>
-                        <div class="strength-text" id="str-text"></div>
                     </div>
-
                     <div class="form-group">
                         <label for="confirm-password">Confirm Password</label>
-                        <div class="input-wrapper">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <div class="password-wrapper">
                             <input type="password" id="confirm-password" placeholder="Confirm your password" required>
-                            <button type="button" class="toggle-password" onclick="togglePassword('confirm-password', this)" aria-label="Toggle password visibility">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                            </button>
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirm-password', this)">Show</button>
                         </div>
                     </div>
-
-                    <div class="form-options" style="margin-bottom: 24px; margin-top: -8px;">
-                        <label class="checkbox-wrapper">
-                            <input type="checkbox" id="terms" required>
-                            <span style="font-size: 0.85rem;">I agree to the <a href="#" style="color: var(--auth-primary); text-decoration: none;">Terms of Service</a> & <a href="#" style="color: var(--auth-primary); text-decoration: none;">Privacy Policy</a></span>
+                    <div class="form-options">
+                        <label class="remember-me" style="font-size: 0.85rem;">
+                            <input type="checkbox" required>
+                            <span>I agree to the Terms of Service & Privacy Policy</span>
                         </label>
                     </div>
-
-                    <button type="submit" class="auth-btn-primary">Create Account</button>
+                    <button type="submit" class="btn btn-primary btn-large auth-btn">SIGN UP</button>
                 </form>
 
-                <div class="social-divider">Or continue with</div>
-                <div class="social-buttons">
-                    <button class="btn-social" type="button" aria-label="Sign in with Google" id="google-auth-btn">
-                        <img src="img/google.svg" alt="Google">
-                        <span style="margin-left: 10px; font-weight: 500; font-size: 0.95rem; color: var(--auth-text-main);">Google</span>
-                    </button>
-                </div>
+                <div class="auth-divider">or</div>
+                <button type="button" class="btn google-btn" id="google-auth-btn">
+                    <img src="img/google.svg" alt="Google" class="google-icon">
+                    Sign up with Google
+                </button>
 
-                <div class="auth-footer">
-                    Already have an account? <a href="login.html">Sign In &rarr;</a>
+                <div class="auth-switch">
+                    Already have an account? <a href="login.html">Sign in</a>
                 </div>
             </div>
         </div>
     </div>
 
+
     <script type="module" src="auth-handler.js"></script>
     <script>
         function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
-            const svg = btn.querySelector('svg');
             if (input.type === 'password') {
                 input.type = 'text';
-                // Eye-off icon
-                svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+                btn.textContent = 'Hide';
             } else {
                 input.type = 'password';
-                // Eye icon
-                svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
-            }
-        }
-
-        function checkPasswordStrength(password) {
-            let strength = 0;
-            if (password.length >= 8) strength++;
-            if (password.match(/[a-z]+/)) strength++;
-            if (password.match(/[A-Z]+/)) strength++;
-            if (password.match(/[0-9]+/)) strength++;
-            if (password.match(/[$@#&!]+/)) strength++;
-
-            const b1 = document.getElementById('str-1');
-            const b2 = document.getElementById('str-2');
-            const b3 = document.getElementById('str-3');
-            const b4 = document.getElementById('str-4');
-            const text = document.getElementById('str-text');
-
-            b1.className = 'strength-bar'; b2.className = 'strength-bar';
-            b3.className = 'strength-bar'; b4.className = 'strength-bar';
-
-            if (password.length === 0) {
-                text.textContent = '';
-                return;
-            }
-
-            if (strength <= 2) {
-                b1.classList.add('strength-weak');
-                text.textContent = 'Weak';
-                text.style.color = 'var(--auth-error)';
-            } else if (strength === 3) {
-                b1.classList.add('strength-fair'); b2.classList.add('strength-fair');
-                text.textContent = 'Fair';
-                text.style.color = '#F59E0B';
-            } else if (strength === 4) {
-                b1.classList.add('strength-good'); b2.classList.add('strength-good'); b3.classList.add('strength-good');
-                text.textContent = 'Good';
-                text.style.color = 'var(--auth-primary)';
-            } else {
-                b1.classList.add('strength-strong'); b2.classList.add('strength-strong'); b3.classList.add('strength-strong'); b4.classList.add('strength-strong');
-                text.textContent = 'Strong';
-                text.style.color = 'var(--auth-success)';
+                btn.textContent = 'Show';
             }
         }
     </script>
 </body>
+
 </html>

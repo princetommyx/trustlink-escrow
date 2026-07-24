@@ -1,13 +1,13 @@
 :root {
-    --bg-color: #F8F9FC;
-    --surface-color: #FFFFFF;
-    --surface-border: #E5E7EB;
-    --primary: #6C4CF1;
-    --primary-glow: rgba(108, 76, 241, 0.2);
-    --secondary: #8B5CF6;
-    --accent: #A78BFA;
-    --text-main: #1F2937;
-    --text-muted: #6B7280;
+    --bg-color: #060A13;
+    --surface-color: rgba(17, 24, 39, 0.6);
+    --surface-border: rgba(255, 255, 255, 0.08);
+    --primary: #3B82F6;
+    --primary-glow: rgba(59, 130, 246, 0.35);
+    --secondary: #06B6D4;
+    --accent: #22D3EE;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
     --success: #10B981;
     --danger: #EF4444;
     --warning: #F59E0B;
@@ -65,7 +65,7 @@ h1, h2, h3, h4 {
     border-radius: 50%;
     filter: blur(120px);
     z-index: -1;
-    opacity: 0.1;
+    opacity: 0.18;
     animation: float 10s ease-in-out infinite;
 }
 
@@ -100,17 +100,19 @@ h1, h2, h3, h4 {
 /* Glassmorphism */
 .glass-card {
     background: var(--surface-color);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--surface-border);
     border-radius: 24px;
     padding: 32px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
     transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass-card:hover {
-    border-color: rgba(108, 76, 241, 0.35);
+    border-color: rgba(59, 130, 246, 0.35);
     transform: translateY(-5px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.4), 0 0 30px rgba(59, 130, 246, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* Buttons */
@@ -134,25 +136,25 @@ h1, h2, h3, h4 {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #6C4CF1 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
     color: #fff;
     box-shadow: 0 4px 15px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 8px 30px rgba(108, 76, 241, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     transform: translateY(-2px);
     filter: brightness(1.08);
 }
 
 .btn-secondary {
-    background: #F3F4F6;
+    background: rgba(255, 255, 255, 0.1);
     color: var(--text-main);
     border: 1px solid var(--surface-border);
 }
 
 .btn-secondary:hover {
-    background: #E5E7EB;
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .btn-outline {
@@ -178,7 +180,7 @@ h1, h2, h3, h4 {
 }
 
 .navbar.scrolled {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(5, 5, 10, 0.8);
     backdrop-filter: blur(12px);
     padding: 15px 0;
     border-bottom: 1px solid var(--surface-border);
@@ -204,7 +206,7 @@ h1, h2, h3, h4 {
 .logo-icon {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #6c4cf1, #9333ea);
+    background: linear-gradient(135deg, #3b82f6, #9333ea);
     border-radius: 8px;
     position: relative;
     box-shadow: 0 0 15px rgba(147, 51, 234, 0.4);
@@ -277,7 +279,7 @@ h1, h2, h3, h4 {
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    background: #FFFFFF;
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--surface-border);
     border-radius: 100px;
     font-size: 0.9rem;
@@ -288,12 +290,12 @@ h1, h2, h3, h4 {
 
 @keyframes badge-pulse {
     0%, 60%, 100% {
-        box-shadow: 0 0 0 0 rgba(108, 76, 241, 0);
+        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
         border-color: var(--surface-border);
     }
     80% {
-        box-shadow: 0 0 20px 2px rgba(108, 76, 241, 0.2);
-        border-color: var(--primary);
+        box-shadow: 0 0 25px 5px rgba(34, 211, 238, 0.35);
+        border-color: rgba(34, 211, 238, 0.7);
     }
 }
 
@@ -364,7 +366,7 @@ h1, h2, h3, h4 {
 }
 
 .mockup-header {
-    background: #F3F4F6;
+    background: rgba(0,0,0,0.2);
     padding: 12px 20px;
     display: flex;
     gap: 8px;
@@ -381,7 +383,7 @@ h1, h2, h3, h4 {
 }
 
 .mockup-notification {
-    background: #FFFFFF;
+    background: rgba(255,255,255,0.05);
     border-radius: 16px;
     padding: 16px;
     display: flex;
@@ -505,8 +507,8 @@ h1, h2, h3, h4 {
     width: 56px;
     height: 56px;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(108, 76, 241, 0.15), rgba(139, 92, 246, 0.15));
-    border: 1px solid rgba(108, 76, 241, 0.25);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.15));
+    border: 1px solid rgba(59, 130, 246, 0.25);
     margin-bottom: 24px;
     display: flex;
     align-items: center;
@@ -605,7 +607,7 @@ h1, h2, h3, h4 {
 .footer {
     border-top: 1px solid var(--surface-border);
     padding: 80px 0 40px;
-    background: #FFFFFF;
+    background: rgba(0,0,0,0.3);
 }
 
 .footer-container {
@@ -717,12 +719,13 @@ h1, h2, h3, h4 {
     gap: 10px;
 }
 .toast {
-    background: #FFFFFF;
+    background: var(--surface-color);
+    backdrop-filter: blur(16px);
     border: 1px solid var(--success);
-    color: var(--text-main);
+    color: #fff;
     padding: 16px 24px;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     transform: translateX(120%);
     transition: transform 0.3s ease;
     display: flex;
@@ -743,7 +746,7 @@ h1, h2, h3, h4 {
     display: inline-block;
 }
 .profile-btn {
-    background: #FFFFFF;
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text-main);
     border: 1px solid var(--surface-border);
     padding: 10px 20px;
@@ -758,13 +761,14 @@ h1, h2, h3, h4 {
 }
 .profile-btn:hover {
     border-color: var(--primary);
-    background: #F3F4F6;
+    background: rgba(255, 255, 255, 0.1);
 }
 .profile-dropdown {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    background: #FFFFFF;
+    background: var(--surface-color);
+    backdrop-filter: blur(16px);
     border: 1px solid var(--surface-border);
     border-radius: 12px;
     width: 200px;
@@ -773,7 +777,7 @@ h1, h2, h3, h4 {
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s ease;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 .profile-menu:hover .profile-dropdown {
     opacity: 1;
@@ -795,7 +799,7 @@ h1, h2, h3, h4 {
     font-size: 0.95rem;
 }
 .dropdown-item:hover {
-    background: #F3F4F6;
+    background: rgba(255,255,255,0.1);
 }
 .dropdown-item.danger {
     color: var(--danger);
@@ -816,14 +820,16 @@ h1, h2, h3, h4 {
 .modern-toast {
     width: 400px;
     max-width: 90vw;
-    background: #FFFFFF;
-    border: 1px solid var(--surface-border);
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 20px;
     display: flex;
     align-items: flex-start;
     gap: 16px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.1);
     transform: translateX(120%) scale(0.9);
     opacity: 0;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
@@ -867,7 +873,7 @@ h1, h2, h3, h4 {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: #F3F4F6;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .modern-toast-success .modern-toast-icon {
@@ -888,7 +894,7 @@ h1, h2, h3, h4 {
 .modern-toast-content h4 {
     margin: 0;
     font-size: 1.1rem;
-    color: var(--text-main);
+    color: #fff;
     font-family: var(--font-heading);
     font-weight: 600;
 }
@@ -913,7 +919,7 @@ h1, h2, h3, h4 {
 }
 
 .modern-toast-close:hover {
-    color: var(--text-main);
+    color: #fff;
 }
 
 .modern-toast-progress {
@@ -922,7 +928,7 @@ h1, h2, h3, h4 {
     left: 4px;
     height: 3px;
     width: calc(100% - 4px);
-    background: #E5E7EB;
+    background: rgba(255, 255, 255, 0.1);
     transform-origin: left;
     animation: toast-progress 6s linear forwards;
 }
