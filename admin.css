@@ -6,7 +6,7 @@
 }
 
 .admin-theme .sidebar .nav-item:hover {
-    color: #c084fc;
+    color: #9333ea;
 }
 
 .admin-theme .badge {
@@ -150,7 +150,7 @@
 }
 
 .chart-date-filter:focus {
-    border-color: var(--primary);
+    border-color: #9333ea;
 }
 
 .chart-body {
@@ -241,8 +241,8 @@
 }
 
 .admin-chat-white .chat-contact.active {
-    background: #eff6ff;
-    border-left: 3px solid #3b82f6;
+    background: #f5f3ff;
+    border-left: 3px solid #9333ea;
 }
 
 .admin-chat-white .contact-info h4 {
@@ -284,7 +284,7 @@
 .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(3, 5, 10, 0.6);
+    background: rgba(139, 92, 246, 0.6);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     z-index: 1000;
