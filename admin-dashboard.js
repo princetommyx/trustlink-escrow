@@ -216,7 +216,7 @@ const bucketActivity = (days) => {
 };
 
 const chartTooltipOptions = {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(108, 76, 241, 0.95)',
     titleColor: '#0f172a',
     bodyColor: '#334155',
     borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -240,7 +240,7 @@ const renderDwChart = () => {
                 {
                     label: 'Money In',
                     data: inAmts,
-                    backgroundColor: '#10b981', // Emerald green
+                    backgroundColor: '#8b5cf6',
                     borderRadius: 4,
                     barPercentage: 0.6,
                     categoryPercentage: 0.8
@@ -248,7 +248,7 @@ const renderDwChart = () => {
                 {
                     label: 'Money Out',
                     data: outAmts,
-                    backgroundColor: '#ef4444', // Red
+                    backgroundColor: '#a78bfa',
                     borderRadius: 4,
                     barPercentage: 0.6,
                     categoryPercentage: 0.8
@@ -295,7 +295,7 @@ const renderTxChart = () => {
                     label: 'Plus Transactions',
                     data: plus,
                     borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
@@ -984,7 +984,7 @@ const loadEscrowsAdmin = async () => {
 };
 
 const ESCROW_STATUS_COLORS = {
-    pending_payment: '#f59e0b', funded: '#3b82f6', dispatched: '#10b981',
+    pending_payment: '#f59e0b', funded: '#6c4cf1', dispatched: '#10b981',
     completed: '#10b981', disputed: '#ef4444', refunded: '#ef4444', released: '#10b981'
 };
 
