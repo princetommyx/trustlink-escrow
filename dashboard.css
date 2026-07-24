@@ -843,6 +843,7 @@ input[type=number] {
     .dashboard-main { margin-left: 0; margin-bottom: 70px; }
     .dashboard-topbar { padding: 0 20px; height: 70px; }
     .topbar-title { font-size: 1.1rem; }
+    #topbar-menu-toggle { display: flex !important; }
     .dashboard-content { padding: 20px; }
     
     .notif-dropdown {
