@@ -840,7 +840,7 @@ input[type=number] {
    ========================================== */
 @media (max-width: 768px) {
     .dashboard-layout { flex-direction: column; }
-    .dashboard-main { margin-left: 0; margin-bottom: 70px; }
+    .dashboard-main { margin-left: 0; margin-bottom: calc(70px + env(safe-area-inset-bottom)); }
     .dashboard-topbar { padding: 0 20px; height: 70px; }
     .topbar-title { font-size: 1.1rem; }
     #topbar-menu-toggle { display: flex !important; }
@@ -891,11 +891,13 @@ input[type=number] {
     /* Mobile Bottom Nav */
     .mobile-bottom-nav {
         display: flex; justify-content: space-around; align-items: center;
-        position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+        position: fixed; bottom: 0; left: 0; width: 100%; 
+        height: calc(70px + env(safe-area-inset-bottom));
         background: var(--surface-color);
         border-top: 1px solid var(--surface-border);
         z-index: 1000;
-        padding: 4px 0;
+        padding-top: 8px;
+        padding-bottom: env(safe-area-inset-bottom);
     }
     .mobile-bottom-nav .nav-item {
         flex-direction: column; padding: 8px 4px; border-radius: 8px;
