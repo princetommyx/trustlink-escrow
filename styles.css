@@ -680,16 +680,17 @@ h1, h2, h3, h4 {
 @media (max-width: 768px) {
     .nav-links {
         position: fixed;
-        top: 80px;
+        top: 0;
         left: 0;
         width: 100%;
         background: var(--bg-color);
         flex-direction: column;
-        padding: 40px 20px;
+        padding: 90px 20px 40px;
         gap: 20px;
         transform: translateY(-150%);
         transition: 0.3s ease;
         border-bottom: 1px solid var(--surface-border);
+        z-index: -1;
     }
     .nav-links.active { transform: translateY(0); }
     .mobile-menu-btn { display: flex; }
