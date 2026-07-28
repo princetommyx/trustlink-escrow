@@ -9,25 +9,19 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <!-- SEO Metadata -->
+    <link rel="stylesheet" href="landing.css">
+    
     <meta name="description" content="TrustLink Escrow: Secure asynchronous escrow platform for social media vendors. Create secure payment links for safe commerce.">
     <meta property="og:title" content="TrustLink Escrow - Secure Social Commerce">
-    <meta property="og:description" content="The ultimate asynchronous escrow platform for social media vendors. Generate secure payment links for Instagram, TikTok, X, and WhatsApp.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://trustlink.co">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="TrustLink Escrow - Secure Social Commerce">
-    <meta name="twitter:description" content="The ultimate asynchronous escrow platform for social media vendors. Generate secure payment links for Instagram, TikTok, X, and WhatsApp.">
 </head>
 
-<body>
+<body class="light-landing">
     <div class="site-wrapper" style="overflow-x: hidden; width: 100%; position: relative; min-height: 100vh;">
     <div class="glow-blob blob-1"></div>
-    <div class="glow-blob blob-2"></div>
+    <div class="glow-blob blob-2" style="bottom: 0; top: auto; right: 0;"></div>
+    <div class="glow-blob blob-3" style="top: 40%; left: 10%;"></div>
 
     <nav class="navbar">
         <div class="container nav-container">
@@ -38,287 +32,127 @@
             <div class="nav-links">
                 <a href="#features">Features</a>
                 <a href="#how-it-works">How it Works</a>
-                <a href="login.html" class="btn btn-secondary">Login</a>
-                <a href="signup.html" class="btn btn-primary">Get Started</a>
+                <a href="login.html" class="btn btn-outline" style="border:none; box-shadow:none; background:transparent;">Log in</a>
+                <a href="signup.html" class="btn btn-primary" style="background:#0F172A; color:#fff;">Get Started Free</a>
             </div>
             <button class="mobile-menu-btn" aria-label="Toggle menu">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </button>
         </div>
     </nav>
 
     <main>
         <!-- Hero Section -->
-        <section class="hero">
-            <div class="container hero-container">
-                <div class="hero-content fade-up">
-                    <div class="badge">Powered by Moolre <img src="moolre.webp" alt="Moolre Logo" class="badge-logo">
-                    </div>
-                    <h1 class="hero-title">Secure Escrow for <span class="text-gradient">Social Commerce</span></h1>
-                    <p class="hero-subtitle">Turn DMs into secure storefronts. Generate dynamic payment links for
-                        Instagram, TikTok, X, and WhatsApp. We leverage <strong>Moolre Payments</strong>, <strong>Moolre SMS</strong>, and <strong>Firebase</strong> to handle the trust, so you handle the sales.</p>
+        <section class="hero" style="padding-top: 140px; text-align: center; min-height: auto;">
+            <div class="container">
+                <div class="hero-content fade-up" style="max-width: 800px; margin: 0 auto;">
+                    <div class="badge">Powered by Moolre <img src="moolre.webp" alt="Moolre Logo" class="badge-logo" style="display:inline-block; vertical-align:middle; margin-left: 6px;"></div>
+                    <h1 class="hero-title" style="font-size: clamp(3rem, 5vw + 1rem, 5rem); letter-spacing: -0.03em;">Secure Escrow for <br><span class="text-gradient">Social Sales Growth</span></h1>
+                    <p class="hero-subtitle" style="font-size: 1.25rem; margin: 24px auto 40px;">Turn DMs into secure storefronts. Manage sales seamlessly while we ring-fence funds to guarantee trust.</p>
                     
-                    <div class="hero-pills" style="display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap;">
-                        <div class="pill" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 100px; font-size: 0.9rem; color: var(--text-main);">
-                            <span style="color: var(--primary);">📱</span> Moolre Powered
-                        </div>
-                        <div class="pill" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 100px; font-size: 0.9rem; color: var(--text-main);">
-                            <span style="color: var(--success);">🛡️</span> Secure Escrow
-                        </div>
-                    </div>
-
-                    <div class="hero-cta">
-                        <a href="signup.html" class="btn btn-primary btn-large">Create Payment Link</a>
+                    <div class="hero-cta" style="justify-content: center; flex-wrap: wrap;">
+                        <a href="signup.html" class="btn btn-primary btn-large">Create Free Link</a>
                         <a href="#how-it-works" class="btn btn-outline btn-large">See How it Works</a>
                     </div>
-
                 </div>
-                <div class="hero-visual fade-up" style="transition-delay: 0.2s;">
-                    <div class="glass-card mockup-card">
-                        <div class="mockup-header">
-                            <div class="dot dot-red"></div>
-                            <div class="dot dot-yellow"></div>
-                            <div class="dot dot-green"></div>
+
+                <div class="hero-visual fade-up" style="margin-top: 60px; position: relative; display: inline-block;">
+                    <img src="img/hero-vendor.png" alt="Social Seller" class="hero-central-image">
+                    
+                    <!-- Floating UI 1: Secure Payment -->
+                    <div class="floating-ui" style="top: 20%; left: -80px;">
+                        <div style="background: #E0F2FE; color: #0284C7; padding: 10px; border-radius: 12px;">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                         </div>
-                        <div class="mockup-body">
-                            <div class="mockup-notification">
-                                <div class="icon-circle success">✓</div>
-                                <div>
-                                    <h4>Payment Secured</h4>
-                                    <p>GH₵ 450.00 is in escrow</p>
+                        <div style="text-align: left;">
+                            <p style="margin:0; font-weight:700; font-family:'Outfit'; color:#0F172A;">$450.00</p>
+                            <p style="margin:0; font-size:0.8rem; color:#64748B;">Funds in Escrow</p>
+                        </div>
+                    </div>
+
+                    <!-- Floating UI 2: Chat -->
+                    <div class="floating-ui" style="top: 60%; right: -100px; flex-direction: column; align-items: flex-end; gap: 8px;">
+                        <div class="chat-bubble chat-receiver">Is the sneaker still available?</div>
+                        <div class="chat-bubble chat-sender">Yes! I'll send the TrustLink.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bento Features Section -->
+        <section id="features" class="features" style="padding-top: 120px;">
+            <div class="container">
+                <div class="section-header fade-up" style="max-width: 700px;">
+                    <h2 style="font-size: clamp(2rem, 4vw, 3rem);">Sell Safely.<br> Harness Buyer Trust.</h2>
+                    <p>Designed perfectly for modern, fragmented social commerce. Get paid instantly when buyers confirm receipt.</p>
+                </div>
+                
+                <div class="bento-grid fade-up">
+                    
+                    <!-- Large Box: Product Focus -->
+                    <div class="bento-card bento-large" style="display:flex; flex-direction:column; justify-content:space-between; background: linear-gradient(to bottom right, #fff, #FFF7ED);">
+                        <div>
+                            <span class="badge" style="font-size:0.8rem; padding: 4px 12px; margin-bottom: 16px;">New Update</span>
+                            <h3 style="font-size: 2.2rem; max-width: 300px;">Showcase Products Securely</h3>
+                            <p style="color: #64748B; max-width: 350px;">Generate a unique trustlink.co URL for your items and share it in any DM.</p>
+                        </div>
+                        <div style="position: relative; text-align: center; margin-top: auto; display:flex; justify-content:center;">
+                            <img src="img/hero-product.png" alt="Premium Sneakers" style="max-width: 90%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+                            
+                            <div class="floating-ui" style="bottom: 20px; right: 20px; background: rgba(255,255,255,0.95);">
+                                <div style="text-align: left;">
+                                    <p style="margin:0; font-weight:700; color:#0F172A;">Nike Shoes Jordan</p>
+                                    <p style="margin:0; font-weight:800; font-size:1.2rem;">$849.99</p>
                                 </div>
                             </div>
-                            <div class="mockup-progress">
-                                <div class="step active"></div>
-                                <div class="step-line active"></div>
-                                <div class="step active"></div>
-                                <div class="step-line"></div>
-                                <div class="step"></div>
-                            </div>
-                            <div class="mockup-btn">Mark as Shipped</div>
-                        </div>
-                    </div>
-                    <div class="glass-card floating-card card-1">
-                        <h4>Moolre Push</h4>
-                        <p>Instant buyer checkout</p>
-                    </div>
-                    <div class="glass-card floating-card card-2">
-                        <h4>Auto-Release</h4>
-                        <p>72hr dispute window</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section id="features" class="features">
-            <div class="container">
-                <div class="section-header fade-up">
-                    <h2>Everything you need to sell safely</h2>
-                    <p>Built for the modern fragmented social landscape.</p>
-                </div>
-                <div class="features-grid">
-                    <div class="feature-card glass-card fade-up">
-                        <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg></div>
-                        <h3>Dynamic Links</h3>
-                        <p>Lightweight utility to rapidly input item details and generate a shareable
-                            trustlink.co/pay/{ref} URL for any DM.</p>
-                    </div>
-                    <div class="feature-card glass-card fade-up" style="transition-delay: 0.1s;">
-                        <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg></div>
-                        <h3>Automated Escrow</h3>
-                        <p>Listens for Moolre Payment webhooks to mathematically log and hold funds within the master
-                            wallet.</p>
-                    </div>
-                    <div class="feature-card glass-card fade-up" style="transition-delay: 0.2s;">
-                        <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg></div>
-                        <h3>Cross-Channel Alerts</h3>
-                        <p>Real-time updates via SMS/WhatsApp APIs to both parties when payments are secured or items
-                            ship.</p>
-                    </div>
-                    <div class="feature-card glass-card fade-up" style="transition-delay: 0.3s;">
-                        <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" /></svg></div>
-                        <h3>Dispute Lock</h3>
-                        <p>A dedicated button inside the Web Tracking Room that freezes automated payouts pending admin
-                            review.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- State Machine / How It Works Section -->
-        <section id="how-it-works" class="state-machine">
-            <div class="container">
-                <div class="section-header fade-up">
-                    <h2>The Cross-Platform Transaction Engine</h2>
-                    <p>Because transactions happen across fragmented apps, we act as the absolute source of truth.</p>
-                </div>
-
-                <div class="steps-container">
-                    <div class="step-item fade-up">
-                        <div class="step-number">1</div>
-                        <div class="step-content glass-card">
-                            <h3>Initiated</h3>
-                            <p>Seller configures the payment parameters. A secure unique token reference is minted and
-                                shared.</p>
-                        </div>
-                    </div>
-                    <div class="step-connector fade-up"></div>
-                    <div class="step-item fade-up">
-                        <div class="step-number">2</div>
-                        <div class="step-content glass-card">
-                            <h3>Awaiting Payment</h3>
-                            <p>Buyer authenticates the Moolre push notification request on their mobile device via the
-                                web view.</p>
-                        </div>
-                    </div>
-                    <div class="step-connector fade-up"></div>
-                    <div class="step-item fade-up">
-                        <div class="step-number">3</div>
-                        <div class="step-content glass-card">
-                            <h3>Funds Escrowed</h3>
-                            <p>Moolre webhook received. Money is ring-fenced. Seller receives a WhatsApp alert to
-                                dispatch.</p>
-                        </div>
-                    </div>
-                    <div class="step-connector fade-up"></div>
-                    <div class="step-item fade-up">
-                        <div class="step-number">4</div>
-                        <div class="step-content glass-card">
-                            <h3>Item Shipped</h3>
-                            <p>Seller hits "Mark as Shipped." This fires the 72-hour auto-release background countdown
-                                daemon.</p>
-                        </div>
-                    </div>
-                    <div class="step-connector fade-up"></div>
-                    <div class="step-item fade-up">
-                        <div class="step-number">5</div>
-                        <div class="step-content glass-card">
-                            <h3>Completed</h3>
-                            <p>Buyer taps "Confirm Receipt" or 72h timer elapses. Moolre Disbursements API triggers
-                                vendor payout.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Testimonials Section -->
-        <section id="reviews" class="testimonials">
-            <div class="container">
-                <div class="section-header fade-up">
-                    <h2 class="section-title">Trusted by <span class="text-gradient">Vendors & Buyers</span></h2>
-                    <p class="section-subtitle">Don't just take our word for it. See how TrustLink is changing social commerce.</p>
-                </div>
-            </div>
-            
-            <div class="testimonials-slider fade-up">
-                <div class="testimonials-track">
-                    <!-- Original Set -->
-                    <div class="testimonial-card glass-card">
-                        <div class="stars">★★★★★</div>
-                        <p class="testimonial-text">"Before TrustLink, buyers were always hesitant to send money first. Now, I just send a link and they pay immediately. My sales have doubled!"</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">AK</div>
-                            <div class="author-info">
-                                <h4>Ama K.</h4>
-                                <span>Instagram Boutique Owner</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-card glass-card">
-                        <div class="stars">★★★★★</div>
-                        <p class="testimonial-text">"I bought a phone on Twitter and was scared of being scammed. The seller used TrustLink, and I felt so safe knowing my money was secure until I received the phone."</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar" style="background: linear-gradient(135deg, #10b981, #3b82f6);">KO</div>
-                            <div class="author-info">
-                                <h4>Kwame O.</h4>
-                                <span>Tech Gadget Buyer</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-card glass-card">
-                        <div class="stars">★★★★★</div>
-                        <p class="testimonial-text">"The Moolre payout integration is seamless. As soon as the buyer confirms receipt, the money hits my mobile money wallet instantly. Flawless execution."</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">ED</div>
-                            <div class="author-info">
-                                <h4>Ebo D.</h4>
-                                <span>Sneaker Reseller</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-card glass-card">
-                        <div class="stars">★★★★★</div>
-                        <p class="testimonial-text">"I sell custom wigs and the 72-hour auto-release gives me peace of mind. I ship the item and know I'll get paid even if the buyer forgets to confirm."</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar" style="background: linear-gradient(135deg, #06b6d4, #3b82f6);">SJ</div>
-                            <div class="author-info">
-                                <h4>Sarah J.</h4>
-                                <span>Beauty Vendor</span>
-                            </div>
                         </div>
                     </div>
 
-                    <!-- Duplicate Set for Infinite Scroll -->
-                    <div class="testimonial-card glass-card">
-                        <div class="stars">★★★★★</div>
-                        <p class="testimonial-text">"Before TrustLink, buyers were always hesitant to send money first. Now, I just send a link and they pay immediately. My sales have doubled!"</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">AK</div>
-                            <div class="author-info">
-                                <h4>Ama K.</h4>
-                                <span>Instagram Boutique Owner</span>
-                            </div>
+                    <!-- Tall Box: Stats -->
+                    <div class="bento-card bento-tall" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background: linear-gradient(135deg, #DCFCE7, #ECFDF5);">
+                        <div class="stat-card">
+                            <h3 style="color:#064E3B;">100%</h3>
+                            <p style="color:#047857; font-weight:500;">Fraud Prevention</p>
+                        </div>
+                        <div class="stat-card" style="margin-top: 24px;">
+                            <h3 style="color:#064E3B;">72hr</h3>
+                            <p style="color:#047857; font-weight:500;">Auto-Release Window</p>
+                        </div>
+                        <div class="stat-card" style="margin-top: 24px;">
+                            <h3 style="color:#064E3B;">24/7</h3>
+                            <p style="color:#047857; font-weight:500;">Dispute Resolution</p>
                         </div>
                     </div>
-                    <div class="testimonial-card glass-card">
-                        <div class="stars">★★★★★</div>
-                        <p class="testimonial-text">"I bought a phone on Twitter and was scared of being scammed. The seller used TrustLink, and I felt so safe knowing my money was secure until I received the phone."</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar" style="background: linear-gradient(135deg, #10b981, #3b82f6);">KO</div>
-                            <div class="author-info">
-                                <h4>Kwame O.</h4>
-                                <span>Tech Gadget Buyer</span>
-                            </div>
+
+                    <!-- Square Box 1 -->
+                    <div class="bento-card bento-square" style="background:#EFF6FF;">
+                        <h4 style="font-size:1.5rem; margin-bottom:12px; color:#1E3A8A;">Cross-Channel Alerts</h4>
+                        <p style="color:#3B82F6; font-size:0.95rem;">Real-time WhatsApp & SMS updates for both parties when payments are escrowed or shipped.</p>
+                    </div>
+
+                    <!-- Wide Box 2 -->
+                    <div class="bento-card bento-wide" style="display:flex; align-items:center; flex-wrap: wrap; gap:32px;">
+                        <div style="flex:1; min-width:250px;">
+                            <h4 style="font-size:1.8rem; margin-bottom:12px;">Dispute Lock</h4>
+                            <p style="color:#64748B;">A dedicated button to freeze automated payouts pending admin review, keeping everyone safe.</p>
+                        </div>
+                        <div style="flex:1; text-align:center; min-width:200px;">
+                            <button class="btn btn-primary" style="background:#EF4444; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);">LOCK FUNDS</button>
                         </div>
                     </div>
-                    <div class="testimonial-card glass-card">
-                        <div class="stars">★★★★★</div>
-                        <p class="testimonial-text">"The Moolre payout integration is seamless. As soon as the buyer confirms receipt, the money hits my mobile money wallet instantly. Flawless execution."</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">ED</div>
-                            <div class="author-info">
-                                <h4>Ebo D.</h4>
-                                <span>Sneaker Reseller</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-card glass-card">
-                        <div class="stars">★★★★★</div>
-                        <p class="testimonial-text">"I sell custom wigs and the 72-hour auto-release gives me peace of mind. I ship the item and know I'll get paid even if the buyer forgets to confirm."</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar" style="background: linear-gradient(135deg, #06b6d4, #3b82f6);">SJ</div>
-                            <div class="author-info">
-                                <h4>Sarah J.</h4>
-                                <span>Beauty Vendor</span>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </section>
 
         <!-- CTA Section -->
-        <section class="cta-section">
+        <section class="cta-section" style="margin-top: 60px;">
             <div class="container">
-                <div class="cta-box glass-card fade-up">
-                    <div class="glow-blob blob-3"></div>
-                    <h2>Ready to revolutionize your social sales?</h2>
-                    <p>Join thousands of vendors using TrustLink to eliminate fraud and build buyer confidence.</p>
-                    <a href="signup.html" class="btn btn-primary btn-large">Get Started Now</a>
+                <div class="cta-box bento-card fade-up" style="background: linear-gradient(135deg, #0F172A, #1E293B); color: white; border: none; padding: 80px 40px;">
+                    <div class="glow-blob blob-3" style="opacity:0.3;"></div>
+                    <h2 style="color:white; font-size: clamp(2rem, 4vw, 3.5rem);">Ready to close more sales?</h2>
+                    <p style="color: #94A3B8;">Join thousands of social vendors using TrustLink to eliminate fraud and build buyer confidence.</p>
+                    <a href="signup.html" class="btn btn-primary btn-large" style="background:white; color:#0F172A;">Get Started For Free</a>
                 </div>
             </div>
         </section>
@@ -341,7 +175,7 @@
                 </div>
                 <div class="link-group">
                     <h4>Resources</h4>
-                    <a href="https://docs.moolre.com" target="_blank" rel="noopener noreferrer">API Documentation (Moolre)</a>
+                    <a href="https://docs.moolre.com" target="_blank">API Documentation</a>
                     <a href="#">Seller Guide</a>
                 </div>
                 <div class="link-group">
@@ -352,7 +186,7 @@
             </div>
         </div>
         <div class="container copyright">
-            <p>&copy; 2026 TrustLink. Built for the Moolre Startup Cup.</p>
+            <p>&copy; 2026 TrustLink. Built for secure commerce.</p>
         </div>
     </footer>
 
@@ -360,5 +194,4 @@
     <script type="module" src="auth-handler.js"></script>
     </div>
 </body>
-
 </html>

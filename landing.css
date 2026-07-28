@@ -1,0 +1,186 @@
+/* landing.css - Modern Light Theme specific to the Landing Page */
+body.light-landing {
+    background-color: #F8FAFC; /* Very light slate */
+    color: #111827;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.light-landing h1, 
+.light-landing h2, 
+.light-landing h3, 
+.light-landing h4 {
+    font-family: 'Outfit', sans-serif;
+    color: #030712;
+}
+
+.light-landing .text-gradient {
+    background: linear-gradient(135deg, #111827 0%, #4B5563 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Background Blobs */
+.light-landing .glow-blob {
+    opacity: 0.7;
+    filter: blur(140px);
+}
+.light-landing .blob-1 { background: rgba(255, 237, 213, 1); } /* Soft Orange */
+.light-landing .blob-2 { background: rgba(224, 242, 254, 1); } /* Soft Blue */
+.light-landing .blob-3 { background: linear-gradient(to right, rgba(254, 240, 138, 1), rgba(167, 243, 208, 1)); }
+
+/* Navbar Overrides */
+.light-landing .navbar {
+    background: transparent;
+    border-bottom: none;
+}
+.light-landing .navbar.scrolled {
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.light-landing .logo { color: #111827; }
+.light-landing .nav-links a:not(.btn) { color: #4B5563; }
+.light-landing .nav-links a:not(.btn):hover { color: #111827; }
+.light-landing .mobile-menu-btn span { background: #111827; }
+
+/* Bento Box & Glassmorphism */
+.light-landing .bento-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 32px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03), inset 0 2px 6px rgba(255, 255, 255, 0.8);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    padding: 40px;
+}
+
+.light-landing .bento-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06), inset 0 2px 6px rgba(255, 255, 255, 0.8);
+}
+
+.light-landing .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+    margin-top: 60px;
+}
+
+/* Feature specific bento sizing */
+.light-landing .bento-large { grid-column: span 8; grid-row: span 2; min-height: 480px; }
+.light-landing .bento-tall { grid-column: span 4; grid-row: span 2; }
+.light-landing .bento-wide { grid-column: span 8; min-height: 240px; }
+.light-landing .bento-square { grid-column: span 4; min-height: 240px; }
+
+@media (max-width: 992px) {
+    .light-landing .bento-large, .light-landing .bento-tall, .light-landing .bento-wide, .light-landing .bento-square {
+        grid-column: span 12;
+    }
+}
+
+/* Floating UI Elements (Hero) */
+.light-landing .floating-ui {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    padding: 16px 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255,255,255,0.9);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+    animation: float 6s ease-in-out infinite;
+}
+
+.light-landing .hero-central-image {
+    width: 100%;
+    max-width: 440px;
+    border-radius: 40px;
+    object-fit: cover;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.1);
+}
+
+/* Buttons */
+.light-landing .btn-primary {
+    background: #0F172A;
+    color: #fff;
+    border-radius: 100px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+}
+.light-landing .btn-primary:hover {
+    background: #1F2937;
+    box-shadow: 0 12px 25px rgba(15, 23, 42, 0.25);
+}
+
+.light-landing .btn-outline {
+    border: 1px solid #E5E7EB;
+    color: #111827;
+    border-radius: 100px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+.light-landing .btn-outline:hover {
+    border-color: #D1D5DB;
+    background: #F9FAFB;
+}
+
+/* Specific floating UI components */
+.light-landing .chat-bubble {
+    border-radius: 20px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+.light-landing .chat-sender {
+    background: #F1F5F9;
+    color: #111827;
+    border-bottom-left-radius: 4px;
+}
+.light-landing .chat-receiver {
+    background: #0F172A;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.light-landing .stat-card {
+    padding: 24px;
+}
+.light-landing .stat-card h3 {
+    font-size: 2.5rem;
+    margin-bottom: 4px;
+}
+.light-landing .stat-card p {
+    color: #64748B;
+    font-size: 0.95rem;
+}
+
+/* Overriding specific hero text elements for light mode */
+.light-landing .hero-subtitle { color: #4B5563; }
+.light-landing .badge { 
+    background: #fff; 
+    border-color: #E2E8F0; 
+    color: #111827;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.light-landing .pill {
+    background: #fff !important;
+    border-color: #E2E8F0 !important;
+    color: #111827 !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+/* Footer overrides */
+.light-landing .footer {
+    background: #fff;
+    border-top: 1px solid #F1F5F9;
+}
+.light-landing .footer-brand p { color: #64748B; }
+.light-landing .link-group a { color: #64748B; }
+.light-landing .link-group a:hover { color: #0F172A; }
+.light-landing .copyright { border-top-color: #F1F5F9; color: #94A3B8; }
