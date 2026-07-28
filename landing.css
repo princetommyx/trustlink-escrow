@@ -193,3 +193,49 @@ body.light-landing {
 .light-landing .link-group a { color: #64748B; }
 .light-landing .link-group a:hover { color: #0F172A; }
 .light-landing .copyright { border-top-color: #F1F5F9; color: #94A3B8; }
+
+/* Showcase Card Specific Styles */
+.light-landing .showcase-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+}
+.light-landing .showcase-card .text-content {
+    flex: 1;
+    min-width: 250px;
+}
+.light-landing .showcase-card .image-content {
+    flex: 1.2;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+.light-landing .showcase-card img {
+    width: 100%;
+    max-width: 350px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 992px) {
+    .light-landing .showcase-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 32px;
+    }
+    .light-landing .showcase-card .text-content h3,
+    .light-landing .showcase-card .text-content p {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .light-landing .showcase-card img {
+        max-width: 280px;
+    }
+    .light-landing .showcase-card .floating-ui {
+        right: 0px;
+        bottom: 10px;
+        padding: 12px 16px;
+    }
+}
