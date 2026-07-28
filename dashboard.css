@@ -1109,7 +1109,7 @@ input[type=number] {
 .dashboard-grid {
     display: flex;
     flex-direction: row;
-    gap: 24px;
+    gap: 40px;
 }
 
 .dashboard-main-col {
@@ -1120,7 +1120,7 @@ input[type=number] {
 }
 
 .dashboard-side-col {
-    width: 320px;
+    width: 360px;
     display: flex;
     flex-direction: column;
 }
@@ -1177,8 +1177,8 @@ input[type=number] {
 
 .financial-cards-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
     flex: 1;
 }
 
@@ -1199,13 +1199,32 @@ input[type=number] {
 .fin-top {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 24px;
+    margin-bottom: 8px;
+    align-items: center;
 }
 
 .fin-label {
     font-size: 0.85rem;
     color: #475569;
     font-weight: 500;
+}
+
+.fin-dots {
+    color: #475569;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.fin-graph-placeholder {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 16px 0;
+}
+
+.fin-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
 }
 
 .fin-value {
@@ -1215,6 +1234,13 @@ input[type=number] {
     margin: 0;
 }
 
+.fin-trend {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.fin-trend.trend-up { color: #10B981; }
+.fin-trend.trend-down { color: #EF4444; }
+
 .bg-green { background: #DCFCE7; }
 .bg-orange { background: #FFEDD5; }
 .bg-blue { background: #DBEAFE; }
@@ -1222,9 +1248,7 @@ input[type=number] {
 /* Transactions Widget */
 .transactions-widget {
     background: #ffffff;
-    border: 1px solid var(--border-color);
     border-radius: 24px;
-    padding: 24px;
 }
 
 .tx-list {

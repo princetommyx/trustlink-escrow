@@ -131,6 +131,9 @@ onAuthStateChanged(auth, async (user) => {
                 currentBalance = parseFloat(data.walletBalance || 0);
                 const balance = currentBalance.toFixed(2);
                 document.getElementById('overview-balance').textContent = `GH₵ ${balance}`;
+                if(document.getElementById('verification-email-text')) {
+                    document.getElementById('verification-email-text').textContent = data.email || user.email;
+                }
                 if(document.getElementById('wallet-available-balance')) {
                     document.getElementById('wallet-available-balance').textContent = `GH₵ ${balance}`;
                 }
@@ -244,17 +247,25 @@ function updateOverviewStats() {
             activityContainer.innerHTML = '';
             recentActivities.slice(0, 5).forEach(act => {
                 let iconBg = "bg-blue-light";
-                if(act.title.includes("COMPLETED")) iconBg = "bg-green-light";
-                if(act.title.includes("CANCELED") || act.title.includes("DISPUTED")) iconBg = "bg-orange-light";
+                let iconColor = "#3B82F6";
+                if(act.title.includes("COMPLETED")) { iconBg = "bg-green-light"; iconColor = "#10B981"; }
+                if(act.title.includes("CANCELED") || act.title.includes("DISPUTED")) { iconBg = "bg-orange-light"; iconColor = "#F97316"; }
 
                 activityContainer.innerHTML += `
-                    <div class="tx-item">
-                        <div class="tx-icon ${iconBg}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75" /></svg></div>
-                        <div class="tx-info">
-                            <span class="tx-name" style="font-size: 0.85rem;">${act.title}</span>
-                            <span class="tx-date" style="font-size: 0.75rem;">${act.description}</span>
+                    <div class="tx-item" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F1F5F9; padding-bottom: 12px; margin-bottom: 12px;">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <div class="tx-icon ${iconBg}" style="width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: ${iconColor};">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75" /></svg>
+                            </div>
+                            <div class="tx-info" style="display: flex; flex-direction: column;">
+                                <span class="tx-name" style="font-size: 0.95rem; font-weight: 600; color: #111827;">${act.title}</span>
+                                <span class="tx-date" style="font-size: 0.75rem; color: #64748B;">${new Date(act.time).toLocaleDateString()}</span>
+                            </div>
                         </div>
-                        <div class="tx-amount" style="font-size: 0.75rem; font-weight: 400; color: #64748b; text-align: right;">${new Date(act.time).toLocaleString()}</div>
+                        <div class="tx-amount" style="display: flex; align-items: center; gap: 6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; color: #cbd5e1;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>
+                            <span style="font-size: 0.95rem; font-weight: 700; color: #111827; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${act.description}">${act.description.split('(')[0].trim()}</span>
+                        </div>
                     </div>
                 `;
             });

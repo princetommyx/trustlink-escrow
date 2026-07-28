@@ -144,76 +144,208 @@
                     <div class="dashboard-main-col">
                         <!-- Top Row: My Card & Financial Record -->
                         <div class="dashboard-top-row">
+                            <!-- My Card (Dark Widget) -->
                             <div class="my-card-widget">
-                                <h3 style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 24px; font-weight: 500;">Total Wallet Balance</h3>
-                                <h2 id="overview-balance" style="color: white; font-size: 2.2rem; margin: 0; font-family: 'Outfit', sans-serif;">GH₵ 0.00</h2>
-                                <div style="margin-top: 32px; display: flex; gap: 12px; position: relative; z-index: 2;">
-                                    <button class="btn btn-primary btn-sm" style="background: white; color: #111827; border: none; font-weight: 600; padding: 10px 20px;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">Top Up</button>
-                                    <button class="btn btn-outline btn-sm" style="border-color: rgba(255,255,255,0.3); color: white; font-weight: 600; padding: 10px 20px;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">Withdraw</button>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                    <h3 style="color: rgba(255,255,255,0.7); font-size: 1rem; font-weight: 500; margin: 0;">My Card</h3>
+                                    <div class="my-card-graph" style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="color: #22C55E; font-size: 0.8rem;">↑ 10%</span>
+                                        <svg width="40" height="20" viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M0 15C5 15 10 5 15 5C20 5 25 15 30 15C35 15 40 5 40 5" stroke="#22C55E" stroke-width="2" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h2 id="overview-balance" style="color: white; font-size: 2.2rem; margin: 0 0 32px 0; font-family: 'Outfit', sans-serif;">$0.00</h2>
+                                <div style="display: flex; gap: 12px; position: relative; z-index: 2;">
+                                    <button class="btn btn-primary btn-sm my-card-btn" style="background: white; color: #111827; border: none; font-weight: 600; padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 8px;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                        Deposit
+                                    </button>
+                                    <button class="btn btn-outline btn-sm my-card-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-weight: 600; padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 8px;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
+                                        Withdraw
+                                    </button>
                                 </div>
                                 <div class="card-bg-shape"></div>
                             </div>
                             
+                            <!-- Financial Record (Pastel Cards) -->
                             <div class="financial-record-widget">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
-                                    <h3 style="margin: 0; font-size: 1.1rem; color: #111827;">Contract Stats</h3>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
+                                    <h3 style="margin: 0; font-size: 1.1rem; color: #111827; font-weight: 600;">Financial Record</h3>
+                                    <div class="dropdown" style="font-size: 0.85rem; color: #64748B; background: #F8F9FA; padding: 6px 12px; border-radius: 8px; border: 1px solid #E2E8F0; cursor: pointer;">Month ▼</div>
                                 </div>
-                                <div class="financial-cards-grid" style="grid-template-columns: repeat(3, 1fr);">
+                                <div class="financial-cards-grid">
                                     <div class="fin-card bg-green">
                                         <div class="fin-top">
                                             <span class="fin-label">Completed Escrows</span>
+                                            <span class="fin-dots">⋮</span>
                                         </div>
-                                        <h3 class="fin-value" id="overview-completed-escrows">0</h3>
+                                        <div class="fin-graph-placeholder">
+                                            <svg width="60" height="30" viewBox="0 0 60 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 25C10 25 15 10 25 10C35 10 40 25 50 25C55 25 60 5 60 5" stroke="#22C55E" stroke-width="2"/></svg>
+                                        </div>
+                                        <div class="fin-bottom">
+                                            <h3 class="fin-value" id="overview-completed-escrows">0</h3>
+                                            <span class="fin-trend trend-up">↑ 17%</span>
+                                        </div>
                                     </div>
                                     <div class="fin-card bg-orange">
                                         <div class="fin-top">
                                             <span class="fin-label">Active Escrows</span>
+                                            <span class="fin-dots">⋮</span>
                                         </div>
-                                        <h3 class="fin-value" id="overview-active-escrows">0</h3>
+                                        <div class="fin-graph-placeholder">
+                                            <svg width="60" height="30" viewBox="0 0 60 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 5C10 5 15 20 25 20C35 20 40 10 50 10C55 10 60 25 60 25" stroke="#F97316" stroke-width="2"/></svg>
+                                        </div>
+                                        <div class="fin-bottom">
+                                            <h3 class="fin-value" id="overview-active-escrows">0</h3>
+                                            <span class="fin-trend trend-up">↑ 44%</span>
+                                        </div>
                                     </div>
                                     <div class="fin-card bg-blue">
                                         <div class="fin-top">
                                             <span class="fin-label">Pending Releases</span>
+                                            <span class="fin-dots">⋮</span>
                                         </div>
-                                        <h3 class="fin-value" id="overview-pending-releases">0</h3>
+                                        <div class="fin-graph-placeholder">
+                                            <svg width="60" height="30" viewBox="0 0 60 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 20C10 20 15 10 25 10C35 10 40 20 50 20C55 20 60 5 60 5" stroke="#3B82F6" stroke-width="2"/></svg>
+                                        </div>
+                                        <div class="fin-bottom">
+                                            <h3 class="fin-value" id="overview-pending-releases">0</h3>
+                                            <span class="fin-trend trend-up">↑ 45%</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Quick Actions -->
-                        <div class="quick-actions-widget" style="margin-top: 24px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 24px; padding: 24px;">
-                            <h3 style="margin: 0 0 24px 0; font-size: 1.1rem; color: #111827;">Quick Actions</h3>
-                            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                                <button class="btn btn-primary" style="flex: 1; padding: 16px; font-size: 1rem;" onclick="document.getElementById('btn-new-escrow').click()">+ Create New Escrow</button>
-                                <button class="btn btn-outline" style="flex: 1; padding: 16px; font-size: 1rem;" onclick="document.querySelector('[data-target=\'view-products\']').click()">Manage Products</button>
+                        <!-- Money Flow (Chart Placeholder) -->
+                        <div class="money-flow-widget" style="margin-top: 32px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
+                                <h3 style="margin: 0; font-size: 1.1rem; color: #111827; font-weight: 600;">Escrow Flow</h3>
+                                <div style="display: flex; gap: 16px; font-size: 0.85rem; color: #64748B;">
+                                    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #111827;"></span> Total Escrows</span>
+                                    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #F97316;"></span> Pending Volumes</span>
+                                </div>
+                                <div class="dropdown" style="font-size: 0.85rem; color: #64748B; background: #F8F9FA; padding: 6px 12px; border-radius: 8px; border: 1px solid #E2E8F0; cursor: pointer;">Weekly ▼</div>
+                            </div>
+                            <!-- Mockup Chart Graphic -->
+                            <div class="chart-container" style="height: 200px; width: 100%; border-bottom: 1px solid #E2E8F0; position: relative;">
+                                <svg width="100%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none">
+                                    <!-- Grid Lines -->
+                                    <line x1="0" y1="50" x2="800" y2="50" stroke="#F1F5F9" stroke-width="1"/>
+                                    <line x1="0" y1="100" x2="800" y2="100" stroke="#F1F5F9" stroke-width="1"/>
+                                    <line x1="0" y1="150" x2="800" y2="150" stroke="#F1F5F9" stroke-width="1"/>
+                                    
+                                    <!-- Orange Line -->
+                                    <path d="M0 120 Q 100 80, 200 130 T 400 150 T 600 90 T 800 110" fill="none" stroke="#F97316" stroke-width="2" stroke-dasharray="4 4"/>
+                                    
+                                    <!-- Black Line -->
+                                    <path d="M0 150 Q 100 110, 200 140 T 400 60 T 600 130 T 800 50" fill="none" stroke="#111827" stroke-width="3"/>
+                                    <circle cx="400" cy="60" r="4" fill="#111827"/>
+                                </svg>
+                                <!-- Mock Tooltip -->
+                                <div style="position: absolute; top: 10px; left: 360px; background: #111827; color: white; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; text-align: center;">
+                                    <div style="font-weight: 600;">$2289</div>
+                                    <div style="color: rgba(255,255,255,0.6); font-size: 0.7rem;">07 Sep, Thu</div>
+                                    <div style="position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #111827;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Actions Grid -->
+                        <div class="bottom-actions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px;">
+                            <!-- Create Escrow (like Send Money To) -->
+                            <div class="action-card" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
+                                    <h3 style="margin: 0; font-size: 1.05rem; color: #111827; font-weight: 600;">Create Escrow</h3>
+                                    <span style="color: #64748B; cursor: pointer;">⋮</span>
+                                </div>
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <button class="btn-icon-add" style="width: 48px; height: 48px; border-radius: 50%; background: #111827; color: white; border: none; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="document.getElementById('btn-new-escrow').click()">+</button>
+                                    <div class="avatar-stack" style="display: flex;">
+                                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #F1F5F9; border: 2px solid white; margin-left: -12px; z-index: 3;"></div>
+                                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #E2E8F0; border: 2px solid white; margin-left: -12px; z-index: 2;"></div>
+                                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #CBD5E1; border: 2px solid white; margin-left: -12px; z-index: 1;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Manage Products (like Scheduled Payments) -->
+                            <div class="action-card" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
+                                    <h3 style="margin: 0; font-size: 1.05rem; color: #111827; font-weight: 600;">Quick Actions</h3>
+                                    <span style="color: #64748B; cursor: pointer;">⋮</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div style="color: #64748B; font-size: 0.8rem; margin-bottom: 4px;">Products</div>
+                                        <div style="color: #111827; font-weight: 600; font-size: 0.95rem;">Manage</div>
+                                    </div>
+                                    <div>
+                                        <div style="color: #64748B; font-size: 0.8rem; margin-bottom: 4px;">Profile</div>
+                                        <div style="color: #111827; font-weight: 600; font-size: 0.95rem;">Settings</div>
+                                    </div>
+                                    <button class="btn btn-outline btn-sm" style="border: 1px solid #E2E8F0; background: #F8F9FA; color: #111827; border-radius: 8px; font-weight: 500;" onclick="document.querySelector('[data-target=\'view-products\']').click()">View</button>
+                                </div>
                             </div>
                         </div>
 
                     </div>
 
                     <div class="dashboard-side-col">
+                        <!-- Transactions List -->
                         <div class="transactions-widget">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                                <h3 style="margin: 0; font-size: 1.1rem; color: #111827;">Recent Activity</h3>
-                                <span style="font-size: 0.8rem; color: #64748b; background: #F1F5F9; padding: 4px 8px; border-radius: 4px;">Latest ▼</span>
+                                <h3 style="margin: 0; font-size: 1.1rem; color: #111827; font-weight: 600;">Transactions</h3>
+                                <div class="dropdown" style="font-size: 0.85rem; color: #64748B; background: #F8F9FA; padding: 6px 12px; border-radius: 8px; border: 1px solid #E2E8F0; cursor: pointer;">Month ▼</div>
                             </div>
-                            <div class="tx-list" id="recent-activity-list">
-                                <!-- Injected dynamically -->
+                            <div class="tx-list ibanko-tx-list" id="recent-activity-list">
+                                <!-- Injected dynamically, styled via CSS .ibanko-tx-item -->
                                 <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px;">
                                     No recent activity</p>
                             </div>
                         </div>
                         
-                        <div class="verification-widget" style="margin-top: 24px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 24px; padding: 24px;">
-                            <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; color: #111827;">Verification Status</h3>
-                            <div style="background: #F1F5F9; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                <span style="font-weight: 500; font-size: 0.9rem;">Email Address</span>
-                                <span id="status-email" class="badge-status badge-success">Verified</span>
+                        <!-- Available Card (Verification Status) -->
+                        <div class="available-card-widget" style="margin-top: 32px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                <h3 style="margin: 0; font-size: 1.1rem; color: #111827; font-weight: 600;">Verification</h3>
+                                <span style="font-size: 0.85rem; color: #64748B; font-weight: 500; cursor: pointer;">View all</span>
                             </div>
-                            <div style="background: #F1F5F9; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-weight: 500; font-size: 0.9rem;">Phone Number</span>
-                                <span id="status-phone" class="badge-status badge-warning">Pending</span>
+                            
+                            <div class="credit-card-style" style="background: #F1F5F9; border-radius: 20px; padding: 24px; position: relative; overflow: hidden; margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 32px;">
+                                    <div style="font-size: 1.2rem; font-weight: 600; color: #111827;">Email</div>
+                                    <div style="font-weight: 700; color: #111827; font-style: italic;">STATUS</div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                    <div>
+                                        <div style="color: #64748B; font-size: 0.75rem; margin-bottom: 4px;">Address</div>
+                                        <div style="color: #111827; font-weight: 600; font-size: 0.9rem; letter-spacing: 1px;" id="verification-email-text">user@email.com</div>
+                                    </div>
+                                    <div>
+                                        <div style="color: #64748B; font-size: 0.75rem; margin-bottom: 4px;">State</div>
+                                        <div style="color: #22C55E; font-weight: 700; font-size: 0.9rem;" id="status-email">Verified</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="credit-card-style" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; padding: 24px; position: relative; overflow: hidden;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 32px;">
+                                    <div style="font-size: 1.2rem; font-weight: 600; color: #111827;">Phone</div>
+                                    <div style="font-weight: 700; color: #111827; font-style: italic;">STATUS</div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                    <div>
+                                        <div style="color: #64748B; font-size: 0.75rem; margin-bottom: 4px;">Number</div>
+                                        <div style="color: #111827; font-weight: 600; font-size: 0.9rem; letter-spacing: 1px;">*** *** ****</div>
+                                    </div>
+                                    <div>
+                                        <div style="color: #64748B; font-size: 0.75rem; margin-bottom: 4px;">State</div>
+                                        <div style="color: #F59E0B; font-weight: 700; font-size: 0.9rem;" id="status-phone">Pending</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
