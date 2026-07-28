@@ -29,42 +29,47 @@
             <div class="sidebar-header">
                 <a href="index.html" class="logo" style="font-size: 1.2rem; flex-direction: row; margin: 0; color: var(--text-main);">
                     <div class="logo-icon" style="width: 24px; height: 24px;"></div>
-                    <span class="logo-text">Admin Panel</span>
+                    <span class="logo-text">TrustLink</span>
                 </a>
                 <button id="btn-collapse" class="btn-icon" style="padding: 4px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
             </div>
             
-            <nav class="sidebar-nav">
+            <div class="sidebar-user" style="padding: 24px; text-align: center; border-bottom: 1px solid #f1f5f9; margin-bottom: 16px;">
+                <div class="avatar" id="user-avatar" style="width: 64px; height: 64px; background: #9333ea; border-radius: 50%; margin: 0 auto 12px;"></div>
+                <h3 class="user-name" id="user-name" style="margin: 0 0 4px; font-size: 1.1rem; color: #111827; font-family: 'Outfit', sans-serif;">Loading...</h3>
+                <span class="user-role" style="color: #94a3b8; font-size: 0.85rem;">Platform Owner</span>
+            </div>
+
+            <nav class="sidebar-nav" style="flex: 1;">
+                <div style="padding: 0 24px 8px; font-size: 0.8rem; font-weight: 600; color: #111827;">Overview</div>
                 <a href="#" class="nav-item active" data-target="view-overview">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg></span> <span class="nav-text" data-short="Stats">Analytics</span>
+                    <span class="nav-text" data-short="Stats" style="color: #64748b;">Analytics</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-users">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg></span> <span class="nav-text" data-short="Users">Users & KYC</span>
+                    <span class="nav-text" data-short="Users" style="color: #64748b;">Users & KYC</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-disputes">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" /></svg></span> <span class="nav-text" data-short="Disputes">Disputes</span>
+                    <span class="nav-text" data-short="Disputes" style="color: #64748b;">Disputes</span>
                     <span class="badge" id="disputes-badge" style="background: var(--danger); display: none;">0</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-escrows-admin">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg></span> <span class="nav-text" data-short="Escrows">Escrows</span>
+                    <span class="nav-text" data-short="Escrows" style="color: #64748b;">Escrows</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-approvals">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span> <span class="nav-text" data-short="Payouts">Payouts</span>
-                </a>
-                <a href="#" class="nav-item" data-target="view-settings">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077l1.41-.513m14.095-5.13l1.41-.513M5.106 17.785l1.15-.964m11.49-9.642l1.149-.964M7.501 19.79l.867-1.23M15.631 5.44l.867-1.23M10.5 21l.513-1.41m2.974-14.095l.513-1.41m-2.974 15.505l-.964-1.15m5.142-11.49l-.964-1.149m-5.142 12.64l-1.23-.867m7.41-10.45l-1.23-.867" /></svg></span> <span class="nav-text" data-short="Settings">Settings</span>
+                    <span class="nav-text" data-short="Payouts" style="color: #64748b;">Payouts</span>
                 </a>
             </nav>
             
-            <div class="sidebar-footer">
-                <div class="user-card">
-                    <div class="avatar" id="user-avatar" style="width: 36px; height: 36px; background: #9333ea; border-radius: 50%;"></div>
-                    <div class="user-info">
-                        <span class="user-name" id="user-name">Loading...</span>
-                        <span class="user-role" style="color: #c084fc;">Platform Owner</span>
-                    </div>
-                </div>
-                <button class="btn btn-outline" id="btn-signout" style="width: 100%; margin-top: 16px; padding: 10px; font-size: 0.85rem; border-color: #9333ea; color: #9333ea;">Sign Out</button>
+            <div class="sidebar-bottom-nav" style="padding: 16px 24px;">
+                <a href="#" class="nav-item" data-target="view-settings" style="padding-left: 0; padding-right: 0; margin-bottom: 8px;">
+                    <span class="nav-text" data-short="Settings" style="color: #64748b;">Settings</span>
+                </a>
+                <button class="nav-item" id="btn-signout" style="width: 100%; background: none; border: none; text-align: left; padding: 12px 0; color: #64748b; font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    Sign Out 
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                    </svg>
+                </button>
             </div>
         </aside>
 
@@ -89,18 +94,57 @@
             
             <div class="dashboard-content">
                 <!-- Analytics View -->
-                <div id="view-overview" class="view-section active" style="gap: 32px; display: flex; flex-direction: column;">
+                <div id="view-overview" class="view-section active dashboard-grid">
                     
-                    <!-- Charts Section -->
-                    <div class="charts-grid-2">
-                        <div class="chart-card-modern">
+                    <div class="dashboard-main-col">
+                        <!-- Top Row: My Card & Financial Record -->
+                        <div class="dashboard-top-row">
+                            <div class="my-card-widget">
+                                <h3 style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 24px; font-weight: 500;">Total Escrowed Funds</h3>
+                                <h2 id="stat-total-escrowed" style="color: white; font-size: 2.2rem; margin: 0; font-family: 'Outfit', sans-serif;">Loading...</h2>
+                                <div style="margin-top: 32px; display: flex; gap: 12px; position: relative; z-index: 2;">
+                                    <button class="btn btn-primary btn-sm" style="background: white; color: #111827; border: none; font-weight: 600; padding: 10px 20px;">Top Up</button>
+                                    <button class="btn btn-outline btn-sm" style="border-color: rgba(255,255,255,0.3); color: white; font-weight: 600; padding: 10px 20px;">Withdraw</button>
+                                </div>
+                                <div class="card-bg-shape"></div>
+                            </div>
+                            
+                            <div class="financial-record-widget">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                                    <h3 style="margin: 0; font-size: 1.1rem; color: #111827;">Financial Record</h3>
+                                </div>
+                                <div class="financial-cards-grid">
+                                    <div class="fin-card bg-green">
+                                        <div class="fin-top">
+                                            <span class="fin-label">Total Users</span>
+                                        </div>
+                                        <h3 class="fin-value" id="stat-total-users">...</h3>
+                                    </div>
+                                    <div class="fin-card bg-orange">
+                                        <div class="fin-top">
+                                            <span class="fin-label">Total Deposited</span>
+                                        </div>
+                                        <h3 class="fin-value" id="stat-total-deposits">...</h3>
+                                    </div>
+                                    <div class="fin-card bg-blue">
+                                        <div class="fin-top">
+                                            <span class="fin-label">Total Withdrawn</span>
+                                        </div>
+                                        <h3 class="fin-value" id="stat-total-withdrawals">...</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Money Flow Chart -->
+                        <div class="chart-card-modern" style="margin-top: 24px;">
                             <div class="chart-header">
-                                <h3 class="chart-title">Deposit & Withdraw Report</h3>
+                                <h3 class="chart-title">Money Flow</h3>
                                 <div class="chart-actions">
-                                    <select class="chart-date-filter" id="dw-chart-range">
-                                        <option value="7">Last 7 days</option>
-                                        <option value="14" selected>Last 14 days</option>
-                                        <option value="30">Last 30 days</option>
+                                    <select class="chart-date-filter" id="dw-chart-range" style="border: none; background: #F1F5F9; border-radius: 8px; padding: 6px 12px;">
+                                        <option value="7">Weekly</option>
+                                        <option value="14" selected>Bi-Weekly</option>
+                                        <option value="30">Monthly</option>
                                     </select>
                                 </div>
                             </div>
@@ -108,14 +152,16 @@
                                 <canvas id="depositWithdrawChart"></canvas>
                             </div>
                         </div>
-                        <div class="chart-card-modern">
+
+                        <!-- Transactions Chart -->
+                        <div class="chart-card-modern" style="margin-top: 24px;">
                             <div class="chart-header">
-                                <h3 class="chart-title">Transactions Report</h3>
+                                <h3 class="chart-title">Transaction Volume</h3>
                                 <div class="chart-actions">
-                                    <select class="chart-date-filter" id="tx-chart-range">
-                                        <option value="7">Last 7 days</option>
-                                        <option value="14" selected>Last 14 days</option>
-                                        <option value="30">Last 30 days</option>
+                                    <select class="chart-date-filter" id="tx-chart-range" style="border: none; background: #F1F5F9; border-radius: 8px; padding: 6px 12px;">
+                                        <option value="7">Weekly</option>
+                                        <option value="14" selected>Bi-Weekly</option>
+                                        <option value="30">Monthly</option>
                                     </select>
                                 </div>
                             </div>
@@ -123,144 +169,81 @@
                                 <canvas id="transactionsChart"></canvas>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Users Section -->
-                    <div>
-                        <h2 class="admin-section-title">Users Analytics</h2>
-                        <div class="stats-grid-4">
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Total Users</span>
-                                    <h3 class="stat-value" id="stat-total-users">...</h3>
-                                </div>
-                                <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg></div>
-                            </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Active Users</span>
-                                    <h3 class="stat-value" id="stat-active-users">...</h3>
-                                </div>
-                                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--success);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                            </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Email Unverified Users</span>
-                                    <h3 class="stat-value" id="stat-email-unverified-users">...</h3>
-                                </div>
-                                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg></div>
-                            </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Mobile Unverified Users</span>
-                                    <h3 class="stat-value" id="stat-mobile-unverified-users">...</h3>
-                                </div>
-                                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg></div>
-                            </div>
+                        
+                        <!-- Hidden old stats to prevent JS errors -->
+                        <div style="display: none;">
+                            <span id="stat-active-users"></span>
+                            <span id="stat-email-unverified-users"></span>
+                            <span id="stat-mobile-unverified-users"></span>
+                            <span id="stat-pending-deposits"></span>
+                            <span id="stat-rejected-deposits"></span>
+                            <span id="stat-deposit-charges"></span>
+                            <span id="stat-pending-withdrawals"></span>
+                            <span id="stat-rejected-withdrawals"></span>
+                            <span id="stat-withdrawal-charges"></span>
+                            <span id="stat-escrowed-funded"></span>
+                            <span id="stat-canceled-escrow"></span>
+                            <span id="stat-disputed-escrow"></span>
                         </div>
                     </div>
 
-                    <!-- Deposits Section -->
-                    <div>
-                        <h2 class="admin-section-title">Deposits Analytics</h2>
-                        <div class="stats-grid-4">
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Total Deposited</span>
-                                    <h3 class="stat-value" id="stat-total-deposits">...</h3>
-                                </div>
-                                <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" /></svg></div>
+                    <div class="dashboard-side-col">
+                        <div class="transactions-widget">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                <h3 style="margin: 0; font-size: 1.1rem; color: #111827;">Transactions</h3>
+                                <span style="font-size: 0.8rem; color: #64748b; background: #F1F5F9; padding: 4px 8px; border-radius: 4px;">Month ▼</span>
                             </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Pending Deposits</span>
-                                    <h3 class="stat-value" id="stat-pending-deposits">...</h3>
+                            <div class="tx-list">
+                                <!-- Dummy Items to match reference UI -->
+                                <div class="tx-item">
+                                    <div class="tx-icon bg-green-light"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75" /></svg></div>
+                                    <div class="tx-info">
+                                        <span class="tx-name">Escrow Deposit</span>
+                                        <span class="tx-date">08 Sep, 2022</span>
+                                    </div>
+                                    <div class="tx-amount">$1200</div>
                                 </div>
-                                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                            </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Rejected Deposits</span>
-                                    <h3 class="stat-value" id="stat-rejected-deposits">...</h3>
+                                <div class="tx-item">
+                                    <div class="tx-icon bg-green-light"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75" /></svg></div>
+                                    <div class="tx-info">
+                                        <span class="tx-name">Escrow Deposit</span>
+                                        <span class="tx-date">08 Sep, 2022</span>
+                                    </div>
+                                    <div class="tx-amount">$1750</div>
                                 </div>
-                                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                            </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Deposited Charge</span>
-                                    <h3 class="stat-value" id="stat-deposit-charges">...</h3>
+                                <div class="tx-item">
+                                    <div class="tx-icon bg-orange-light"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75" /></svg></div>
+                                    <div class="tx-info">
+                                        <span class="tx-name">Withdrawal</span>
+                                        <span class="tx-date">08 Sep, 2022</span>
+                                    </div>
+                                    <div class="tx-amount">$500</div>
                                 </div>
-                                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--success);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Withdrawals Section -->
-                    <div>
-                        <h2 class="admin-section-title">Withdrawals Analytics</h2>
-                        <div class="stats-grid-4">
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Total Withdrawn</span>
-                                    <h3 class="stat-value" id="stat-total-withdrawals">...</h3>
+                                <div class="tx-item">
+                                    <div class="tx-icon bg-green-light"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75" /></svg></div>
+                                    <div class="tx-info">
+                                        <span class="tx-name">Escrow Deposit</span>
+                                        <span class="tx-date">08 Sep, 2022</span>
+                                    </div>
+                                    <div class="tx-amount">$4300</div>
                                 </div>
-                                <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg></div>
-                            </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Pending Withdrawals</span>
-                                    <h3 class="stat-value" id="stat-pending-withdrawals">...</h3>
-                                </div>
-                                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                            </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Rejected Withdrawals</span>
-                                    <h3 class="stat-value" id="stat-rejected-withdrawals">...</h3>
-                                </div>
-                                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                            </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Withdrawal Charge</span>
-                                    <h3 class="stat-value" id="stat-withdrawal-charges">...</h3>
-                                </div>
-                                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--success);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Escrow Section -->
-                    <div>
-                        <h2 class="admin-section-title">Escrow Analytics</h2>
-                        <div class="stats-grid-4">
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Total Escrowed</span>
-                                    <h3 class="stat-value" id="stat-total-escrowed">...</h3>
-                                </div>
-                                <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg></div>
+                        <div class="system-status-widget" style="margin-top: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="margin: 0; font-size: 1.1rem; color: #111827;">System Health</h3>
+                                <span style="font-size: 0.8rem; color: #64748b; cursor: pointer;">View all</span>
                             </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Escrowed Funded</span>
-                                    <h3 class="stat-value" id="stat-escrowed-funded">...</h3>
+                            <div class="system-card light-cyan">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+                                    <span style="font-weight: 600; color: #111827;">Moolre API</span>
+                                    <span style="font-weight: 700;">ONLINE</span>
                                 </div>
-                                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--success);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                            </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Canceled Escrow</span>
-                                    <h3 class="stat-value" id="stat-canceled-escrow">...</h3>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b;">
+                                    <span>Response Time</span>
+                                    <span>24ms</span>
                                 </div>
-                                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg></div>
-                            </div>
-                            <div class="stat-card-modern">
-                                <div class="stat-info">
-                                    <span class="stat-label">Disputed Escrow</span>
-                                    <h3 class="stat-value" id="stat-disputed-escrow">...</h3>
-                                </div>
-                                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" /></svg></div>
                             </div>
                         </div>
                     </div>

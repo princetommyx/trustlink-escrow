@@ -332,3 +332,192 @@
 .admin-table-white .transaction-table tbody tr:hover td {
     background: #f8fafc;
 }
+
+/* NEW ADMIN DASHBOARD LAYOUT & WIDGETS */
+.dashboard-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+}
+
+.dashboard-main-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.dashboard-side-col {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        flex-direction: column;
+    }
+    .dashboard-side-col {
+        width: 100%;
+    }
+}
+
+.dashboard-top-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .dashboard-top-row {
+        flex-direction: column;
+    }
+}
+
+/* My Card Widget (Dark Theme) */
+.my-card-widget {
+    flex: 1.2;
+    background: #111827;
+    border-radius: 24px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(17, 24, 39, 0.15);
+}
+
+.my-card-widget .card-bg-shape {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 200px;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05));
+    border-radius: 50% 0 0 50%;
+    transform: translateX(30%);
+}
+
+/* Financial Record Widget */
+.financial-record-widget {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.financial-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    flex: 1;
+}
+
+@media (max-width: 640px) {
+    .financial-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.fin-card {
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.fin-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.fin-label {
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+.fin-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.bg-green { background: #DCFCE7; }
+.bg-orange { background: #FFEDD5; }
+.bg-blue { background: #DBEAFE; }
+
+/* Transactions Widget */
+.transactions-widget {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 24px;
+}
+
+.tx-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tx-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tx-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tx-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.bg-green-light { background: #ECFDF5; color: #10B981; }
+.bg-orange-light { background: #FFF7ED; color: #F97316; }
+
+.tx-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tx-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.tx-date {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.tx-amount {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* System Card */
+.system-status-widget {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 24px;
+}
+
+.system-card {
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.light-cyan { background: #ECFEFF; }
