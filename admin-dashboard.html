@@ -23,7 +23,8 @@
 </head>
 <body>
     <div class="dashboard-layout admin-theme">
-        <aside class="sidebar">
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <a href="index.html" class="logo" style="font-size: 1.2rem; flex-direction: row; margin: 0; color: var(--text-main);">
                     <div class="logo-icon" style="width: 24px; height: 24px;"></div>
@@ -537,5 +538,35 @@
     <script src="node_modules/gsap/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="admin-dashboard.js"></script>
+
+    <!-- Mobile Drawer Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuBtn = document.getElementById('topbar-menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+
+            function toggleMobileMenu() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('open');
+                    backdrop.classList.toggle('active');
+                }
+            }
+
+            mobileMenuBtn?.addEventListener('click', toggleMobileMenu);
+            backdrop?.addEventListener('click', toggleMobileMenu);
+
+            // Also close drawer if a sidebar nav item is clicked on mobile
+            const sidebarNavItems = sidebar.querySelectorAll('.nav-item');
+            sidebarNavItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('open');
+                        backdrop.classList.remove('active');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

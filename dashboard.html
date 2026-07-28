@@ -1,89 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrustLink Dashboard - Control Center</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233B82F6'/%3E%3Cstop offset='1' stop-color='%2306B6D4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Crect x='10' y='10' width='12' height='12' rx='3' fill='white'/%3E%3C/svg%3E">
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233B82F6'/%3E%3Cstop offset='1' stop-color='%2306B6D4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Crect x='10' y='10' width='12' height='12' rx='3' fill='white'/%3E%3C/svg%3E">
     <!-- Syncing your team's core templates with your new separated style sheet -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="dashboard.css">
     <!-- SEO Metadata -->
-    <meta name="description" content="TrustLink Escrow: Secure asynchronous escrow platform for social media vendors. Create secure payment links for safe commerce.">
+    <meta name="description"
+        content="TrustLink Escrow: Secure asynchronous escrow platform for social media vendors. Create secure payment links for safe commerce.">
     <meta property="og:title" content="TrustLink Escrow - Secure Social Commerce">
-    <meta property="og:description" content="The ultimate asynchronous escrow platform for social media vendors. Generate secure payment links for Instagram, TikTok, X, and WhatsApp.">
+    <meta property="og:description"
+        content="The ultimate asynchronous escrow platform for social media vendors. Generate secure payment links for Instagram, TikTok, X, and WhatsApp.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://trustlink.co">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="TrustLink Escrow - Secure Social Commerce">
-    <meta name="twitter:description" content="The ultimate asynchronous escrow platform for social media vendors. Generate secure payment links for Instagram, TikTok, X, and WhatsApp.">
+    <meta name="twitter:description"
+        content="The ultimate asynchronous escrow platform for social media vendors. Generate secure payment links for Instagram, TikTok, X, and WhatsApp.">
 </head>
+
 <body>
     <div class="dashboard-layout">
         <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <a href="index.html" class="logo" style="font-size: 1.2rem; flex-direction: row; margin: 0; color: var(--text-main);">
+                <a href="index.html" class="logo"
+                    style="font-size: 1.2rem; flex-direction: row; margin: 0; color: var(--text-main);">
                     <div class="logo-icon" style="width: 24px; height: 24px;"></div>
                     <span class="logo-text">TrustLink</span>
                 </a>
-                <button id="btn-collapse" class="btn-icon" style="padding: 4px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
+                <button id="btn-collapse" class="btn-icon" style="padding: 4px;"><svg xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                        style="width: 24px; height: 24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg></button>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active" data-target="view-overview">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg></span> <span class="nav-text" data-short="Home">Overview</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                        </svg></span> <span class="nav-text" data-short="Home">Overview</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-escrows">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg></span> <span class="nav-text" data-short="Escrows">Escrow Contracts</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                        </svg></span> <span class="nav-text" data-short="Escrows">Escrow Contracts</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-products">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" /></svg></span> <span class="nav-text" data-short="Products">My Products</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
+                        </svg></span> <span class="nav-text" data-short="Products">My Products</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-wallet">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" /></svg></span> <span class="nav-text" data-short="Wallet">Wallet</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+                        </svg></span> <span class="nav-text" data-short="Wallet">Wallet</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-messages">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" /></svg></span> <span class="nav-text" data-short="Chat">Messages</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                        </svg></span> <span class="nav-text" data-short="Chat">Messages</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-transactions">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg></span> <span class="nav-text" data-short="Logs">Transaction Logs</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                        </svg></span> <span class="nav-text" data-short="Logs">Transaction Logs</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-profile">
-                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg></span> <span class="nav-text" data-short="Profile">Profile</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg></span> <span class="nav-text" data-short="Profile">Profile</span>
                 </a>
             </nav>
-            
+
             <div class="sidebar-footer">
                 <div class="user-card">
-                    <div class="avatar" id="user-avatar" style="width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%;"></div>
+                    <div class="avatar" id="user-avatar"
+                        style="width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%;">
+                    </div>
                     <div class="user-info">
                         <span class="user-name" id="user-name">Loading...</span>
                         <span class="user-role">User</span>
                     </div>
                 </div>
-                <button class="btn btn-outline" id="btn-signout" style="width: 100%; margin-top: 16px; padding: 10px; font-size: 0.85rem;">Sign Out</button>
+                <button class="btn btn-outline" id="btn-signout"
+                    style="width: 100%; margin-top: 16px; padding: 10px; font-size: 0.85rem;">Sign Out</button>
             </div>
         </aside>
 
         <nav class="mobile-bottom-nav">
             <a href="#" class="nav-item active" data-target="view-overview">
-                <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg></span>
+                <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                    </svg></span>
                 <span class="nav-text">Home</span>
             </a>
             <a href="#" class="nav-item" data-target="view-escrows">
-                <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg></span>
+                <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg></span>
                 <span class="nav-text">Escrows</span>
             </a>
             <a href="#" class="nav-item" data-target="view-wallet">
-                <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" /></svg></span>
+                <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+                    </svg></span>
                 <span class="nav-text">Wallet</span>
             </a>
             <a href="#" class="nav-item" data-target="view-profile">
-                <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg></span>
+                <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg></span>
                 <span class="nav-text">Profile</span>
             </a>
         </nav>
@@ -91,22 +152,35 @@
         <main class="dashboard-main">
             <header class="dashboard-topbar">
                 <div style="display: flex; align-items: center;">
-                    <button id="topbar-menu-toggle" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
+                    <button id="topbar-menu-toggle" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                            style="width: 24px; height: 24px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg></button>
                     <h1 class="topbar-title" id="current-view-title">Overview</h1>
                 </div>
                 <div class="topbar-actions">
                     <div class="notif-wrapper">
-                        <button class="btn-icon" id="btn-notifications" aria-label="Notifications"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg><span id="notif-dot" class="notif-dot hidden"></span></button>
+                        <button class="btn-icon" id="btn-notifications" aria-label="Notifications"><svg
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" style="width: 24px; height: 24px;">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                            </svg><span id="notif-dot" class="notif-dot hidden"></span></button>
                         <div id="notif-dropdown" class="notif-dropdown hidden">
                             <div class="notif-header">Notifications</div>
-                            <div id="notif-list"><div class="notif-empty">No notifications yet</div></div>
+                            <div id="notif-list">
+                                <div class="notif-empty">No notifications yet</div>
+                            </div>
                         </div>
                     </div>
                     <button id="btn-new-escrow" class="btn btn-primary btn-sm">+ New Escrow</button>
-                    <button id="btn-signout-top" class="btn btn-outline btn-sm" style="margin-left: 8px; border-color: var(--danger); color: var(--danger);">Sign Out</button>
+                    <button id="btn-signout-top" class="btn btn-outline btn-sm"
+                        style="margin-left: 8px; border-color: var(--danger); color: var(--danger);">Sign Out</button>
                 </div>
             </header>
-            
+
             <div class="dashboard-content">
                 <!-- Overview View -->
                 <div id="view-overview" class="view-section active">
@@ -124,16 +198,17 @@
                             <h3 class="stat-value" id="overview-pending-releases">0</h3>
                         </div>
                     </div>
-                    
+
                     <div class="recent-activity-container">
                         <h2>Recent Activity</h2>
                         <div class="activity-list" id="recent-activity-list">
                             <!-- Injected dynamically -->
-                            <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px;">No recent activity</p>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px;">
+                                No recent activity</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Escrows View -->
                 <div id="view-escrows" class="view-section hidden">
                     <div class="view-header">
@@ -143,21 +218,22 @@
                             <button class="toggle-btn" id="toggle-seller">I am Selling</button>
                         </div>
                     </div>
-                    
+
                     <div class="portal-card portal-card-white" id="buyer-escrows">
                         <!-- Dynamic content for buyer escrows will go here -->
                     </div>
-                    
+
                     <div class="portal-card portal-card-white hidden" id="seller-escrows">
                         <!-- Dynamic content for seller escrows will go here -->
                     </div>
                 </div>
-                
+
                 <!-- Products View -->
                 <div id="view-products" class="view-section hidden">
                     <div class="view-header">
                         <h2 style="margin-bottom: 24px;">My Products & Services</h2>
-                        <button id="btn-add-product" class="btn btn-primary" style="margin-bottom: 24px;">+ Add Product</button>
+                        <button id="btn-add-product" class="btn btn-primary" style="margin-bottom: 24px;">+ Add
+                            Product</button>
                     </div>
                     <div class="products-grid" id="products-grid">
                         <!-- Products injected via JS -->
@@ -174,13 +250,15 @@
                                 <h1 style="margin: 0; font-size: 2.5rem;" id="wallet-available-balance">GH₵ 0.00</h1>
                             </div>
                             <div style="display: flex; gap: 16px;">
-                                <button class="btn btn-primary" onclick="if(document.getElementById('btn-new-escrow')) document.getElementById('btn-new-escrow').click();">New Escrow</button>
+                                <button class="btn btn-primary"
+                                    onclick="if(document.getElementById('btn-new-escrow')) document.getElementById('btn-new-escrow').click();">New
+                                    Escrow</button>
                                 <button class="btn btn-outline" id="btn-withdraw">Withdraw</button>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Messages View -->
                 <div id="view-messages" class="view-section hidden">
                     <h2 style="margin-bottom: 24px;">In-App Messaging</h2>
@@ -193,7 +271,9 @@
                                 <h3 style="margin: 0;" id="chat-title">No chat selected</h3>
                             </div>
                             <div class="chat-messages" id="chat-messages">
-                                <p style="text-align: center; color: var(--text-muted); padding: 20px;">In-app messaging is coming soon. For now, buyers and sellers are connected automatically via SMS notifications.</p>
+                                <p style="text-align: center; color: var(--text-muted); padding: 20px;">In-app messaging
+                                    is coming soon. For now, buyers and sellers are connected automatically via SMS
+                                    notifications.</p>
                             </div>
                             <div class="chat-input-area">
                                 <input type="text" placeholder="Messaging coming soon..." disabled>
@@ -202,7 +282,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Profile View -->
                 <div id="view-profile" class="view-section hidden">
                     <h2 style="margin-bottom: 24px;">My Profile</h2>
@@ -218,9 +298,11 @@
                         <div class="form-group">
                             <label>Phone Number</label>
                             <input type="tel" id="profile-phone" placeholder="e.g. 0551234567">
-                            <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Used for SMS alerts: payment received, delivery confirmed, and withdrawal updates.</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Used for SMS
+                                alerts: payment received, delivery confirmed, and withdrawal updates.</span>
                         </div>
-                        <button class="btn btn-primary" id="btn-save-profile" style="margin-top: 8px; max-width: 200px;">Save Profile</button>
+                        <button class="btn btn-primary" id="btn-save-profile"
+                            style="margin-top: 8px; max-width: 200px;">Save Profile</button>
                     </div>
 
                     <h2 style="margin-bottom: 24px;">Security</h2>
@@ -228,7 +310,8 @@
                         <form id="change-password-form">
                             <div class="form-group">
                                 <label>Current Password</label>
-                                <input type="password" id="current-password" placeholder="Enter current password" required>
+                                <input type="password" id="current-password" placeholder="Enter current password"
+                                    required>
                             </div>
                             <div class="form-group">
                                 <label>New Password</label>
@@ -236,9 +319,11 @@
                             </div>
                             <div class="form-group">
                                 <label>Confirm New Password</label>
-                                <input type="password" id="confirm-new-password" placeholder="Re-enter new password" required>
+                                <input type="password" id="confirm-new-password" placeholder="Re-enter new password"
+                                    required>
                             </div>
-                            <button type="submit" class="btn btn-primary" id="btn-change-password" style="margin-top: 8px; max-width: 200px;">Change Password</button>
+                            <button type="submit" class="btn btn-primary" id="btn-change-password"
+                                style="margin-top: 8px; max-width: 200px;">Change Password</button>
                         </form>
                     </div>
                 </div>
@@ -258,12 +343,15 @@
                                 </tr>
                             </thead>
                             <tbody id="transaction-logs-body">
-                                <tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 20px;">No transactions found</td></tr>
+                                <tr>
+                                    <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 20px;">
+                                        No transactions found</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                
+
             </div>
         </main>
     </div>
@@ -273,26 +361,31 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Create New Escrow</h2>
-                <button id="close-escrow-modal" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                <button id="close-escrow-modal" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg></button>
             </div>
             <form id="new-escrow-form" class="modal-form">
                 <div id="escrow-line-items">
                     <!-- Line items will be injected here via JS -->
                 </div>
-                <button type="button" id="btn-add-line-item" class="btn btn-outline" style="width: 100%; border-style: dashed; margin-bottom: 24px; padding: 12px; color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.2);">
+                <button type="button" id="btn-add-line-item" class="btn btn-outline"
+                    style="width: 100%; border-style: dashed; margin-bottom: 24px; padding: 12px; color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.2);">
                     <i class="fa-solid fa-plus"></i> Add Another Product
                 </button>
-                
+
                 <div class="form-group">
                     <label>Total Amount (GH₵)</label>
-                    <input type="number" id="escrow-amount" placeholder="0.00" min="0" step="0.01" required style="color: var(--success); font-weight: bold; font-size: 1.2rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 4px; width: 100%;">
+                    <input type="number" id="escrow-amount" placeholder="0.00" min="0" step="0.01" required
+                        style="color: var(--success); font-weight: bold; font-size: 1.2rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 4px; width: 100%;">
                 </div>
-                
+
                 <div class="form-group">
                     <label>Counterparty Email (Buyer)</label>
                     <input type="email" id="buyer-email" placeholder="buyer@example.com" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label>Buyer Phone Number (SMS)</label>
                     <input type="tel" id="buyer-phone" placeholder="+233 55 000 0000" required>
@@ -301,9 +394,10 @@
                 <div class="form-group">
                     <label>Expected Delivery / Pickup Date</label>
                     <input type="date" id="escrow-delivery-date" required>
-                    <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">The buyer gets an SMS reminder on this day to collect the item and confirm delivery.</span>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">The buyer gets an SMS
+                        reminder on this day to collect the item and confirm delivery.</span>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label>Platform Fee Allocation</label>
@@ -317,7 +411,8 @@
 
                 <div class="form-group">
                     <label>Terms of Agreement</label>
-                    <textarea id="escrow-terms" placeholder="Terms will be auto-filled based on your product..." rows="4" required></textarea>
+                    <textarea id="escrow-terms" placeholder="Terms will be auto-filled based on your product..."
+                        rows="4" required></textarea>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" id="btn-cancel-escrow">Cancel</button>
@@ -332,13 +427,17 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Add New Product / Service</h2>
-                <button id="close-product-modal" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                <button id="close-product-modal" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg></button>
             </div>
             <form id="new-product-form" class="modal-form">
                 <div class="form-group">
                     <label>Product Image (optional)</label>
                     <input type="file" id="new-prod-image" accept="image/*">
-                    <img id="new-prod-preview" class="hidden" alt="Product preview" style="margin-top: 10px; width: 100%; max-height: 180px; object-fit: cover; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <img id="new-prod-preview" class="hidden" alt="Product preview"
+                        style="margin-top: 10px; width: 100%; max-height: 180px; object-fit: cover; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
                 </div>
                 <div class="form-group">
                     <label>Product Name</label>
@@ -350,7 +449,8 @@
                 </div>
                 <div class="form-group">
                     <label>Description / Terms</label>
-                    <textarea id="new-prod-desc" placeholder="Describe the item or service specs..." rows="3" required></textarea>
+                    <textarea id="new-prod-desc" placeholder="Describe the item or service specs..." rows="3"
+                        required></textarea>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" id="btn-cancel-product">Cancel</button>
@@ -365,10 +465,14 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Withdraw Funds</h2>
-                <button id="close-withdraw-modal" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                <button id="close-withdraw-modal" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg></button>
             </div>
             <form id="withdraw-form" class="modal-form">
-                <p style="color: var(--text-muted); margin-bottom: 16px;">Available: <strong id="withdraw-available" style="color: var(--success);">GH₵ 0.00</strong></p>
+                <p style="color: var(--text-muted); margin-bottom: 16px;">Available: <strong id="withdraw-available"
+                        style="color: var(--success);">GH₵ 0.00</strong></p>
                 <div class="form-group">
                     <label>Amount (GH₵)</label>
                     <input type="number" id="withdraw-amount" placeholder="0.00" min="1" step="0.01" required>
@@ -385,7 +489,9 @@
                     <label>Mobile Money Number</label>
                     <input type="tel" id="withdraw-phone" placeholder="e.g. 0551234567" required>
                 </div>
-                <p style="color: var(--text-muted); font-size: 0.85rem;">Withdrawals are reviewed and paid out to your mobile money wallet. Funds are deducted from your balance immediately and refunded if the request is rejected.</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Withdrawals are reviewed and paid out to your
+                    mobile money wallet. Funds are deducted from your balance immediately and refunded if the request is
+                    rejected.</p>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" id="btn-cancel-withdraw">Cancel</button>
                     <button type="submit" class="btn btn-primary">Request Withdrawal</button>
@@ -429,4 +535,5 @@
         });
     </script>
 </body>
+
 </html>
