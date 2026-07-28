@@ -969,26 +969,34 @@ input[type=number] {
         max-width: 85%;
     }
 
-    /* Topbar: let it breathe instead of colliding */
+    /* Topbar: responsive wrap */
     .dashboard-topbar {
         height: auto;
         min-height: 60px;
         flex-wrap: wrap;
-        gap: 8px;
         padding: 10px 16px;
+        justify-content: space-between;
+    }
+    .topbar-left {
+        order: 1;
     }
     .topbar-actions {
-        gap: 8px;
-        flex-wrap: wrap;
+        order: 2;
+        gap: 12px;
+        flex-wrap: nowrap;
         justify-content: flex-end;
+    }
+    .dashboard-topbar .search-bar {
+        order: 3;
+        width: 100%;
+        max-width: 100% !important;
+        margin: 12px 0 0 0 !important;
     }
     .topbar-actions .btn {
         padding: 8px 12px;
         font-size: 0.8rem;
         white-space: nowrap;
     }
-    /* The notification bell is decorative for now - reclaim the space */
-    .topbar-actions > .btn-icon { display: none; }
 
     /* View headers (title + search/toggles) stack instead of squeezing */
     .view-header {
