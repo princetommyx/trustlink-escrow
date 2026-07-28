@@ -344,7 +344,7 @@ function loadEscrows() {
                         time: data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now(),
                         title: data.buyerEmail ? data.buyerEmail.split('@')[0] : 'Escrow Deposit',
                         status: data.status,
-                        description: `$${data.amount}` // Just amount for sleek UI
+                        description: `GH₵ ${data.amount}` // Just amount for sleek UI
                     });
                 }
                 
@@ -416,7 +416,7 @@ function loadEscrows() {
                         time: data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now(),
                         title: data.sellerEmail ? data.sellerEmail.split('@')[0] : 'Escrow Payment',
                         status: data.status,
-                        description: `$${data.amount}` // Just amount for sleek UI
+                        description: `GH₵ ${data.amount}` // Just amount for sleek UI
                     });
                 }
                 
