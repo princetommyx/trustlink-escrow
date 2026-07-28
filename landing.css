@@ -51,6 +51,16 @@ body.light-landing {
 .light-landing .nav-links a:not(.btn):hover { color: #111827; }
 .light-landing .mobile-menu-btn span { background: #111827; }
 
+/* Mobile Menu Override for Light Theme */
+@media (max-width: 768px) {
+    .light-landing .nav-links {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+}
+
 /* Bento Box & Glassmorphism */
 .light-landing .bento-card {
     background: rgba(255, 255, 255, 0.6);
