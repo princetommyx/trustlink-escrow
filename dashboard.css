@@ -1349,6 +1349,24 @@ input[type=number] {
     border-color: #CBD5E1 !important;
 }
 
+/* My Card Button Overrides (Dark Background) */
+.my-card-btn.btn-primary {
+    background: #FFFFFF !important;
+    color: #111827 !important;
+}
+.my-card-btn.btn-primary:hover {
+    background: #F8FAFC !important;
+}
+.my-card-btn.btn-outline {
+    background: transparent !important;
+    color: #FFFFFF !important;
+    border-color: rgba(255,255,255,0.4) !important;
+}
+.my-card-btn.btn-outline:hover {
+    background: rgba(255,255,255,0.1) !important;
+    border-color: #FFFFFF !important;
+}
+
 /* Products Subviews */
 .products-subview {
     animation: fadeIn 0.3s ease;
