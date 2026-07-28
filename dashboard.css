@@ -1146,6 +1146,18 @@ input[type=number] {
     }
 }
 
+.bottom-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 768px) {
+    .bottom-actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* My Card Widget (Dark Theme) */
 .my-card-widget {
     flex: 1.2;

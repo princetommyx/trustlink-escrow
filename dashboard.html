@@ -45,7 +45,8 @@
                 </div>
                 
                 <div class="user-card" style="display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center; margin-bottom: 16px;">
-                    <div class="avatar" id="user-avatar" style="width: 64px; height: 64px; background: linear-gradient(135deg, #3B82F6, #60A5FA); border-radius: 50%; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                    <!-- Use background-size cover and background-position center for avatars -->
+                    <div class="avatar" id="sidebar-avatar" style="width: 64px; height: 64px; background: linear-gradient(135deg, #3B82F6, #60A5FA); background-size: cover; background-position: center; border-radius: 50%; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
                     </div>
                     <div class="user-info">
                         <span class="user-name" id="user-name" style="font-weight: 700; font-size: 1.1rem; color: #111827;">Loading...</span>
@@ -254,7 +255,7 @@
                         </div>
 
                         <!-- Bottom Actions Grid -->
-                        <div class="bottom-actions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px;">
+                        <div class="bottom-actions-grid" style="margin-top: 32px;">
                             <!-- Create Escrow (like Send Money To) -->
                             <div class="action-card" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
@@ -428,7 +429,20 @@
                 <!-- Profile View -->
                 <div id="view-profile" class="view-section hidden">
                     <h2 style="margin-bottom: 24px;">My Profile</h2>
-                    <div class="portal-card portal-card-white" style="margin-bottom: 40px;">
+                    <div class="portal-card portal-card-white" style="margin-bottom: 40px; display: flex; flex-direction: column; gap: 24px;">
+                        
+                        <!-- Avatar Upload Section -->
+                        <div style="display: flex; align-items: center; gap: 24px;">
+                            <div id="profile-avatar" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #60A5FA); background-size: cover; background-position: center; position: relative; cursor: pointer; overflow: hidden;" title="Click to change profile picture">
+                                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.5); color: white; font-size: 0.7rem; text-align: center; padding: 4px 0; font-weight: 500;">EDIT</div>
+                                <input type="file" id="avatar-upload-input" accept="image/*" style="opacity: 0; position: absolute; inset: 0; cursor: pointer;">
+                            </div>
+                            <div>
+                                <h3 style="margin-bottom: 4px; font-size: 1.1rem; color: #111827;">Profile Picture</h3>
+                                <p style="color: #64748B; font-size: 0.85rem; margin: 0;">Click the image to upload a new avatar. JPG, PNG, max 2MB.</p>
+                                <p id="avatar-upload-status" style="color: #10B981; font-size: 0.8rem; margin-top: 4px; display: none;">Uploading...</p>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label>Full Name</label>
                             <input type="text" id="profile-name" placeholder="Your name">
