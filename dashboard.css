@@ -1136,7 +1136,8 @@ input[type=number] {
 
 .dashboard-top-row {
     display: flex;
-    gap: 24px;
+    flex-direction: column;
+    gap: 32px;
     margin-bottom: 0;
 }
 

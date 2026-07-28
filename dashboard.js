@@ -269,8 +269,8 @@ function updateOverviewStats() {
                 let iconColor = "#3B82F6";
                 let arrowPath = "M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75"; // Down arrow
                 
-                if(act.title.includes("COMPLETED")) { iconColor = "#10B981"; arrowPath = "M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75"; } // Up arrow
-                if(act.title.includes("CANCELED") || act.title.includes("DISPUTED")) { iconColor = "#EF4444"; arrowPath = "M6 18L18 6M6 6l12 12"; } // X
+                if(act.status === "COMPLETED") { iconColor = "#10B981"; arrowPath = "M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75"; } // Up arrow
+                if(act.status === "CANCELED" || act.status === "DISPUTED") { iconColor = "#EF4444"; arrowPath = "M6 18L18 6M6 6l12 12"; } // X
                 
                 // Keep background uniform light grayish-blue for the unique style
                 let iconBgStyle = "background: #F1F5F9;";
@@ -282,7 +282,7 @@ function updateOverviewStats() {
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" d="${arrowPath}" /></svg>
                             </div>
                             <div class="tx-info" style="display: flex; flex-direction: column; gap: 2px;">
-                                <span class="tx-name" style="font-size: 0.95rem; font-weight: 600; color: #111827;">${act.title.toUpperCase()}</span>
+                                <span class="tx-name" style="font-size: 0.95rem; font-weight: 600; color: #111827;">${act.title}</span>
                                 <span class="tx-date" style="font-size: 0.75rem; color: #64748B;">${new Date(act.time).toLocaleDateString('en-GB')}</span>
                             </div>
                         </div>
@@ -342,8 +342,9 @@ function loadEscrows() {
                     recentActivities.push({
                         type: 'seller',
                         time: data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now(),
-                        title: `Escrow ${escapeHtml(data.status).replace('_', ' ')}`,
-                        description: `Selling: ${escapeHtml(data.description)} (GH₵ ${data.amount})`
+                        title: data.buyerEmail ? data.buyerEmail.split('@')[0] : 'Escrow Deposit',
+                        status: data.status,
+                        description: `$${data.amount}` // Just amount for sleek UI
                     });
                 }
                 
@@ -413,8 +414,9 @@ function loadEscrows() {
                     recentActivities.push({
                         type: 'buyer',
                         time: data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now(),
-                        title: `Escrow ${escapeHtml(data.status).replace('_', ' ')}`,
-                        description: `Buying: ${escapeHtml(data.description)} (GH₵ ${data.amount})`
+                        title: data.sellerEmail ? data.sellerEmail.split('@')[0] : 'Escrow Payment',
+                        status: data.status,
+                        description: `$${data.amount}` // Just amount for sleek UI
                     });
                 }
                 

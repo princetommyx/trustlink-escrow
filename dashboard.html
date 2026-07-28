@@ -146,28 +146,28 @@
                         <!-- Top Row: My Card & Financial Record -->
                         <div class="dashboard-top-row">
                             <!-- My Card (Dark Theme) -->
-                            <div class="my-card-widget" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                                        <h3 style="color: rgba(255,255,255,0.7); font-size: 1rem; font-weight: 500; margin: 0;">My Card</h3>
-                                        <div class="my-card-graph" style="display: flex; align-items: center; gap: 8px;">
-                                            <span id="wallet-trend" style="color: #22C55E; font-size: 0.8rem; display: none;"></span>
-                                            <svg width="40" height="20" viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M0 15C5 15 10 5 15 5C20 5 25 15 30 15C35 15 40 5 40 5" stroke="#22C55E" stroke-width="2" stroke-linecap="round"/>
-                                            </svg>
-                                        </div>
-                                    </div>
+                            <div class="my-card-widget" style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                                    <h3 style="color: rgba(255,255,255,0.7); font-size: 1rem; font-weight: 500; margin: 0 0 24px 0;">My Card</h3>
                                     <h2 id="overview-balance" style="color: white; font-size: 2.2rem; margin: 0; font-family: 'Outfit', sans-serif;">$0.00</h2>
                                 </div>
-                                <div style="display: flex; gap: 12px; position: relative; z-index: 2; margin-top: 24px;">
-                                    <button class="btn btn-primary btn-sm my-card-btn" style="background: white; color: #111827; border: none; font-weight: 600; padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                                        Deposit
-                                    </button>
-                                    <button class="btn btn-outline btn-sm my-card-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-weight: 600; padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
-                                        Withdraw
-                                    </button>
+                                <div style="display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; height: 100%;">
+                                    <div class="my-card-graph" style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+                                        <span id="wallet-trend" style="color: #22C55E; font-size: 0.8rem; display: none;"></span>
+                                        <svg width="60" height="30" viewBox="0 0 60 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M0 25C10 25 15 10 25 10C35 10 40 25 50 25C55 25 60 5 60 5" stroke="#22C55E" stroke-width="2" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                    <div style="display: flex; gap: 12px; position: relative; z-index: 2;">
+                                        <button class="btn btn-primary btn-sm my-card-btn" style="background: white; color: #111827; border: none; font-weight: 600; padding: 10px 20px; border-radius: 16px; display: flex; align-items: center; gap: 8px;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                            Deposit
+                                        </button>
+                                        <button class="btn btn-outline btn-sm my-card-btn" style="background: transparent; border: 1px solid rgba(255,255,255,0.4); color: white; font-weight: 600; padding: 10px 20px; border-radius: 16px; display: flex; align-items: center; gap: 8px;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
+                                            Withdraw
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="card-bg-shape"></div>
                             </div>
