@@ -448,11 +448,12 @@
 
                     <!-- ADD PRODUCT STATE -->
                     <div id="products-add-view" class="products-subview hidden">
+                        <form id="new-product-form">
                         <div class="view-header" style="justify-content: space-between; align-items: center; margin-bottom: 32px; display: flex; border-bottom: 1px solid #E2E8F0; padding-bottom: 24px;">
                             <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #111827;">Add Products</h2>
                             <div style="display: flex; gap: 12px;">
-                                <button class="btn btn-outline btn-discard-product" style="border: 1px solid #E2E8F0; border-radius: 20px; padding: 10px 24px; color: #111827; font-weight: 500; background: white;">Discard</button>
-                                <button class="btn btn-primary btn-save-product" style="background: #111827; border-radius: 20px; padding: 10px 32px; font-weight: 500;">Add</button>
+                                <button type="button" class="btn btn-outline btn-discard-product" style="border: 1px solid #E2E8F0; border-radius: 20px; padding: 10px 24px; color: #111827; font-weight: 500; background: white;">Discard</button>
+                                <button type="submit" class="btn btn-primary btn-save-product" style="background: #111827; border-radius: 20px; padding: 10px 32px; font-weight: 500;">Add</button>
                             </div>
                         </div>
 
@@ -462,7 +463,7 @@
                                     <h3 class="section-title">Product</h3>
                                     <div class="form-group">
                                         <label>Title</label>
-                                        <input type="text" placeholder="Enter title">
+                                        <input type="text" id="new-prod-name" placeholder="Enter title" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Description</label>
@@ -481,18 +482,20 @@
                                                 <span>🔗</span>
                                                 <span>"</span>
                                             </div>
-                                            <textarea placeholder="Product description" style="height: 150px;"></textarea>
+                                            <textarea id="new-prod-desc" placeholder="Product description" style="height: 150px;"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div class="form-section">
                                     <h3 class="section-title">Media</h3>
-                                    <div class="media-dropzone">
+                                    <div class="media-dropzone" onclick="document.getElementById('new-prod-image').click()">
+                                        <input type="file" id="new-prod-image" accept="image/*" style="display: none;">
                                         <svg xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px; margin-bottom: 12px; color: #111827;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                                         <div style="font-weight: 500; color: #111827; margin-bottom: 4px;">Choose a file or drag & drop it here</div>
                                         <div style="font-size: 0.8rem; color: #64748B; margin-bottom: 16px;">JPG or PNG formats, up to 5MB</div>
-                                        <button class="btn btn-outline" style="border-radius: 20px; font-size: 0.85rem; padding: 6px 16px; background: white; border: 1px solid #E2E8F0;">Browse File</button>
+                                        <button type="button" class="btn btn-outline" style="border-radius: 20px; font-size: 0.85rem; padding: 6px 16px; background: white; border: 1px solid #E2E8F0;">Browse File</button>
+                                        <img id="new-prod-preview" class="hidden" src="" alt="Preview" style="max-width: 100%; max-height: 150px; margin-top: 16px; border-radius: 8px; border: 1px solid #E2E8F0; object-fit: cover;">
                                     </div>
                                 </div>
 
@@ -501,11 +504,11 @@
                                     <div style="display: flex; gap: 16px;">
                                         <div class="form-group" style="flex: 1;">
                                             <label>Pricing</label>
-                                            <input type="text" placeholder="0.00">
+                                            <input type="number" id="new-prod-price" placeholder="0.00" required step="0.01">
                                         </div>
                                         <div class="form-group" style="flex: 1;">
                                             <label>Sale Price</label>
-                                            <input type="text" placeholder="0.00">
+                                            <input type="number" placeholder="0.00" step="0.01">
                                         </div>
                                     </div>
                                 </div>
@@ -563,6 +566,7 @@
                                 </div>
                             </div>
                         </div>
+                        </form>
                     </div>
                 </div>
 

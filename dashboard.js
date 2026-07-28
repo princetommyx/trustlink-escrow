@@ -1273,7 +1273,6 @@ if(formNewProd) {
             await addDoc(collection(db, "products"), newProd);
             await fetchProducts(); // Re-fetch to get Firestore IDs and render
 
-            closeProdModal();
             formNewProd.reset();
             newProductImage = "";
             document.getElementById('new-prod-preview')?.classList.add('hidden');
@@ -1285,7 +1284,7 @@ if(formNewProd) {
             alert("Error adding product.");
         } finally {
             btnSubmit.disabled = false;
-            btnSubmit.textContent = 'Save Product';
+            btnSubmit.textContent = 'Add'; // Updated to match the HTML button text
         }
     });
 }
