@@ -202,7 +202,13 @@
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
                                     <h3 style="margin: 0; font-size: 1.1rem; color: #111827;">Contract Stats</h3>
                                 </div>
-                                <div class="financial-cards-grid">
+                                <div class="financial-cards-grid" style="grid-template-columns: repeat(3, 1fr);">
+                                    <div class="fin-card bg-green">
+                                        <div class="fin-top">
+                                            <span class="fin-label">Completed Escrows</span>
+                                        </div>
+                                        <h3 class="fin-value" id="overview-completed-escrows">0</h3>
+                                    </div>
                                     <div class="fin-card bg-orange">
                                         <div class="fin-top">
                                             <span class="fin-label">Active Escrows</span>
@@ -219,6 +225,15 @@
                             </div>
                         </div>
 
+                        <!-- Quick Actions -->
+                        <div class="quick-actions-widget" style="margin-top: 24px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 24px; padding: 24px;">
+                            <h3 style="margin: 0 0 24px 0; font-size: 1.1rem; color: #111827;">Quick Actions</h3>
+                            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                                <button class="btn btn-primary" style="flex: 1; padding: 16px; font-size: 1rem;" onclick="document.getElementById('btn-new-escrow').click()">+ Create New Escrow</button>
+                                <button class="btn btn-outline" style="flex: 1; padding: 16px; font-size: 1rem;" onclick="document.querySelector('[data-target=\'view-products\']').click()">Manage Products</button>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="dashboard-side-col">
@@ -231,6 +246,18 @@
                                 <!-- Injected dynamically -->
                                 <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px;">
                                     No recent activity</p>
+                            </div>
+                        </div>
+                        
+                        <div class="verification-widget" style="margin-top: 24px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 24px; padding: 24px;">
+                            <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; color: #111827;">Verification Status</h3>
+                            <div style="background: #F1F5F9; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <span style="font-weight: 500; font-size: 0.9rem;">Email Address</span>
+                                <span id="status-email" class="badge-status badge-success">Verified</span>
+                            </div>
+                            <div style="background: #F1F5F9; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 500; font-size: 0.9rem;">Phone Number</span>
+                                <span id="status-phone" class="badge-status badge-warning">Pending</span>
                             </div>
                         </div>
                     </div>

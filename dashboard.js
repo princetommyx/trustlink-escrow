@@ -161,7 +161,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-let escrowStats = { activeSeller: 0, activeBuyer: 0, pendingSeller: 0, pendingBuyer: 0 };
+let escrowStats = { activeSeller: 0, activeBuyer: 0, pendingSeller: 0, pendingBuyer: 0, completedSeller: 0, completedBuyer: 0 };
 let recentActivities = [];
 
 // ==========================================
@@ -204,8 +204,10 @@ const maybeSendDeliveryReminder = async (escrowId, data) => {
 function updateOverviewStats() {
     const totalActive = escrowStats.activeSeller + escrowStats.activeBuyer;
     const totalPending = escrowStats.pendingSeller + escrowStats.pendingBuyer;
+    const totalCompleted = escrowStats.completedSeller + escrowStats.completedBuyer;
     if(document.getElementById('overview-active-escrows')) document.getElementById('overview-active-escrows').textContent = totalActive;
     if(document.getElementById('overview-pending-releases')) document.getElementById('overview-pending-releases').textContent = totalPending;
+    if(document.getElementById('overview-completed-escrows')) document.getElementById('overview-completed-escrows').textContent = totalCompleted;
     
     // Sort recent activities by timestamp (descending)
     recentActivities.sort((a, b) => b.time - a.time);
@@ -276,12 +278,14 @@ function loadEscrows() {
             sellerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have not created any escrows as a seller.</p>';
             escrowStats.activeSeller = 0;
             escrowStats.pendingSeller = 0;
+            escrowStats.completedSeller = 0;
             recentActivities = recentActivities.filter(a => a.type !== 'seller');
             updateOverviewStats();
         } else {
             sellerEscrowsContainer.innerHTML = '';
             escrowStats.activeSeller = 0;
             escrowStats.pendingSeller = 0;
+            escrowStats.completedSeller = 0;
             // Remove old seller activities
             recentActivities = recentActivities.filter(a => a.type !== 'seller');
             
@@ -292,6 +296,7 @@ function loadEscrows() {
 
                 if (data.status !== 'COMPLETED' && data.status !== 'DISPUTED') escrowStats.activeSeller++;
                 if (data.status === 'FUNDED' || data.status === 'DISPATCHED') escrowStats.pendingSeller++;
+                if (data.status === 'COMPLETED') escrowStats.completedSeller++;
                 
                 if(data.createdAt) {
                     recentActivities.push({
@@ -344,12 +349,14 @@ function loadEscrows() {
             buyerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have no active escrows as a buyer.</p>';
             escrowStats.activeBuyer = 0;
             escrowStats.pendingBuyer = 0;
+            escrowStats.completedBuyer = 0;
             recentActivities = recentActivities.filter(a => a.type !== 'buyer');
             updateOverviewStats();
         } else {
             buyerEscrowsContainer.innerHTML = '';
             escrowStats.activeBuyer = 0;
             escrowStats.pendingBuyer = 0;
+            escrowStats.completedBuyer = 0;
             // Remove old buyer activities
             recentActivities = recentActivities.filter(a => a.type !== 'buyer');
             
@@ -360,6 +367,7 @@ function loadEscrows() {
 
                 if (data.status !== 'COMPLETED' && data.status !== 'DISPUTED') escrowStats.activeBuyer++;
                 if (data.status === 'FUNDED' || data.status === 'DISPATCHED') escrowStats.pendingBuyer++;
+                if (data.status === 'COMPLETED') escrowStats.completedBuyer++;
                 
                 if(data.createdAt) {
                     recentActivities.push({

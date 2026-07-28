@@ -1233,6 +1233,7 @@ input[type=number] {
     margin: 0;
 }
 
+.bg-green { background: #DCFCE7; }
 .bg-orange { background: #FFEDD5; }
 .bg-blue { background: #DBEAFE; }
 
