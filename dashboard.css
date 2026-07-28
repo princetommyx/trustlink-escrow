@@ -1440,8 +1440,10 @@ input[type=number] {
     font-size: 0.95rem;
     outline: none;
     box-sizing: border-box;
-    background: #F8FAFC;
+    background-color: #F8FAFC !important; /* Force light background */
     color: #111827;
+    -webkit-appearance: none; /* Fix iOS gray background issue */
+    appearance: none;
 }
 .form-group input:focus,
 .form-group select:focus,
