@@ -145,24 +145,26 @@
                     <div class="dashboard-main-col">
                         <!-- Top Row: My Card & Financial Record -->
                         <div class="dashboard-top-row">
-                            <!-- My Card (Dark Widget) -->
-                            <div class="my-card-widget">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                                    <h3 style="color: rgba(255,255,255,0.7); font-size: 1rem; font-weight: 500; margin: 0;">My Card</h3>
-                                    <div class="my-card-graph" style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="color: #22C55E; font-size: 0.8rem;">↑ 10%</span>
-                                        <svg width="40" height="20" viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M0 15C5 15 10 5 15 5C20 5 25 15 30 15C35 15 40 5 40 5" stroke="#22C55E" stroke-width="2" stroke-linecap="round"/>
-                                        </svg>
+                            <!-- My Card (Dark Theme) -->
+                            <div class="my-card-widget" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                        <h3 style="color: rgba(255,255,255,0.7); font-size: 1rem; font-weight: 500; margin: 0;">My Card</h3>
+                                        <div class="my-card-graph" style="display: flex; align-items: center; gap: 8px;">
+                                            <span id="wallet-trend" style="color: #22C55E; font-size: 0.8rem; display: none;"></span>
+                                            <svg width="40" height="20" viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M0 15C5 15 10 5 15 5C20 5 25 15 30 15C35 15 40 5 40 5" stroke="#22C55E" stroke-width="2" stroke-linecap="round"/>
+                                            </svg>
+                                        </div>
                                     </div>
+                                    <h2 id="overview-balance" style="color: white; font-size: 2.2rem; margin: 0; font-family: 'Outfit', sans-serif;">$0.00</h2>
                                 </div>
-                                <h2 id="overview-balance" style="color: white; font-size: 2.2rem; margin: 0 0 32px 0; font-family: 'Outfit', sans-serif;">$0.00</h2>
-                                <div style="display: flex; gap: 12px; position: relative; z-index: 2;">
-                                    <button class="btn btn-primary btn-sm my-card-btn" style="background: white; color: #111827; border: none; font-weight: 600; padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 8px;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">
+                                <div style="display: flex; gap: 12px; position: relative; z-index: 2; margin-top: 24px;">
+                                    <button class="btn btn-primary btn-sm my-card-btn" style="background: white; color: #111827; border: none; font-weight: 600; padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                                         Deposit
                                     </button>
-                                    <button class="btn btn-outline btn-sm my-card-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-weight: 600; padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 8px;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">
+                                    <button class="btn btn-outline btn-sm my-card-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-weight: 600; padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
                                         Withdraw
                                     </button>
@@ -187,7 +189,7 @@
                                         </div>
                                         <div class="fin-bottom">
                                             <h3 class="fin-value" id="overview-completed-escrows">0</h3>
-                                            <span class="fin-trend trend-up">↑ 17%</span>
+                                            <span class="fin-trend trend-up" id="completed-escrows-trend" style="display: none;"></span>
                                         </div>
                                     </div>
                                     <div class="fin-card bg-orange">
@@ -200,7 +202,7 @@
                                         </div>
                                         <div class="fin-bottom">
                                             <h3 class="fin-value" id="overview-active-escrows">0</h3>
-                                            <span class="fin-trend trend-up">↑ 44%</span>
+                                            <span class="fin-trend trend-up" id="active-escrows-trend" style="display: none;"></span>
                                         </div>
                                     </div>
                                     <div class="fin-card bg-blue">
@@ -213,7 +215,7 @@
                                         </div>
                                         <div class="fin-bottom">
                                             <h3 class="fin-value" id="overview-pending-releases">0</h3>
-                                            <span class="fin-trend trend-up">↑ 45%</span>
+                                            <span class="fin-trend trend-up" id="pending-releases-trend" style="display: none;"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -245,10 +247,10 @@
                                     <path d="M0 150 Q 100 110, 200 140 T 400 60 T 600 130 T 800 50" fill="none" stroke="#111827" stroke-width="3"/>
                                     <circle cx="400" cy="60" r="4" fill="#111827"/>
                                 </svg>
-                                <!-- Mock Tooltip -->
-                                <div style="position: absolute; top: 10px; left: 360px; background: #111827; color: white; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; text-align: center;">
-                                    <div style="font-weight: 600;">$2289</div>
-                                    <div style="color: rgba(255,255,255,0.6); font-size: 0.7rem;">07 Sep, Thu</div>
+                                <!-- Mock Tooltip (Updated Dynamically) -->
+                                <div id="chart-tooltip" style="position: absolute; top: 10px; left: 360px; background: #111827; color: white; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; text-align: center; display: none;">
+                                    <div id="chart-tooltip-amount" style="font-weight: 600;">$0.00</div>
+                                    <div id="chart-tooltip-date" style="color: rgba(255,255,255,0.6); font-size: 0.7rem;"></div>
                                     <div style="position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #111827;"></div>
                                 </div>
                             </div>
