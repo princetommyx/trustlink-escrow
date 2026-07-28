@@ -596,11 +596,21 @@ document.getElementById('avatar-upload-input')?.addEventListener('change', async
     }
 
     const statusText = document.getElementById('avatar-upload-status');
+    const saveBtn = document.getElementById('btn-save-profile');
     if(statusText) {
         statusText.style.display = 'block';
-        statusText.textContent = 'Uploading...';
+        statusText.textContent = 'Uploading... Please wait.';
         statusText.style.color = '#10B981';
     }
+    if(saveBtn) saveBtn.disabled = true;
+
+    // Show immediate local preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const avatarEl = document.getElementById('profile-avatar');
+        if (avatarEl) avatarEl.style.backgroundImage = `url('${e.target.result}')`;
+    };
+    reader.readAsDataURL(file);
 
     try {
         const fileExt = file.name.split('.').pop();
@@ -619,10 +629,12 @@ document.getElementById('avatar-upload-input')?.addEventListener('change', async
         }
     } catch (error) {
         if(statusText) {
-            statusText.textContent = 'Upload failed: ' + error.message;
+            statusText.textContent = 'Upload failed. Please try again.';
             statusText.style.color = '#EF4444';
         }
         alert("Failed to upload avatar: " + error.message);
+    } finally {
+        if(saveBtn) saveBtn.disabled = false;
     }
 });
 

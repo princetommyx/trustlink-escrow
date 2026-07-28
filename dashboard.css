@@ -986,12 +986,6 @@ input[type=number] {
         flex-wrap: nowrap;
         justify-content: flex-end;
     }
-    .dashboard-topbar .search-bar {
-        order: 3;
-        width: 100%;
-        max-width: 100% !important;
-        margin: 12px 0 0 0 !important;
-    }
     .topbar-actions .btn {
         padding: 8px 12px;
         font-size: 0.8rem;
