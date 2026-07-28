@@ -1065,34 +1065,39 @@ const fetchProducts = async () => {
 };
 
 const renderProducts = () => {
-    if(productsGrid) {
-        // Render Grid
-        productsGrid.innerHTML = '';
+    const productsEmptyView = document.getElementById('products-empty-view');
+    const productsListView = document.getElementById('products-list-view');
+    const productsTableBody = document.getElementById('products-table-body');
+    
+    if (productsEmptyView && productsListView && productsTableBody) {
+        productsTableBody.innerHTML = '';
         if (myProducts.length === 0) {
-            productsGrid.innerHTML = `
-                <div class="empty-state" style="grid-column: 1 / -1;">
-                    <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px;"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg></div>
-                    <h3>No products yet</h3>
-                    <p>Add the items or services you sell so you can create escrows in one tap.</p>
-                    <button class="btn btn-primary" onclick="document.getElementById('btn-add-product').click()">+ Add your first product</button>
-                </div>
-            `;
+            window.showProductSubView('empty');
+        } else {
+            window.showProductSubView('list');
+            myProducts.forEach(prod => {
+                const imgUrl = (prod.image && prod.image.startsWith('data:image/')) ? prod.image : 'https://via.placeholder.com/48';
+                productsTableBody.innerHTML += `
+                    <tr>
+                        <td style="padding: 16px;"><input type="checkbox" style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid #CBD5E1;"></td>
+                        <td style="padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 48px; height: 48px; background: #F1F5F9; border-radius: 8px; overflow: hidden;">
+                                    <img src="${imgUrl}" alt="prod" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <span style="font-weight: 500; color: #111827;">${escapeHtml(prod.name)}</span>
+                            </div>
+                        </td>
+                        <td style="padding: 16px;">
+                            <span class="badge-published">Published</span>
+                        </td>
+                        <td style="padding: 16px;">GH₵ ${parseFloat(prod.price).toLocaleString()}</td>
+                        <td style="padding: 16px;">100 stock for 1 variants</td>
+                        <td style="padding: 16px; text-align: right;"><button class="btn-icon">⋯</button></td>
+                    </tr>
+                `;
+            });
         }
-        myProducts.forEach(prod => {
-            // Only render images we stored ourselves (inline data URLs)
-            const imgHTML = (prod.image && prod.image.startsWith('data:image/'))
-                ? `<img src="${prod.image}" alt="${escapeHtml(prod.name)}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.08);">`
-                : '';
-            productsGrid.innerHTML += `
-                <div class="product-item portal-card-white">
-                    ${imgHTML}
-                    <h3>${escapeHtml(prod.name)}</h3>
-                    <h2 class="product-price">GH₵ ${parseFloat(prod.price).toLocaleString()}</h2>
-                    <p class="product-desc">${escapeHtml(prod.desc)}</p>
-                    <button class="btn btn-outline" style="width: 100%; border-color: var(--primary); color: var(--primary);" onclick="document.getElementById('btn-new-escrow').click(); setTimeout(() => { injectSingleLineItem('${prod.id}'); }, 100);">Sell this Item</button>
-                </div>
-            `;
-        });
     }
 
     // Update existing Selects in Modal
@@ -1272,6 +1277,9 @@ if(formNewProd) {
             formNewProd.reset();
             newProductImage = "";
             document.getElementById('new-prod-preview')?.classList.add('hidden');
+            
+            // Switch back to list view on success
+            window.showProductSubView('list');
         } catch (error) {
             console.error("Error adding document: ", error);
             alert("Error adding product.");
@@ -1281,3 +1289,48 @@ if(formNewProd) {
         }
     });
 }
+
+// New Products View Toggling Logic
+window.showProductSubView = (state) => {
+    const emptyView = document.getElementById('products-empty-view');
+    const listView = document.getElementById('products-list-view');
+    const addView = document.getElementById('products-add-view');
+    const title = document.getElementById('current-view-title');
+
+    if(emptyView) emptyView.classList.add('hidden');
+    if(listView) listView.classList.add('hidden');
+    if(addView) addView.classList.add('hidden');
+
+    if(state === 'empty') {
+        if(emptyView) emptyView.classList.remove('hidden');
+        if(title) title.textContent = 'Products';
+    } else if(state === 'list') {
+        if(listView) listView.classList.remove('hidden');
+        if(title) title.textContent = 'Products';
+    } else if(state === 'add') {
+        if(addView) addView.classList.remove('hidden');
+        if(title) title.textContent = 'Add Products';
+    }
+};
+
+window.openAddProductFlow = () => {
+    // Go to Products view first
+    const productsNav = document.querySelector('.nav-item[data-target="view-products"]');
+    if(productsNav) productsNav.click();
+    
+    // Switch to Add state
+    window.showProductSubView('add');
+};
+
+document.querySelectorAll('.btn-add-product-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+        window.showProductSubView('add');
+    });
+});
+
+document.querySelectorAll('.btn-discard-product').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Go back to list, if list is empty renderProducts will switch to empty state
+        if (typeof renderProducts === 'function') renderProducts();
+    });
+});

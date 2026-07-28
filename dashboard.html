@@ -260,7 +260,7 @@
                                     <span style="color: #64748B; cursor: pointer;">⋮</span>
                                 </div>
                                 <div style="display: flex; gap: 12px; align-items: center;">
-                                    <button class="btn-icon-add" style="width: 48px; height: 48px; border-radius: 50%; background: #111827; color: white; border: none; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="document.getElementById('btn-new-escrow').click()">+</button>
+                                    <button class="btn-icon-add" style="width: 48px; height: 48px; border-radius: 50%; background: #111827; color: white; border: none; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="window.openAddProductFlow()">+</button>
                                     <div class="avatar-stack" style="display: flex;">
                                         <div style="width: 48px; height: 48px; border-radius: 50%; background: #F1F5F9; border: 2px solid white; margin-left: -12px; z-index: 3;"></div>
                                         <div style="width: 48px; height: 48px; border-radius: 50%; background: #E2E8F0; border: 2px solid white; margin-left: -12px; z-index: 2;"></div>
@@ -370,13 +370,199 @@
 
                 <!-- Products View -->
                 <div id="view-products" class="view-section hidden">
-                    <div class="view-header">
-                        <h2 style="margin-bottom: 24px;">My Products & Services</h2>
-                        <button id="btn-add-product" class="btn btn-primary" style="margin-bottom: 24px;">+ Add
-                            Product</button>
+                    
+                    <!-- EMPTY STATE -->
+                    <div id="products-empty-view" class="products-subview">
+                        <div class="view-header" style="justify-content: space-between; align-items: center; margin-bottom: 24px; display: flex;">
+                            <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #111827;">Products</h2>
+                            <button class="btn btn-primary btn-add-product-trigger" style="background: #111827; border-radius: 20px; padding: 10px 20px;">+ Add Product</button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center;">
+                            <div class="empty-ufo-illustration" style="margin-bottom: 24px; position: relative;">
+                                <svg width="200" height="160" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M100 20 C60 20, 30 50, 30 50 C30 50, 10 70, 40 80 C70 90, 130 90, 160 80 C190 70, 170 50, 170 50 C170 50, 140 20, 100 20 Z" fill="white" stroke="#111827" stroke-width="4" stroke-linecap="round"/>
+                                    <path d="M70 50 Q100 20 130 50" stroke="#111827" stroke-width="4" fill="none" stroke-linecap="round"/>
+                                    <circle cx="100" cy="65" r="5" fill="#111827"/>
+                                    <circle cx="70" cy="60" r="4" fill="#111827"/>
+                                    <circle cx="130" cy="60" r="4" fill="#111827"/>
+                                    <path d="M90 10 L100 0 L110 10" stroke="#111827" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                    <path d="M60 85 L30 140 Q100 160 170 140 L140 85" fill="#FCA5A5" opacity="0.6"/>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 8px;">Let's add a new product!</h3>
+                            <p style="color: #64748B; font-size: 0.95rem; margin-bottom: 32px;">Simple flow to make your new card.</p>
+                            <button class="btn btn-primary btn-add-product-trigger" style="background: #111827; border-radius: 24px; padding: 12px 32px; font-weight: 500;">+ Add Product</button>
+                        </div>
                     </div>
-                    <div class="products-grid" id="products-grid">
-                        <!-- Products injected via JS -->
+
+                    <!-- LIST STATE -->
+                    <div id="products-list-view" class="products-subview hidden">
+                        <div class="view-header" style="justify-content: space-between; align-items: center; margin-bottom: 24px; display: flex;">
+                            <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #111827;">Products</h2>
+                            <button class="btn btn-primary btn-add-product-trigger" style="background: #111827; border-radius: 20px; padding: 10px 20px;">+ Add Product</button>
+                        </div>
+                        <div class="products-toolbar" style="display: flex; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                            <div class="products-search-wrap" style="position: relative; flex-grow: 1; max-width: 400px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 16px; top: 12px; width: 20px; height: 20px; color: #64748B;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.15 5.15a7.5 7.5 0 0011.5 11.5z" /></svg>
+                                <input type="text" placeholder="Search products" style="width: 100%; padding: 12px 16px 12px 44px; border: 1px solid #E2E8F0; border-radius: 12px; font-size: 0.95rem; outline: none; box-sizing: border-box;">
+                            </div>
+                            <div style="display: flex; gap: 12px;">
+                                <button style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 500; color: #111827; cursor: pointer;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M6 8h12M9 12h6M12 16v4" /></svg>
+                                    Show All Products
+                                </button>
+                                <button style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 500; color: #111827; cursor: pointer;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" /></svg>
+                                    Sort by name A-Z
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="products-table-container" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; margin-bottom: 24px;">
+                            <table class="products-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid #E2E8F0; background: #F8FAFC;">
+                                        <th style="padding: 16px; width: 48px;"><input type="checkbox" style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid #CBD5E1;"></th>
+                                        <th style="padding: 16px; font-weight: 600; color: #0F172A;">Product</th>
+                                        <th style="padding: 16px; font-weight: 600; color: #0F172A;">Status</th>
+                                        <th style="padding: 16px; font-weight: 600; color: #0F172A;">Price</th>
+                                        <th style="padding: 16px; font-weight: 600; color: #0F172A;">Inventory</th>
+                                        <th style="padding: 16px; width: 48px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="products-table-body">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; color: #64748B; font-size: 0.9rem;">
+                            <span>Page of 1 of 1</span>
+                            <div style="display: flex; gap: 8px;">
+                                <button style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #E2E8F0; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer;">&lt;</button>
+                                <button style="width: 32px; height: 32px; border-radius: 50%; border: none; background: #111827; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 500;">1</button>
+                                <button style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #E2E8F0; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer;">&gt;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADD PRODUCT STATE -->
+                    <div id="products-add-view" class="products-subview hidden">
+                        <div class="view-header" style="justify-content: space-between; align-items: center; margin-bottom: 32px; display: flex; border-bottom: 1px solid #E2E8F0; padding-bottom: 24px;">
+                            <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #111827;">Add Products</h2>
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn btn-outline btn-discard-product" style="border: 1px solid #E2E8F0; border-radius: 20px; padding: 10px 24px; color: #111827; font-weight: 500; background: white;">Discard</button>
+                                <button class="btn btn-primary btn-save-product" style="background: #111827; border-radius: 20px; padding: 10px 32px; font-weight: 500;">Add</button>
+                            </div>
+                        </div>
+
+                        <div class="add-product-grid">
+                            <div class="add-product-left">
+                                <div class="form-section">
+                                    <h3 class="section-title">Product</h3>
+                                    <div class="form-group">
+                                        <label>Title</label>
+                                        <input type="text" placeholder="Enter title">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <div class="rich-text-editor">
+                                            <div class="editor-toolbar">
+                                                <span>↩</span> <span>↪</span>
+                                                <span style="margin: 0 12px;">Normal Text ⌄</span>
+                                                <span style="font-weight:bold;">B</span>
+                                                <span style="font-style:italic;">I</span>
+                                                <span style="text-decoration:underline;">U</span>
+                                                <span style="text-decoration:line-through;">S</span>
+                                                <span>&lt;&gt;</span>
+                                                <span>≡</span>
+                                                <span>::</span>
+                                                <span>📷</span>
+                                                <span>🔗</span>
+                                                <span>"</span>
+                                            </div>
+                                            <textarea placeholder="Product description" style="height: 150px;"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-section">
+                                    <h3 class="section-title">Media</h3>
+                                    <div class="media-dropzone">
+                                        <svg xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px; margin-bottom: 12px; color: #111827;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                                        <div style="font-weight: 500; color: #111827; margin-bottom: 4px;">Choose a file or drag & drop it here</div>
+                                        <div style="font-size: 0.8rem; color: #64748B; margin-bottom: 16px;">JPG or PNG formats, up to 5MB</div>
+                                        <button class="btn btn-outline" style="border-radius: 20px; font-size: 0.85rem; padding: 6px 16px; background: white; border: 1px solid #E2E8F0;">Browse File</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <h3 class="section-title">Pricing</h3>
+                                    <div style="display: flex; gap: 16px;">
+                                        <div class="form-group" style="flex: 1;">
+                                            <label>Pricing</label>
+                                            <input type="text" placeholder="0.00">
+                                        </div>
+                                        <div class="form-group" style="flex: 1;">
+                                            <label>Sale Price</label>
+                                            <input type="text" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="add-product-right">
+                                <div class="form-section">
+                                    <h3 class="section-title">Product Status</h3>
+                                    <div class="form-group">
+                                        <label>Status</label>
+                                        <select>
+                                            <option>Published</option>
+                                            <option>Draft</option>
+                                            <option>Hidden</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-checkbox-group">
+                                        <input type="checkbox" id="hide-product">
+                                        <label for="hide-product">Hide this product</label>
+                                    </div>
+                                    <p class="form-hint">Hidden products are not searchable and visible in storefront. Hidden products are only accessible by direct link.</p>
+                                </div>
+                                
+                                <div class="form-section">
+                                    <h3 class="section-title">Organization</h3>
+                                    <div class="form-group">
+                                        <label>Collections</label>
+                                        <div style="position: relative;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 12px; top: 12px; width: 16px; height: 16px; color: #64748B;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.15 5.15a7.5 7.5 0 0011.5 11.5z" /></svg>
+                                            <input type="text" placeholder="Search for collections" style="padding-left: 36px;">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Tags</label>
+                                        <div style="display: flex; gap: 8px;">
+                                            <input type="text" placeholder="Modern, Classic, Trendy" style="flex: 1;">
+                                            <button style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid #E2E8F0; background: white; cursor: pointer;">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <h3 class="section-title">Shipping</h3>
+                                    <div class="form-group">
+                                        <label>Weight</label>
+                                        <div style="display: flex; gap: 8px;">
+                                            <input type="text" placeholder="0" style="flex: 1;">
+                                            <select style="width: 80px;">
+                                                <option>g</option>
+                                                <option>kg</option>
+                                                <option>lb</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
