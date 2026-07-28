@@ -33,24 +33,16 @@
     <div class="dashboard-layout">
         <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header" style="flex-direction: column; align-items: flex-start; padding: 32px 24px 16px 24px;">
-                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 32px;">
-                    <a href="index.html" class="logo" style="font-size: 1.4rem; font-family: 'Outfit', sans-serif; font-weight: 700; flex-direction: row; margin: 0; color: #111827;">
-                        <div class="logo-icon" style="width: 24px; height: 24px; background: linear-gradient(135deg, #10B981, #34D399); border-radius: 6px;"></div>
-                        <span class="logo-text">iBanko</span> <!-- Will change to TrustLink via CSS or leave as is if user wants exact mockup, let's use TrustLink -->
-                    </a>
-                    <button id="btn-collapse" class="btn-icon" style="padding: 4px; color: #111827;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                    </svg></button>
-                </div>
+            <div class="sidebar-header" style="flex-direction: column; align-items: center; padding: 32px 24px 16px 24px;">
+                <!-- Logo removed from here to match screenshot -->
                 
                 <div class="user-card" style="display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center; margin-bottom: 16px;">
                     <!-- Use background-size cover and background-position center for avatars -->
-                    <div class="avatar" id="sidebar-avatar" style="width: 64px; height: 64px; background: linear-gradient(135deg, #3B82F6, #60A5FA); background-size: cover; background-position: center; border-radius: 50%; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                    <div class="avatar" id="sidebar-avatar" style="width: 80px; height: 80px; background: linear-gradient(135deg, #3B82F6, #60A5FA); background-size: cover; background-position: center; border-radius: 50%; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
                     </div>
                     <div class="user-info">
-                        <span class="user-name" id="user-name" style="font-weight: 700; font-size: 1.1rem; color: #111827;">Loading...</span>
-                        <span class="user-role" style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Vendor</span>
+                        <span class="user-name" id="user-name" style="font-weight: 700; font-size: 1.2rem; color: #111827; text-transform: uppercase;">Loading...</span>
+                        <span class="user-role" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: block; margin-top: 4px;">Vendor</span>
                     </div>
                 </div>
             </div>
@@ -111,9 +103,15 @@
 
         <main class="dashboard-main">
             <header class="dashboard-topbar">
-                <div style="display: flex; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <a href="index.html" class="logo" style="font-size: 1.4rem; font-family: 'Outfit', sans-serif; font-weight: 700; display: flex; align-items: center; gap: 8px; text-decoration: none; color: #111827;">
+                        <div class="logo-icon" style="width: 24px; height: 24px; background: linear-gradient(135deg, #10B981, #34D399); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 10px; height: 10px; border: 2px solid white; border-radius: 3px;"></div>
+                        </div>
+                        <span class="logo-text">TrustLink</span>
+                    </a>
                     <button id="topbar-menu-toggle" class="btn-icon" style="color: #111827;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
-                    <h1 class="topbar-title" id="current-view-title" style="color: #111827; font-weight: 700;">Hello <span id="greeting-name">Vendor</span> 👋</h1>
+                    <h1 class="topbar-title" id="current-view-title" style="display: none;"></h1>
                 </div>
                 
                 <div class="topbar-actions">
