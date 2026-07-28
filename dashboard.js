@@ -129,6 +129,13 @@ onAuthStateChanged(auth, async (user) => {
                 if (profileName && document.activeElement !== profileName) profileName.value = data.fullName || '';
                 if (profilePhone && document.activeElement !== profilePhone) profilePhone.value = data.phone || pickUserPhone(data) || '';
 
+                if (data.photoURL) {
+                    const sidebarAvatar = document.getElementById('sidebar-avatar');
+                    const profileAvatar = document.getElementById('profile-avatar');
+                    if (sidebarAvatar) sidebarAvatar.style.backgroundImage = `url('${data.photoURL}')`;
+                    if (profileAvatar) profileAvatar.style.backgroundImage = `url('${data.photoURL}')`;
+                }
+
                 currentBalance = parseFloat(data.walletBalance || 0);
                 const balance = currentBalance.toFixed(2);
                 document.getElementById('overview-balance').textContent = `GH₵ ${balance}`;
@@ -553,6 +560,52 @@ window.raiseDispute = async (escrowId) => {
 // ==========================================
 // PROFILE
 // ==========================================
+
+document.getElementById('avatar-upload-input')?.addEventListener('change', async (e) => {
+    if (!currentUser) return;
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        alert("Please upload an image file.");
+        return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+        alert("Image size should be less than 2MB.");
+        return;
+    }
+
+    const statusText = document.getElementById('avatar-upload-status');
+    if(statusText) {
+        statusText.style.display = 'block';
+        statusText.textContent = 'Uploading...';
+        statusText.style.color = '#10B981';
+    }
+
+    try {
+        const fileExt = file.name.split('.').pop();
+        const storageRef = ref(storage, `users/${currentUser.uid}/profile_${Date.now()}.${fileExt}`);
+        
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+
+        await updateDoc(doc(db, "users", currentUser.uid), {
+            photoURL: downloadURL
+        });
+
+        if(statusText) {
+            statusText.textContent = 'Uploaded successfully!';
+            setTimeout(() => { statusText.style.display = 'none'; }, 2000);
+        }
+    } catch (error) {
+        if(statusText) {
+            statusText.textContent = 'Upload failed: ' + error.message;
+            statusText.style.color = '#EF4444';
+        }
+        alert("Failed to upload avatar: " + error.message);
+    }
+});
+
 document.getElementById('btn-save-profile')?.addEventListener('click', async () => {
     if (!currentUser) return;
     const btn = document.getElementById('btn-save-profile');
