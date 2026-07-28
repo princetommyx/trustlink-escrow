@@ -183,28 +183,55 @@
 
             <div class="dashboard-content">
                 <!-- Overview View -->
-                <div id="view-overview" class="view-section active">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-label">Total Wallet Balance</span>
-                            <h3 class="stat-value" id="overview-balance">GH₵ 0.00</h3>
+                <div id="view-overview" class="view-section active dashboard-grid">
+                    
+                    <div class="dashboard-main-col">
+                        <!-- Top Row: My Card & Financial Record -->
+                        <div class="dashboard-top-row">
+                            <div class="my-card-widget">
+                                <h3 style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 24px; font-weight: 500;">Total Wallet Balance</h3>
+                                <h2 id="overview-balance" style="color: white; font-size: 2.2rem; margin: 0; font-family: 'Outfit', sans-serif;">GH₵ 0.00</h2>
+                                <div style="margin-top: 32px; display: flex; gap: 12px; position: relative; z-index: 2;">
+                                    <button class="btn btn-primary btn-sm" style="background: white; color: #111827; border: none; font-weight: 600; padding: 10px 20px;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">Top Up</button>
+                                    <button class="btn btn-outline btn-sm" style="border-color: rgba(255,255,255,0.3); color: white; font-weight: 600; padding: 10px 20px;" onclick="document.querySelector('[data-target=\'view-wallet\']').click()">Withdraw</button>
+                                </div>
+                                <div class="card-bg-shape"></div>
+                            </div>
+                            
+                            <div class="financial-record-widget">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                                    <h3 style="margin: 0; font-size: 1.1rem; color: #111827;">Contract Stats</h3>
+                                </div>
+                                <div class="financial-cards-grid">
+                                    <div class="fin-card bg-orange">
+                                        <div class="fin-top">
+                                            <span class="fin-label">Active Escrows</span>
+                                        </div>
+                                        <h3 class="fin-value" id="overview-active-escrows">0</h3>
+                                    </div>
+                                    <div class="fin-card bg-blue">
+                                        <div class="fin-top">
+                                            <span class="fin-label">Pending Releases</span>
+                                        </div>
+                                        <h3 class="fin-value" id="overview-pending-releases">0</h3>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Active Escrows</span>
-                            <h3 class="stat-value" id="overview-active-escrows">0</h3>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Pending Releases</span>
-                            <h3 class="stat-value" id="overview-pending-releases">0</h3>
-                        </div>
+
                     </div>
 
-                    <div class="recent-activity-container">
-                        <h2>Recent Activity</h2>
-                        <div class="activity-list" id="recent-activity-list">
-                            <!-- Injected dynamically -->
-                            <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px;">
-                                No recent activity</p>
+                    <div class="dashboard-side-col">
+                        <div class="transactions-widget">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                <h3 style="margin: 0; font-size: 1.1rem; color: #111827;">Recent Activity</h3>
+                                <span style="font-size: 0.8rem; color: #64748b; background: #F1F5F9; padding: 4px 8px; border-radius: 4px;">Latest ▼</span>
+                            </div>
+                            <div class="tx-list" id="recent-activity-list">
+                                <!-- Injected dynamically -->
+                                <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px;">
+                                    No recent activity</p>
+                            </div>
                         </div>
                     </div>
                 </div>

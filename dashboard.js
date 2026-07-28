@@ -238,14 +238,18 @@ function updateOverviewStats() {
         } else {
             activityContainer.innerHTML = '';
             recentActivities.slice(0, 5).forEach(act => {
+                let iconBg = "bg-blue-light";
+                if(act.title.includes("COMPLETED")) iconBg = "bg-green-light";
+                if(act.title.includes("CANCELED") || act.title.includes("DISPUTED")) iconBg = "bg-orange-light";
+
                 activityContainer.innerHTML += `
-                    <div class="activity-item">
-                        <div class="activity-icon bg-primary"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                        <div class="activity-details">
-                            <h4>${act.title}</h4>
-                            <p>${act.description}</p>
+                    <div class="tx-item">
+                        <div class="tx-icon ${iconBg}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75" /></svg></div>
+                        <div class="tx-info">
+                            <span class="tx-name" style="font-size: 0.85rem;">${act.title}</span>
+                            <span class="tx-date" style="font-size: 0.75rem;">${act.description}</span>
                         </div>
-                        <div class="activity-time">${new Date(act.time).toLocaleString()}</div>
+                        <div class="tx-amount" style="font-size: 0.75rem; font-weight: 400; color: #64748b; text-align: right;">${new Date(act.time).toLocaleString()}</div>
                     </div>
                 `;
             });
