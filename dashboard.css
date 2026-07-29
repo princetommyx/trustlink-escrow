@@ -330,7 +330,8 @@ body {
 }
 
 .view-toggles {
-    display: flex;
+    display: inline-flex;
+    width: fit-content;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 8px;
     padding: 4px;
