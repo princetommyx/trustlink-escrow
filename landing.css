@@ -51,6 +51,16 @@ body.light-landing {
 .light-landing .nav-links a:not(.btn):hover { color: #111827; }
 .light-landing .mobile-menu-btn span { background: #111827; }
 
+/* Profile Button Override for Light Theme */
+.light-landing .profile-btn {
+    color: #111827;
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+.light-landing .profile-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
 /* Mobile Menu Override for Light Theme */
 @media (max-width: 768px) {
     .light-landing .nav-links {

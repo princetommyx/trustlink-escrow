@@ -92,7 +92,7 @@ onAuthStateChanged(auth, async (user) => {
             
             // Update UI
             // Find existing auth buttons
-            const loginBtn = navLinks.querySelector(".btn-secondary");
+            const loginBtn = navLinks.querySelector(".btn-secondary, .btn-outline");
             const signupBtn = navLinks.querySelector(".btn-primary");
             
             if (loginBtn) loginBtn.style.display = "none";
