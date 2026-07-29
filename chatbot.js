@@ -5,7 +5,7 @@
 
 (function () {
     // ─── CONFIG ─────────────────────────────────────────────────────────────
-    const DEEPSEEK_API_KEY = 'YOUR_DEEPSEEK_API_KEY_HERE'; // ← Add your DeepSeek API key here (get it from platform.deepseek.com)
+    const DEEPSEEK_API_KEY = 'YOUR_DEEPSEEK_API_KEY_HERE'; // Injected by GitHub Actions at deploy time
     const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
     const MODEL = 'deepseek-chat';
 

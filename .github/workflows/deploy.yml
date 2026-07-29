@@ -1,0 +1,23 @@
+name: Deploy with Secrets
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Inject DeepSeek API Key
+        run: |
+          sed -i "s|YOUR_DEEPSEEK_API_KEY_HERE|${{ secrets.DEEPSEEK_API_KEY }}|g" chatbot.js
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          exclude_assets: '.github,node_modules,*.md,*.txt,*.mjs,*.json,webhook-server'
