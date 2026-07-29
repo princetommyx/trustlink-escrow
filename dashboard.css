@@ -554,6 +554,20 @@ body {
     display: none;
 }
 
+.modal-content-light {
+    background: #ffffff !important;
+    border: 1px solid #E2E8F0 !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+.modal-content-light h2 {
+    color: #111827 !important;
+}
+.modal-content-light .btn-icon {
+    color: #475569 !important;
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -638,20 +652,6 @@ body {
 }
 
 /* Hide number input spinners universally */
-.modal-form .form-group label {
-    color: rgba(255,255,255,0.7) !important;
-}
-.modal-form .form-group input, 
-.modal-form .form-group select, 
-.modal-form .form-group textarea {
-    background-color: rgba(0, 0, 0, 0.3) !important;
-    color: white !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-}
-.modal-form .form-group select option {
-    background-color: #111827;
-    color: white;
-}
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
