@@ -854,7 +854,7 @@ async function populateEscrowProductSelect() {
     }
 
     try {
-        const q = query(collection(db, "products"), where("vendorId", "==", currentUser.uid));
+        const q = query(collection(db, "products"), where("userId", "==", currentUser.uid));
         const snap = await getDocs(q);
         
         if (snap.empty) {

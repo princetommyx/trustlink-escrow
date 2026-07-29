@@ -638,6 +638,20 @@ body {
 }
 
 /* Hide number input spinners universally */
+.modal-form .form-group label {
+    color: rgba(255,255,255,0.7) !important;
+}
+.modal-form .form-group input, 
+.modal-form .form-group select, 
+.modal-form .form-group textarea {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.modal-form .form-group select option {
+    background-color: #111827;
+    color: white;
+}
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
