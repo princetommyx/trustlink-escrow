@@ -69,7 +69,7 @@ body.auth-page {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 60px 20px 40px;
+    padding: 24px 20px 20px;
     flex-direction: column;
 }
 
