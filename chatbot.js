@@ -5,7 +5,7 @@
 
 (function () {
     // ─── CONFIG ─────────────────────────────────────────────────────────────
-    const DEEPSEEK_API_KEY = 'YOUR_DEEPSEEK_API_KEY_HERE'; // ← Replace with your DeepSeek API key
+    const DEEPSEEK_API_KEY = 'YOUR_DEEPSEEK_API_KEY_HERE'; // ← Add your DeepSeek API key here (get it from platform.deepseek.com)
     const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
     const MODEL = 'deepseek-chat';
 
