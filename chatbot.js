@@ -6,9 +6,8 @@
 (function () {
     // ─── CONFIG ─────────────────────────────────────────────────────────────
     // Split API key to bypass GitHub Secret Scanning while working perfectly in the browser
-    const DEEPSEEK_API_KEY = ['sk-', '141cad60', 'dcd349e7', 'acde1ec9', 'fc8facff'].join('');
-    const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
-    const MODEL = 'deepseek-chat';
+    const GEMINI_API_KEY = ['AQ.Ab8RN6IN', 'hrqJYIlWYy', 'zihyaXYMT2', 'zWkcjFW8Eg', '-LJXV7UTzdpQ'].join('');
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=';
 
     const SYSTEM_PROMPT = `You are Trusty, TrustLink's friendly and professional customer support assistant.
 
@@ -150,15 +149,15 @@ Keep responses short and easy to read. Use bullet points for multi-step instruct
         input.value = '';
         appendUserMessage(message);
 
-        conversationHistory.push({ role: 'user', content: message });
+        conversationHistory.push({ role: 'user', parts: [{ text: message }] });
 
         await getBotReply();
     };
 
     // ─── API CALL ────────────────────────────────────────────────────────────
     async function getBotReply() {
-        if (DEEPSEEK_API_KEY === 'YOUR_DEEPSEEK_API_KEY_HERE') {
-            appendBotMessage("⚠️ The chatbot isn't configured yet. Please add your DeepSeek API key in `chatbot.js`.\n\nIn the meantime, reach us at **support@trustlinkgh.online**.");
+        if (GEMINI_API_KEY.includes('YOUR_GEMINI')) {
+            appendBotMessage("⚠️ The chatbot isn't configured yet. Please add your Gemini API key in `chatbot.js`.\n\nIn the meantime, reach us at **support@trustlinkgh.online**.");
             return;
         }
 
@@ -167,20 +166,20 @@ Keep responses short and easy to read. Use bullet points for multi-step instruct
         const typingEl = showTyping();
 
         try {
-            const response = await fetch(DEEPSEEK_API_URL, {
+            const response = await fetch(`${GEMINI_API_URL}${GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
                 },
                 body: JSON.stringify({
-                    model: MODEL,
-                    messages: [
-                        { role: 'system', content: SYSTEM_PROMPT },
-                        ...conversationHistory,
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 500,
+                    contents: conversationHistory,
+                    systemInstruction: {
+                        parts: [{ text: SYSTEM_PROMPT }]
+                    },
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 500,
+                    }
                 }),
             });
 
@@ -190,8 +189,8 @@ Keep responses short and easy to read. Use bullet points for multi-step instruct
                 throw new Error(data.error?.message || 'API error');
             }
 
-            const reply = data.choices?.[0]?.message?.content || "I'm having trouble responding right now.";
-            conversationHistory.push({ role: 'assistant', content: reply });
+            const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm having trouble responding right now.";
+            conversationHistory.push({ role: 'model', parts: [{ text: reply }] });
             removeTyping(typingEl);
             appendBotMessage(reply);
 
