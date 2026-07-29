@@ -205,6 +205,11 @@ h1, h2, h3, h4 {
     z-index: 110;
 }
 
+.logo img {
+    transform: scale(1.6);
+    transform-origin: left center;
+}
+
 .logo-icon {
     width: 32px;
     height: 32px;
