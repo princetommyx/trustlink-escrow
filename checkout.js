@@ -65,6 +65,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     escrow.status = 'FUNDED';
                     await notifyBuyerSMS(); await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
                     alert("Payment Successful! Your funds are now securely held in escrow.");
+                    
+                    if (escrow.redirectUrl) {
+                        const sep = escrow.redirectUrl.includes('?') ? '&' : '?';
+                        window.location.href = `${escrow.redirectUrl}${sep}escrow_id=${escrowId}&status=funded&reference=${escrow.customReference || ''}`;
+                        return; // Stop execution to allow redirect
+                    }
                 } else {
                     throw new Error("Moolre says the transaction is not fully successful yet.");
                 }
@@ -183,7 +189,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 await updateDoc(docRef, { status: 'FUNDED' });
                                 await notifyBuyerSMS(); await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
                                 alert("Payment Successful! Funds are now securely held in escrow.");
-                                window.location.reload();
+                                if (escrow.redirectUrl) {
+                                    const sep = escrow.redirectUrl.includes('?') ? '&' : '?';
+                                    window.location.href = `${escrow.redirectUrl}${sep}escrow_id=${escrowId}&status=funded&reference=${escrow.customReference || ''}`;
+                                } else {
+                                    window.location.reload();
+                                }
                             } else {
                                 // Let's poll for up to 30 seconds
                                 let attempts = 0;
@@ -196,7 +207,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             await updateDoc(docRef, { status: 'FUNDED' });
                                             await notifyBuyerSMS(); await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
                                             alert("Payment Successful! Funds are now securely held in escrow.");
-                                            window.location.reload();
+                                            if (escrow.redirectUrl) {
+                                                const sep = escrow.redirectUrl.includes('?') ? '&' : '?';
+                                                window.location.href = `${escrow.redirectUrl}${sep}escrow_id=${escrowId}&status=funded&reference=${escrow.customReference || ''}`;
+                                            } else {
+                                                window.location.reload();
+                                            }
                                         }
                                     } catch(e) { }
                                     
@@ -219,6 +235,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 statusBadge.textContent = 'Status: Paid (Awaiting Dispatch)';
                 statusBadge.classList.add('status-funded');
                 actionButtons.innerHTML = `<p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Your funds are securely locked in TrustLink Escrow. The seller has been notified to dispatch the item.</p>`;
+                if (escrow.redirectUrl) {
+                    const sep = escrow.redirectUrl.includes('?') ? '&' : '?';
+                    actionButtons.innerHTML += `<button class="btn btn-primary btn-large" style="width: 100%; margin-top: 12px;" onclick="window.location.href='${escrow.redirectUrl}${sep}escrow_id=${escrowId}&status=funded&reference=${escrow.customReference || ''}'">Return to Vendor</button>`;
+                }
                 
             } else if (status === 'DISPATCHED') {
                 statusBadge.textContent = 'Status: Dispatched';

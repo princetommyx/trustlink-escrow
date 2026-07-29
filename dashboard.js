@@ -141,6 +141,16 @@ onAuthStateChanged(auth, async (user) => {
                     if (profileAvatar) profileAvatar.style.backgroundImage = `url('${data.photoURL}')`;
                 }
 
+                // Load API Settings
+                const apiKeyDisplay = document.getElementById('api-key-display');
+                if (apiKeyDisplay) {
+                    apiKeyDisplay.value = data.apiKey || '••••••••••••••••••••';
+                }
+                const webhookInput = document.getElementById('webhook-url-input');
+                if (webhookInput && document.activeElement !== webhookInput) {
+                    webhookInput.value = data.webhookUrl || '';
+                }
+
                 currentBalance = parseFloat(data.walletBalance || 0);
                 const balance = currentBalance.toFixed(2);
                 document.getElementById('overview-balance').textContent = `GH₵ ${balance}`;
@@ -1393,4 +1403,88 @@ document.querySelectorAll('.btn-discard-product').forEach(btn => {
         // Go back to list, if list is empty renderProducts will switch to empty state
         if (typeof renderProducts === 'function') renderProducts();
     });
+    });
 });
+
+// ==========================================
+// API & DEVELOPER SETTINGS
+// ==========================================
+
+const btnGenerateApiKey = document.getElementById('btn-generate-api-key');
+if (btnGenerateApiKey) {
+    btnGenerateApiKey.addEventListener('click', async () => {
+        if (!currentUser) return;
+        if (confirm("Are you sure you want to generate a new API Key? Your old key will stop working immediately.")) {
+            btnGenerateApiKey.disabled = true;
+            btnGenerateApiKey.textContent = 'Generating...';
+            
+            try {
+                // Generate a random key (tl_live_ + 32 random chars)
+                const array = new Uint8Array(16);
+                window.crypto.getRandomValues(array);
+                const randomHex = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+                const newApiKey = 'tl_live_' + randomHex;
+                
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    apiKey: newApiKey
+                });
+                
+                document.getElementById('api-key-display').value = newApiKey;
+                alert("New API Key generated successfully!");
+            } catch (error) {
+                console.error("Error generating API Key:", error);
+                alert("Failed to generate API Key: " + error.message);
+            } finally {
+                btnGenerateApiKey.disabled = false;
+                btnGenerateApiKey.textContent = 'Generate New Key';
+            }
+        }
+    });
+}
+
+const btnCopyApiKey = document.getElementById('btn-copy-api-key');
+if (btnCopyApiKey) {
+    btnCopyApiKey.addEventListener('click', async () => {
+        const apiKey = document.getElementById('api-key-display').value;
+        if (apiKey && apiKey !== '••••••••••••••••••••') {
+            try {
+                await navigator.clipboard.writeText(apiKey);
+                btnCopyApiKey.textContent = 'Copied!';
+                setTimeout(() => btnCopyApiKey.textContent = 'Copy', 2000);
+            } catch (err) {
+                alert("Failed to copy API key.");
+            }
+        } else {
+            alert("Generate an API key first.");
+        }
+    });
+}
+
+const webhookForm = document.getElementById('webhook-settings-form');
+if (webhookForm) {
+    webhookForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentUser) return;
+        
+        const webhookUrl = document.getElementById('webhook-url-input').value.trim();
+        const btnSaveWebhook = document.getElementById('btn-save-webhook');
+        btnSaveWebhook.disabled = true;
+        btnSaveWebhook.textContent = 'Saving...';
+        
+        try {
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                webhookUrl: webhookUrl
+            });
+            btnSaveWebhook.textContent = 'Saved ✓';
+            setTimeout(() => {
+                btnSaveWebhook.disabled = false;
+                btnSaveWebhook.textContent = 'Save Webhook';
+            }, 1500);
+        } catch (error) {
+            console.error("Error saving webhook:", error);
+            alert("Failed to save webhook: " + error.message);
+            btnSaveWebhook.disabled = false;
+            btnSaveWebhook.textContent = 'Save Webhook';
+        }
+    });
+}
