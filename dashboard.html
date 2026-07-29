@@ -344,12 +344,13 @@
 
                 <!-- Escrows View -->
                 <div id="view-escrows" class="view-section hidden">
-                    <div class="view-header">
-                        <h2 style="margin-bottom: 24px;">Escrow Contracts</h2>
-                        <div class="view-toggles" style="margin-bottom: 24px;">
-                            <button class="toggle-btn active" id="toggle-buyer">I am Buying</button>
-                            <button class="toggle-btn" id="toggle-seller">I am Selling</button>
-                        </div>
+                    <div class="view-header" style="justify-content: space-between; align-items: center; display: flex;">
+                        <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #111827;">Escrow Contracts</h2>
+                        <button class="btn btn-primary" id="btn-new-escrow-trigger" style="background: #111827; border-radius: 20px; padding: 10px 20px;">+ Initiate Escrow</button>
+                    </div>
+                    <div class="view-toggles" style="margin-bottom: 24px; margin-top: 16px;">
+                        <button class="toggle-btn active" id="toggle-buyer">I am Buying</button>
+                        <button class="toggle-btn" id="toggle-seller">I am Selling</button>
                     </div>
 
                     <div class="portal-card portal-card-white" id="buyer-escrows">
@@ -678,13 +679,12 @@
                     </svg></button>
             </div>
             <form id="new-escrow-form" class="modal-form">
-                <div id="escrow-line-items">
-                    <!-- Line items will be injected here via JS -->
+                <div class="form-group">
+                    <label>Select Product</label>
+                    <select id="escrow-product-select" required>
+                        <option value="" disabled selected>Loading your products...</option>
+                    </select>
                 </div>
-                <button type="button" id="btn-add-line-item" class="btn btn-outline"
-                    style="width: 100%; border-style: dashed; margin-bottom: 24px; padding: 12px; color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.2);">
-                    <i class="fa-solid fa-plus"></i> Add Another Product
-                </button>
 
                 <div class="form-group">
                     <label>Total Amount (GH₵)</label>

@@ -810,7 +810,7 @@ if (topSignoutBtn) {
 }
 
 // New Escrow Modal Logic
-const btnNewEscrow = document.getElementById('btn-new-escrow');
+const btnNewEscrow = document.getElementById('btn-new-escrow-trigger');
 const modalOverlay = document.getElementById('new-escrow-modal');
 const btnCloseModal = document.getElementById('close-escrow-modal');
 const btnCancelEscrow = document.getElementById('btn-cancel-escrow');
@@ -825,6 +825,7 @@ const openModal = () => {
             gsap.fromTo('#new-escrow-modal .modal-content', { scale: 0.95, y: 20, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.4, ease: 'back.out(1.5)' });
         }
     }, 10);
+    populateEscrowProductSelect();
 };
 
 const closeModal = () => {
@@ -832,22 +833,69 @@ const closeModal = () => {
         gsap.to('#new-escrow-modal .modal-content', { scale: 0.95, y: 10, opacity: 0, duration: 0.3, ease: 'power2.in', onComplete: () => {
             modalOverlay.classList.remove('active');
             setTimeout(() => modalOverlay.classList.add('hidden'), 300);
+            if (formNewEscrow) formNewEscrow.reset();
         }});
     } else {
         modalOverlay.classList.remove('active');
         setTimeout(() => modalOverlay.classList.add('hidden'), 300);
+        if (formNewEscrow) formNewEscrow.reset();
     }
 };
 
-if (btnNewEscrow) {
-    btnNewEscrow.addEventListener('click', () => {
-        const escrowLineItems = document.getElementById('escrow-line-items');
-        if(escrowLineItems && !escrowLineItems.innerHTML.trim()) {
-            // Will define injectSingleLineItem below
-            if(typeof injectSingleLineItem !== 'undefined') injectSingleLineItem('');
+async function populateEscrowProductSelect() {
+    const select = document.getElementById('escrow-product-select');
+    if(!select) return;
+    
+    select.innerHTML = '<option value="" disabled selected>Loading your products...</option>';
+    
+    if(!currentUser) {
+        select.innerHTML = '<option value="" disabled>Please log in</option>';
+        return;
+    }
+
+    try {
+        const q = query(collection(db, "products"), where("vendorId", "==", currentUser.uid));
+        const snap = await getDocs(q);
+        
+        if (snap.empty) {
+            select.innerHTML = '<option value="" disabled>No products found. Please add a product first.</option>';
+            return;
         }
-        openModal();
+
+        select.innerHTML = '<option value="" disabled selected>Select a product to link...</option>';
+        snap.forEach(docSnap => {
+            const prod = docSnap.data();
+            const option = document.createElement('option');
+            option.value = docSnap.id;
+            option.dataset.price = prod.price || 0;
+            option.dataset.name = prod.name || 'Unnamed Product';
+            option.textContent = `${prod.name} (GH₵ ${parseFloat(prod.price || 0).toFixed(2)})`;
+            select.appendChild(option);
+        });
+    } catch (err) {
+        console.error("Error loading products for escrow:", err);
+        select.innerHTML = '<option value="" disabled>Error loading products</option>';
+    }
+}
+
+// Auto-fill amount when product selected
+const productSelect = document.getElementById('escrow-product-select');
+if (productSelect) {
+    productSelect.addEventListener('change', (e) => {
+        const selectedOpt = e.target.options[e.target.selectedIndex];
+        const amountInput = document.getElementById('escrow-amount');
+        const termsInput = document.getElementById('escrow-terms');
+        if(amountInput && selectedOpt) {
+            amountInput.value = selectedOpt.dataset.price;
+        }
+        if(termsInput && selectedOpt) {
+            termsInput.value = `Payment for: ${selectedOpt.dataset.name}`;
+        }
     });
+}
+
+if (btnNewEscrow) {
+    btnNewEscrow.addEventListener('click', openModal);
 }
 if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
 if (btnCancelEscrow) btnCancelEscrow.addEventListener('click', closeModal);
@@ -931,18 +979,16 @@ if (formNewEscrow) {
                     sellerName: newEscrow.sellerName
                 };
                 try {
-                    // Only use SMS, as requested (WhatsApp is not configured)
-                    await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, moolrePaymentId, smsDetails);
-                    showModernToast("Escrow Created Successfully!", "An SMS notification has been sent to the buyer. The payment link was also copied to your clipboard!");
+                    await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, "", smsDetails);
+                    showModernToast("Escrow Created Successfully!", "An SMS notification has been sent to the buyer.");
                 } catch (smsError) {
                     console.warn("SMS failed.", smsError);
-                    showModernToast("Escrow Created!", "Failed to send automatic SMS. The payment link has been COPIED TO YOUR CLIPBOARD. Please paste it to the buyer directly.", "warning");
+                    showModernToast("Escrow Created!", "Failed to send automatic SMS. Please share the link with the buyer directly.", "warning");
                 }
             } else {
-                showModernToast("Escrow Created Successfully!", "The payment link has been COPIED TO YOUR CLIPBOARD. Please send it to the buyer.");
+                showModernToast("Escrow Created Successfully!", "No phone number provided, so SMS was skipped.");
             }
 
-            // Do not redirect the seller. The buyer will pay via the WhatsApp link!
             closeModal();
             // Optionally, refresh the UI here
             if (typeof fetchProducts === 'function') fetchProducts();
