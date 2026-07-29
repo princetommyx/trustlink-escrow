@@ -201,6 +201,8 @@ h1, h2, h3, h4 {
     font-size: 1.5rem;
     color: var(--text-main);
     text-decoration: none;
+    position: relative;
+    z-index: 110;
 }
 
 .logo-icon {
@@ -248,6 +250,8 @@ h1, h2, h3, h4 {
     cursor: pointer;
     flex-direction: column;
     gap: 6px;
+    position: relative;
+    z-index: 110;
 }
 
 .mobile-menu-btn span {
@@ -771,7 +775,7 @@ h1, h2, h3, h4 {
         transform: translateY(-150%);
         transition: 0.3s ease;
         border-bottom: 1px solid var(--surface-border);
-        z-index: -1;
+        z-index: 99;
     }
     .nav-links.active { transform: translateY(0); }
     .mobile-menu-btn { display: flex; }
@@ -851,20 +855,22 @@ h1, h2, h3, h4 {
     right: 0;
     background: var(--surface-color);
     backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--surface-border);
     border-radius: 12px;
     width: 200px;
     padding: 8px 0;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
+    transform: translateY(-10px) translateZ(0);
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
 }
 .profile-menu:hover .profile-dropdown {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
 }
 .dropdown-item {
     display: block;
