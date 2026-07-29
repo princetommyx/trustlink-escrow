@@ -47,7 +47,8 @@
             font-weight: 500;
             color: #9CA3AF;
             white-space: nowrap;
-            flex-shrink: 0;
+            flex: 0 0 auto;
+            width: max-content;
         }
         .step.active {
             color: #111827;
@@ -268,11 +269,11 @@
                 <div class="stepper">
                     <div class="step">
                         <div class="step-icon">✓</div>
-                        Customer Information
+                        <span>Customer Information</span>
                     </div>
                     <div class="step active">
                         <div class="step-icon">2</div>
-                        Payment Details
+                        <span>Payment Details</span>
                     </div>
                 </div>
 
