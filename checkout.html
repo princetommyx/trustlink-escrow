@@ -31,7 +31,7 @@
             padding-right: 0px;
         }
         
-        .stepper {
+        .checkout-stepper {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
@@ -42,7 +42,7 @@
             user-select: none;
             -webkit-user-select: none;
         }
-        .step {
+        .checkout-stepper .step {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -51,11 +51,19 @@
             white-space: nowrap;
             flex: 0 0 auto;
             width: max-content;
+            background: none !important;
+            box-shadow: none !important;
+            border-radius: 0;
+            width: auto;
+            height: auto;
+            position: static;
         }
-        .step.active {
+        .checkout-stepper .step.active {
             color: #111827;
+            background: none !important;
+            box-shadow: none !important;
         }
-        .step-icon {
+        .checkout-stepper .step-icon {
             width: 28px;
             height: 28px;
             border-radius: 50%;
@@ -67,7 +75,7 @@
             color: white;
             flex-shrink: 0;
         }
-        .step.active .step-icon {
+        .checkout-stepper .step.active .step-icon {
             background: #000;
         }
 
@@ -268,7 +276,7 @@
             
             <!-- Left Side: Payment Selection -->
             <div class="checkout-main">
-                <div class="stepper">
+                <div class="checkout-stepper">
                     <div class="step">
                         <div class="step-icon">✓</div>
                         <span>Customer Information</span>
