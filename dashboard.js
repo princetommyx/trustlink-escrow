@@ -118,8 +118,11 @@ onAuthStateChanged(auth, async (user) => {
                     window.location.href = "admin-dashboard.html";
                     return;
                 }
-                document.getElementById('user-name').textContent = data.fullName;
-                if(document.getElementById('greeting-name')) document.getElementById('greeting-name').textContent = data.fullName.split(' ')[0];
+                if(document.getElementById('user-name')) document.getElementById('user-name').textContent = data.fullName || user.email.split('@')[0];
+                if(document.getElementById('greeting-name')) {
+                    const n = data.fullName || user.email.split('@')[0];
+                    document.getElementById('greeting-name').textContent = n.split(' ')[0];
+                }
 
                 // Keep the profile form in sync (don't overwrite while typing)
                 const profileName = document.getElementById('profile-name');
@@ -155,7 +158,7 @@ onAuthStateChanged(auth, async (user) => {
                     loadTransactionLogs();
                 }
             } else {
-                document.getElementById('user-name').textContent = user.email.split('@')[0];
+                if(document.getElementById('user-name')) document.getElementById('user-name').textContent = user.email.split('@')[0];
                 if(document.getElementById('greeting-name')) document.getElementById('greeting-name').textContent = user.email.split('@')[0];
                 if(!currentUser) {
                     currentUser = user;
@@ -166,7 +169,7 @@ onAuthStateChanged(auth, async (user) => {
             }
         });
     } catch(e) {
-        document.getElementById('user-name').textContent = user.email.split('@')[0];
+        if(document.getElementById('user-name')) document.getElementById('user-name').textContent = user.email.split('@')[0];
         if(document.getElementById('greeting-name')) document.getElementById('greeting-name').textContent = user.email.split('@')[0];
         if(!currentUser) {
             currentUser = user;
