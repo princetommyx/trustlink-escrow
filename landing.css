@@ -65,8 +65,6 @@ body.light-landing {
 @media (max-width: 768px) {
     .light-landing .nav-links {
         background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid rgba(0,0,0,0.05);
     }
 }
@@ -83,7 +81,7 @@ body.light-landing {
     position: relative;
     overflow: hidden;
     padding: 40px;
-    will-change: transform, box-shadow;
+    will-change: transform;
 }
 
 .light-landing .bento-card:hover {
@@ -113,8 +111,7 @@ body.light-landing {
 /* Floating UI Elements (Hero) */
 .light-landing .floating-ui {
     position: absolute;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.98);
     border-radius: 20px;
     padding: 16px 20px;
     box-shadow: 0 15px 40px rgba(0,0,0,0.08);
