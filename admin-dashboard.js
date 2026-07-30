@@ -387,6 +387,7 @@ const fetchAdminStats = async () => {
         document.getElementById('stat-mobile-unverified-users').textContent = unvMobileSnap.data().count.toLocaleString();
 
         activityRecords = [];
+        let recentTxList = [];
 
         // Escrow (statuses are stored uppercase, e.g. PENDING_PAYMENT / FUNDED)
         const escrowDocs = await getDocs(collection(db, 'escrows'));
@@ -408,8 +409,17 @@ const fetchAdminStats = async () => {
                 plus: 1,
                 minus: ['canceled', 'cancelled', 'refunded', 'disputed'].includes(status) ? 1 : 0
             });
+            
+            if (amt > 0) {
+                recentTxList.push({
+                    name: 'Escrow',
+                    amount: amt,
+                    date: date,
+                    isPositive: true
+                });
+            }
         });
-        document.getElementById('stat-total-escrowed').textContent = formatGHS(tEscrow);
+        document.getElementById('stat-total-escrowed').textContent = formatGHS(eFunded); // Show currently funded escrows instead of all-time total
         document.getElementById('stat-escrowed-funded').textContent = formatGHS(eFunded);
         document.getElementById('stat-canceled-escrow').textContent = formatGHS(cEscrow);
         document.getElementById('stat-disputed-escrow').textContent = formatGHS(dEscrow);
@@ -437,16 +447,56 @@ const fetchAdminStats = async () => {
                 wCharge += fee;
             }
 
+            const date = toDate(data.createdAt);
             if (status === 'completed') {
                 activityRecords.push({
-                    date: toDate(data.createdAt),
+                    date: date,
                     inAmt: type === 'deposit' ? amt : 0,
                     outAmt: type === 'withdrawal' ? amt : 0,
                     plus: type === 'deposit' ? 1 : 0,
                     minus: type === 'withdrawal' ? 1 : 0
                 });
             }
+            
+            if (amt > 0) {
+                recentTxList.push({
+                    name: type === 'deposit' ? 'Deposit' : 'Withdrawal',
+                    amount: amt,
+                    date: date,
+                    isPositive: type === 'deposit'
+                });
+            }
         });
+        
+        // Render Recent Transactions in Sidebar
+        recentTxList.sort((a, b) => b.date - a.date);
+        const adminTxListEl = document.getElementById('admin-tx-list');
+        if (adminTxListEl) {
+            adminTxListEl.innerHTML = '';
+            const topTxs = recentTxList.slice(0, 5);
+            if (topTxs.length === 0) {
+                adminTxListEl.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">No transactions yet</div>';
+            } else {
+                topTxs.forEach(tx => {
+                    const iconColor = tx.isPositive ? 'bg-green-light' : 'bg-orange-light';
+                    const iconSvg = tx.isPositive 
+                        ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75" /></svg>'
+                        : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75" /></svg>';
+                    
+                    const item = document.createElement('div');
+                    item.className = 'tx-item';
+                    item.innerHTML = `
+                        <div class="tx-icon ${iconColor}">${iconSvg}</div>
+                        <div class="tx-info">
+                            <span class="tx-name">${escapeHtml(tx.name)}</span>
+                            <span class="tx-date">${tx.date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                        </div>
+                        <div class="tx-amount">${formatGHS(tx.amount)}</div>
+                    `;
+                    adminTxListEl.appendChild(item);
+                });
+            }
+        }
 
         document.getElementById('stat-total-deposits').textContent = formatGHS(tDep);
         document.getElementById('stat-pending-deposits').textContent = formatGHS(pDep);
