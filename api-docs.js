@@ -70,6 +70,51 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Navigation Logic
+const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+const views = document.querySelectorAll('.view-section');
+const topbarTitle = document.querySelector('.breadcrumb strong') || { textContent: '' }; // Quick fallback
+
+navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        const targetId = item.getAttribute('data-target');
+        
+        // If it doesn't have a data-target (like the Dashboard link), let it behave normally (navigate)
+        if (!targetId) return;
+        
+        e.preventDefault();
+        
+        // Remove active class from all nav items
+        navItems.forEach(nav => nav.classList.remove('active'));
+        // Hide all views and remove flex styling that might interfere
+        views.forEach(view => {
+            view.classList.add('hidden');
+            view.style.display = 'none';
+            view.classList.remove('active');
+        });
+        
+        // Add active to clicked nav item
+        item.classList.add('active');
+        
+        // Show target view
+        const targetView = document.getElementById(targetId);
+        if (targetView) {
+            targetView.classList.remove('hidden');
+            targetView.classList.add('active');
+            if (targetId === 'view-endpoints') {
+                targetView.style.display = 'flex'; // This specific view uses flex layout
+            } else {
+                targetView.style.display = 'block';
+            }
+        }
+        
+        // Close sidebar on mobile after clicking a link
+        if (window.innerWidth <= 768) {
+            sidebar.classList.remove('open');
+        }
+    });
+});
+
 // Request Config Tabs (Body, Headers, Auth)
 const configTabs = document.querySelectorAll('.tabs-header .tab-btn');
 const configContents = document.querySelectorAll('.request-card .tab-content');

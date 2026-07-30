@@ -28,19 +28,19 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         Dashboard
                     </a>
-                    <a href="#" class="nav-item active">
+                    <a href="#" class="nav-item active" data-target="view-endpoints">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         API Endpoints
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="#" class="nav-item" data-target="view-keys">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
                         API Keys
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="#" class="nav-item" data-target="view-analytics">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                         Analytics
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="#" class="nav-item" data-target="view-docs">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                         Documentation
                     </a>
@@ -83,7 +83,7 @@
             </header>
 
             <div class="api-content-wrapper">
-                
+                <div id="view-endpoints" class="view-section active" style="display: flex; flex-direction: row; width: 100%; height: 100%;">
                 <!-- Request Configuration Column -->
                 <section class="request-column">
                     <div class="breadcrumb">
@@ -226,7 +226,48 @@ response = requests.request(<span style="color: #98c379;">"POST"</span>, url, he
 </code></pre>
                         </div>
                     </div>
+                    </div>
                 </section>
+                </div> <!-- /view-endpoints -->
+                
+                <div id="view-keys" class="view-section hidden" style="width: 100%; padding: 32px; display: none;">
+                    <h2 style="margin-bottom: 8px;">API Keys</h2>
+                    <p style="color: #64748B; margin-bottom: 24px;">Manage your developer API keys for authentication.</p>
+                    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px; max-width: 600px;">
+                        <h3 style="margin-bottom: 16px;">Your Secret Key</h3>
+                        <p style="color: #64748B; font-size: 0.95rem; margin-bottom: 16px;">Use this key in the <code>x-api-key</code> header to authenticate API requests.</p>
+                        <div style="display: flex; gap: 12px; margin-top: 16px; align-items: center;">
+                            <input type="password" id="api-docs-key-display" value="tl_live_your_api_key_here" readonly style="padding: 12px; border: 1px solid #E2E8F0; border-radius: 8px; flex-grow: 1; background: #F8FAFC;">
+                        </div>
+                        <p style="margin-top: 20px; font-size: 0.9rem; color: #64748B;">Head back to the main dashboard Settings tab to generate or revoke API keys.</p>
+                    </div>
+                </div>
+
+                <div id="view-analytics" class="view-section hidden" style="width: 100%; padding: 32px; display: none;">
+                    <h2 style="margin-bottom: 8px;">API Analytics</h2>
+                    <p style="color: #64748B; margin-bottom: 24px;">View your API request usage and performance metrics.</p>
+                    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 48px 24px; text-align: center; max-width: 800px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#94A3B8" style="width: 48px; height: 48px; margin: 0 auto 16px auto;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+                        <h3 style="color: #475569; margin-bottom: 8px;">No API requests yet</h3>
+                        <p style="color: #64748B;">Your charts and usage metrics will appear here once you start making requests.</p>
+                    </div>
+                </div>
+
+                <div id="view-docs" class="view-section hidden" style="width: 100%; padding: 32px; display: none; overflow-y: auto;">
+                    <h2 style="margin-bottom: 8px;">Documentation</h2>
+                    <p style="color: #64748B; margin-bottom: 24px;">Integration guides and API reference.</p>
+                    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 32px; max-width: 800px;">
+                        <h3 style="margin-bottom: 16px;">Getting Started</h3>
+                        <p style="color: #475569; line-height: 1.6; margin-bottom: 24px;">To integrate TrustLink Escrow into your platform, you need to make POST requests to our endpoints using your secret API key. All requests should be made over HTTPS and data should be JSON encoded.</p>
+                        
+                        <h4 style="margin-top: 32px; margin-bottom: 12px; font-size: 1.05rem;">Authentication</h4>
+                        <p style="color: #475569; line-height: 1.6; margin-bottom: 16px;">Pass your API key in the <code>x-api-key</code> header for all requests.</p>
+                        <pre style="background: #F8FAFC; padding: 16px; border-radius: 8px; overflow-x: auto; color: #1E293B; border: 1px solid #E2E8F0;"><code>curl -H "x-api-key: tl_live_your_key" https://trustlink.co/api/v1/escrows</code></pre>
+
+                        <h4 style="margin-top: 32px; margin-bottom: 12px; font-size: 1.05rem;">Webhooks</h4>
+                        <p style="color: #475569; line-height: 1.6; margin-bottom: 16px;">Configure your Webhook URL in the dashboard to receive real-time updates when an escrow changes status.</p>
+                    </div>
+                </div>
                 
             </div>
         </main>
