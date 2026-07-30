@@ -71,9 +71,7 @@ body.light-landing {
 
 /* Bento Box & Glassmorphism */
 .light-landing .bento-card {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(12px); /* Reduced from 24px for performance */
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.9);
     border-radius: 32px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03), inset 0 2px 6px rgba(255, 255, 255, 0.8);
