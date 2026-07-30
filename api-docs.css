@@ -242,6 +242,20 @@ body {
     flex-grow: 1;
     overflow-y: auto;
     background: var(--bg-color);
+    width: 100%;
+    min-width: 0;
+}
+
+.view-section {
+    width: 100%;
+    min-width: 0;
+}
+
+#view-endpoints {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
 }
 
 /* Middle Column (Request) */
@@ -530,6 +544,7 @@ pre { margin: 0; }
 
 @media (max-width: 1024px) {
     .api-content-wrapper { flex-direction: column; }
+    #view-endpoints { flex-direction: column; height: auto; }
     .response-column {
         width: 100%;
         border-top: 1px solid var(--border-color);
@@ -560,6 +575,10 @@ pre { margin: 0; }
     
     .request-column, .response-column {
         padding: 20px 16px;
+    }
+    
+    #view-docs, #view-keys, #view-analytics {
+        padding: 20px 16px !important;
     }
     
     .response-metrics { flex-direction: column; gap: 8px; }

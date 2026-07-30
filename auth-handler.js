@@ -184,12 +184,7 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
         const rawEmailOrPhone = document.getElementById("email").value;
         const email = normalizeIdentifier(rawEmailOrPhone);
         const password = document.getElementById("password").value;
-        const confirmPassword = document.getElementById("confirm-password").value;
         const btn = document.querySelector(".auth-btn");
-
-        if (password !== confirmPassword) {
-            return showError("Passwords do not match.");
-        }
 
         btn.disabled = true;
         btn.textContent = "VERIFYING...";
