@@ -68,7 +68,7 @@
             <div class="sidebar-footer" style="padding: 24px;">
                 <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px;">
                     <a href="#" style="color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 500;">Support</a>
-                    <a href="#" style="color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 500;">Setting</a>
+                    <a href="#" id="btn-settings-nav" style="color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 500;">Setting</a>
                 </div>
                 <button id="btn-signout" style="background: transparent; border: none; color: #111827; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 0;">
                     Sign out <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
@@ -684,6 +684,46 @@
                             </div>
                             <button type="submit" class="btn btn-primary" id="btn-save-webhook" style="margin-top: 8px; max-width: 200px;">Save Webhook</button>
                         </form>
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="view-settings" class="view-section hidden">
+                    <h2 style="margin-bottom: 24px;">Settings</h2>
+                    <div class="portal-card portal-card-white" style="margin-bottom: 24px;">
+                        <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: #111827;">Notifications</h3>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <div>
+                                    <h4 style="margin: 0; color: #111827;">Email Notifications</h4>
+                                    <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748B;">Receive updates about your escrows via email.</p>
+                                </div>
+                                <input type="checkbox" checked style="width: 20px; height: 20px;">
+                            </label>
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <div>
+                                    <h4 style="margin: 0; color: #111827;">SMS Notifications</h4>
+                                    <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748B;">Get text messages for important events.</p>
+                                </div>
+                                <input type="checkbox" style="width: 20px; height: 20px;">
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="portal-card portal-card-white" style="margin-bottom: 24px;">
+                        <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: #111827;">Security</h3>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <h4 style="margin: 0 0 8px; color: #111827;">Change Password</h4>
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <input type="password" placeholder="Current Password">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <input type="password" placeholder="New Password">
+                                </div>
+                                <button class="btn btn-primary" style="max-width: max-content;">Update Password</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

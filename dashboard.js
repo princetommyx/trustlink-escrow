@@ -34,6 +34,26 @@ navItems.forEach(item => {
     });
 });
 
+// Settings Footer Link Logic
+const btnSettingsNav = document.getElementById('btn-settings-nav');
+if (btnSettingsNav) {
+    btnSettingsNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        navItems.forEach(nav => nav.classList.remove('active'));
+        views.forEach(view => view.classList.add('hidden'));
+        
+        document.getElementById('view-settings').classList.remove('hidden');
+        topbarTitle.textContent = 'Settings';
+        
+        // On mobile, close sidebar automatically
+        const sidebar = document.querySelector('.sidebar');
+        if (window.innerWidth <= 768 && sidebar) {
+            sidebar.classList.remove('open');
+            document.getElementById('sidebar-backdrop').classList.remove('active');
+        }
+    });
+}
+
 // Collapse Sidebar Logic
 const collapseBtn = document.getElementById('btn-collapse');
 const topbarMenuToggle = document.getElementById('topbar-menu-toggle');
