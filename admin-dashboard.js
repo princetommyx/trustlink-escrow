@@ -98,6 +98,14 @@ onAuthStateChanged(auth, async (user) => {
     } catch(e) {
         document.getElementById('user-name').textContent = 'Admin (' + user.email.split('@')[0] + ')';
     }
+
+    // Now that we are verified as an admin, fetch the dashboard data
+    fetchAdminStats();
+    await loadUsersList();
+    loadDisputes();
+    loadEscrowsAdmin();
+    loadPayoutsAdmin();
+    loadPlatformSettings();
 });
 
 document.getElementById('btn-save-admin-profile')?.addEventListener('click', async () => {
@@ -1092,12 +1100,6 @@ document.getElementById('btn-save-fee')?.addEventListener('click', async () => {
 // Initialize when document loads
 document.addEventListener('DOMContentLoaded', async () => {
     initCharts();
-    fetchAdminStats();
-    await loadUsersList(); // payouts need the user list to show emails
-    loadDisputes();
-    loadEscrowsAdmin();
-    loadPayoutsAdmin();
-    loadPlatformSettings();
 });
 
 // Admin Creation Logic using secondary app
