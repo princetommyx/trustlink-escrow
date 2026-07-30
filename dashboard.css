@@ -1041,6 +1041,21 @@ input[type=number] {
     /* Settings/admin cards inherit sane spacing */
     .settings-card { padding: 16px; }
     .stats-grid-4 { gap: 12px; }
+
+    /* Fix My Account Card Overflow on Mobile */
+    .my-card-widget {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 24px;
+        padding: 24px !important;
+    }
+    .my-card-widget > div {
+        align-items: flex-start !important;
+        width: 100%;
+    }
+    .my-card-widget .my-card-graph {
+        margin-bottom: 16px !important;
+    }
 }
 
 /* Very small phones */
