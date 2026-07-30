@@ -768,6 +768,9 @@ h1, h2, h3, h4 {
 }
 
 @media (max-width: 768px) {
+    .navbar { padding: 12px 0; }
+    .navbar.scrolled { padding: 8px 0; }
+    
     .nav-links {
         position: fixed;
         top: 0;
