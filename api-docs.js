@@ -2,12 +2,9 @@ import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// --- Authentication Guard ---
+// --- Authentication (Optional for viewing docs) ---
 onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        // Redirect if not logged in
-        window.location.href = 'login.html';
-    } else {
+    if (user) {
         // User is logged in, fetch their data
         try {
             const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -42,6 +39,10 @@ onAuthStateChanged(auth, async (user) => {
         } catch (error) {
             console.error("Error fetching user data:", error);
         }
+    } else {
+        // User is not logged in
+        document.getElementById('user-name').textContent = 'Guest User';
+        document.getElementById('user-email').textContent = 'Login to view your API Key';
     }
 });
 
