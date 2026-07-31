@@ -508,7 +508,7 @@ export async function executeMoolrePayout(transactionId, amount, recipient, netw
              throw new Error(`The recipient phone number '${recipient}' is incomplete or invalid. Moolre requires a standard 10-digit mobile number.`);
         }
 
-        const response = await fetch("https://api.moolre.com/open/transact/disburse", {
+        const response = await fetch("https://api.moolre.com/open/transact/payout", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -527,7 +527,12 @@ export async function executeMoolrePayout(transactionId, amount, recipient, netw
             })
         });
 
-        const data = await response.json();
+        let data;
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            throw new Error(`Moolre API returned an invalid response (HTTP ${response.status}). The endpoint URL might be incorrect or blocked.`);
+        }
         
         if (!response.ok || data.status == 0) {
             console.error("Moolre Payout Error:", data);
