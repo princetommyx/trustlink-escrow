@@ -8,63 +8,158 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="landing.css">
     <style>
+        body {
+            background-color: #FAFAFA;
+            color: #111827;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .confirm-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 114px); /* accounting for nav */
+            padding: 20px;
+        }
+
         .confirm-card {
-            background: rgba(10, 15, 28, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 40px;
+            background: #ffffff;
+            border: 1px solid #E5E7EB;
+            padding: 48px 40px;
             border-radius: 24px;
             text-align: center;
-            max-width: 460px;
+            max-width: 480px;
             width: 100%;
-            margin: auto;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
         }
+        
         .confirm-icon {
-            font-size: 3.5rem;
-            margin-bottom: 16px;
-        }
-        .confirm-amount {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: #F3F4F6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 2.5rem;
-            font-family: var(--font-heading);
-            font-weight: 700;
-            color: var(--success);
-            margin: 16px 0;
         }
+        
+        .confirm-amount {
+            font-size: 2.8rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: #111827;
+            margin: 16px 0;
+            letter-spacing: -0.5px;
+        }
+        
         .confirm-details {
             text-align: left;
-            margin: 24px 0;
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 12px;
+            margin: 32px 0;
+            background: #F8FAFC;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid #F1F5F9;
         }
-        .confirm-details p { margin: 8px 0; color: rgba(255,255,255,0.8); }
-        .confirm-details strong { color: #fff; }
+        
+        .confirm-details p { 
+            margin: 12px 0; 
+            color: #64748B; 
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+        }
+        
+        .confirm-details p:first-child { margin-top: 0; }
+        .confirm-details p:last-child { margin-bottom: 0; }
+        
+        .confirm-details strong { 
+            color: #1E293B; 
+            font-weight: 600;
+        }
+        
         .expiry-note {
-            color: var(--text-muted);
+            color: #94A3B8;
             font-size: 0.85rem;
-            margin-top: 16px;
+            margin-top: 24px;
         }
-        .error-state h2 { color: var(--danger); }
-        .success-state h2 { color: var(--success); }
+        
+        /* Buttons */
+        .btn-confirm {
+            width: 100%;
+            background: #111827;
+            color: #fff;
+            padding: 16px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            background: #000;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        }
+        
+        .btn-dispute {
+            width: 100%;
+            background: transparent;
+            color: #EF4444;
+            padding: 16px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            border: 2px solid #FECACA;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+        
+        .btn-dispute:hover {
+            background: #FEF2F2;
+            border-color: #F87171;
+        }
+
+        /* States */
+        .error-state .confirm-icon { background: #FEF2F2; color: #EF4444; }
+        .error-state h2 { color: #EF4444; }
+        
+        .success-state .confirm-icon { background: #F0FDF4; color: #22C55E; }
+        .success-state h2 { color: #22C55E; }
+        
+        .dispute-state .confirm-icon { background: #FFFBEB; color: #F59E0B; }
+        .dispute-state h2 { color: #F59E0B; }
+
         .loader {
-            border: 4px solid rgba(255,255,255,0.1);
-            border-top: 4px solid var(--primary);
+            border: 4px solid #E5E7EB;
+            border-top: 4px solid #111827;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 24px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .hidden { display: none; }
+        
+        .hidden { display: none !important; }
 
         @media (max-width: 480px) {
-            .confirm-card { padding: 24px 16px; border-radius: 16px; }
-            .confirm-amount { font-size: 2rem; }
-            .confirm-details { padding: 16px; }
+            .confirm-card { padding: 32px 24px; border-radius: 20px; }
+            .confirm-amount { font-size: 2.2rem; }
+            .confirm-details { padding: 20px; }
         }
     </style>
     <!-- SEO Metadata -->
@@ -77,52 +172,62 @@
     <meta name="twitter:title" content="TrustLink Escrow - Secure Social Commerce">
     <meta name="twitter:description" content="The ultimate asynchronous escrow platform for social media vendors. Generate secure payment links for Instagram, TikTok, X, and WhatsApp.">
 </head>
-<body class="auth-wrapper" style="justify-content: center; padding: 20px;">
-
-    <div class="confirm-card">
-        <!-- Loading -->
-        <div id="state-loading">
-            <div class="loader"></div>
-            <h2>Verifying your link...</h2>
+<body class="light-landing">
+    
+    <nav class="navbar" style="position: static; background: #fff; border-bottom: 1px solid #E5E7EB; padding: 16px 0;">
+        <div class="container nav-container" style="justify-content: center;">
+            <a href="index.html" class="logo" style="display: flex; align-items: center; text-decoration: none;">
+                <img src="img/logo.png" alt="TrustLink Logo" style="height: 80px; width: auto; max-width: 200px; object-fit: contain; margin-top: 4px;">
+            </a>
         </div>
+    </nav>
 
-        <!-- Valid: ask for confirmation -->
-        <div id="state-confirm" class="hidden">
-            <div class="confirm-icon">📦</div>
-            <h2 style="font-family: var(--font-heading);">Confirm Your Delivery</h2>
-            <p style="color: var(--text-muted); margin-top: 8px;">Only confirm once you have received and inspected your item. This releases the payment to the seller and cannot be undone.</p>
-            <div class="confirm-amount" id="confirm-amount">GH₵ 0.00</div>
-            <div class="confirm-details">
-                <p><strong>Item:</strong> <span id="confirm-item"></span></p>
-                <p><strong>Seller:</strong> <span id="confirm-seller"></span></p>
-                <p><strong>Ref:</strong> <span id="confirm-ref"></span></p>
+    <div class="confirm-wrapper">
+        <div class="confirm-card">
+            <!-- Loading -->
+            <div id="state-loading">
+                <div class="loader"></div>
+                <h2 style="font-family: 'Outfit', sans-serif;">Verifying your link...</h2>
             </div>
-            <button id="btn-confirm-delivery" class="btn btn-primary btn-large" style="width: 100%;">✓ Yes, I received my package</button>
-            <button id="btn-report-problem" class="btn btn-outline" style="width: 100%; margin-top: 12px; border-color: var(--danger); color: var(--danger);">Report a problem instead</button>
-            <p class="expiry-note" id="expiry-note"></p>
-        </div>
 
-        <!-- Success -->
-        <div id="state-success" class="success-state hidden">
-            <div class="confirm-icon">✅</div>
-            <h2 style="font-family: var(--font-heading);">Delivery Confirmed!</h2>
-            <p style="color: var(--text-muted); margin-top: 12px;">The payment has been released to the seller. Thank you for using TrustLink Escrow.</p>
-            <p class="expiry-note">This link has now expired — you can close this page.</p>
-        </div>
+            <!-- Valid: ask for confirmation -->
+            <div id="state-confirm" class="hidden">
+                <div class="confirm-icon">📦</div>
+                <h2 style="font-family: 'Outfit', sans-serif;">Confirm Delivery</h2>
+                <p style="color: #64748B; margin-top: 12px; font-size: 0.95rem; line-height: 1.5;">Only confirm once you have received and inspected your item. This releases the payment to the seller.</p>
+                <div class="confirm-amount" id="confirm-amount">GH₵ 0.00</div>
+                <div class="confirm-details">
+                    <p><span>Item:</span> <strong id="confirm-item">...</strong></p>
+                    <p><span>Seller:</span> <strong id="confirm-seller">...</strong></p>
+                    <p><span>Ref:</span> <strong id="confirm-ref">...</strong></p>
+                </div>
+                <button id="btn-confirm-delivery" class="btn-confirm">✓ Yes, I received my package</button>
+                <button id="btn-report-problem" class="btn-dispute">Report a problem</button>
+                <p class="expiry-note" id="expiry-note"></p>
+            </div>
 
-        <!-- Dispute raised -->
-        <div id="state-disputed" class="hidden">
-            <div class="confirm-icon">⚖️</div>
-            <h2 style="font-family: var(--font-heading); color: var(--warning);">Dispute Raised</h2>
-            <p style="color: var(--text-muted); margin-top: 12px;">Your funds remain safely locked in escrow. Our support team will review the case and contact you.</p>
-            <p class="expiry-note">You can close this page.</p>
-        </div>
+            <!-- Success -->
+            <div id="state-success" class="success-state hidden">
+                <div class="confirm-icon">✅</div>
+                <h2 style="font-family: 'Outfit', sans-serif;">Delivery Confirmed!</h2>
+                <p style="color: #64748B; margin-top: 16px; line-height: 1.5;">The payment has been released to the seller. Thank you for using TrustLink Escrow.</p>
+                <p class="expiry-note">This link has now expired — you can safely close this page.</p>
+            </div>
 
-        <!-- Error -->
-        <div id="state-error" class="error-state hidden">
-            <div class="confirm-icon">🔒</div>
-            <h2 style="font-family: var(--font-heading);" id="error-title">Invalid Link</h2>
-            <p style="color: var(--text-muted); margin-top: 12px;" id="error-message">This confirmation link is not valid.</p>
+            <!-- Dispute raised -->
+            <div id="state-disputed" class="dispute-state hidden">
+                <div class="confirm-icon">⚖️</div>
+                <h2 style="font-family: 'Outfit', sans-serif;">Dispute Raised</h2>
+                <p style="color: #64748B; margin-top: 16px; line-height: 1.5;">Your funds remain safely locked in escrow. Our support team will review the case and contact you shortly.</p>
+                <p class="expiry-note">You can safely close this page.</p>
+            </div>
+
+            <!-- Error -->
+            <div id="state-error" class="error-state hidden">
+                <div class="confirm-icon">🔒</div>
+                <h2 style="font-family: 'Outfit', sans-serif;" id="error-title">Invalid Link</h2>
+                <p style="color: #64748B; margin-top: 16px; line-height: 1.5;" id="error-message">This confirmation link is not valid or has expired.</p>
+            </div>
         </div>
     </div>
 
