@@ -2,7 +2,7 @@ import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone } from "./moolre-service.js";
+import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone, executeMoolrePayout } from "./moolre-service.js";
 
 let currentUser = null;
 let currentBalance = 0;
@@ -794,7 +794,7 @@ if (withdrawForm) {
             await updateDoc(doc(db, "users", currentUser.uid), {
                 walletBalance: currentBalance - amount
             });
-            await addDoc(collection(db, "transactions"), {
+            const txRef = await addDoc(collection(db, "transactions"), {
                 userId: currentUser.uid,
                 type: 'withdrawal',
                 amount: amount,
@@ -806,9 +806,55 @@ if (withdrawForm) {
                 createdAt: serverTimestamp()
             });
 
-            alert("Withdrawal request submitted!\n\nYour funds have been reserved and will be paid to your mobile money wallet once the request is processed.");
-            withdrawForm.reset();
-            closeWithdrawModal();
+            // Auto-process payout directly
+            try {
+                await executeMoolrePayout(txRef.id, amount, phone, network);
+                
+                await updateDoc(txRef, {
+                    status: 'completed',
+                    processedAt: serverTimestamp(),
+                    processedBy: 'auto'
+                });
+                
+                // Try sending SMS for automated withdrawal success
+                try {
+                    await sendEscrowStatusSMS(phone, `TrustLink: Your automated withdrawal of GH₵ ${amount.toFixed(2)} has been sent to your mobile money wallet.`, `${txRef.id}-payout`);
+                } catch(smsErr) { console.warn("Withdrawal SMS failed", smsErr); }
+
+                alert("Withdrawal successful! Your funds have been instantly sent to your mobile money wallet.");
+                withdrawForm.reset();
+                closeWithdrawModal();
+            } catch (payoutError) {
+                // If payout fails, refund the user!
+                await updateDoc(txRef, {
+                    status: 'failed',
+                    error: payoutError.message,
+                    processedAt: serverTimestamp(),
+                    processedBy: 'auto'
+                });
+                // Refund the balance
+                const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+                if (userSnap.exists()) {
+                    const latestBal = parseFloat(userSnap.data().walletBalance || 0);
+                    await updateDoc(doc(db, "users", currentUser.uid), {
+                        walletBalance: latestBal + amount
+                    });
+                }
+                
+                // Log refund deposit
+                await addDoc(collection(db, "transactions"), {
+                    userId: currentUser.uid,
+                    type: 'deposit',
+                    amount: amount,
+                    fee: 0,
+                    status: 'completed',
+                    description: 'Refund: Automated Withdrawal Failed',
+                    createdAt: serverTimestamp()
+                });
+
+                alert(`Automated withdrawal failed: ${payoutError.message}\n\nYour funds have been instantly refunded to your TrustLink balance.`);
+            }
+
         } catch (error) {
             console.error("Withdrawal error:", error);
             alert("Failed to submit withdrawal: " + error.message);
