@@ -976,8 +976,21 @@ const loadPayoutsAdmin = async () => {
                         const userRef = doc(db, "users", t.userId);
                         const userSnap = await getDoc(userRef);
                         if (userSnap.exists()) {
+                            const refundAmount = parseFloat(t.amount) || 0;
                             const bal = parseFloat(userSnap.data().walletBalance || 0);
-                            await updateDoc(userRef, { walletBalance: bal + (parseFloat(t.amount) || 0) });
+                            await updateDoc(userRef, { walletBalance: bal + refundAmount });
+                            
+                            // Add a deposit transaction so the user sees the refund in their history
+                            await addDoc(collection(db, "transactions"), {
+                                userId: t.userId,
+                                type: 'deposit',
+                                amount: refundAmount,
+                                fee: 0,
+                                status: 'completed',
+                                description: 'Refund: Rejected Withdrawal',
+                                originalTxId: t.id,
+                                createdAt: serverTimestamp()
+                            });
                         }
                         // Tell the seller their funds were returned
                         try {
