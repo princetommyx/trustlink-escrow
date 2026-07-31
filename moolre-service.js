@@ -497,12 +497,14 @@ export async function executeMoolrePayout(transactionId, amount, recipient, netw
         // Strip any spaces or dashes from the user's input
         let cleanRecipient = String(recipient || '').replace(/[^0-9]/g, '');
         
-        // Moolre sometimes requires the 233 format for disbursements just like SMS
-        if (cleanRecipient.startsWith('0')) {
-            cleanRecipient = '233' + cleanRecipient.slice(1);
+        // Moolre disburse API expects the standard 10-digit local format (e.g. 0551234567)
+        if (cleanRecipient.length === 12 && cleanRecipient.startsWith('233')) {
+            cleanRecipient = '0' + cleanRecipient.slice(3);
+        } else if (cleanRecipient.length === 9) {
+            cleanRecipient = '0' + cleanRecipient;
         }
         
-        if (cleanRecipient.length !== 10 && cleanRecipient.length !== 12) {
+        if (cleanRecipient.length !== 10) {
              throw new Error(`The recipient phone number '${recipient}' is incomplete or invalid. Moolre requires a standard 10-digit mobile number.`);
         }
 
