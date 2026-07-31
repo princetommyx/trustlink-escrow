@@ -169,3 +169,89 @@ exports.onEscrowStatusChange = functions.firestore
 
         return null;
     });
+
+// Process Payout (Admin Only)
+exports.processPayout = functions.https.onCall(async (data, context) => {
+    // 1. Ensure the user is authenticated
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'You must be logged in to process payouts.');
+    }
+    
+    // 2. Verify the user's role is 'admin'
+    const adminSnap = await db.collection('users').doc(context.auth.uid).get();
+    if (!adminSnap.exists || adminSnap.data().role !== 'admin') {
+        throw new functions.https.HttpsError('permission-denied', 'Only administrators can process payouts.');
+    }
+
+    const { transactionId } = data;
+    if (!transactionId) {
+        throw new functions.https.HttpsError('invalid-argument', 'Transaction ID is required.');
+    }
+
+    const txRef = db.collection('transactions').doc(transactionId);
+    
+    try {
+        const result = await db.runTransaction(async (t) => {
+            const txSnap = await t.get(txRef);
+            if (!txSnap.exists) {
+                throw new functions.https.HttpsError('not-found', 'Transaction not found.');
+            }
+            
+            const txData = txSnap.data();
+            if (txData.status !== 'pending' || txData.type !== 'withdrawal') {
+                throw new functions.https.HttpsError('failed-precondition', 'Transaction is not a pending withdrawal.');
+            }
+
+            // Moolre API Secrets
+            // IMPORTANT: In a real production setup, these should be loaded from functions.config() or Secrets Manager
+            const MOOLRE_API_USER = "sasulabs";
+            const MOOLRE_PUBLIC_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOjEwNzgzNCwiZXhwIjoxOTU2NTQ1OTk5fQ.ZPgxaR7PP6FZH5msdXkWSQX6lbjp27mTywLgMhAeaPc";
+            const MOOLRE_PRIVATE_KEY = "tDA79UwhA1PLoCsBNXzcmk08qOXNvd25xKVjKPN93i2RVqa1VNoUWN7jXR91v39C";
+            const MOOLRE_ACCOUNT_NUMBER = "10783406072616";
+
+            // Make the payout request to Moolre
+            // Using a standard/presumed endpoint for disbursements. Adjust if Moolre documentation specifies a different endpoint.
+            const response = await fetch("https://api.moolre.com/open/transact/disburse", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-USER': MOOLRE_API_USER,
+                    'X-API-KEY': MOOLRE_PRIVATE_KEY,
+                    'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
+                },
+                body: JSON.stringify({
+                    type: 1, 
+                    accountnumber: MOOLRE_ACCOUNT_NUMBER,
+                    amount: txData.amount.toString(),
+                    recipient: txData.momoNumber,
+                    network: txData.network,
+                    currency: "GHS",
+                    externalref: transactionId
+                })
+            });
+
+            const moolreData = await response.json();
+
+            if (!response.ok || moolreData.status == 0) {
+                console.error("Moolre Payout Error:", moolreData);
+                throw new functions.https.HttpsError('internal', moolreData.message || 'Moolre API payout failed.');
+            }
+
+            // Payout successful, update the transaction status
+            t.update(txRef, {
+                status: 'completed',
+                processedAt: admin.firestore.FieldValue.serverTimestamp(),
+                processedBy: context.auth.token.email || 'admin',
+                moolreReference: moolreData.data ? moolreData.data.reference : null
+            });
+
+            return { success: true, message: 'Payout completed successfully.', amount: txData.amount, phone: txData.momoNumber, network: txData.network };
+        });
+
+        return result;
+
+    } catch (error) {
+        console.error("Error processing payout:", error);
+        throw new functions.https.HttpsError('internal', error.message || 'Failed to process payout.');
+    }
+});

@@ -479,3 +479,49 @@ export async function initiateUSSDPushPayment(phone, amount, channel, escrowId) 
         throw error;
     }
 }
+
+/**
+ * Automates the disbursement of funds via Moolre API for payouts/withdrawals.
+ * WARNING: This is a client-side implementation for MVP purposes only.
+ * 
+ * @param {string} transactionId - The ID of the withdrawal transaction
+ * @param {number|string} amount - The amount to disburse
+ * @param {string} recipient - The recipient's mobile money number
+ * @param {string} network - The recipient's network (e.g., '13' for MTN)
+ * @returns {Promise<object>} - Response indicating the transfer status
+ */
+export async function executeMoolrePayout(transactionId, amount, recipient, network) {
+    try {
+        console.log(`[MOOLRE API] Initiating automated payout for ${transactionId}`);
+        const response = await fetch("https://api.moolre.com/open/transact/disburse", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-USER': MOOLRE_API_USER,
+                'X-API-KEY': MOOLRE_PRIVATE_KEY,
+                'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
+            },
+            body: JSON.stringify({
+                type: 1, // Assumed standard type for disbursement based on Moolre patterns
+                accountnumber: MOOLRE_ACCOUNT_NUMBER,
+                amount: amount.toString(),
+                recipient: recipient,
+                network: network,
+                currency: "GHS",
+                externalref: transactionId
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok || data.status == 0) {
+            console.error("Moolre Payout Error:", data);
+            throw new Error(data.message || "Failed to execute automated Moolre payout");
+        }
+        
+        return data.data; // Return Moolre reference or payout details
+    } catch (error) {
+        console.error("Error executing Moolre payout:", error);
+        throw error;
+    }
+}

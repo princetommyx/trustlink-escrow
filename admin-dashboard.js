@@ -2,7 +2,7 @@ import { auth, db, firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { onAuthStateChanged, signOut, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { sendEscrowStatusSMS, pickUserPhone } from "./moolre-service.js";
+import { sendEscrowStatusSMS, pickUserPhone, executeMoolrePayout } from "./moolre-service.js";
 
 // Navigation Logic
 const navItems = document.querySelectorAll('.nav-item');
@@ -930,14 +930,19 @@ const loadPayoutsAdmin = async () => {
                 approveBtn.style.cssText = 'padding: 4px 12px; font-size: 0.8rem; background: var(--success); border-color: var(--success);';
                 approveBtn.textContent = 'Approve';
                 approveBtn.addEventListener('click', async () => {
-                    if (!confirm(`Approve payout of ${formatGHS(parseFloat(t.amount) || 0)} to ${t.momoNumber} (${NETWORK_NAMES[t.network] || t.network})?\n\nConfirm AFTER sending the money from the Moolre wallet.`)) return;
+                    if (!confirm(`Are you sure you want to approve payout of ${formatGHS(parseFloat(t.amount) || 0)} to ${t.momoNumber} (${NETWORK_NAMES[t.network] || t.network})?\n\nThis will automatically disburse funds via Moolre API.`)) return;
                     approveBtn.disabled = true;
+                    approveBtn.textContent = 'Processing...';
                     try {
+                        // Fast MVP Approach: Call Moolre directly from frontend
+                        await executeMoolrePayout(t.id, parseFloat(t.amount) || 0, t.momoNumber, t.network);
+                        
                         await updateDoc(doc(db, "transactions", t.id), {
                             status: 'completed',
                             processedAt: new Date(),
                             processedBy: auth.currentUser ? auth.currentUser.email : 'admin'
                         });
+                        
                         // SMS the seller that their payout is on its way
                         try {
                             if (t.momoNumber) {
@@ -949,6 +954,7 @@ const loadPayoutsAdmin = async () => {
                     } catch (error) {
                         alert("Failed to approve: " + error.message);
                         approveBtn.disabled = false;
+                        approveBtn.textContent = 'Approve';
                     }
                 });
                 actions.appendChild(approveBtn);
