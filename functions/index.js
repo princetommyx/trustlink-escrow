@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
-
+const twilio = require('twilio');
 admin.initializeApp();
 const db = admin.firestore();
 
@@ -63,6 +63,28 @@ app.post('/v1/escrows', authenticateApi, async (req, res) => {
         
         // Return a checkout URL for the buyer to visit
         const checkoutUrl = `https://trustlink.co/checkout.html?id=${escrowRef.id}`; // Assuming trustlink.co is the domain
+
+        // Attempt to send WhatsApp message if buyerPhone is provided
+        if (escrowData.buyerPhone) {
+            try {
+                const client = getTwilioClient(); // Function defined at bottom of file
+                if (client) {
+                    const twilioNumber = process.env.TWILIO_WHATSAPP_NUMBER || "whatsapp:+16624904332";
+                    const toWhatsAppNumber = escrowData.buyerPhone.startsWith('whatsapp:') ? escrowData.buyerPhone : `whatsapp:${escrowData.buyerPhone}`;
+                    const messageBody = `Hello from Trustlink Escrow! 👋\n\nYour transaction (#${escrowRef.id}) is ready for payment. Please use the secure link below to complete it:\n\n${checkoutUrl}`;
+                    
+                    await client.messages.create({
+                        body: messageBody,
+                        from: twilioNumber,
+                        to: toWhatsAppNumber
+                    });
+                    console.log(`WhatsApp message sent to ${toWhatsAppNumber}`);
+                }
+            } catch (twilioError) {
+                // We log the error but don't fail the overall escrow creation
+                console.error("Failed to send WhatsApp message:", twilioError);
+            }
+        }
 
         res.status(201).json({
             id: escrowRef.id,
@@ -253,5 +275,60 @@ exports.processPayout = functions.https.onCall(async (data, context) => {
     } catch (error) {
         console.error("Error processing payout:", error);
         throw new functions.https.HttpsError('internal', error.message || 'Failed to process payout.');
+    }
+});
+
+// Twilio Setup
+const getTwilioClient = () => {
+    const accountSid = process.env.TWILIO_SID;
+    const authToken = process.env.TWILIO_TOKEN;
+    if (!accountSid || !authToken) {
+        console.warn("Twilio credentials not found in environment variables.");
+        return null;
+    }
+    return twilio(accountSid, authToken);
+};
+
+/**
+ * Example function that gets called when a transaction is created or updated
+ * to send the payment link via WhatsApp.
+ */
+exports.sendPaymentLinkViaWhatsApp = functions.https.onCall(async (data, context) => {
+    const { buyerPhone, transactionId, paymentLink } = data;
+
+    if (!buyerPhone || !paymentLink) {
+        throw new functions.https.HttpsError(
+            'invalid-argument', 
+            'The function must be called with a buyerPhone and paymentLink.'
+        );
+    }
+
+    const client = getTwilioClient();
+    if (!client) {
+         throw new functions.https.HttpsError('internal', 'Twilio client not configured properly.');
+    }
+
+    const twilioNumber = process.env.TWILIO_WHATSAPP_NUMBER || "whatsapp:+16624904332";
+
+    // Format the phone number (Twilio requires the "whatsapp:" prefix and E.164 format)
+    const toWhatsAppNumber = buyerPhone.startsWith('whatsapp:') ? buyerPhone : `whatsapp:${buyerPhone}`;
+
+    // Formulate your message
+    const messageBody = `Hello from Trustlink Escrow! 👋\n\nYour transaction (#${transactionId}) is ready for payment. Please use the secure link below to complete it:\n\n${paymentLink}`;
+
+    try {
+        // Send the message using Twilio
+        const message = await client.messages.create({
+            body: messageBody,
+            from: twilioNumber,
+            to: toWhatsAppNumber
+        });
+
+        console.log(`Success! WhatsApp message sent with SID: ${message.sid}`);
+        return { success: true, messageId: message.sid };
+
+    } catch (error) {
+        console.error("Error sending WhatsApp message:", error);
+        throw new functions.https.HttpsError('internal', 'Failed to send WhatsApp message.', error.message);
     }
 });
