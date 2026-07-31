@@ -777,11 +777,11 @@ if (withdrawForm) {
         const network = document.getElementById('withdraw-network').value;
 
         if (isNaN(amount) || amount <= 0) {
-            alert("Please enter a valid amount.");
+            showModernToast("Invalid Amount", "Please enter a valid amount to withdraw.", "warning");
             return;
         }
         if (amount > currentBalance) {
-            alert(`Insufficient balance. You can withdraw up to GH₵ ${currentBalance.toFixed(2)}.`);
+            showModernToast("Insufficient Balance", `You can only withdraw up to GH₵ ${currentBalance.toFixed(2)}.`, "warning");
             return;
         }
 
@@ -821,7 +821,7 @@ if (withdrawForm) {
                     await sendEscrowStatusSMS(phone, `TrustLink: Your automated withdrawal of GH₵ ${amount.toFixed(2)} has been sent to your mobile money wallet.`, `${txRef.id}-payout`);
                 } catch(smsErr) { console.warn("Withdrawal SMS failed", smsErr); }
 
-                alert("Withdrawal successful! Your funds have been instantly sent to your mobile money wallet.");
+                showModernToast("Withdrawal Successful", "Your funds have been instantly sent to your mobile money wallet.", "success");
                 withdrawForm.reset();
                 closeWithdrawModal();
             } catch (payoutError) {
@@ -852,12 +852,12 @@ if (withdrawForm) {
                     createdAt: serverTimestamp()
                 });
 
-                alert(`Automated withdrawal failed: ${payoutError.message}\n\nYour funds have been instantly refunded to your TrustLink balance.`);
+                showModernToast("Automated Withdrawal Failed", `${payoutError.message}. Your funds have been instantly refunded.`, "error");
             }
 
         } catch (error) {
             console.error("Withdrawal error:", error);
-            alert("Failed to submit withdrawal: " + error.message);
+            showModernToast("Withdrawal Error", error.message, "error");
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Request Withdrawal';
@@ -1323,8 +1323,10 @@ window.showModernToast = function(title, message, type = "success") {
     let iconSvg = '';
     if (type === "success") {
         iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #10B981;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-    } else {
+    } else if (type === "warning") {
         iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #F59E0B;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+    } else if (type === "error") {
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #EF4444;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
     }
 
     toast.innerHTML = `
