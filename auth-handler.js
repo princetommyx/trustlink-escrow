@@ -83,16 +83,26 @@ onAuthStateChanged(auth, async (user) => {
         // If user visits login/signup while already logged in, redirect them
         if (isAuthPage && !sessionStorage.getItem("justAuth")) {
             let isAdmin = false;
+            
+            // Ensure user document exists (handles Google Auth redirect case safely)
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (!userDoc.exists()) {
+                    await setDoc(doc(db, "users", user.uid), {
+                        fullName: user.displayName || user.email.split('@')[0],
+                        email: user.email,
+                        lastLoginAt: new Date()
+                    });
+                } else {
+                    const data = userDoc.data();
+                    if (data.role === "admin" || data.role === "support") isAdmin = true;
+                }
+            } catch(e) {
+                console.error("Error checking/creating user doc:", e);
+            }
+            
             if (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com") {
                 isAdmin = true;
-            } else {
-                try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        const data = userDoc.data();
-                        if (data.role === "admin" || data.role === "support") isAdmin = true;
-                    }
-                } catch(e) {}
             }
 
             if (isAdmin) {
@@ -345,9 +355,6 @@ if (googleBtn) {
         try {
             googleBtn.disabled = true;
             googleBtn.innerHTML = "Please wait...";
-            
-            // Set justAuth before to prevent onAuthStateChanged from firing a redirect early
-            sessionStorage.setItem("justAuth", "true");
             
             const provider = new GoogleAuthProvider();
             // Using redirect instead of popup to fix mobile Safari issues
