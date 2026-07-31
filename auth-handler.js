@@ -6,8 +6,7 @@ import {
     onAuthStateChanged,
     signOut,
     GoogleAuthProvider,
-    signInWithRedirect,
-    getRedirectResult,
+    signInWithPopup,
     sendPasswordResetEmail,
     sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -48,32 +47,6 @@ if (pendingToast) {
     sessionStorage.removeItem("authToast");
 }
 
-// Handle redirect result for Google Auth
-getRedirectResult(auth).then(async (result) => {
-    if (result && result.user) {
-        const user = result.user;
-        try {
-            await setDoc(doc(db, "users", user.uid), {
-                fullName: user.displayName || user.email.split('@')[0],
-                email: user.email,
-                lastLoginAt: new Date()
-            }, { merge: true });
-            
-            sessionStorage.setItem("authToast", `Welcome back, ${user.displayName || 'there'}!`);
-            window.location.href = "dashboard.html";
-        } catch (e) {
-            console.error("Failed to save user data after redirect:", e);
-        }
-    }
-}).catch((error) => {
-    console.error("Redirect auth error:", error);
-    // If we have a showError function available we could call it here, 
-    // but globally we might just log it or alert
-    if (window.location.pathname.includes("login.html") || window.location.pathname.includes("signup.html")) {
-        const errorDiv = document.getElementById("auth-error");
-        if (errorDiv) errorDiv.textContent = error.message;
-    }
-});
 
 // Listen to auth state
 onAuthStateChanged(auth, async (user) => {
@@ -356,9 +329,22 @@ if (googleBtn) {
             googleBtn.disabled = true;
             googleBtn.innerHTML = "Please wait...";
             
+            // Set justAuth before to prevent onAuthStateChanged from firing a redirect early
+            sessionStorage.setItem("justAuth", "true");
+            
             const provider = new GoogleAuthProvider();
-            // Using redirect instead of popup to fix mobile Safari issues
-            await signInWithRedirect(auth, provider);
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            
+            // Store or update user in Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                fullName: user.displayName || user.email.split('@')[0],
+                email: user.email,
+                lastLoginAt: new Date()
+            }, { merge: true });
+            
+            sessionStorage.setItem("authToast", `Welcome back, ${user.displayName || 'there'}!`);
+            window.location.href = "dashboard.html";
         } catch (error) {
             console.error(error);
             showError(error.message);
