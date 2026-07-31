@@ -493,6 +493,15 @@ export async function initiateUSSDPushPayment(phone, amount, channel, escrowId) 
 export async function executeMoolrePayout(transactionId, amount, recipient, network) {
     try {
         console.log(`[MOOLRE API] Initiating automated payout for ${transactionId}`);
+        
+        // Strip any spaces or dashes from the user's input
+        let cleanRecipient = String(recipient || '').replace(/[^0-9]/g, '');
+        
+        // Moolre sometimes requires the 233 format for disbursements just like SMS
+        if (cleanRecipient.startsWith('0')) {
+            cleanRecipient = '233' + cleanRecipient.slice(1);
+        }
+
         const response = await fetch("https://api.moolre.com/open/transact/disburse", {
             method: 'POST',
             headers: {
@@ -502,10 +511,10 @@ export async function executeMoolrePayout(transactionId, amount, recipient, netw
                 'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
             },
             body: JSON.stringify({
-                type: 1, // Assumed standard type for disbursement based on Moolre patterns
+                type: 1, 
                 accountnumber: MOOLRE_ACCOUNT_NUMBER,
-                amount: amount.toString(),
-                recipient: recipient,
+                amount: parseFloat(amount).toFixed(2), // Ensure exactly 2 decimal places as a string
+                recipient: cleanRecipient,
                 network: network,
                 currency: "GHS",
                 externalref: transactionId
@@ -519,7 +528,7 @@ export async function executeMoolrePayout(transactionId, amount, recipient, netw
             throw new Error(data.message || "Failed to execute automated Moolre payout");
         }
         
-        return data.data; // Return Moolre reference or payout details
+        return data.data; 
     } catch (error) {
         console.error("Error executing Moolre payout:", error);
         throw error;
