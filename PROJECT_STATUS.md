@@ -87,6 +87,8 @@ The platform allows sellers to generate instant dynamic checkout & tracking link
 - [x] **Interactive API Documentation Portal**: Full REST API reference with interactive sandbox playground.
 - [x] **Multi-Language Code Snippets**: Pre-built examples in cURL, JavaScript (Fetch), Python (Requests), and PHP.
 ### 9. Interactive WhatsApp Chatbot Engine (`functions/index.js`, `test-whatsapp-bot.js`)
+- [x] **Dual Gateway Support (Meta Cloud API & Twilio)**: Fully compatible with both official Meta WhatsApp Business Cloud API (Free 1,000 conversations/mo) and Twilio.
+- [x] **Meta Webhook Verification & Graph API**: Automatic verification handshake (`GET /webhook/whatsapp` with challenge token) and native message dispatcher via Meta Graph API.
 - [x] **Instant 1-Line Escrow Creation**: Command parser allowing sellers to mint escrow links in one text (`CREATE <Amount> <Item> <Buyer Phone>`).
 - [x] **Multi-Step Conversational Wizard**: Guided step-by-step interactive bot flow (`NEW` / `CREATE`) walking vendors through Item Name, Price, Buyer MoMo Phone, and Fee Split.
 - [x] **Stateful Session Manager**: Firestore-backed conversation state machine (`whatsapp_sessions`) tracking vendor progress with timeout & `CANCEL` triggers.
