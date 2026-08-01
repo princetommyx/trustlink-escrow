@@ -42,6 +42,11 @@
                 <a href="#" class="nav-item active" data-target="view-overview">
                     <span class="nav-text" data-short="Overview">Overview</span>
                 </a>
+                <a href="#" class="nav-item" data-target="view-whatsapp">
+                    <span class="nav-text" data-short="WhatsApp" style="display: flex; align-items: center; gap: 6px;">
+                        <span>💬</span> WhatsApp Bot <span style="background: #10B981; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; font-weight: 700; margin-left: 4px;">NEW</span>
+                    </span>
+                </a>
                 <a href="#" class="nav-item" data-target="view-escrows">
                     <span class="nav-text" data-short="Escrows">Escrow Contracts</span>
                 </a>
@@ -81,6 +86,10 @@
                 <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg></span>
                 <span class="nav-text">Home</span>
             </a>
+            <a href="#" class="nav-item" data-target="view-whatsapp">
+                <span class="nav-icon" style="font-size: 1.2rem;">💬</span>
+                <span class="nav-text">Bot</span>
+            </a>
             <a href="#" class="nav-item" data-target="view-escrows">
                 <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg></span>
                 <span class="nav-text">Escrows</span>
@@ -104,7 +113,11 @@
                     <h1 class="topbar-title" id="current-view-title" style="display: none;"></h1>
                 </div>
                 
-                <div class="topbar-actions">
+                <div class="topbar-actions" style="display: flex; align-items: center; gap: 12px;">
+                    <a href="https://wa.me/16624904332?text=MENU" target="_blank" class="btn" style="background: #10B981; color: white; border-radius: 20px; padding: 8px 16px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);">
+                        <span>💬</span> WhatsApp Bot
+                    </a>
+
                     <div class="notif-wrapper">
                         <button class="btn-icon" id="btn-notifications" aria-label="Notifications" style="background: #F8F9FA; border-radius: 50%; color: #111827;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg><span id="notif-dot" class="notif-dot hidden"></span></button>
                         <div id="notif-dropdown" class="notif-dropdown hidden">
@@ -125,6 +138,24 @@
                 <div id="view-overview" class="view-section active dashboard-grid">
                     
                     <div class="dashboard-main-col">
+                        <!-- WhatsApp Bot Announcement Banner -->
+                        <div class="whatsapp-banner" style="background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: white; border-radius: 20px; padding: 20px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.35); flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 16px; min-width: 280px; flex: 1;">
+                                <div style="width: 48px; height: 48px; min-width: 48px; border-radius: 14px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">💬</div>
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: white;">TrustLink WhatsApp Bot is Live!</h3>
+                                        <span style="background: rgba(255,255,255,0.25); color: white; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 20px;">ONLINE</span>
+                                    </div>
+                                    <p style="margin: 0; font-size: 0.85rem; opacity: 0.95; line-height: 1.4;">Create escrow links directly inside WhatsApp by texting <code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-family: monospace;">CREATE 350 Shoes 0244123456</code> to our official bot number.</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px; flex-shrink: 0;">
+                                <button class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; border-radius: 12px; padding: 10px 16px; font-weight: 600; cursor: pointer;" onclick="document.querySelector('.nav-item[data-target=\'view-whatsapp\']').click()">Bot Guide</button>
+                                <a href="https://wa.me/16624904332?text=MENU" target="_blank" class="btn" style="background: white; color: #047857; border-radius: 12px; padding: 10px 18px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Chat on WhatsApp ➔</a>
+                            </div>
+                        </div>
+
                         <!-- Top Row: My Card & Financial Record -->
                         <div class="dashboard-top-row">
                             <!-- My Card (Dark Theme) -->
@@ -697,6 +728,155 @@
                             </div>
                             <button type="submit" class="btn btn-primary" id="btn-save-webhook" style="margin-top: 8px; max-width: 200px;">Save Webhook</button>
                         </form>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Bot Hub View -->
+                <div id="view-whatsapp" class="view-section hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                        <div>
+                            <h2 style="margin: 0 0 6px 0; font-size: 1.5rem; color: #111827;">WhatsApp Bot Assistant</h2>
+                            <p style="margin: 0; color: #64748B; font-size: 0.9rem;">Generate escrow links, mark deliveries as shipped, and track buyer payments directly from WhatsApp.</p>
+                        </div>
+                        <a href="https://wa.me/16624904332?text=MENU" target="_blank" class="btn" style="background: #10B981; color: white; border-radius: 12px; padding: 12px 20px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                            <span>💬</span> Open WhatsApp Chat
+                        </a>
+                    </div>
+
+                    <!-- Bot Status & Info Card -->
+                    <div class="portal-card portal-card-white" style="margin-bottom: 24px; background: linear-gradient(135deg, #064E3B 0%, #065F46 100%); color: white; border-radius: 20px; padding: 28px; box-shadow: 0 10px 25px -5px rgba(6, 78, 59, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+                            <div>
+                                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.25); border: 1px solid #10B981; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; display: inline-block; box-shadow: 0 0 8px #10B981;"></span>
+                                    <span style="font-size: 0.8rem; font-weight: 700; color: #A7F3D0; text-transform: uppercase; letter-spacing: 0.5px;">Live & Operational</span>
+                                </div>
+                                <h3 style="margin: 0 0 8px 0; font-size: 1.4rem; color: white; font-weight: 700;">TrustLink WhatsApp Business Assistant</h3>
+                                <p style="margin: 0 0 16px 0; color: #D1FAE5; font-size: 0.95rem; max-width: 600px; line-height: 1.5;">
+                                    Chat directly with our automated bot number to create escrow contracts for your social media customers in less than 10 seconds.
+                                </p>
+                                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                    <div style="background: rgba(0,0,0,0.25); padding: 10px 16px; border-radius: 12px; font-family: monospace; font-size: 1.05rem; font-weight: 600; color: white; border: 1px solid rgba(255,255,255,0.15);">
+                                        📱 +1 (662) 490-4332
+                                    </div>
+                                    <button class="btn btn-sm" style="background: white; color: #065F46; border: none; font-weight: 700; border-radius: 10px; padding: 10px 16px; cursor: pointer;" onclick="navigator.clipboard.writeText('+16624904332'); if (window.showModernToast) window.showModernToast('Number copied to clipboard!', 'success'); else alert('Copied!');">
+                                        Copy Number
+                                    </button>
+                                </div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 16px 20px; text-align: center; min-width: 160px;">
+                                <div style="font-size: 2rem; margin-bottom: 4px;">⚡</div>
+                                <div style="font-size: 0.8rem; color: #A7F3D0; margin-bottom: 2px;">Avg. Link Creation</div>
+                                <div style="font-size: 1.3rem; font-weight: 700; color: white;">3 Seconds</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Command Generator -->
+                    <div class="portal-card portal-card-white" style="margin-bottom: 24px; border-radius: 20px; padding: 28px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <span style="font-size: 1.3rem;">🛠️</span>
+                            <h3 style="margin: 0; font-size: 1.15rem; color: #111827; font-weight: 700;">Interactive WhatsApp Command Builder</h3>
+                        </div>
+                        <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 20px;">
+                            Fill in your sale details below to generate a pre-formatted command you can paste directly into WhatsApp.
+                        </p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Price (GH₵)</label>
+                                <input type="number" id="wa-gen-price" placeholder="e.g. 450" style="width: 100%; padding: 12px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem;" oninput="window.updateWaPreviewCommand()">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Item Name / Description</label>
+                                <input type="text" id="wa-gen-item" placeholder="e.g. Nike Air Max" style="width: 100%; padding: 12px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem;" oninput="window.updateWaPreviewCommand()">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Buyer Phone (Ghana MoMo)</label>
+                                <input type="tel" id="wa-gen-phone" placeholder="e.g. 0244123456" style="width: 100%; padding: 12px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem;" oninput="window.updateWaPreviewCommand()">
+                            </div>
+                        </div>
+
+                        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+                            <div>
+                                <div style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 4px;">Generated WhatsApp Message</div>
+                                <code id="wa-command-preview" style="font-family: monospace; font-size: 1.1rem; color: #0F172A; font-weight: 700;">CREATE 450 Nike Air Max 0244123456</code>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-outline" style="border: 1px solid #CBD5E1; background: white; color: #1E293B; border-radius: 10px; font-weight: 600; padding: 10px 16px;" onclick="window.copyWaCommand()">
+                                    📋 Copy Command
+                                </button>
+                                <a id="wa-direct-send-btn" href="https://wa.me/16624904332?text=CREATE%20450%20Nike%20Air%20Max%200244123456" target="_blank" class="btn" style="background: #10B981; color: white; border-radius: 10px; font-weight: 600; padding: 10px 18px; text-decoration: none;">
+                                    Send to Bot ➔
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Command Reference Cheatsheet Grid -->
+                    <h3 style="margin: 0 0 16px 0; font-size: 1.15rem; color: #111827; font-weight: 700;">Available Bot Commands</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 32px;">
+                        
+                        <!-- Command 1: CREATE Fast -->
+                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="background: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">FAST CREATE</span>
+                                <button style="background: none; border: none; color: #059669; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('CREATE 350 Shoes 0244123456'); window.showModernToast('Copied example command!', 'success');">Copy</button>
+                            </div>
+                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">CREATE &lt;Amount&gt; &lt;Item&gt; &lt;Phone&gt;</code>
+                            <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Creates an escrow link immediately and sends an automated SMS alert to the buyer.</p>
+                        </div>
+
+                        <!-- Command 2: Guided Wizard -->
+                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="background: #E0E7FF; color: #4338CA; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">GUIDED WIZARD</span>
+                                <button style="background: none; border: none; color: #4338CA; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('NEW'); window.showModernToast('Copied command!', 'success');">Copy</button>
+                            </div>
+                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">NEW</code>
+                            <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Starts an interactive 4-step wizard asking for Item, Price, Phone, and Fee Split.</p>
+                        </div>
+
+                        <!-- Command 3: STATUS -->
+                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="background: #FEF3C7; color: #B45309; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">ORDER TRACKING</span>
+                                <button style="background: none; border: none; color: #B45309; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('STATUS'); window.showModernToast('Copied command!', 'success');">Copy</button>
+                            </div>
+                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">STATUS</code>
+                            <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Lists your recent orders and live payment statuses (Awaiting Payment, Escrowed, etc.).</p>
+                        </div>
+
+                        <!-- Command 4: SHIP -->
+                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="background: #F3E8FF; color: #7E22CE; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">DISPATCH</span>
+                                <button style="background: none; border: none; color: #7E22CE; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('SHIP'); window.showModernToast('Copied command!', 'success');">Copy</button>
+                            </div>
+                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">SHIP &lt;EscrowID&gt;</code>
+                            <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Marks the package as dispatched and sends a delivery notification SMS to the buyer.</p>
+                        </div>
+
+                        <!-- Command 5: BALANCE -->
+                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="background: #E0F2FE; color: #0369A1; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">FINANCIALS</span>
+                                <button style="background: none; border: none; color: #0369A1; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('BALANCE'); window.showModernToast('Copied command!', 'success');">Copy</button>
+                            </div>
+                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">BALANCE</code>
+                            <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Returns your available wallet balance and funds currently locked in escrow.</p>
+                        </div>
+
+                        <!-- Command 6: MENU -->
+                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="background: #F1F5F9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">NAVIGATION</span>
+                                <button style="background: none; border: none; color: #475569; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('MENU'); window.showModernToast('Copied command!', 'success');">Copy</button>
+                            </div>
+                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">MENU or HELP</code>
+                            <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Displays the full interactive command list and options inside WhatsApp chat.</p>
+                        </div>
+
                     </div>
                 </div>
 

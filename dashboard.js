@@ -1555,3 +1555,38 @@ if (webhookForm) {
         }
     });
 }
+
+// WhatsApp Command Builder Interactive Helpers
+window.updateWaPreviewCommand = function() {
+    const priceInput = document.getElementById('wa-gen-price');
+    const itemInput = document.getElementById('wa-gen-item');
+    const phoneInput = document.getElementById('wa-gen-phone');
+    const previewEl = document.getElementById('wa-command-preview');
+    const directBtn = document.getElementById('wa-direct-send-btn');
+    
+    if (!previewEl) return;
+    
+    const price = priceInput && priceInput.value.trim() ? priceInput.value.trim() : '450';
+    const item = itemInput && itemInput.value.trim() ? itemInput.value.trim() : 'Nike Air Max';
+    const phone = phoneInput && phoneInput.value.trim() ? phoneInput.value.trim() : '0244123456';
+    
+    const cmd = `CREATE ${price} ${item} ${phone}`;
+    previewEl.textContent = cmd;
+    
+    if (directBtn) {
+        directBtn.href = `https://wa.me/16624904332?text=${encodeURIComponent(cmd)}`;
+    }
+};
+
+window.copyWaCommand = function() {
+    const previewEl = document.getElementById('wa-command-preview');
+    if (!previewEl) return;
+    navigator.clipboard.writeText(previewEl.textContent.trim()).then(() => {
+        if (typeof showModernToast === 'function') {
+            showModernToast('Command copied to clipboard!', 'success');
+        } else {
+            alert('Copied to clipboard!');
+        }
+    });
+};
+
