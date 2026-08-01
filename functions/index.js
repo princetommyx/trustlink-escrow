@@ -10,6 +10,7 @@ const db = admin.firestore();
 const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // Middleware to authenticate via x-api-key header
 const authenticateApi = async (req, res, next) => {
@@ -98,38 +99,350 @@ app.post('/v1/escrows', authenticateApi, async (req, res) => {
     }
 });
 
-// Check Escrow Status
-app.get('/v1/escrows/:id', authenticateApi, async (req, res) => {
-    try {
-        const escrowRef = db.collection('escrows').doc(req.params.id);
-        const escrowSnap = await escrowRef.get();
-
-        if (!escrowSnap.exists) {
-            return res.status(404).json({ error: 'Escrow not found' });
-        }
-
-        const escrowData = escrowSnap.data();
-
-        // Verify that this escrow belongs to the authenticated vendor
-        if (escrowData.sellerId !== req.vendorId) {
-            return res.status(403).json({ error: 'Access denied to this escrow' });
-        }
-
-        res.status(200).json({
-            id: escrowSnap.id,
-            status: escrowData.status,
-            amount: escrowData.amount,
-            description: escrowData.description,
-            customReference: escrowData.customReference || '',
-            createdAt: escrowData.createdAt ? escrowData.createdAt.toDate().toISOString() : null
-        });
-    } catch (error) {
-        console.error('Error fetching escrow:', error);
-        res.status(500).json({ error: 'Failed to fetch escrow' });
+// Helper: Normalize Ghana Phone Numbers
+function normalizeGhanaPhone(phone) {
+    if (!phone) return { local: '', intl: '', raw: '' };
+    let clean = phone.replace(/^whatsapp:/i, '').replace(/[^\d+]/g, '');
+    let digits = clean.replace(/\+/g, '');
+    
+    // Normalize to 10-digit local (e.g., 024XXXXXXX)
+    let local = digits;
+    if (digits.startsWith('233') && digits.length === 12) {
+        local = '0' + digits.slice(3);
+    } else if (!digits.startsWith('0') && digits.length === 9) {
+        local = '0' + digits;
     }
+
+    // Normalize to E.164 international (+233XXXXXXXXX)
+    let intl = '+233' + local.slice(1);
+    return { local, intl, raw: phone };
+}
+
+// Helper: Get or Provision Vendor User
+async function getOrCreateVendorByPhone(phoneInfo, profileName = 'WhatsApp Seller') {
+    const { local, intl } = phoneInfo;
+    
+    // Search by local phone or international phone
+    let querySnap = await db.collection('users').where('phone', '==', local).limit(1).get();
+    if (querySnap.empty) {
+        querySnap = await db.collection('users').where('phone', '==', intl).limit(1).get();
+    }
+
+    if (!querySnap.empty) {
+        return { vendorId: querySnap.docs[0].id, vendorData: querySnap.docs[0].data() };
+    }
+
+    // Create guest vendor profile
+    const newVendorRef = await db.collection('users').add({
+        displayName: profileName || 'WhatsApp Seller',
+        phone: local,
+        intlPhone: intl,
+        role: 'seller',
+        walletBalance: 0,
+        escrowBalance: 0,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        source: 'whatsapp_bot'
+    });
+
+    const newSnap = await newVendorRef.get();
+    return { vendorId: newVendorRef.id, vendorData: newSnap.data() };
+}
+
+// Helper: Dispatch SMS Notification to Buyer
+async function sendBuyerSmsAlert(phone, message) {
+    const MOOLRE_API_USER = "sasulabs";
+    const MOOLRE_PUBLIC_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOjEwNzgzNCwiZXhwIjoxOTU2NTQ1OTk5fQ.ZPgxaR7PP6FZH5msdXkWSQX6lbjp27mTywLgMhAeaPc";
+    const MOOLRE_PRIVATE_KEY = "tDA79UwhA1PLoCsBNXzcmk08qOXNvd25xKVjKPN93i2RVqa1VNoUWN7jXR91v39C";
+
+    try {
+        const { local } = normalizeGhanaPhone(phone);
+        const ghanaPhone = '233' + local.slice(1);
+
+        await fetch("https://api.moolre.com/open/sms/send", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-API-USER": MOOLRE_API_USER,
+                "X-API-KEY": MOOLRE_PRIVATE_KEY,
+                "X-API-PUBKEY": MOOLRE_PUBLIC_KEY
+            },
+            body: JSON.stringify({
+                recipient: ghanaPhone,
+                sender: "TrustLink",
+                message: message
+            })
+        });
+    } catch (err) {
+        console.warn("SMS alert failed:", err);
+    }
+}
+
+// WhatsApp Webhook Endpoint (Twilio compatible)
+app.post(['/webhook/whatsapp', '/v1/webhook/whatsapp'], async (req, res) => {
+    const from = req.body.From || req.body.from || '';
+    const body = (req.body.Body || req.body.body || '').trim();
+    const profileName = req.body.ProfileName || req.body.profileName || 'WhatsApp Seller';
+
+    if (!from) {
+        return res.status(400).send('Missing From field');
+    }
+
+    const phoneInfo = normalizeGhanaPhone(from);
+    const sessionRef = db.collection('whatsapp_sessions').doc(phoneInfo.local || from);
+    const sessionSnap = await sessionRef.get();
+    const session = sessionSnap.exists ? sessionSnap.data() : { step: 'IDLE', draft: {} };
+
+    let reply = '';
+    const upperBody = body.toUpperCase();
+
+    try {
+        // Reset / Cancel command
+        if (['CANCEL', 'RESET', 'STOP', 'QUIT'].includes(upperBody)) {
+            await sessionRef.set({ step: 'IDLE', draft: {}, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+            reply = `❌ *Action Cancelled*\n\nYour previous session has been cleared.\n\nType *MENU* or *HI* to see what you can do!`;
+        }
+        // Menu / Help commands
+        else if (['MENU', 'HI', 'HELLO', 'START', 'HELP', 'COMMANDS', '5'].includes(upperBody) && session.step === 'IDLE') {
+            reply = `🛡️ *Welcome to TrustLink Escrow Bot!* 👋\n\nThe secure payment & escrow service for Instagram, TikTok & WhatsApp sellers.\n\n*What would you like to do?*\n\n1️⃣ *NEW* or *CREATE* — Create a new escrow checkout link (guided)\n⚡ *CREATE <Amount> <Item> <Buyer Phone>* — Instant link generation\n   _Example:_ \`CREATE 350 Nike Shoes 0244123456\`\n2️⃣ *STATUS* or *STATUS <EscrowID>* — Track order status\n3️⃣ *SHIP <EscrowID>* — Mark order as shipped\n4️⃣ *BALANCE* — Check your TrustLink wallet\n5️⃣ *HELP* — Show this menu\n\n_Reply with a command or number to get started!_`;
+        }
+        // Check for 1-Line Fast Create: CREATE <Amount> <Item Name> <Buyer Phone>
+        else if (upperBody.startsWith('CREATE ') && session.step === 'IDLE' && upperBody.split(' ').length >= 4) {
+            const parts = body.split(/\s+/);
+            const amountStr = parts[1];
+            const buyerPhoneRaw = parts[parts.length - 1];
+            const itemName = parts.slice(2, parts.length - 1).join(' ');
+
+            const amount = parseFloat(amountStr);
+            const buyerPhoneInfo = normalizeGhanaPhone(buyerPhoneRaw);
+
+            if (isNaN(amount) || amount <= 0) {
+                reply = `⚠️ *Invalid Price*\nPlease provide a valid numeric amount.\n\n*Example:* \`CREATE 350 Nike Jordan Shoes 0244123456\``;
+            } else if (!buyerPhoneInfo.local || buyerPhoneInfo.local.length !== 10) {
+                reply = `⚠️ *Invalid Buyer Phone Number*\nPlease provide a valid 10-digit Ghanaian phone number (e.g. 0244123456).\n\n*Example:* \`CREATE 350 Nike Jordan Shoes 0244123456\``;
+            } else {
+                const { vendorId } = await getOrCreateVendorByPhone(phoneInfo, profileName);
+                const fee = parseFloat((amount * 0.03).toFixed(2));
+                const totalAmount = parseFloat((amount + fee / 2).toFixed(2)); // Default 50/50 split
+
+                const escrowRef = await db.collection('escrows').add({
+                    sellerId: vendorId,
+                    sellerPhone: phoneInfo.local,
+                    buyerPhone: buyerPhoneInfo.local,
+                    amount: amount,
+                    fee: fee,
+                    feeSplit: '50/50',
+                    totalAmount: totalAmount,
+                    description: itemName,
+                    status: 'PENDING_PAYMENT',
+                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                    source: 'whatsapp_bot'
+                });
+
+                const checkoutUrl = `https://trustlink.co/checkout.html?id=${escrowRef.id}`;
+                
+                // Dispatch SMS Alert to Buyer
+                sendBuyerSmsAlert(
+                    buyerPhoneInfo.local,
+                    `TrustLink: ${profileName} has created an escrow order for "${itemName}" (GH₵ ${amount.toFixed(2)}). Pay securely here: ${checkoutUrl}`
+                );
+
+                reply = `✅ *Escrow Payment Link Created!*\n\n📦 *Item:* ${itemName}\n💰 *Price:* GH₵ ${amount.toFixed(2)}\n🛡️ *Escrow Fee (3%):* GH₵ ${fee.toFixed(2)} (50/50 Split)\n📱 *Buyer Phone:* ${buyerPhoneInfo.local}\n🆔 *Escrow ID:* \`${escrowRef.id}\`\n\n🔗 *Shareable Checkout Link:*\n${checkoutUrl}\n\n📲 _We've sent an instant SMS to the buyer with payment instructions. You can also copy & paste the link above directly into your DMs!_`;
+            }
+        }
+        // Start Step-by-Step Guided Wizard (1 or NEW or CREATE)
+        else if (['1', 'NEW', 'CREATE'].includes(upperBody) && session.step === 'IDLE') {
+            await sessionRef.set({
+                step: 'AWAITING_ITEM_NAME',
+                draft: {},
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+            reply = `✨ *Create New Escrow Link (Step 1/4)*\n\n📦 What item or service are you selling?\n_Example: iPhone 13 Pro 128GB, Sneakers, Wig, etc._\n\n_(Type *CANCEL* anytime to stop)_`;
+        }
+        // Wizard Step 1: Awaiting Item Name
+        else if (session.step === 'AWAITING_ITEM_NAME') {
+            const itemName = body;
+            if (!itemName || itemName.length < 2) {
+                reply = `⚠️ Please enter a clear name or description for the item:`;
+            } else {
+                await sessionRef.update({
+                    step: 'AWAITING_AMOUNT',
+                    'draft.itemName': itemName,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+                reply = `📦 *Item:* ${itemName}\n\n💰 *Step 2/4:* What is the selling price in GH₵?\n_Example: 450_`;
+            }
+        }
+        // Wizard Step 2: Awaiting Amount
+        else if (session.step === 'AWAITING_AMOUNT') {
+            const amount = parseFloat(body.replace(/[^\d.]/g, ''));
+            if (isNaN(amount) || amount <= 0) {
+                reply = `⚠️ *Invalid Amount*\nPlease enter a valid number for the price in GH₵ (e.g. *350* or *1200*):`;
+            } else {
+                await sessionRef.update({
+                    step: 'AWAITING_BUYER_PHONE',
+                    'draft.amount': amount,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+                reply = `💰 *Price:* GH₵ ${amount.toFixed(2)}\n\n📱 *Step 3/4:* What is the buyer's phone number?\n_Example: 0244123456_`;
+            }
+        }
+        // Wizard Step 3: Awaiting Buyer Phone
+        else if (session.step === 'AWAITING_BUYER_PHONE') {
+            const buyerPhoneInfo = normalizeGhanaPhone(body);
+            if (!buyerPhoneInfo.local || buyerPhoneInfo.local.length !== 10) {
+                reply = `⚠️ *Invalid Phone Number*\nPlease provide a valid 10-digit Ghanaian mobile money number (e.g. *0244123456*):`;
+            } else {
+                await sessionRef.update({
+                    step: 'AWAITING_FEE_SPLIT',
+                    'draft.buyerPhone': buyerPhoneInfo.local,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+                reply = `📱 *Buyer:* ${buyerPhoneInfo.local}\n\n⚖️ *Step 4/4:* Who will pay the 3% escrow fee?\n\n1️⃣ *50/50 Split* (Buyer pays 1.5%, Seller pays 1.5%)\n2️⃣ *Buyer Pays Full 3%*\n3️⃣ *Seller Pays Full 3%*\n\n_Reply *1*, *2*, or *3*:_`;
+            }
+        }
+        // Wizard Step 4: Awaiting Fee Split
+        else if (session.step === 'AWAITING_FEE_SPLIT') {
+            let feeSplit = '50/50';
+            if (body === '2' || upperBody.includes('BUYER')) feeSplit = 'buyer';
+            else if (body === '3' || upperBody.includes('SELLER')) feeSplit = 'seller';
+
+            const draft = session.draft || {};
+            const amount = parseFloat(draft.amount || 0);
+            const itemName = draft.itemName || 'Item';
+            const buyerPhone = draft.buyerPhone || '';
+
+            const { vendorId } = await getOrCreateVendorByPhone(phoneInfo, profileName);
+            const fee = parseFloat((amount * 0.03).toFixed(2));
+            
+            let totalPayable = amount;
+            if (feeSplit === '50/50') totalPayable = parseFloat((amount + fee / 2).toFixed(2));
+            else if (feeSplit === 'buyer') totalPayable = parseFloat((amount + fee).toFixed(2));
+
+            const escrowRef = await db.collection('escrows').add({
+                sellerId: vendorId,
+                sellerPhone: phoneInfo.local,
+                buyerPhone: buyerPhone,
+                amount: amount,
+                fee: fee,
+                feeSplit: feeSplit,
+                totalAmount: totalPayable,
+                description: itemName,
+                status: 'PENDING_PAYMENT',
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                source: 'whatsapp_bot'
+            });
+
+            const checkoutUrl = `https://trustlink.co/checkout.html?id=${escrowRef.id}`;
+
+            // Reset session
+            await sessionRef.set({ step: 'IDLE', draft: {}, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+
+            // Dispatch SMS Alert to Buyer
+            sendBuyerSmsAlert(
+                buyerPhone,
+                `TrustLink: ${profileName} has created an escrow order for "${itemName}" (GH₵ ${amount.toFixed(2)}). Pay securely here: ${checkoutUrl}`
+            );
+
+            reply = `🎉 *Escrow Order Successfully Created!*\n\n📦 *Item:* ${itemName}\n💰 *Price:* GH₵ ${amount.toFixed(2)}\n🛡️ *Escrow Fee:* GH₵ ${fee.toFixed(2)} (${feeSplit.toUpperCase()})\n📱 *Buyer:* ${buyerPhone}\n🆔 *Escrow ID:* \`${escrowRef.id}\`\n\n🔗 *Shareable Payment Link:*\n${checkoutUrl}\n\n📲 _We've notified the buyer via SMS. You can also paste this link directly in your DMs on Instagram, TikTok, or WhatsApp!_`;
+        }
+        // Balance Inquiry (4 or BALANCE / WALLET)
+        else if (['4', 'BALANCE', 'WALLET'].includes(upperBody)) {
+            const { vendorData } = await getOrCreateVendorByPhone(phoneInfo, profileName);
+            const walletBal = parseFloat(vendorData.walletBalance || 0);
+            const escrowBal = parseFloat(vendorData.escrowBalance || 0);
+
+            reply = `💼 *TrustLink Wallet Statement*\n\n💰 *Available Balance:* GH₵ ${walletBal.toFixed(2)}\n🔒 *In Escrow (Pending Delivery):* GH₵ ${escrowBal.toFixed(2)}\n\n_To withdraw your available funds instantly to Mobile Money, visit your TrustLink web dashboard at https://trustlink.co/dashboard.html_`;
+        }
+        // Status Check (2 or STATUS)
+        else if (upperBody.startsWith('STATUS') || upperBody === '2') {
+            const parts = body.split(/\s+/);
+            if (parts.length > 1 && parts[1].length > 3) {
+                const searchId = parts[1];
+                const escrowSnap = await db.collection('escrows').doc(searchId).get();
+                if (!escrowSnap.exists) {
+                    reply = `⚠️ *Escrow Not Found*\nCould not find any transaction with ID \`${searchId}\`. Please verify and try again.`;
+                } else {
+                    const esc = escrowSnap.data();
+                    const statusEmoji = esc.status === 'COMPLETED' ? '✅' : esc.status === 'FUNDS_ESCROWED' ? '🔒' : esc.status === 'ITEM_SHIPPED' ? '🚚' : esc.status === 'DISPUTED' ? '⚠️' : '⏳';
+                    reply = `📋 *Escrow Details: #${escrowSnap.id}*\n\n📦 *Item:* ${esc.description || 'N/A'}\n💰 *Amount:* GH₵ ${parseFloat(esc.amount || 0).toFixed(2)}\n${statusEmoji} *Status:* *${esc.status}*\n📱 *Buyer:* ${esc.buyerPhone || 'N/A'}\n\n🔗 *Link:* https://trustlink.co/checkout.html?id=${escrowSnap.id}`;
+                }
+            } else {
+                // List latest 3 escrows
+                const escrowsSnap = await db.collection('escrows')
+                    .where('sellerPhone', '==', phoneInfo.local)
+                    .limit(3)
+                    .get();
+
+                if (escrowsSnap.empty) {
+                    reply = `📭 *No Active Escrows Found*\n\nYou haven't created any escrows under this phone number yet.\n\nType *NEW* to create your first escrow link!`;
+                } else {
+                    let list = `📋 *Your Recent Escrow Orders:*\n\n`;
+                    escrowsSnap.docs.forEach((docSnap, idx) => {
+                        const esc = docSnap.data();
+                        const statusEmoji = esc.status === 'COMPLETED' ? '✅' : esc.status === 'FUNDS_ESCROWED' ? '🔒' : esc.status === 'ITEM_SHIPPED' ? '🚚' : '⏳';
+                        list += `${idx + 1}️⃣ *${esc.description || 'Item'}* — GH₵ ${parseFloat(esc.amount || 0).toFixed(2)}\n   ${statusEmoji} Status: *${esc.status}*\n   🆔 ID: \`${docSnap.id}\`\n\n`;
+                    });
+                    list += `_Reply *STATUS <EscrowID>* to view specific details or *SHIP <EscrowID>* to mark as shipped._`;
+                    reply = list;
+                }
+            }
+        }
+        // Mark as Shipped (3 or SHIP <id>)
+        else if (upperBody.startsWith('SHIP') || upperBody === '3') {
+            const parts = body.split(/\s+/);
+            if (parts.length < 2) {
+                reply = `🚚 *Mark Order as Shipped*\n\nPlease provide the Escrow ID of the order you dispatched.\n\n*Format:* \`SHIP <EscrowID>\`\n*Example:* \`SHIP TL-9821\``;
+            } else {
+                const escrowId = parts[1];
+                const escrowRef = db.collection('escrows').doc(escrowId);
+                const escrowSnap = await escrowRef.get();
+
+                if (!escrowSnap.exists) {
+                    reply = `⚠️ *Escrow Not Found*\nNo transaction matches ID \`${escrowId}\`.`;
+                } else {
+                    const esc = escrowSnap.data();
+                    if (esc.status === 'PENDING_PAYMENT') {
+                        reply = `⚠️ *Cannot Mark as Shipped Yet*\n\nThe buyer has not completed payment for this escrow. Only ship parcels after status is *FUNDS_ESCROWED*.`;
+                    } else if (['ITEM_SHIPPED', 'COMPLETED'].includes(esc.status)) {
+                        reply = `ℹ️ This order is already marked as *${esc.status}*.`;
+                    } else {
+                        await escrowRef.update({
+                            status: 'ITEM_SHIPPED',
+                            shippedAt: admin.firestore.FieldValue.serverTimestamp()
+                        });
+
+                        // Dispatch SMS alert to buyer
+                        if (esc.buyerPhone) {
+                            sendBuyerSmsAlert(
+                                esc.buyerPhone,
+                                `TrustLink: The seller has marked your order "${esc.description}" as shipped! Please confirm receipt once delivered at: https://trustlink.co/confirm.html?id=${escrowId}`
+                            );
+                        }
+
+                        reply = `🚚 *Order Marked as Shipped!* ✅\n\n📦 *Item:* ${esc.description}\n🆔 *Escrow ID:* \`${escrowId}\`\n\n📲 _We've alerted the buyer to inspect the parcel upon arrival and confirm receipt._`;
+                    }
+                }
+            }
+        }
+        // Fallback default
+        else {
+            reply = `👋 *Hi there!* Type *MENU* to see available options, or *NEW* to create a secure escrow payment link for your buyer.`;
+        }
+    } catch (botErr) {
+        console.error('WhatsApp Bot Error:', botErr);
+        reply = `⚠️ Sorry, an error occurred processing your request. Please try again or type *MENU*.`;
+    }
+
+    // Build TwiML XML Response
+    const twiml = new twilio.twiml.MessagingResponse();
+    twiml.message(reply);
+
+    res.writeHead(200, { 'Content-Type': 'text/xml' });
+    res.end(twiml.toString());
 });
 
 exports.api = functions.https.onRequest(app);
+exports.whatsappWebhook = functions.https.onRequest(app);
 
 // Webhook Dispatcher
 exports.onEscrowStatusChange = functions.firestore

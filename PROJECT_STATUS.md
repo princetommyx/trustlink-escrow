@@ -86,8 +86,17 @@ The platform allows sellers to generate instant dynamic checkout & tracking link
 ### 8. Developer API & WooCommerce Plugin (`api-docs.html`, `trustlink-woocommerce-plugin/`, `functions/index.js`)
 - [x] **Interactive API Documentation Portal**: Full REST API reference with interactive sandbox playground.
 - [x] **Multi-Language Code Snippets**: Pre-built examples in cURL, JavaScript (Fetch), Python (Requests), and PHP.
-- [x] **Firebase Cloud Functions API**: `/v1/escrows` endpoints for programmatic contract creation and webhook status dispatches.
-- [x] **Ready-to-Install WooCommerce Plugin**: WordPress plugin allowing any WooCommerce store to plug into TrustLink Escrow.
+### 9. Interactive WhatsApp Chatbot Engine (`functions/index.js`, `test-whatsapp-bot.js`)
+- [x] **Instant 1-Line Escrow Creation**: Command parser allowing sellers to mint escrow links in one text (`CREATE <Amount> <Item> <Buyer Phone>`).
+- [x] **Multi-Step Conversational Wizard**: Guided step-by-step interactive bot flow (`NEW` / `CREATE`) walking vendors through Item Name, Price, Buyer MoMo Phone, and Fee Split.
+- [x] **Stateful Session Manager**: Firestore-backed conversation state machine (`whatsapp_sessions`) tracking vendor progress with timeout & `CANCEL` triggers.
+- [x] **Phone Standardizer & Auto-Provisioning**: Auto-resolves Ghanaian numbers (`024...`, `+233...`, `233...`) and provisions guest vendor profiles for first-time WhatsApp users.
+- [x] **Live Order Management**:
+  - `STATUS` / `STATUS <EscrowID>`: Track real-time progress of active orders.
+  - `SHIP <EscrowID>`: Mark parcels as shipped directly from chat, dispatching SMS tracking links to the buyer.
+  - `BALANCE`: Instant wallet and escrow balance inquiries with link to dashboard.
+- [x] **Buyer Auto-SMS Notification**: Instant outbound SMS sent to the buyer's phone with checkout URL as soon as an escrow is created via WhatsApp.
+- [x] **Dashboard Integration**: Interactive WhatsApp Assistant quick-card added to the vendor control center.
 
 ---
 
@@ -95,7 +104,7 @@ The platform allows sellers to generate instant dynamic checkout & tracking link
 
 ```
 [INITIATED]
-    │  (Seller creates link & sends to buyer)
+    │  (Seller creates link via Web Dashboard OR WhatsApp Bot)
     ▼
 [AWAITING_PAYMENT]
     │  (Buyer enters phone & approves Mobile Money USSD prompt)
@@ -104,7 +113,7 @@ The platform allows sellers to generate instant dynamic checkout & tracking link
     │  (Moolre verifies payment; SMS alert sent to Seller to dispatch)
     ▼
 [ITEM_SHIPPED]
-    │  (Seller clicks "Mark as Shipped" & adds tracking note)
+    │  (Seller clicks "Mark as Shipped" on Web OR texts "SHIP <id>" on WhatsApp)
     ├───► [DISPUTED] ──► (Admin reviews chat & executes Refund or Forced Release)
     ▼
 [COMPLETED]
@@ -129,15 +138,13 @@ The platform allows sellers to generate instant dynamic checkout & tracking link
    - Add real-time buyer-seller messaging within the escrow transaction room to centralize communication and provide audit trails during disputes.
 4. **KYC / Identity Verification Flow**:
    - Implement Ghana Card / ID document upload in the user dashboard with an approval panel in the Admin dashboard for high-volume limits.
-5. **WhatsApp Bot Integration**:
-   - Expand the existing WhatsApp notification hooks into an interactive WhatsApp chatbot allowing vendors to generate escrow links directly within WhatsApp chat.
 
 ### 🟣 Low Priority (V2 Scaling & Expansion)
-6. **Multi-Currency & Regional Gateways**:
+5. **Multi-Currency & Regional Gateways**:
    - Add Paystack, Flutterwave, or Stripe integrations for USD, NGN, and KES cross-border transactions.
-7. **Mobile App Store Packages**:
+6. **Mobile App Store Packages**:
    - Package the responsive web app using Capacitor / PWA for direct distribution on Android and iOS app stores.
 
 ---
 
-*Document generated on August 1, 2026 for TrustLink Escrow development tracking.*
+*Document updated on August 1, 2026 for TrustLink Escrow development tracking.*
