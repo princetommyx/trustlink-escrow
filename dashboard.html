@@ -181,7 +181,17 @@
                             <div class="financial-record-widget">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
                                     <h3 style="margin: 0; font-size: 1.1rem; color: #111827; font-weight: 600;">Order records</h3>
-                                    <div class="dropdown" style="font-size: 0.85rem; color: #64748B; background: #F8F9FA; padding: 6px 12px; border-radius: 8px; border: 1px solid #E2E8F0; cursor: pointer;">Month ▼</div>
+                                    <div class="timeframe-select-container">
+                                        <select id="order-records-timeframe" class="timeframe-select" aria-label="Filter order records by timeframe">
+                                            <option value="day">Day</option>
+                                            <option value="week">Week</option>
+                                            <option value="month" selected>Month</option>
+                                            <option value="all">All Time</option>
+                                        </select>
+                                        <svg class="timeframe-chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
                                 </div>
                                 <div class="financial-cards-grid">
                                     <div class="fin-card bg-green">
@@ -235,7 +245,16 @@
                                     <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #111827;"></span> Total Orders</span>
                                     <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #F97316;"></span> Pending Volumes</span>
                                 </div>
-                                <div class="dropdown" style="font-size: 0.85rem; color: #64748B; background: #F8F9FA; padding: 6px 12px; border-radius: 8px; border: 1px solid #E2E8F0; cursor: pointer;">Weekly ▼</div>
+                                <div class="timeframe-select-container">
+                                    <select id="order-flow-timeframe" class="timeframe-select" aria-label="Filter order flow by timeframe">
+                                        <option value="day">Daily</option>
+                                        <option value="week" selected>Weekly</option>
+                                        <option value="month">Monthly</option>
+                                    </select>
+                                    <svg class="timeframe-chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
                             </div>
                             <!-- Mockup Chart Graphic -->
                             <div class="chart-container" style="height: 200px; width: 100%; border-bottom: 1px solid #E2E8F0; position: relative;">

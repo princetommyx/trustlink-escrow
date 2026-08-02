@@ -127,6 +127,15 @@ if(toggleBuyer && toggleSeller) {
     });
 }
 
+// Timeframe Filtering Event Listeners
+document.getElementById('order-records-timeframe')?.addEventListener('change', (e) => {
+    updateOverviewStats(e.target.value);
+});
+
+document.getElementById('order-flow-timeframe')?.addEventListener('change', (e) => {
+    updateOverviewStats();
+});
+
 // Authentication Protection & User Data
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -225,8 +234,73 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-let escrowStats = { activeSeller: 0, activeBuyer: 0, pendingSeller: 0, pendingBuyer: 0, completedSeller: 0, completedBuyer: 0 };
+let allLoadedSellerEscrows = [];
+let allLoadedBuyerEscrows = [];
+let selectedOrderRecordsTimeframe = 'month';
 let recentActivities = [];
+
+function getEscrowTime(data) {
+    if (!data) return Date.now();
+    if (data.createdAt) {
+        if (typeof data.createdAt.toMillis === 'function') return data.createdAt.toMillis();
+        if (data.createdAt.seconds) return data.createdAt.seconds * 1000;
+        const t = new Date(data.createdAt).getTime();
+        if (!isNaN(t)) return t;
+    }
+    if (data.updatedAt) {
+        if (typeof data.updatedAt.toMillis === 'function') return data.updatedAt.toMillis();
+        if (data.updatedAt.seconds) return data.updatedAt.seconds * 1000;
+        const t = new Date(data.updatedAt).getTime();
+        if (!isNaN(t)) return t;
+    }
+    return Date.now();
+}
+
+function filterEscrowsByTimeframe(escrowsList, timeframe) {
+    if (timeframe === 'all') return escrowsList;
+    const now = Date.now();
+    let cutoff = 0;
+    if (timeframe === 'day') {
+        cutoff = now - (24 * 60 * 60 * 1000);
+    } else if (timeframe === 'week') {
+        cutoff = now - (7 * 24 * 60 * 60 * 1000);
+    } else if (timeframe === 'month') {
+        cutoff = now - (30 * 24 * 60 * 60 * 1000);
+    }
+    return escrowsList.filter(e => getEscrowTime(e) >= cutoff);
+}
+
+function getPreviousPeriodRange(timeframe) {
+    if (timeframe === 'all') return null;
+    const now = Date.now();
+    if (timeframe === 'day') {
+        return { start: now - (48 * 60 * 60 * 1000), end: now - (24 * 60 * 60 * 1000) };
+    } else if (timeframe === 'week') {
+        return { start: now - (14 * 24 * 60 * 60 * 1000), end: now - (7 * 24 * 60 * 60 * 1000) };
+    } else if (timeframe === 'month') {
+        return { start: now - (60 * 24 * 60 * 60 * 1000), end: now - (30 * 24 * 60 * 60 * 1000) };
+    }
+    return null;
+}
+
+function updateTrendBadge(elemId, currentCount, prevCount) {
+    const el = document.getElementById(elemId);
+    if (!el) return;
+    if (currentCount === 0 && prevCount === 0) {
+        el.style.display = 'none';
+        return;
+    }
+    el.style.display = 'inline-block';
+    if (currentCount >= prevCount) {
+        const diff = currentCount - prevCount;
+        el.className = 'fin-trend trend-up';
+        el.textContent = diff > 0 ? `+${diff}` : `0%`;
+    } else {
+        const diff = prevCount - currentCount;
+        el.className = 'fin-trend trend-down';
+        el.textContent = `-${diff}`;
+    }
+}
 
 // ==========================================
 // DELIVERY-DAY REMINDERS
@@ -265,21 +339,63 @@ const maybeSendDeliveryReminder = async (escrowId, data) => {
     }
 };
 
-function updateOverviewStats() {
-    const totalActive = escrowStats.activeSeller + escrowStats.activeBuyer;
-    const totalPending = escrowStats.pendingSeller + escrowStats.pendingBuyer;
-    const totalCompleted = escrowStats.completedSeller + escrowStats.completedBuyer;
+function updateOverviewStats(timeframe) {
+    if (!timeframe) {
+        const select = document.getElementById('order-records-timeframe');
+        timeframe = select ? select.value : selectedOrderRecordsTimeframe;
+    }
+    selectedOrderRecordsTimeframe = timeframe;
+
+    const filteredSeller = filterEscrowsByTimeframe(allLoadedSellerEscrows, timeframe);
+    const filteredBuyer = filterEscrowsByTimeframe(allLoadedBuyerEscrows, timeframe);
+    const allFiltered = [...filteredSeller, ...filteredBuyer];
+
+    let totalActive = 0;
+    let totalPending = 0;
+    let totalCompleted = 0;
+
+    allFiltered.forEach(data => {
+        if (data.status !== 'COMPLETED' && data.status !== 'DISPUTED') totalActive++;
+        if (data.status === 'FUNDED' || data.status === 'DISPATCHED') totalPending++;
+        if (data.status === 'COMPLETED') totalCompleted++;
+    });
+
     if(document.getElementById('overview-active-escrows')) document.getElementById('overview-active-escrows').textContent = totalActive;
     if(document.getElementById('overview-pending-releases')) document.getElementById('overview-pending-releases').textContent = totalPending;
     if(document.getElementById('overview-completed-escrows')) document.getElementById('overview-completed-escrows').textContent = totalCompleted;
     
+    // Calculate and display dynamic trend badges compared to previous period
+    const prevRange = getPreviousPeriodRange(timeframe);
+    if (prevRange) {
+        const allLoaded = [...allLoadedSellerEscrows, ...allLoadedBuyerEscrows];
+        const prevEscrows = allLoaded.filter(e => {
+            const t = getEscrowTime(e);
+            return t >= prevRange.start && t < prevRange.end;
+        });
+
+        let prevActive = 0, prevPending = 0, prevCompleted = 0;
+        prevEscrows.forEach(data => {
+            if (data.status !== 'COMPLETED' && data.status !== 'DISPUTED') prevActive++;
+            if (data.status === 'FUNDED' || data.status === 'DISPATCHED') prevPending++;
+            if (data.status === 'COMPLETED') prevCompleted++;
+        });
+
+        updateTrendBadge('completed-escrows-trend', totalCompleted, prevCompleted);
+        updateTrendBadge('active-escrows-trend', totalActive, prevActive);
+        updateTrendBadge('pending-releases-trend', totalPending, prevPending);
+    } else {
+        const cTrend = document.getElementById('completed-escrows-trend');
+        const aTrend = document.getElementById('active-escrows-trend');
+        const pTrend = document.getElementById('pending-releases-trend');
+        if (cTrend) cTrend.style.display = 'none';
+        if (aTrend) aTrend.style.display = 'none';
+        if (pTrend) pTrend.style.display = 'none';
+    }
+
     // Set dynamic volume total instead of dummy "$2289"
     const tooltipAmount = document.getElementById('chart-tooltip-amount');
     const tooltipContainer = document.getElementById('chart-tooltip');
     if (tooltipAmount && tooltipContainer) {
-        // Just show total active + pending as a placeholder metric for "volume" since we don't have historical prices here
-        // Ideally we would query all transaction amounts, but for now just showing total escrow count is better than dummy data.
-        // Actually, if we don't have total volume, hiding it is safest to meet the "no dummy data" requirement.
         tooltipContainer.style.display = 'none'; 
     }
 
@@ -288,7 +404,11 @@ function updateOverviewStats() {
 
     // Notification bell: dot when something needs attention, dropdown = recent activity
     const notifDot = document.getElementById('notif-dot');
-    if (notifDot) notifDot.classList.toggle('hidden', totalPending === 0);
+    if (notifDot) {
+        const globalPending = allLoadedSellerEscrows.filter(d => d.status === 'FUNDED' || d.status === 'DISPATCHED').length +
+                              allLoadedBuyerEscrows.filter(d => d.status === 'FUNDED' || d.status === 'DISPATCHED').length;
+        notifDot.classList.toggle('hidden', globalPending === 0);
+    }
     const notifList = document.getElementById('notif-list');
     if (notifList) {
         if (recentActivities.length === 0) {
@@ -419,27 +539,20 @@ function loadEscrows() {
         
         if (snapshot.empty) {
             sellerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have not created any orders as a seller.</p>';
-            escrowStats.activeSeller = 0;
-            escrowStats.pendingSeller = 0;
-            escrowStats.completedSeller = 0;
+            allLoadedSellerEscrows = [];
             recentActivities = recentActivities.filter(a => a.type !== 'seller');
             updateOverviewStats();
         } else {
             sellerEscrowsContainer.innerHTML = '';
-            escrowStats.activeSeller = 0;
-            escrowStats.pendingSeller = 0;
-            escrowStats.completedSeller = 0;
+            allLoadedSellerEscrows = [];
             // Remove old seller activities
             recentActivities = recentActivities.filter(a => a.type !== 'seller');
             
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const escrowId = docSnap.id;
+                allLoadedSellerEscrows.push({ id: escrowId, ...data });
                 maybeSendDeliveryReminder(escrowId, data);
-
-                if (data.status !== 'COMPLETED' && data.status !== 'DISPUTED') escrowStats.activeSeller++;
-                if (data.status === 'FUNDED' || data.status === 'DISPATCHED') escrowStats.pendingSeller++;
-                if (data.status === 'COMPLETED') escrowStats.completedSeller++;
                 
                 if(data.createdAt) {
                     recentActivities.push({
@@ -493,27 +606,20 @@ function loadEscrows() {
         
         if (snapshot.empty) {
             buyerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have no active orders as a buyer.</p>';
-            escrowStats.activeBuyer = 0;
-            escrowStats.pendingBuyer = 0;
-            escrowStats.completedBuyer = 0;
+            allLoadedBuyerEscrows = [];
             recentActivities = recentActivities.filter(a => a.type !== 'buyer');
             updateOverviewStats();
         } else {
             buyerEscrowsContainer.innerHTML = '';
-            escrowStats.activeBuyer = 0;
-            escrowStats.pendingBuyer = 0;
-            escrowStats.completedBuyer = 0;
+            allLoadedBuyerEscrows = [];
             // Remove old buyer activities
             recentActivities = recentActivities.filter(a => a.type !== 'buyer');
             
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const escrowId = docSnap.id;
+                allLoadedBuyerEscrows.push({ id: escrowId, ...data });
                 maybeSendDeliveryReminder(escrowId, data);
-
-                if (data.status !== 'COMPLETED' && data.status !== 'DISPUTED') escrowStats.activeBuyer++;
-                if (data.status === 'FUNDED' || data.status === 'DISPATCHED') escrowStats.pendingBuyer++;
-                if (data.status === 'COMPLETED') escrowStats.completedBuyer++;
                 
                 if(data.createdAt) {
                     recentActivities.push({

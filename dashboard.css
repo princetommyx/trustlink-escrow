@@ -1308,6 +1308,52 @@ input[type=number] {
     flex-direction: column;
 }
 
+.timeframe-select-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.timeframe-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: #F8FAFC;
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 6px 28px 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+    cursor: pointer;
+    outline: none;
+    font-family: inherit;
+    transition: all 0.15s ease;
+}
+
+.timeframe-select:hover {
+    background: #F1F5F9;
+    border-color: #CBD5E1;
+    color: #0F172A;
+}
+
+.timeframe-select:focus {
+    background: #FFFFFF;
+    border-color: #0F172A;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.08);
+    color: #0F172A;
+}
+
+.timeframe-chevron-icon {
+    position: absolute;
+    right: 8px;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+    color: #64748B;
+    transition: transform 0.2s ease;
+}
+
 .financial-cards-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
