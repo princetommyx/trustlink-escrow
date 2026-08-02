@@ -1798,4 +1798,96 @@ input[type=number] {
     }
 }
 
+/* Order Action Buttons (Copy Link, SMS Buyer, WhatsApp) */
+.order-action-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 14px;
+}
+
+.btn-order-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    line-height: 1;
+    white-space: nowrap;
+    outline: none;
+}
+
+.btn-order-action svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.btn-order-copy {
+    background: #FFFFFF !important;
+    color: #2563EB !important;
+    border: 1.5px solid #2563EB !important;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
+}
+
+.btn-order-copy:hover {
+    background: #EFF6FF !important;
+    border-color: #1D4ED8 !important;
+    color: #1D4ED8 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.15);
+}
+
+.btn-order-sms {
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid #1D4ED8 !important;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
+}
+
+.btn-order-sms:hover {
+    background: #1D4ED8 !important;
+    border-color: #1E40AF !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+}
+
+.btn-order-whatsapp {
+    background: #25D366 !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid #1EBE5D !important;
+    box-shadow: 0 1px 3px rgba(37, 211, 102, 0.28);
+}
+
+.btn-order-whatsapp:hover {
+    background: #1EBE5D !important;
+    border-color: #179B4B !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+}
+
+@media (max-width: 640px) {
+    .order-action-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        width: 100%;
+    }
+    .btn-order-action {
+        width: 100%;
+        padding: 9px 6px;
+        font-size: 0.75rem;
+        gap: 4px;
+    }
+}
+
+
 

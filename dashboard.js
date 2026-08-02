@@ -2,7 +2,7 @@ import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone, executeMoolrePayout, sendMoolreOTP } from "./moolre-service.js";
+import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone, executeMoolrePayout, sendMoolreOTP, normalizePhone } from "./moolre-service.js";
 
 let currentUser = null;
 let currentBalance = 0;
@@ -587,10 +587,40 @@ function loadEscrows() {
                 
                 if (data.status === 'PENDING_PAYMENT') {
                     statusUI = `<span style="background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING PAYMENT</span>`;
-                    actionBtn = `<button class="btn btn-outline" style="border-color: var(--primary); color: var(--primary);" onclick="window.copyToClipboard('${window.location.origin}/checkout.html?id=${escrowId}')">COPY LINK</button>`;
+                    const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
+                    actionBtn = `
+                        <div class="order-action-group">
+                            <button type="button" class="btn-order-action btn-order-copy" onclick="window.copyToClipboard('${checkoutUrl}')" title="Copy checkout link">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                                </svg>
+                                <span>COPY LINK</span>
+                            </button>
+                            <button type="button" class="btn-order-action btn-order-sms" onclick="window.notifyBuyerViaSMS('${escrowId}')" title="Notify buyer via SMS">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-.873-.873c.12-.596.34-1.285.666-1.992C3.125 16.536 2.25 14.394 2.25 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                                </svg>
+                                <span>SMS BUYER</span>
+                            </button>
+                            <button type="button" class="btn-order-action btn-order-whatsapp" onclick="window.shareEscrowViaWhatsApp('${escrowId}')" title="Share via WhatsApp">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                                </svg>
+                                <span>WHATSAPP</span>
+                            </button>
+                        </div>
+                    `;
                 } else if (data.status === 'FUNDED') {
                     statusUI = `<span style="background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid #3b82f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">FUNDED - DISPATCH NOW</span>`;
-                    actionBtn = `<button class="btn btn-primary" onclick="window.dispatchItem('${escrowId}')">MARK AS DISPATCHED</button>`;
+                    actionBtn = `
+                        <div class="order-action-group">
+                            <button class="btn btn-primary" onclick="window.dispatchItem('${escrowId}')">MARK AS DISPATCHED</button>
+                            <button type="button" class="btn-order-action btn-order-whatsapp" onclick="window.shareEscrowViaWhatsApp('${escrowId}')" title="Message Buyer on WhatsApp">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" style="width:15px;height:15px;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                                <span>WHATSAPP</span>
+                            </button>
+                        </div>
+                    `;
                 } else if (data.status === 'DISPATCHED') {
                     statusUI = `<span style="background-color: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">DISPATCHED</span>`;
                 } else if (data.status === 'COMPLETED') {
@@ -725,6 +755,169 @@ window.copyToClipboard = async (text) => {
         }
     } else {
         prompt("Copy the payment link below:", text);
+    }
+};
+
+window.openNotifyModal = (escrow) => {
+    const modal = document.getElementById('notify-buyer-modal');
+    if (!modal) {
+        const inputPhone = prompt("Enter the buyer's Ghana phone number (e.g. 0244123456):");
+        if (inputPhone) {
+            window.submitNotifyBuyerDirect(escrow.id, inputPhone, 'sms');
+        }
+        return;
+    }
+    
+    const idInput = document.getElementById('notify-escrow-id');
+    if (idInput) idInput.value = escrow.id;
+
+    const refEl = document.getElementById('notify-modal-ref');
+    if (refEl) refEl.textContent = '#' + escrow.id.substring(0, 8).toUpperCase();
+
+    const descEl = document.getElementById('notify-modal-desc');
+    if (descEl) descEl.textContent = escrow.description || escrow.productName || 'Escrow Order';
+
+    const amtEl = document.getElementById('notify-modal-amount');
+    if (amtEl) {
+        const amountVal = Number(escrow.amount || escrow.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        amtEl.textContent = 'GH₵ ' + amountVal;
+    }
+    
+    const phoneInput = document.getElementById('notify-buyer-phone');
+    if (phoneInput) {
+        phoneInput.value = escrow.buyerPhone || '';
+        setTimeout(() => phoneInput.focus(), 150);
+    }
+    
+    modal.classList.remove('hidden');
+};
+
+window.closeNotifyModal = () => {
+    const modal = document.getElementById('notify-buyer-modal');
+    if (modal) modal.classList.add('hidden');
+};
+
+window.notifyBuyerViaSMS = async (escrowId) => {
+    try {
+        let escrow = allLoadedSellerEscrows.find(e => e.id === escrowId);
+        if (!escrow) {
+            const snap = await getDoc(doc(db, "escrows", escrowId));
+            if (snap.exists()) {
+                escrow = { id: snap.id, ...snap.data() };
+            }
+        }
+        if (!escrow) {
+            if (typeof showModernToast === 'function') {
+                showModernToast("Order Not Found", "Could not locate this escrow order details.", "error");
+            } else {
+                alert("Could not locate this escrow order details.");
+            }
+            return;
+        }
+
+        const phone = escrow.buyerPhone ? String(escrow.buyerPhone).trim() : "";
+        const cleanDigits = phone.replace(/[^0-9]/g, '');
+
+        if (cleanDigits.length >= 9) {
+            const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
+            if (typeof showModernToast === 'function') {
+                showModernToast("Sending SMS... ⏳", `Dispatching payment link SMS to ${phone}`, "info");
+            }
+            const smsDetails = {
+                description: escrow.description || escrow.productName || "Order #" + escrowId.substring(0, 8),
+                amount: escrow.amount || escrow.totalAmount || 0,
+                sellerName: escrow.sellerName || (currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink Seller")
+            };
+            try {
+                await sendSMSNotification(phone, checkoutUrl, escrowId, "", smsDetails);
+                if (typeof showModernToast === 'function') {
+                    showModernToast("SMS Sent! 📱", `Payment link successfully sent to ${phone}.`, "success");
+                }
+            } catch (smsErr) {
+                console.error("SMS notification failed:", smsErr);
+                if (typeof showModernToast === 'function') {
+                    showModernToast("SMS Delivery Notice", smsErr.message || "Could not dispatch SMS. You can share via WhatsApp or Copy Link.", "warning");
+                }
+            }
+        } else {
+            window.openNotifyModal(escrow);
+        }
+    } catch (err) {
+        console.error("Notify via SMS error:", err);
+        if (typeof showModernToast === 'function') {
+            showModernToast("Action Error", err.message || "Could not complete SMS notification.", "error");
+        }
+    }
+};
+
+window.shareEscrowViaWhatsApp = async (escrowId) => {
+    try {
+        let escrow = allLoadedSellerEscrows.find(e => e.id === escrowId);
+        if (!escrow) {
+            const snap = await getDoc(doc(db, "escrows", escrowId));
+            if (snap.exists()) {
+                escrow = { id: snap.id, ...snap.data() };
+            }
+        }
+        if (!escrow) {
+            if (typeof showModernToast === 'function') {
+                showModernToast("Order Not Found", "Could not locate this escrow order details.", "error");
+            } else {
+                alert("Could not locate this escrow order details.");
+            }
+            return;
+        }
+
+        const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
+        const formattedAmount = Number(escrow.amount || escrow.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const item = escrow.description || escrow.productName || `Order #${escrowId.substring(0, 8).toUpperCase()}`;
+        const seller = escrow.sellerName || (currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink Seller");
+        const delivery = escrow.deliveryDate ? `\n📅 *Estimated Delivery:* ${deliveryDateLabel(escrow.deliveryDate)}` : "";
+
+        const message = 
+`🤝 *TrustLink Secure Escrow Payment*
+
+📦 *Item / Order:* ${item}
+💰 *Total Amount:* GH₵ ${formattedAmount}
+👤 *Seller:* ${seller}${delivery}
+
+🔒 *Your payment stays protected in TrustLink Escrow until you receive and verify your item.*
+
+👉 *Pay securely here:*
+${checkoutUrl}
+
+🛡️ *Protected by TrustLink Escrow Ghana*`;
+
+        const phone = escrow.buyerPhone ? String(escrow.buyerPhone).trim() : "";
+        let whatsappUrl = "";
+
+        if (phone && phone.replace(/[^0-9]/g, '').length >= 9) {
+            const intlPhone = normalizePhone(phone);
+            whatsappUrl = `https://wa.me/${intlPhone}?text=${encodeURIComponent(message)}`;
+        } else {
+            whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+        }
+
+        window.open(whatsappUrl, '_blank');
+        if (typeof showModernToast === 'function') {
+            showModernToast("Opening WhatsApp 💬", "Payment link and order summary ready to send.", "success");
+        }
+
+        // Background API trigger if available
+        if (phone && phone.replace(/[^0-9]/g, '').length >= 9) {
+            try {
+                sendWhatsAppNotification(phone, checkoutUrl, escrowId, "", {
+                    description: item,
+                    amount: escrow.amount,
+                    sellerName: seller
+                }).catch(waErr => console.warn("Background WhatsApp API call notice:", waErr));
+            } catch (e) {}
+        }
+    } catch (err) {
+        console.error("WhatsApp share error:", err);
+        if (typeof showModernToast === 'function') {
+            showModernToast("WhatsApp Share Failed", err.message || "Could not prepare WhatsApp share.", "error");
+        }
     }
 };
 
@@ -2258,4 +2451,88 @@ window.copyWaCommand = function() {
         }
     });
 };
+
+// Notify Buyer Modal Interactions (SMS & WhatsApp)
+const notifyBuyerForm = document.getElementById('notify-buyer-form');
+const closeNotifyModalBtn = document.getElementById('close-notify-modal');
+const btnNotifyWhatsAppModal = document.getElementById('btn-notify-whatsapp-modal');
+
+if (closeNotifyModalBtn) {
+    closeNotifyModalBtn.addEventListener('click', () => {
+        window.closeNotifyModal();
+    });
+}
+
+if (notifyBuyerForm) {
+    notifyBuyerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const escrowId = document.getElementById('notify-escrow-id').value;
+        const phone = document.getElementById('notify-buyer-phone').value.trim();
+        const btn = document.getElementById('btn-send-notify-sms');
+        const origHtml = btn ? btn.innerHTML : '';
+
+        const cleanDigits = phone.replace(/[^0-9]/g, '');
+        if (cleanDigits.length < 9) {
+            if (typeof showModernToast === 'function') {
+                showModernToast("Invalid Phone", "Please enter a valid Ghana phone number (e.g. 0244123456).", "warning");
+            } else {
+                alert("Please enter a valid Ghana phone number.");
+            }
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Sending SMS...';
+        }
+
+        try {
+            await updateDoc(doc(db, "escrows", escrowId), { buyerPhone: phone });
+            let escrow = allLoadedSellerEscrows.find(e => e.id === escrowId);
+            if (escrow) escrow.buyerPhone = phone;
+
+            const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
+            const smsDetails = {
+                description: escrow ? (escrow.description || escrow.productName) : "Order #" + escrowId.substring(0, 8),
+                amount: escrow ? (escrow.amount || escrow.totalAmount) : 0,
+                sellerName: escrow ? escrow.sellerName : (currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink Seller")
+            };
+
+            await sendSMSNotification(phone, checkoutUrl, escrowId, "", smsDetails);
+            if (typeof showModernToast === 'function') {
+                showModernToast("SMS Sent! 📱", `Payment link successfully sent to ${phone}.`, "success");
+            }
+            window.closeNotifyModal();
+        } catch (err) {
+            console.error("SMS notification modal error:", err);
+            if (typeof showModernToast === 'function') {
+                showModernToast("Notification Failed", err.message || "Failed to send SMS.", "error");
+            }
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        }
+    });
+}
+
+if (btnNotifyWhatsAppModal) {
+    btnNotifyWhatsAppModal.addEventListener('click', async () => {
+        const escrowId = document.getElementById('notify-escrow-id').value;
+        const phone = document.getElementById('notify-buyer-phone').value.trim();
+        if (phone && phone.replace(/[^0-9]/g, '').length >= 9) {
+            try {
+                await updateDoc(doc(db, "escrows", escrowId), { buyerPhone: phone });
+                let escrow = allLoadedSellerEscrows.find(e => e.id === escrowId);
+                if (escrow) escrow.buyerPhone = phone;
+            } catch (e) {
+                console.warn("Could not save phone to escrow:", e);
+            }
+        }
+        window.closeNotifyModal();
+        window.shareEscrowViaWhatsApp(escrowId);
+    });
+}
+
 
