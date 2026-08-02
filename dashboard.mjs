@@ -158,16 +158,16 @@ onAuthStateChanged(auth, async (user) => {
                 const profileName = document.getElementById('profile-name');
                 const profilePhone = document.getElementById('profile-phone');
                 const profileEmail = document.getElementById('profile-email');
-                const verificationEmailText = document.getElementById('verification-email-text');
                 if (profileEmail) profileEmail.value = data.email || user.email || '';
-                if (verificationEmailText) verificationEmailText.textContent = user.email;
                 if (profileName && document.activeElement !== profileName) profileName.value = data.fullName || '';
-                if (profilePhone && document.activeElement !== profilePhone) profilePhone.value = data.phone || pickUserPhone(data) || '';
+                const userPhone = (data.phone || pickUserPhone(data) || '').trim();
+                if (profilePhone && document.activeElement !== profilePhone) profilePhone.value = userPhone;
 
                 // Sync phone verification state
                 isPhoneVerified = data.phoneVerified === true;
-                verifiedPhone = isPhoneVerified ? (data.phone || pickUserPhone(data) || '').trim() : '';
+                verifiedPhone = isPhoneVerified ? userPhone : '';
                 updatePhoneBadgeUI();
+                updateVerificationOverviewUI(data.email || user.email, userPhone, isPhoneVerified);
 
                 if (data.photoURL) {
                     const sidebarAvatar = document.getElementById('sidebar-avatar');
@@ -746,6 +746,47 @@ document.getElementById('avatar-upload-input')?.addEventListener('change', async
 // -------------------------------------------------------------
 // Phone Verification & Profile Handlers
 // -------------------------------------------------------------
+function arePhonesEquivalent(p1, p2) {
+    if (!p1 || !p2) return false;
+    const digits1 = String(p1).replace(/[^0-9]/g, '');
+    const digits2 = String(p2).replace(/[^0-9]/g, '');
+    if (!digits1 || !digits2) return false;
+    if (digits1 === digits2) return true;
+    const suffix1 = digits1.length > 9 ? digits1.slice(-9) : digits1;
+    const suffix2 = digits2.length > 9 ? digits2.slice(-9) : digits2;
+    return suffix1.length === 9 && suffix1 === suffix2;
+}
+
+function updateVerificationOverviewUI(userEmail, userPhone, isVerified) {
+    const verificationEmailText = document.getElementById('verification-email-text');
+    const statusEmail = document.getElementById('status-email');
+    const verificationPhoneText = document.getElementById('verification-phone-text');
+    const statusPhone = document.getElementById('status-phone');
+
+    if (verificationEmailText && userEmail) {
+        verificationEmailText.textContent = userEmail;
+    }
+    if (statusEmail) {
+        statusEmail.textContent = 'Verified';
+        statusEmail.style.color = '#22C55E';
+    }
+
+    const cleanPhone = (userPhone || '').trim();
+    if (verificationPhoneText) {
+        verificationPhoneText.textContent = cleanPhone || '*** *** ****';
+    }
+
+    if (statusPhone) {
+        if (isVerified && cleanPhone) {
+            statusPhone.textContent = 'Verified';
+            statusPhone.style.color = '#22C55E';
+        } else {
+            statusPhone.textContent = 'Pending';
+            statusPhone.style.color = '#F59E0B';
+        }
+    }
+}
+
 function updatePhoneBadgeUI(currentInputVal) {
     const profilePhone = document.getElementById('profile-phone');
     const rawVal = (currentInputVal !== undefined ? currentInputVal : (profilePhone ? profilePhone.value : '')).trim();
@@ -760,7 +801,9 @@ function updatePhoneBadgeUI(currentInputVal) {
         return;
     }
 
-    if (isPhoneVerified && rawVal === verifiedPhone) {
+    const isMatch = isPhoneVerified && (rawVal === verifiedPhone || arePhonesEquivalent(rawVal, verifiedPhone));
+
+    if (isMatch) {
         if (verifiedBadge) verifiedBadge.style.display = 'inline-flex';
         if (unverifiedBadge) unverifiedBadge.style.display = 'none';
         if (verifyBtn) verifyBtn.style.display = 'none';
@@ -934,6 +977,7 @@ async function verifySubmittedOtp(enteredOtp, submitBtn, errorElement, inputElem
         isPhoneVerified = true;
         verifiedPhone = pendingPhoneVerification.phone;
         updatePhoneBadgeUI();
+        updateVerificationOverviewUI(currentUser.email, verifiedPhone, true);
 
         if (inlineOtpSection) inlineOtpSection.style.display = 'none';
         if (phoneVerifyModal) phoneVerifyModal.classList.add('hidden');
@@ -1062,13 +1106,14 @@ document.getElementById('btn-save-profile')?.addEventListener('click', async () 
             phone: phone
         };
         // If phone changed from the verified number, mark as unverified
-        if (isPhoneVerified && phone !== verifiedPhone) {
+        if (isPhoneVerified && !arePhonesEquivalent(phone, verifiedPhone)) {
             updateData.phoneVerified = false;
             isPhoneVerified = false;
             verifiedPhone = '';
         }
         await updateDoc(doc(db, "users", currentUser.uid), updateData);
         updatePhoneBadgeUI(phone);
+        updateVerificationOverviewUI(currentUser.email, phone, isPhoneVerified);
         btn.textContent = 'Saved ✓';
         setTimeout(() => { btn.textContent = 'Save Profile'; btn.disabled = false; }, 1500);
     } catch (error) {
