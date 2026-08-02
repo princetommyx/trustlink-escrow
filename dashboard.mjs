@@ -957,7 +957,7 @@ if (formNewEscrow) {
                 name: currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink User"
             };
 
-            const buyerEmail = document.getElementById('buyer-email') ? document.getElementById('buyer-email').value : "";
+            const buyerEmail = document.getElementById('buyer-email') ? document.getElementById('buyer-email').value.trim() : "";
             const buyerPhoneInput = document.getElementById('buyer-phone');
 
             // Snapshot the platform fee rate at creation time so later changes
