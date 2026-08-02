@@ -469,13 +469,14 @@ function loadEscrows() {
                     statusUI = `<span style="background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">DISPUTED</span>`;
                 }
 
+                const formattedAmount = Number(data.amount || data.totalAmount || data.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 sellerEscrowsContainer.innerHTML += `
                     <div class="order-ledger-row">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <span style="font-weight: 700; color: #60A5FA;">${escapeHtml(data.description)} - #${escrowId.substring(0, 8).toUpperCase()}</span>
+                            <span style="font-weight: 700; color: #0F172A; font-size: 1rem;">${escapeHtml(data.description || data.productName || 'Order')} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
                         </div>
-                        <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}${data.deliveryDate ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDate)}` : ``}</p>
+                        <p style="margin: 0 0 1rem 0; color: #64748B; font-size: 0.95rem;"><strong>Value:</strong> GH₵ ${formattedAmount}${data.deliveryDate ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDate)}` : ``}</p>
                         ${actionBtn}
                     </div>
                 `;
@@ -547,13 +548,14 @@ function loadEscrows() {
                     statusUI = `<span style="background-color: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">DISPUTED</span>`;
                 }
 
+                const buyerAmount = Number(data.amount || data.totalAmount || data.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 buyerEscrowsContainer.innerHTML += `
                     <div class="order-ledger-row">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <span style="font-weight: 700; color: #60A5FA;">${escapeHtml(data.description)} - #${escrowId.substring(0, 8).toUpperCase()}</span>
+                            <span style="font-weight: 700; color: #0F172A; font-size: 1rem;">${escapeHtml(data.description || data.productName || 'Order')} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
                         </div>
-                        <p style="margin: 0 0 1rem 0; color: var(--text-muted);"><strong>Value:</strong> GH₵ ${parseFloat(data.amount).toFixed(2)}${data.deliveryDate ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDate)}` : ``}</p>
+                        <p style="margin: 0 0 1rem 0; color: #64748B; font-size: 0.95rem;"><strong>Value:</strong> GH₵ ${buyerAmount}${data.deliveryDate ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDate)}` : ``}</p>
                         ${actionBtn}
                     </div>
                 `;

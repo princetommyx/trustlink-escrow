@@ -331,27 +331,37 @@ body {
 
 .view-toggles {
     display: inline-flex;
+    align-items: center;
     width: fit-content;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 8px;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    border-radius: 9999px;
     padding: 4px;
+    gap: 4px;
 }
 
 .toggle-btn {
     background: transparent;
     border: none;
-    color: var(--text-muted);
-    padding: 8px 16px;
-    border-radius: 6px;
+    color: #64748B;
+    padding: 8px 20px;
+    border-radius: 9999px;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.toggle-btn:hover {
+    color: #0F172A;
 }
 
 .toggle-btn.active {
-    background: var(--surface-color);
-    color: var(--text-main);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    background: #0F172A;
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.16);
 }
 
 .portal-card {
