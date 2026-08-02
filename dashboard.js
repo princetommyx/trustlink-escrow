@@ -292,15 +292,70 @@ function updateOverviewStats() {
     const notifList = document.getElementById('notif-list');
     if (notifList) {
         if (recentActivities.length === 0) {
-            notifList.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+            notifList.innerHTML = `
+                <div class="notif-empty">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px; color: #94A3B8; margin-bottom: 4px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                    </svg>
+                    <span>No notifications yet</span>
+                </div>
+            `;
         } else {
             notifList.innerHTML = '';
-            recentActivities.slice(0, 6).forEach(act => {
+            recentActivities.slice(0, 8).forEach(act => {
+                let iconBg = '#EFF6FF';
+                let iconColor = '#2563EB';
+                let iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                let statusLabel = 'Pending';
+                let statusBadgeColor = '#D97706';
+                let statusBadgeBg = '#FEF3C7';
+
+                if (act.status === 'COMPLETED') {
+                    iconBg = '#ECFDF5';
+                    iconColor = '#10B981';
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                    statusLabel = 'Completed';
+                    statusBadgeColor = '#059669';
+                    statusBadgeBg = '#D1FAE5';
+                } else if (act.status === 'DISPATCHED') {
+                    iconBg = '#F5F3FF';
+                    iconColor = '#8B5CF6';
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.25V3.75A1.125 1.125 0 0013.125 2.625h-7.5A1.125 1.125 0 004.5 3.75v10.5c0 .621.504 1.125 1.125 1.125h.375" /></svg>`;
+                    statusLabel = 'Dispatched';
+                    statusBadgeColor = '#7C3AED';
+                    statusBadgeBg = '#EDE9FE';
+                } else if (act.status === 'FUNDED') {
+                    iconBg = '#EFF6FF';
+                    iconColor = '#3B82F6';
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v.375c0 .621.504 1.125 1.125 1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-10.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V5.25c0-.621.504-1.125 1.125-1.125h16.5c.621 0 1.125.504 1.125 1.125v.75" /></svg>`;
+                    statusLabel = 'Funded';
+                    statusBadgeColor = '#1D4ED8';
+                    statusBadgeBg = '#DBEAFE';
+                } else if (act.status === 'CANCELED' || act.status === 'DISPUTED') {
+                    iconBg = '#FEF2F2';
+                    iconColor = '#EF4444';
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>`;
+                    statusLabel = act.status === 'DISPUTED' ? 'Disputed' : 'Cancelled';
+                    statusBadgeColor = '#DC2626';
+                    statusBadgeBg = '#FEE2E2';
+                }
+
+                const formattedTime = new Date(act.time).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                const formattedAmount = act.amount ? `GH₵ ${Number(act.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : act.description;
+
                 notifList.innerHTML += `
                     <div class="notif-item">
-                        <h5>${act.title}</h5>
-                        <p>${act.description}</p>
-                        <p style="font-size: 0.7rem; margin-top: 4px;">${new Date(act.time).toLocaleString()}</p>
+                        <div class="notif-icon-box" style="background: ${iconBg}; color: ${iconColor};">
+                            ${iconSvg}
+                        </div>
+                        <div class="notif-body">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                <h5>${escapeHtml(act.title)}</h5>
+                                <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: ${statusBadgeBg}; color: ${statusBadgeColor};">${statusLabel}</span>
+                            </div>
+                            <p style="font-weight: 600; color: #0F172A; font-size: 0.85rem;">${escapeHtml(formattedAmount)}</p>
+                            <div class="notif-time">${formattedTime}</div>
+                        </div>
                     </div>
                 `;
             });
@@ -390,9 +445,10 @@ function loadEscrows() {
                     recentActivities.push({
                         type: 'seller',
                         time: data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now(),
-                        title: data.buyerEmail ? data.buyerEmail.split('@')[0] : 'Escrow Deposit',
+                        title: data.productName || data.description || (data.buyerEmail ? `Order: ${data.buyerEmail.split('@')[0]}` : (data.buyerPhone ? `Order: ${data.buyerPhone}` : 'Escrow Deposit')),
                         status: data.status,
-                        description: `GH₵ ${data.amount}` // Just amount for sleek UI
+                        amount: data.amount,
+                        description: `GH₵ ${Number(data.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     });
                 }
                 
@@ -462,9 +518,10 @@ function loadEscrows() {
                     recentActivities.push({
                         type: 'buyer',
                         time: data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now(),
-                        title: data.sellerEmail ? data.sellerEmail.split('@')[0] : 'Escrow Payment',
+                        title: data.productName || data.description || (data.sellerEmail ? `Order: ${data.sellerEmail.split('@')[0]}` : 'Escrow Payment'),
                         status: data.status,
-                        description: `GH₵ ${data.amount}` // Just amount for sleek UI
+                        amount: data.amount,
+                        description: `GH₵ ${Number(data.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     });
                 }
                 

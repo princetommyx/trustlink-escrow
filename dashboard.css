@@ -737,61 +737,135 @@ input[type=number] {
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    background: var(--danger);
-    border: 2px solid var(--bg-color);
+    background: #EF4444;
+    border: 2px solid #FFFFFF;
 }
 
 .notif-dropdown {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 12px);
     right: 0;
-    width: 320px;
-    max-width: 85vw;
-    background: rgba(10, 15, 28, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    z-index: 200;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
+    box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.18), 0 4px 16px -2px rgba(15, 23, 42, 0.08);
+    z-index: 500;
     overflow: hidden;
+    animation: notifSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes notifSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .notif-header {
     padding: 14px 18px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--text-main);
+    font-weight: 700;
+    font-size: 0.92rem;
+    border-bottom: 1px solid #F1F5F9;
+    color: #0F172A;
+    background: #F8FAFC;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notif-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #0F172A;
+    font-weight: 700;
+}
+
+.notif-list-container {
+    max-height: 380px;
+    overflow-y: auto;
 }
 
 .notif-item {
-    padding: 12px 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 14px 18px;
+    border-bottom: 1px solid #F1F5F9;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.15s ease;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    text-align: left;
 }
 
-.notif-item:hover { background: rgba(255, 255, 255, 0.05); }
-.notif-item:last-child { border-bottom: none; }
-
-.notif-item h5 {
-    margin: 0 0 4px;
-    font-size: 0.85rem;
-    color: var(--text-main);
+.notif-item:hover {
+    background: #F8FAFC;
 }
 
-.notif-item p {
+.notif-item:active {
+    background: #F1F5F9;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.notif-icon-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.notif-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.notif-body h5 {
     margin: 0;
-    font-size: 0.8rem;
-    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #0F172A;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.notif-body p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.4;
+}
+
+.notif-body .notif-time {
+    font-size: 0.72rem;
+    color: #94A3B8;
+    margin-top: 4px;
+    font-weight: 500;
 }
 
 .notif-empty {
-    padding: 24px 18px;
+    padding: 36px 20px;
     text-align: center;
-    color: var(--text-muted);
-    font-size: 0.85rem;
+    color: #64748B;
+    font-size: 0.88rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 /* White Theme Overrides */
@@ -845,10 +919,12 @@ input[type=number] {
     
     .notif-dropdown {
         position: fixed;
-        top: 70px;
-        right: 5vw;
-        width: 90vw;
-        max-width: 90vw;
+        top: 75px;
+        left: 16px;
+        right: 16px;
+        width: auto;
+        max-width: none;
+        box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
     }
     
     /* Off-canvas Sidebar for Mobile */
