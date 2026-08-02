@@ -628,10 +628,25 @@
                             <input type="email" id="profile-email" disabled style="opacity: 0.6;">
                         </div>
                         <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="tel" id="profile-phone" placeholder="e.g. 0551234567">
-                            <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Used for SMS
-                                alerts: payment received, delivery confirmed, and withdrawal updates.</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label style="margin-bottom: 0;">Phone Number</label>
+                                <div id="phone-status-wrapper">
+                                    <span id="phone-verified-badge" class="badge-status" style="display: none; background: rgba(16, 185, 129, 0.1); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; align-items: center; gap: 4px;">
+                                        <svg style="width: 12px; height: 12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        Verified
+                                    </span>
+                                    <span id="phone-unverified-badge" class="badge-status" style="display: none; background: rgba(245, 158, 11, 0.1); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.25); font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; font-weight: 600;">
+                                        Unverified
+                                    </span>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="tel" id="profile-phone" placeholder="e.g. 0551234567" style="flex: 1;">
+                                <button type="button" id="btn-verify-phone-trigger" class="btn btn-outline" style="display: none; white-space: nowrap; border: 1px solid #10B981; color: #10B981; background: #FFFFFF; font-weight: 600; padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                                    Verify Phone
+                                </button>
+                            </div>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; display: block;">Used for SMS alerts: payment received, delivery confirmed, and withdrawal updates.</span>
                         </div>
                         <button class="btn btn-primary" id="btn-save-profile"
                             style="margin-top: 8px; max-width: 200px;">Save Profile</button>
@@ -1045,6 +1060,41 @@
                 <div class="modal-actions" style="margin-top: 0; display: flex; flex-direction: column; gap: 12px;">
                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; border-radius: 12px; font-weight: 600; font-size: 1rem; background: #111827;">Request Withdrawal</button>
                     <button type="button" class="btn btn-outline" id="btn-cancel-withdraw" style="width: 100%; padding: 16px; border-radius: 12px; font-weight: 600; font-size: 1rem; border: 1px solid #E2E8F0; color: #475569; background: #FFFFFF; cursor: pointer; transition: background 0.2s;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Phone Verification Modal -->
+    <div id="phone-verify-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-content-light" style="max-width: 440px; padding: 32px; text-align: center;">
+            <div class="modal-header" style="margin-bottom: 16px; justify-content: flex-end;">
+                <button id="close-phone-verify-modal" type="button" class="btn-icon" style="background: #F1F5F9; border-radius: 50%; padding: 8px; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <div style="width: 64px; height: 64px; margin: 0 auto 16px; background: rgba(16, 185, 129, 0.1); color: #10B981; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 32px; height: 32px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>
+            </div>
+            
+            <h2 style="font-size: 1.4rem; font-weight: 700; color: #111827; margin-bottom: 8px;">Verify Phone Number</h2>
+            <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 24px; line-height: 1.5;">
+                We sent a 4-digit verification code via SMS to <strong id="verify-modal-phone" style="color: #111827;"></strong>
+            </p>
+
+            <form id="phone-otp-form">
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="phone-otp-input" placeholder="••••" maxlength="4" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{4}" required style="text-align: center; font-size: 1.8rem; font-weight: 700; letter-spacing: 10px; padding: 14px; border-radius: 12px; border: 2px solid #E2E8F0; background: #F8FAFC; color: #111827; width: 100%; box-sizing: border-box; font-family: monospace;">
+                    <div id="phone-otp-error" style="color: #EF4444; font-size: 0.85rem; margin-top: 8px; font-weight: 500; display: none;">Invalid verification code. Please try again.</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="btn-submit-phone-otp" style="width: 100%; padding: 14px; font-weight: 600; font-size: 1rem; border-radius: 10px; margin-bottom: 16px; background: #111827; color: white;">Verify Code</button>
+
+                <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.85rem; color: #64748B;">
+                    <span>Didn't receive code?</span>
+                    <button type="button" id="btn-resend-phone-otp" style="background: none; border: none; color: #3B82F6; font-weight: 600; cursor: pointer; padding: 0; font-size: 0.85rem;">Resend Code</button>
+                    <span id="resend-timer" style="color: #94A3B8; display: none;">(in <span id="resend-countdown">30</span>s)</span>
                 </div>
             </form>
         </div>

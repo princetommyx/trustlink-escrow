@@ -2,10 +2,14 @@ import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone } from "./moolre-service.js";
+import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone, executeMoolrePayout, sendMoolreOTP } from "./moolre-service.js";
 
 let currentUser = null;
 let currentBalance = 0;
+let isPhoneVerified = false;
+let verifiedPhone = "";
+let pendingPhoneVerification = null;
+let resendInterval = null;
 
 const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
@@ -159,6 +163,11 @@ onAuthStateChanged(auth, async (user) => {
                 if (verificationEmailText) verificationEmailText.textContent = user.email;
                 if (profileName && document.activeElement !== profileName) profileName.value = data.fullName || '';
                 if (profilePhone && document.activeElement !== profilePhone) profilePhone.value = data.phone || pickUserPhone(data) || '';
+
+                // Sync phone verification state
+                isPhoneVerified = data.phoneVerified === true;
+                verifiedPhone = isPhoneVerified ? (data.phone || pickUserPhone(data) || '').trim() : '';
+                updatePhoneBadgeUI();
 
                 if (data.photoURL) {
                     const sidebarAvatar = document.getElementById('sidebar-avatar');
@@ -677,6 +686,220 @@ document.getElementById('avatar-upload-input')?.addEventListener('change', async
     }
 });
 
+// -------------------------------------------------------------
+// Phone Verification & Profile Handlers
+// -------------------------------------------------------------
+function updatePhoneBadgeUI(currentInputVal) {
+    const profilePhone = document.getElementById('profile-phone');
+    const rawVal = (currentInputVal !== undefined ? currentInputVal : (profilePhone ? profilePhone.value : '')).trim();
+    const verifiedBadge = document.getElementById('phone-verified-badge');
+    const unverifiedBadge = document.getElementById('phone-unverified-badge');
+    const verifyBtn = document.getElementById('btn-verify-phone-trigger');
+
+    if (!rawVal) {
+        if (verifiedBadge) verifiedBadge.style.display = 'none';
+        if (unverifiedBadge) unverifiedBadge.style.display = 'none';
+        if (verifyBtn) verifyBtn.style.display = 'none';
+        return;
+    }
+
+    if (isPhoneVerified && rawVal === verifiedPhone) {
+        if (verifiedBadge) verifiedBadge.style.display = 'inline-flex';
+        if (unverifiedBadge) unverifiedBadge.style.display = 'none';
+        if (verifyBtn) verifyBtn.style.display = 'none';
+    } else {
+        if (verifiedBadge) verifiedBadge.style.display = 'none';
+        if (unverifiedBadge) unverifiedBadge.style.display = 'inline-flex';
+        if (verifyBtn) verifyBtn.style.display = 'inline-block';
+    }
+}
+
+document.getElementById('profile-phone')?.addEventListener('input', (e) => {
+    updatePhoneBadgeUI(e.target.value);
+});
+
+const phoneVerifyModal = document.getElementById('phone-verify-modal');
+const closePhoneVerifyModal = document.getElementById('close-phone-verify-modal');
+const phoneOtpForm = document.getElementById('phone-otp-form');
+const phoneOtpInput = document.getElementById('phone-otp-input');
+const phoneOtpError = document.getElementById('phone-otp-error');
+const verifyModalPhone = document.getElementById('verify-modal-phone');
+const btnResendPhoneOtp = document.getElementById('btn-resend-phone-otp');
+const resendTimer = document.getElementById('resend-timer');
+const resendCountdown = document.getElementById('resend-countdown');
+
+function startResendCountdown() {
+    if (resendInterval) clearInterval(resendInterval);
+    let secondsLeft = 30;
+    if (btnResendPhoneOtp) btnResendPhoneOtp.style.display = 'none';
+    if (resendTimer) resendTimer.style.display = 'inline';
+    if (resendCountdown) resendCountdown.textContent = secondsLeft;
+
+    resendInterval = setInterval(() => {
+        secondsLeft--;
+        if (resendCountdown) resendCountdown.textContent = secondsLeft;
+        if (secondsLeft <= 0) {
+            clearInterval(resendInterval);
+            if (resendTimer) resendTimer.style.display = 'none';
+            if (btnResendPhoneOtp) {
+                btnResendPhoneOtp.style.display = 'inline';
+                btnResendPhoneOtp.disabled = false;
+            }
+        }
+    }, 1000);
+}
+
+document.getElementById('btn-verify-phone-trigger')?.addEventListener('click', async () => {
+    const phoneInput = document.getElementById('profile-phone');
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+    const cleanDigits = phone.replace(/[^0-9]/g, '');
+
+    if (!phone || cleanDigits.length < 9) {
+        if (typeof showModernToast === 'function') {
+            showModernToast("Invalid Phone Number", "Please enter a valid phone number (e.g., 0551234567) to verify.", "warning");
+        } else {
+            alert("Please enter a valid phone number to verify.");
+        }
+        if (phoneInput) phoneInput.focus();
+        return;
+    }
+
+    const triggerBtn = document.getElementById('btn-verify-phone-trigger');
+    const originalText = triggerBtn.textContent;
+    triggerBtn.disabled = true;
+    triggerBtn.textContent = 'Sending SMS...';
+
+    const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+    pendingPhoneVerification = {
+        phone: phone,
+        otp: generatedOtp,
+        timestamp: Date.now()
+    };
+
+    try {
+        console.log(`[PHONE VERIFICATION] Sending OTP ${generatedOtp} to ${phone}`);
+        await sendMoolreOTP(phone, generatedOtp);
+        
+        if (verifyModalPhone) verifyModalPhone.textContent = phone;
+        if (phoneOtpInput) {
+            phoneOtpInput.value = '';
+            phoneOtpInput.style.borderColor = '#E2E8F0';
+        }
+        if (phoneOtpError) phoneOtpError.style.display = 'none';
+        
+        if (phoneVerifyModal) {
+            phoneVerifyModal.classList.remove('hidden');
+            if (typeof gsap !== 'undefined') {
+                gsap.fromTo(phoneVerifyModal.querySelector('.modal-content'), 
+                    { scale: 0.9, opacity: 0, y: 20 },
+                    { scale: 1, opacity: 1, y: 0, duration: 0.3, ease: 'back.out(1.7)' }
+                );
+            }
+        }
+        if (phoneOtpInput) setTimeout(() => phoneOtpInput.focus(), 200);
+        
+        startResendCountdown();
+        if (typeof showModernToast === 'function') {
+            showModernToast("Code Sent", `A 4-digit verification code was sent to ${phone}`, "info");
+        }
+    } catch (error) {
+        console.error("Failed to send OTP:", error);
+        if (typeof showModernToast === 'function') {
+            showModernToast("SMS Failed", "Could not send verification SMS. Please try again.", "error");
+        } else {
+            alert("Could not send verification SMS: " + error.message);
+        }
+    } finally {
+        triggerBtn.disabled = false;
+        triggerBtn.textContent = originalText;
+    }
+});
+
+closePhoneVerifyModal?.addEventListener('click', () => {
+    if (phoneVerifyModal) phoneVerifyModal.classList.add('hidden');
+    if (resendInterval) clearInterval(resendInterval);
+});
+
+btnResendPhoneOtp?.addEventListener('click', async () => {
+    if (!pendingPhoneVerification) return;
+    
+    btnResendPhoneOtp.disabled = true;
+    btnResendPhoneOtp.textContent = 'Sending...';
+
+    const newOtp = Math.floor(1000 + Math.random() * 9000).toString();
+    pendingPhoneVerification.otp = newOtp;
+
+    try {
+        await sendMoolreOTP(pendingPhoneVerification.phone, newOtp);
+        if (typeof showModernToast === 'function') {
+            showModernToast("Code Resent", `A new 4-digit code was sent to ${pendingPhoneVerification.phone}`, "info");
+        }
+        startResendCountdown();
+    } catch (error) {
+        console.error("Resend error:", error);
+        if (typeof showModernToast === 'function') {
+            showModernToast("Failed to resend code", error.message, "error");
+        }
+    } finally {
+        btnResendPhoneOtp.textContent = 'Resend Code';
+    }
+});
+
+phoneOtpForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser || !pendingPhoneVerification) return;
+
+    const enteredOtp = (phoneOtpInput ? phoneOtpInput.value.trim() : '');
+    const submitBtn = document.getElementById('btn-submit-phone-otp');
+
+    if (enteredOtp !== pendingPhoneVerification.otp) {
+        if (phoneOtpError) {
+            phoneOtpError.textContent = "Invalid verification code. Please check your SMS and try again.";
+            phoneOtpError.style.display = 'block';
+        }
+        if (phoneOtpInput) {
+            phoneOtpInput.style.borderColor = '#EF4444';
+            phoneOtpInput.focus();
+        }
+        return;
+    }
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying...';
+    }
+
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), {
+            phone: pendingPhoneVerification.phone,
+            phoneVerified: true,
+            phoneVerifiedAt: serverTimestamp()
+        });
+
+        isPhoneVerified = true;
+        verifiedPhone = pendingPhoneVerification.phone;
+        updatePhoneBadgeUI();
+
+        if (phoneVerifyModal) phoneVerifyModal.classList.add('hidden');
+        if (resendInterval) clearInterval(resendInterval);
+        
+        if (typeof showModernToast === 'function') {
+            showModernToast("Phone Verified! 🎉", "Your phone number has been verified successfully.", "success");
+        }
+    } catch (error) {
+        console.error("Error saving phone verification:", error);
+        if (phoneOtpError) {
+            phoneOtpError.textContent = "Failed to save verification: " + error.message;
+            phoneOtpError.style.display = 'block';
+        }
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify Code';
+        }
+    }
+});
+
 document.getElementById('btn-save-profile')?.addEventListener('click', async () => {
     if (!currentUser) return;
     const btn = document.getElementById('btn-save-profile');
@@ -695,10 +918,18 @@ document.getElementById('btn-save-profile')?.addEventListener('click', async () 
     btn.disabled = true;
     btn.textContent = 'Saving...';
     try {
-        await updateDoc(doc(db, "users", currentUser.uid), {
+        const updateData = {
             fullName: name,
             phone: phone
-        });
+        };
+        // If phone changed from the verified number, mark as unverified
+        if (isPhoneVerified && phone !== verifiedPhone) {
+            updateData.phoneVerified = false;
+            isPhoneVerified = false;
+            verifiedPhone = '';
+        }
+        await updateDoc(doc(db, "users", currentUser.uid), updateData);
+        updatePhoneBadgeUI(phone);
         btn.textContent = 'Saved ✓';
         setTimeout(() => { btn.textContent = 'Save Profile'; btn.disabled = false; }, 1500);
     } catch (error) {
