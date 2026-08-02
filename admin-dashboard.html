@@ -60,6 +60,9 @@
                 <a href="#" class="nav-item" data-target="view-approvals">
                     <span class="nav-text" data-short="Payouts" style="color: #64748b;">Payouts</span>
                 </a>
+                <a href="#" class="nav-item" data-target="view-reports" id="nav-item-reports">
+                    <span class="nav-text" data-short="Reports" style="color: #64748b;">Generate Reports 📊</span>
+                </a>
             </nav>
             
             <div class="sidebar-bottom-nav" style="padding: 16px 24px;">
@@ -90,7 +93,7 @@
                         </div>
                     </div>
                     <button id="btn-signout-top" class="btn btn-outline btn-sm" style="margin-left: 8px; border-color: var(--danger); color: var(--danger);">Sign Out</button>
-                    <button class="btn btn-primary btn-sm" style="background: #9333ea; border-color: #9333ea;" onclick="alert('Generate Report')">Generate Report</button>
+                    <button class="btn btn-primary btn-sm" id="btn-topbar-generate-report" style="background: #9333ea; border-color: #9333ea; font-weight: 600; box-shadow: 0 2px 6px rgba(147, 51, 234, 0.25);">Generate Report</button>
                 </div>
             </header>
             
@@ -483,6 +486,145 @@
                                 <tr><td colspan="7" style="text-align: center; color: #64748b;">Loading transactions...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Reports & Analytics Center View -->
+                <div id="view-reports" class="view-section hidden">
+                    <div class="view-header">
+                        <div class="view-header-title-group">
+                            <h2>Reports & Analytics Center</h2>
+                            <p>Generate, preview, filter, and export detailed platform reports on users, commissions, escrows, and disputes.</p>
+                        </div>
+                        <div class="report-export-actions" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                            <button class="btn btn-outline" id="btn-copy-report" style="border-color: #cbd5e1; color: #334155; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.85rem; padding: 9px 14px; border-radius: 8px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>
+                                <span>Copy Data</span>
+                            </button>
+                            <button class="btn btn-outline" id="btn-print-report" style="border-color: #9333ea; color: #9333ea; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.85rem; padding: 9px 14px; border-radius: 8px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-3.323 2.61-6.079 6.03-6.079 3.42 0 6.27 2.756 6.03 6.079M6.72 13.829A6.002 6.002 0 0012 18c2.474 0 4.622-1.498 5.28-3.671M6.72 13.829a6.012 6.012 0 010-3.658M12 18v3.75m0-19.5v3.75" /></svg>
+                                <span>Print / PDF</span>
+                            </button>
+                            <button class="btn btn-primary" id="btn-export-csv" style="background: #9333ea; border-color: #9333ea; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.85rem; padding: 9px 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(147, 51, 234, 0.25);">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                                <span>Export CSV</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Report Category Tabs -->
+                    <div class="report-type-pills">
+                        <button class="report-type-pill active" data-type="commissions">
+                            <span class="report-pill-icon">💰</span>
+                            <span class="report-pill-title">Commissions & Revenue</span>
+                        </button>
+                        <button class="report-type-pill" data-type="users">
+                            <span class="report-pill-icon">👥</span>
+                            <span class="report-pill-title">Users & KYC</span>
+                        </button>
+                        <button class="report-type-pill" data-type="escrows">
+                            <span class="report-pill-icon">📦</span>
+                            <span class="report-pill-title">Escrow Orders</span>
+                        </button>
+                        <button class="report-type-pill" data-type="disputes">
+                            <span class="report-pill-icon">⚖️</span>
+                            <span class="report-pill-title">Disputes & Payouts</span>
+                        </button>
+                    </div>
+
+                    <!-- Filter Control Card -->
+                    <div class="report-filter-card">
+                        <div class="report-filter-grid">
+                            <!-- Date Range Preset -->
+                            <div class="filter-field">
+                                <label>Date Range</label>
+                                <select id="report-date-preset">
+                                    <option value="all">All Time</option>
+                                    <option value="today">Today</option>
+                                    <option value="week" selected>Last 7 Days</option>
+                                    <option value="month">This Month (Last 30 Days)</option>
+                                    <option value="custom">Custom Date Range...</option>
+                                </select>
+                            </div>
+
+                            <!-- Custom Start Date -->
+                            <div class="filter-field hidden" id="report-custom-start-wrap">
+                                <label>Start Date</label>
+                                <input type="date" id="report-start-date">
+                            </div>
+
+                            <!-- Custom End Date -->
+                            <div class="filter-field hidden" id="report-custom-end-wrap">
+                                <label>End Date</label>
+                                <input type="date" id="report-end-date">
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div class="filter-field">
+                                <label id="report-status-label">Status Filter</label>
+                                <select id="report-status-filter">
+                                    <option value="all">All Statuses</option>
+                                </select>
+                            </div>
+
+                            <!-- Search Filter -->
+                            <div class="filter-field" style="grid-column: span 1;">
+                                <label>Search Filter</label>
+                                <div class="search-input-wrapper" style="max-width: 100%;">
+                                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                    </svg>
+                                    <input type="text" id="report-search-input" class="modern-search-input" placeholder="Filter by ID, description, name...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Executive Summary Cards -->
+                    <div class="report-kpi-grid" id="report-kpi-grid">
+                        <div class="report-kpi-card">
+                            <div class="report-kpi-label" id="report-kpi-label-1">Total Commission</div>
+                            <div class="report-kpi-value" style="color: #7e22ce;" id="report-kpi-val-1">GH₵ 0.00</div>
+                            <div class="report-kpi-sub" id="report-kpi-sub-1">Realized + In Escrow</div>
+                        </div>
+                        <div class="report-kpi-card">
+                            <div class="report-kpi-label" id="report-kpi-label-2">Realized Profit</div>
+                            <div class="report-kpi-value" style="color: #10b981;" id="report-kpi-val-2">GH₵ 0.00</div>
+                            <div class="report-kpi-sub" id="report-kpi-sub-2">Completed Escrows</div>
+                        </div>
+                        <div class="report-kpi-card">
+                            <div class="report-kpi-label" id="report-kpi-label-3">Total Volume</div>
+                            <div class="report-kpi-value" style="color: #2563eb;" id="report-kpi-val-3">GH₵ 0.00</div>
+                            <div class="report-kpi-sub" id="report-kpi-sub-3">Gross Transactions</div>
+                        </div>
+                        <div class="report-kpi-card">
+                            <div class="report-kpi-label" id="report-kpi-label-4">Records Count</div>
+                            <div class="report-kpi-value" style="color: #0f172a;" id="report-kpi-val-4">0</div>
+                            <div class="report-kpi-sub" id="report-kpi-sub-4">Filtered entries</div>
+                        </div>
+                    </div>
+
+                    <!-- Live Preview Table Container -->
+                    <div class="portal-card portal-card-white" style="border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; padding: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <div style="padding: 16px 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: #ffffff;">
+                            <div>
+                                <h3 id="report-table-title" style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Commission Revenue Ledger</h3>
+                                <span id="report-table-subtitle" style="font-size: 0.82rem; color: #64748b;">Showing live filtered report results</span>
+                            </div>
+                            <div style="font-size: 0.85rem; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 4px 12px; border-radius: 20px;" id="report-record-count-badge">
+                                0 Records
+                            </div>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="table-modern" style="width: 100%; border-collapse: collapse;">
+                                <thead id="report-table-head">
+                                    <!-- Dynamic Headers based on report type -->
+                                </thead>
+                                <tbody id="report-table-body">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 

@@ -20,11 +20,42 @@ navItems.forEach(item => {
         // Add active to clicked
         item.classList.add('active');
         const targetId = item.getAttribute('data-target');
-        document.getElementById(targetId).classList.remove('hidden');
+        const targetView = document.getElementById(targetId);
+        if (targetView) targetView.classList.remove('hidden');
 
         // Update Title
-        topbarTitle.textContent = item.querySelector('.nav-text').textContent.trim();
+        if (topbarTitle) {
+            topbarTitle.textContent = item.querySelector('.nav-text')?.textContent.trim() || 'Dashboard';
+        }
+
+        if (targetId === 'view-reports') {
+            renderActiveReport();
+        }
     });
+});
+
+// Topbar "Generate Report" Button Handler
+const openReportsView = (reportType = null) => {
+    navItems.forEach(nav => nav.classList.remove('active'));
+    views.forEach(view => view.classList.add('hidden'));
+
+    const reportsNav = document.getElementById('nav-item-reports');
+    if (reportsNav) reportsNav.classList.add('active');
+
+    const reportsView = document.getElementById('view-reports');
+    if (reportsView) reportsView.classList.remove('hidden');
+
+    if (topbarTitle) topbarTitle.textContent = "Reports & Analytics 📊";
+
+    if (reportType) {
+        setReportType(reportType);
+    } else {
+        renderActiveReport();
+    }
+};
+
+document.getElementById('btn-topbar-generate-report')?.addEventListener('click', () => {
+    openReportsView();
 });
 
 // Collapse Sidebar Logic
@@ -372,9 +403,11 @@ const initCharts = () => {
 };
 
 // -------------------------------------------------------------
-// Commission Wallet State & Helpers
+// Commission Wallet & Reports State & Helpers
 // -------------------------------------------------------------
 let allCommissionRecords = [];
+let allRawEscrows = [];
+let allRawTransactions = [];
 let currentCommissionTimeframe = 'all';
 
 const fetchAdminStats = async () => {
@@ -398,6 +431,8 @@ const fetchAdminStats = async () => {
         activityRecords = [];
         let recentTxList = [];
         allCommissionRecords = [];
+        allRawEscrows = [];
+        allRawTransactions = [];
         let totalCommissionAccumulated = 0;
         let realizedCommissionTotal = 0;
 
@@ -413,6 +448,15 @@ const fetchAdminStats = async () => {
             const feeAllocation = data.feeAllocation || 'split';
             const fees = computeFeeSplit(amt, feePercent, feeAllocation);
             const date = toDate(data.createdAt) || new Date();
+
+            allRawEscrows.push({
+                id: doc.id,
+                ...data,
+                normalizedStatus: status,
+                parsedAmount: amt,
+                computedFees: fees,
+                parsedDate: date
+            });
 
             tEscrow += amt;
             if (['funded', 'active', 'dispatched', 'in_escrow', 'pending_confirmation'].includes(status)) {
@@ -435,6 +479,7 @@ const fetchAdminStats = async () => {
                 commStatus = 'IN_ESCROW';
                 isQualifying = true;
                 totalCommissionAccumulated += fees.totalFee;
+                realizedCommissionTotal += fees.totalFee;
             } else if (['canceled', 'cancelled', 'refunded'].includes(status)) {
                 commStatus = 'REFUNDED';
             }
@@ -489,6 +534,16 @@ const fetchAdminStats = async () => {
             const status = normStatus(data.status);
             const type = normStatus(data.type);
             const date = toDate(data.createdAt) || new Date();
+
+            allRawTransactions.push({
+                id: doc.id,
+                ...data,
+                normalizedStatus: status,
+                normalizedType: type,
+                parsedAmount: amt,
+                parsedFee: fee,
+                parsedDate: date
+            });
 
             if (type === 'deposit') {
                 if (status === 'completed') tDep += amt;
@@ -1542,3 +1597,909 @@ if (btnCreateAdmin) {
         }
     });
 }
+
+// ==========================================================================
+// REPORTS & ANALYTICS CENTER ENGINE
+// ==========================================================================
+let currentReportType = 'commissions'; // 'commissions' | 'users' | 'escrows' | 'disputes'
+let currentReportPreset = 'week';
+let currentReportStatus = 'all';
+let currentReportSearch = '';
+
+const showAdminToast = (message, type = 'success') => {
+    let container = document.getElementById('admin-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'admin-toast-container';
+        container.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    const bg = type === 'error' ? '#ef4444' : (type === 'info' ? '#3b82f6' : '#10b981');
+    toast.style.cssText = `
+        background: ${bg};
+        color: #ffffff;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        pointer-events: auto;
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(20px);
+        opacity: 0;
+    `;
+    const icon = type === 'error' ? '⚠️' : (type === 'info' ? 'ℹ️' : '✓');
+    toast.innerHTML = `<span>${icon}</span><span>${escapeHtml(message)}</span>`;
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+    });
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+};
+
+const isDateInRange = (recordDate, preset, customStart, customEnd) => {
+    if (!recordDate) return true;
+    const d = recordDate instanceof Date ? recordDate : toDate(recordDate);
+    if (!d || isNaN(d.getTime())) return true;
+    
+    const now = new Date();
+    
+    if (preset === 'all') return true;
+    
+    if (preset === 'today') {
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        return d >= startOfDay && d <= endOfDay;
+    }
+    
+    if (preset === 'week') {
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return d >= weekAgo;
+    }
+    
+    if (preset === 'month') {
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        return d >= monthAgo;
+    }
+    
+    if (preset === 'custom') {
+        if (customStart) {
+            const start = new Date(customStart + 'T00:00:00');
+            if (!isNaN(start.getTime()) && d < start) return false;
+        }
+        if (customEnd) {
+            const end = new Date(customEnd + 'T23:59:59');
+            if (!isNaN(end.getTime()) && d > end) return false;
+        }
+        return true;
+    }
+    
+    return true;
+};
+
+const updateReportStatusOptions = (type) => {
+    const sel = document.getElementById('report-status-filter');
+    const label = document.getElementById('report-status-label');
+    if (!sel) return;
+    
+    sel.innerHTML = '';
+    
+    if (type === 'commissions') {
+        if (label) label.textContent = 'Commission Status';
+        sel.innerHTML = `
+            <option value="all">All Commissions & Fees</option>
+            <option value="REALIZED">Realized / Profit Only (Completed)</option>
+            <option value="IN_ESCROW">In Escrow (Active Escrows)</option>
+            <option value="REFUNDED">Refunded / Cancelled</option>
+            <option value="escrow">Escrow 2.5% Cut Only</option>
+            <option value="tx_fee">Payout / Deposit Fees Only</option>
+        `;
+    } else if (type === 'users') {
+        if (label) label.textContent = 'Role & Verification';
+        sel.innerHTML = `
+            <option value="all">All Registered Users</option>
+            <option value="verified_email">Verified Email</option>
+            <option value="unverified_email">Unverified Email</option>
+            <option value="admin_roles">Admins & Support</option>
+            <option value="regular_users">Regular Customers</option>
+        `;
+    } else if (type === 'escrows') {
+        if (label) label.textContent = 'Order Status';
+        sel.innerHTML = `
+            <option value="all">All Escrow Orders</option>
+            <option value="created">Created / Awaiting Payment</option>
+            <option value="funded">Funded (In Escrow)</option>
+            <option value="dispatched">Dispatched (In Transit)</option>
+            <option value="completed">Completed & Released</option>
+            <option value="disputed">Under Dispute</option>
+            <option value="canceled">Cancelled / Refunded</option>
+        `;
+    } else if (type === 'disputes') {
+        if (label) label.textContent = 'Case / Payout Status';
+        sel.innerHTML = `
+            <option value="all">All Disputes & Payouts</option>
+            <option value="dispute_active">Active Disputes Only</option>
+            <option value="dispute_resolved">Resolved Disputes</option>
+            <option value="payout_pending">Pending Payout Approvals</option>
+            <option value="payout_completed">Completed Payouts</option>
+        `;
+    }
+    currentReportStatus = 'all';
+};
+
+const setReportType = (type) => {
+    currentReportType = type;
+    document.querySelectorAll('.report-type-pill').forEach(pill => {
+        if (pill.getAttribute('data-type') === type) {
+            pill.classList.add('active');
+        } else {
+            pill.classList.remove('active');
+        }
+    });
+    updateReportStatusOptions(type);
+    renderActiveReport();
+};
+
+let activeReportDataset = [];
+
+const renderActiveReport = () => {
+    const tableHead = document.getElementById('report-table-head');
+    const tableBody = document.getElementById('report-table-body');
+    const titleEl = document.getElementById('report-table-title');
+    const subTitleEl = document.getElementById('report-table-subtitle');
+    const countBadge = document.getElementById('report-record-count-badge');
+    
+    if (!tableHead || !tableBody) return;
+
+    const preset = document.getElementById('report-date-preset')?.value || 'week';
+    const statusVal = document.getElementById('report-status-filter')?.value || 'all';
+    const searchVal = (document.getElementById('report-search-input')?.value || '').trim().toLowerCase();
+    const customStart = document.getElementById('report-start-date')?.value || '';
+    const customEnd = document.getElementById('report-end-date')?.value || '';
+
+    activeReportDataset = [];
+
+    // 1. COMMISSIONS REPORT
+    if (currentReportType === 'commissions') {
+        if (titleEl) titleEl.textContent = "Commission Revenue & Fee Ledger";
+        if (subTitleEl) subTitleEl.textContent = "Comprehensive report of TrustLink accumulated small platform commissions (2.5% escrow cuts & direct gateway fees).";
+
+        tableHead.innerHTML = `
+            <tr>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Reference / ID</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Description / Item</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Order Amount</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Platform Fee (2.5%)</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Buyer Fee</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Seller Fee</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Commission Status</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Date Created</th>
+            </tr>
+        `;
+
+        const filtered = allCommissionRecords.filter(r => {
+            if (!isDateInRange(r.date, preset, customStart, customEnd)) return false;
+            
+            if (statusVal === 'REALIZED' && r.commStatus !== 'REALIZED') return false;
+            if (statusVal === 'IN_ESCROW' && r.commStatus !== 'IN_ESCROW') return false;
+            if (statusVal === 'REFUNDED' && r.commStatus !== 'REFUNDED') return false;
+            if (statusVal === 'escrow' && r.type !== 'escrow') return false;
+            if (statusVal === 'tx_fee' && r.type !== 'tx_fee') return false;
+
+            if (searchVal) {
+                const matchId = (r.id || '').toLowerCase().includes(searchVal);
+                const matchTitle = (r.title || '').toLowerCase().includes(searchVal);
+                const matchBuyer = (r.buyer || '').toLowerCase().includes(searchVal);
+                const matchSeller = (r.seller || '').toLowerCase().includes(searchVal);
+                if (!matchId && !matchTitle && !matchBuyer && !matchSeller) return false;
+            }
+            return true;
+        });
+
+        activeReportDataset = filtered;
+
+        // Compute KPIs
+        let totalCommission = 0;
+        let realizedProfit = 0;
+        let totalOrderVolume = 0;
+
+        filtered.forEach(r => {
+            if (r.commStatus === 'REALIZED' || r.commStatus === 'IN_ESCROW') {
+                totalCommission += r.totalFee;
+            }
+            if (r.commStatus === 'REALIZED') {
+                realizedProfit += r.totalFee;
+            }
+            totalOrderVolume += r.amount;
+        });
+
+        // Set KPI Cards
+        document.getElementById('report-kpi-label-1').textContent = 'Total Commission';
+        document.getElementById('report-kpi-val-1').textContent = formatGHS(totalCommission);
+        document.getElementById('report-kpi-val-1').style.color = '#7e22ce';
+        document.getElementById('report-kpi-sub-1').textContent = 'Accumulated in Period';
+
+        document.getElementById('report-kpi-label-2').textContent = 'Realized Profit';
+        document.getElementById('report-kpi-val-2').textContent = formatGHS(realizedProfit);
+        document.getElementById('report-kpi-val-2').style.color = '#10b981';
+        document.getElementById('report-kpi-sub-2').textContent = 'Completed Escrows';
+
+        document.getElementById('report-kpi-label-3').textContent = 'Order Volume (GMV)';
+        document.getElementById('report-kpi-val-3').textContent = formatGHS(totalOrderVolume);
+        document.getElementById('report-kpi-val-3').style.color = '#2563eb';
+        document.getElementById('report-kpi-sub-3').textContent = 'Gross Handled Value';
+
+        document.getElementById('report-kpi-label-4').textContent = 'Filtered Entries';
+        document.getElementById('report-kpi-val-4').textContent = filtered.length.toLocaleString();
+        document.getElementById('report-kpi-val-4').style.color = '#0f172a';
+        document.getElementById('report-kpi-sub-4').textContent = 'Ledger records';
+
+        if (countBadge) countBadge.textContent = `${filtered.length} Record${filtered.length === 1 ? '' : 's'}`;
+
+        if (filtered.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 0.95rem;">No commission records found for the selected filters.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = filtered.map(r => {
+            let statusBadge = '';
+            if (r.commStatus === 'REALIZED') {
+                statusBadge = '<span class="badge badge-success" style="font-size: 0.75rem;">Realized Profit ✓</span>';
+            } else if (r.commStatus === 'IN_ESCROW') {
+                statusBadge = '<span class="badge badge-warning" style="font-size: 0.75rem;">In Escrow</span>';
+            } else if (r.commStatus === 'REFUNDED') {
+                statusBadge = '<span class="badge badge-danger" style="font-size: 0.75rem;">Refunded</span>';
+            } else {
+                statusBadge = '<span class="badge" style="background: #e2e8f0; color: #64748b; font-size: 0.75rem;">Unfunded</span>';
+            }
+
+            const dateStr = r.date ? r.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
+
+            return `
+                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;">
+                    <td style="padding: 12px 16px; font-family: monospace; font-weight: 700; color: #64748b; font-size: 0.85rem;">#${escapeHtml(r.id.slice(0, 8).toUpperCase())}</td>
+                    <td style="padding: 12px 16px;">
+                        <strong style="color: #0f172a; font-size: 0.9rem;">${escapeHtml(r.title)}</strong>
+                        <div style="font-size: 0.78rem; color: #64748b;">${escapeHtml(r.buyer)} ➔ ${escapeHtml(r.seller)}</div>
+                    </td>
+                    <td style="padding: 12px 16px; font-weight: 600; color: #334155;">${formatGHS(r.amount)}</td>
+                    <td style="padding: 12px 16px; font-weight: 700; color: #059669; font-size: 0.95rem;">${formatGHS(r.totalFee)}</td>
+                    <td style="padding: 12px 16px; color: #10b981; font-weight: 600; font-size: 0.85rem;">+${formatGHS(r.buyerFee)}</td>
+                    <td style="padding: 12px 16px; color: #6366f1; font-weight: 600; font-size: 0.85rem;">-${formatGHS(r.sellerFee)}</td>
+                    <td style="padding: 12px 16px;">${statusBadge}</td>
+                    <td style="padding: 12px 16px; font-size: 0.82rem; color: #64748b;">${dateStr}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // 2. USERS REPORT
+    else if (currentReportType === 'users') {
+        if (titleEl) titleEl.textContent = "Platform Users & KYC Report";
+        if (subTitleEl) subTitleEl.textContent = "Directory of registered accounts, identity verification status, contacts, and roles.";
+
+        tableHead.innerHTML = `
+            <tr>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">User / Name</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Email Address</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Phone Contact</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Account Role</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Email Status</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Date Registered</th>
+            </tr>
+        `;
+
+        const filtered = allUsers.filter(u => {
+            const joinedDate = toDate(u.createdAt);
+            if (!isDateInRange(joinedDate, preset, customStart, customEnd)) return false;
+
+            if (statusVal === 'verified_email' && !u.emailVerified) return false;
+            if (statusVal === 'unverified_email' && u.emailVerified) return false;
+            if (statusVal === 'admin_roles' && !(u.role === 'admin' || u.role === 'support')) return false;
+            if (statusVal === 'regular_users' && (u.role === 'admin' || u.role === 'support')) return false;
+
+            if (searchVal) {
+                const matchName = (u.fullName || '').toLowerCase().includes(searchVal);
+                const matchEmail = (u.email || '').toLowerCase().includes(searchVal);
+                const matchPhone = (u.phone || pickUserPhone(u) || '').toLowerCase().includes(searchVal);
+                const matchId = (u.id || '').toLowerCase().includes(searchVal);
+                if (!matchName && !matchEmail && !matchPhone && !matchId) return false;
+            }
+            return true;
+        });
+
+        activeReportDataset = filtered;
+
+        // Compute KPIs
+        let verifiedCount = 0;
+        let staffCount = 0;
+        filtered.forEach(u => {
+            if (u.emailVerified) verifiedCount++;
+            if (u.role === 'admin' || u.role === 'support') staffCount++;
+        });
+
+        document.getElementById('report-kpi-label-1').textContent = 'Total Filtered Users';
+        document.getElementById('report-kpi-val-1').textContent = filtered.length.toLocaleString();
+        document.getElementById('report-kpi-val-1').style.color = '#7e22ce';
+        document.getElementById('report-kpi-sub-1').textContent = 'Matched criteria';
+
+        document.getElementById('report-kpi-label-2').textContent = 'Verified Accounts';
+        document.getElementById('report-kpi-val-2').textContent = verifiedCount.toLocaleString();
+        document.getElementById('report-kpi-val-2').style.color = '#10b981';
+        document.getElementById('report-kpi-sub-2').textContent = `${filtered.length > 0 ? Math.round((verifiedCount / filtered.length) * 100) : 0}% compliance`;
+
+        document.getElementById('report-kpi-label-3').textContent = 'Admins & Staff';
+        document.getElementById('report-kpi-val-3').textContent = staffCount.toLocaleString();
+        document.getElementById('report-kpi-val-3').style.color = '#2563eb';
+        document.getElementById('report-kpi-sub-3').textContent = 'Platform operators';
+
+        document.getElementById('report-kpi-label-4').textContent = 'Unverified Emails';
+        document.getElementById('report-kpi-val-4').textContent = (filtered.length - verifiedCount).toLocaleString();
+        document.getElementById('report-kpi-val-4').style.color = '#f59e0b';
+        document.getElementById('report-kpi-sub-4').textContent = 'Pending verification';
+
+        if (countBadge) countBadge.textContent = `${filtered.length} User${filtered.length === 1 ? '' : 's'}`;
+
+        if (filtered.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 0.95rem;">No user records found matching the filter criteria.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = filtered.map(u => {
+            const email = u.email || 'N/A';
+            const name = u.fullName || email.split('@')[0];
+            const phone = u.phone || pickUserPhone(u) || '—';
+            const joinedDate = toDate(u.createdAt);
+            const dateStr = joinedDate ? joinedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Unknown';
+            const verifiedBadge = u.emailVerified ? 
+                '<span class="badge badge-success" style="font-size: 0.75rem;">Verified ✓</span>' : 
+                '<span class="badge badge-warning" style="font-size: 0.75rem;">Unverified</span>';
+            const roleBadge = (u.role === 'admin' || u.role === 'support') ? 
+                `<span class="badge badge-purple" style="font-size: 0.75rem; text-transform: uppercase;">${escapeHtml(u.role)}</span>` : 
+                '<span class="badge" style="background: #f1f5f9; color: #475569; font-size: 0.75rem;">Customer</span>';
+
+            return `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 16px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: #9333ea; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;">${name.charAt(0).toUpperCase()}</div>
+                            <strong style="color: #0f172a; font-size: 0.9rem;">${escapeHtml(name)}</strong>
+                        </div>
+                    </td>
+                    <td style="padding: 12px 16px; color: #334155; font-size: 0.88rem;">${escapeHtml(email)}</td>
+                    <td style="padding: 12px 16px; font-family: monospace; color: #475569; font-size: 0.88rem;">${escapeHtml(phone)}</td>
+                    <td style="padding: 12px 16px;">${roleBadge}</td>
+                    <td style="padding: 12px 16px;">${verifiedBadge}</td>
+                    <td style="padding: 12px 16px; font-size: 0.82rem; color: #64748b;">${dateStr}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // 3. ESCROWS REPORT
+    else if (currentReportType === 'escrows') {
+        if (titleEl) titleEl.textContent = "Escrow Transactions & Orders Report";
+        if (subTitleEl) subTitleEl.textContent = "Live audit of all escrow contracts created on TrustLink, tracking fulfillment, funding, and release statuses.";
+
+        tableHead.innerHTML = `
+            <tr>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Escrow ID</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Item / Description</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Escrow Value</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Seller</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Buyer</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Current Status</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Created</th>
+            </tr>
+        `;
+
+        const filtered = allRawEscrows.filter(e => {
+            if (!isDateInRange(e.parsedDate, preset, customStart, customEnd)) return false;
+
+            if (statusVal !== 'all') {
+                if (statusVal === 'created' && !['created', 'pending', 'pending_payment'].includes(e.normalizedStatus)) return false;
+                if (statusVal === 'funded' && !['funded', 'active', 'in_escrow', 'pending_confirmation'].includes(e.normalizedStatus)) return false;
+                if (statusVal === 'dispatched' && e.normalizedStatus !== 'dispatched') return false;
+                if (statusVal === 'completed' && !['completed', 'released'].includes(e.normalizedStatus)) return false;
+                if (statusVal === 'disputed' && e.normalizedStatus !== 'disputed') return false;
+                if (statusVal === 'canceled' && !['canceled', 'cancelled', 'refunded'].includes(e.normalizedStatus)) return false;
+            }
+
+            if (searchVal) {
+                const matchId = (e.id || '').toLowerCase().includes(searchVal);
+                const matchItem = (e.item || e.description || '').toLowerCase().includes(searchVal);
+                const matchBuyer = (e.buyerName || e.buyerEmail || e.buyerPhone || '').toLowerCase().includes(searchVal);
+                const matchSeller = (e.sellerName || e.sellerEmail || e.sellerPhone || '').toLowerCase().includes(searchVal);
+                if (!matchId && !matchItem && !matchBuyer && !matchSeller) return false;
+            }
+            return true;
+        });
+
+        activeReportDataset = filtered;
+
+        // Compute KPIs
+        let totalVolume = 0;
+        let completedValue = 0;
+        let inEscrowValue = 0;
+
+        filtered.forEach(e => {
+            totalVolume += e.parsedAmount;
+            if (['completed', 'released'].includes(e.normalizedStatus)) {
+                completedValue += e.parsedAmount;
+            } else if (['funded', 'active', 'dispatched', 'in_escrow', 'pending_confirmation'].includes(e.normalizedStatus)) {
+                inEscrowValue += e.parsedAmount;
+            }
+        });
+
+        document.getElementById('report-kpi-label-1').textContent = 'Gross Escrow Volume';
+        document.getElementById('report-kpi-val-1').textContent = formatGHS(totalVolume);
+        document.getElementById('report-kpi-val-1').style.color = '#7e22ce';
+        document.getElementById('report-kpi-sub-1').textContent = 'Total value in period';
+
+        document.getElementById('report-kpi-label-2').textContent = 'Completed & Released';
+        document.getElementById('report-kpi-val-2').textContent = formatGHS(completedValue);
+        document.getElementById('report-kpi-val-2').style.color = '#10b981';
+        document.getElementById('report-kpi-sub-2').textContent = 'Successfully disbursed';
+
+        document.getElementById('report-kpi-label-3').textContent = 'Currently in Escrow';
+        document.getElementById('report-kpi-val-3').textContent = formatGHS(inEscrowValue);
+        document.getElementById('report-kpi-val-3').style.color = '#2563eb';
+        document.getElementById('report-kpi-sub-3').textContent = 'Safeguarded funds';
+
+        document.getElementById('report-kpi-label-4').textContent = 'Total Orders';
+        document.getElementById('report-kpi-val-4').textContent = filtered.length.toLocaleString();
+        document.getElementById('report-kpi-val-4').style.color = '#0f172a';
+        document.getElementById('report-kpi-sub-4').textContent = 'Escrow contracts';
+
+        if (countBadge) countBadge.textContent = `${filtered.length} Order${filtered.length === 1 ? '' : 's'}`;
+
+        if (filtered.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 0.95rem;">No escrow orders match the filter criteria.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = filtered.map(e => {
+            const dateStr = e.parsedDate ? e.parsedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
+            let badge = '';
+            if (['completed', 'released'].includes(e.normalizedStatus)) {
+                badge = '<span class="badge badge-success" style="font-size: 0.75rem;">Completed ✓</span>';
+            } else if (['funded', 'active', 'in_escrow', 'pending_confirmation'].includes(e.normalizedStatus)) {
+                badge = '<span class="badge badge-warning" style="font-size: 0.75rem;">Funded (In Escrow)</span>';
+            } else if (e.normalizedStatus === 'dispatched') {
+                badge = '<span class="badge badge-purple" style="font-size: 0.75rem;">Dispatched 🚚</span>';
+            } else if (e.normalizedStatus === 'disputed') {
+                badge = '<span class="badge badge-danger" style="font-size: 0.75rem;">Disputed ⚠️</span>';
+            } else if (['canceled', 'cancelled', 'refunded'].includes(e.normalizedStatus)) {
+                badge = '<span class="badge" style="background: #f1f5f9; color: #64748b; font-size: 0.75rem;">Cancelled</span>';
+            } else {
+                badge = '<span class="badge" style="background: #e2e8f0; color: #64748b; font-size: 0.75rem;">Awaiting Payment</span>';
+            }
+
+            return `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 16px; font-family: monospace; font-weight: 700; color: #64748b; font-size: 0.85rem;">#${escapeHtml(e.id.slice(0, 8).toUpperCase())}</td>
+                    <td style="padding: 12px 16px;">
+                        <strong style="color: #0f172a; font-size: 0.9rem;">${escapeHtml(e.item || e.description || 'Escrow Order')}</strong>
+                    </td>
+                    <td style="padding: 12px 16px; font-weight: 700; color: #0f172a; font-size: 0.95rem;">${formatGHS(e.parsedAmount)}</td>
+                    <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">${escapeHtml(e.sellerName || e.sellerEmail || e.sellerPhone || 'Seller')}</td>
+                    <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">${escapeHtml(e.buyerName || e.buyerEmail || e.buyerPhone || 'Buyer')}</td>
+                    <td style="padding: 12px 16px;">${badge}</td>
+                    <td style="padding: 12px 16px; font-size: 0.82rem; color: #64748b;">${dateStr}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // 4. DISPUTES & PAYOUTS REPORT
+    else if (currentReportType === 'disputes') {
+        if (titleEl) titleEl.textContent = "Disputes & Payout Approvals Audit";
+        if (subTitleEl) subTitleEl.textContent = "Audit trail of buyer/seller dispute arbitrations and direct Mobile Money / Bank withdrawal payouts.";
+
+        tableHead.innerHTML = `
+            <tr>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Record Type / ID</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Details / Reason</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Amount</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Beneficiary / Parties</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Status</th>
+                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Logged Date</th>
+            </tr>
+        `;
+
+        // Gather dispute escrows + payout transactions
+        const items = [];
+        allRawEscrows.forEach(e => {
+            if (e.normalizedStatus === 'disputed' || e.disputedAt || e.disputeReason) {
+                items.push({
+                    type: 'Dispute',
+                    id: e.id,
+                    title: e.item || e.description || 'Disputed Escrow Order',
+                    amount: e.parsedAmount,
+                    party: `${e.buyerName || e.buyerPhone || 'Buyer'} vs ${e.sellerName || e.sellerPhone || 'Seller'}`,
+                    status: e.normalizedStatus === 'disputed' ? 'Active Dispute' : 'Resolved',
+                    isPending: e.normalizedStatus === 'disputed',
+                    date: e.parsedDate
+                });
+            }
+        });
+
+        allRawTransactions.forEach(t => {
+            if (t.normalizedType === 'withdrawal') {
+                items.push({
+                    type: 'Payout Request',
+                    id: t.id,
+                    title: `MoMo Payout (${t.momoNumber || t.accountNumber || 'Wallet'})`,
+                    amount: t.parsedAmount,
+                    party: t.accountName || t.userName || t.momoNumber || 'User',
+                    status: t.normalizedStatus === 'pending' ? 'Pending Approval' : (t.normalizedStatus === 'completed' ? 'Approved & Paid' : 'Rejected'),
+                    isPending: t.normalizedStatus === 'pending',
+                    date: t.parsedDate
+                });
+            }
+        });
+
+        items.sort((a, b) => (b.date || 0) - (a.date || 0));
+
+        const filtered = items.filter(it => {
+            if (!isDateInRange(it.date, preset, customStart, customEnd)) return false;
+
+            if (statusVal === 'dispute_active' && (it.type !== 'Dispute' || !it.isPending)) return false;
+            if (statusVal === 'dispute_resolved' && (it.type !== 'Dispute' || it.isPending)) return false;
+            if (statusVal === 'payout_pending' && (it.type !== 'Payout Request' || !it.isPending)) return false;
+            if (statusVal === 'payout_completed' && (it.type !== 'Payout Request' || it.status !== 'Approved & Paid')) return false;
+
+            if (searchVal) {
+                const matchId = (it.id || '').toLowerCase().includes(searchVal);
+                const matchTitle = (it.title || '').toLowerCase().includes(searchVal);
+                const matchParty = (it.party || '').toLowerCase().includes(searchVal);
+                if (!matchId && !matchTitle && !matchParty) return false;
+            }
+            return true;
+        });
+
+        activeReportDataset = filtered;
+
+        // Compute KPIs
+        let pendingDisputes = 0;
+        let pendingPayouts = 0;
+        let totalDisputedAmt = 0;
+
+        filtered.forEach(it => {
+            if (it.type === 'Dispute' && it.isPending) {
+                pendingDisputes++;
+                totalDisputedAmt += it.amount;
+            } else if (it.type === 'Payout Request' && it.isPending) {
+                pendingPayouts++;
+            }
+        });
+
+        document.getElementById('report-kpi-label-1').textContent = 'Active Disputes';
+        document.getElementById('report-kpi-val-1').textContent = pendingDisputes.toString();
+        document.getElementById('report-kpi-val-1').style.color = '#ef4444';
+        document.getElementById('report-kpi-sub-1').textContent = 'Requires arbitration';
+
+        document.getElementById('report-kpi-label-2').textContent = 'Pending Payouts';
+        document.getElementById('report-kpi-val-2').textContent = pendingPayouts.toString();
+        document.getElementById('report-kpi-val-2').style.color = '#f59e0b';
+        document.getElementById('report-kpi-sub-2').textContent = 'Awaiting admin approval';
+
+        document.getElementById('report-kpi-label-3').textContent = 'Active Disputed Value';
+        document.getElementById('report-kpi-val-3').textContent = formatGHS(totalDisputedAmt);
+        document.getElementById('report-kpi-val-3').style.color = '#7e22ce';
+        document.getElementById('report-kpi-sub-3').textContent = 'Held in escrow';
+
+        document.getElementById('report-kpi-label-4').textContent = 'Total Records';
+        document.getElementById('report-kpi-val-4').textContent = filtered.length.toLocaleString();
+        document.getElementById('report-kpi-val-4').style.color = '#0f172a';
+        document.getElementById('report-kpi-sub-4').textContent = 'Cases & payout entries';
+
+        if (countBadge) countBadge.textContent = `${filtered.length} Case${filtered.length === 1 ? '' : 's'}`;
+
+        if (filtered.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 0.95rem;">No disputes or payouts found matching current criteria.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = filtered.map(it => {
+            const dateStr = it.date ? it.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
+            let badge = '';
+            if (it.status === 'Active Dispute') {
+                badge = '<span class="badge badge-danger" style="font-size: 0.75rem;">Dispute Active ⚠️</span>';
+            } else if (it.status === 'Resolved') {
+                badge = '<span class="badge badge-success" style="font-size: 0.75rem;">Resolved ✓</span>';
+            } else if (it.status === 'Pending Approval') {
+                badge = '<span class="badge badge-warning" style="font-size: 0.75rem;">Pending Approval</span>';
+            } else if (it.status === 'Approved & Paid') {
+                badge = '<span class="badge badge-success" style="font-size: 0.75rem;">Disbursed ✓</span>';
+            } else {
+                badge = '<span class="badge" style="background: #f1f5f9; color: #64748b; font-size: 0.75rem;">Declined</span>';
+            }
+
+            return `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 16px;">
+                        <span class="badge ${it.type === 'Dispute' ? 'badge-danger' : 'badge-purple'}" style="font-size: 0.75rem; margin-bottom: 4px; display: inline-block;">${it.type}</span>
+                        <div style="font-family: monospace; font-weight: 700; color: #64748b; font-size: 0.82rem;">#${escapeHtml(it.id.slice(0, 8).toUpperCase())}</div>
+                    </td>
+                    <td style="padding: 12px 16px;">
+                        <strong style="color: #0f172a; font-size: 0.9rem;">${escapeHtml(it.title)}</strong>
+                    </td>
+                    <td style="padding: 12px 16px; font-weight: 700; color: #0f172a; font-size: 0.95rem;">${formatGHS(it.amount)}</td>
+                    <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">${escapeHtml(it.party)}</td>
+                    <td style="padding: 12px 16px;">${badge}</td>
+                    <td style="padding: 12px 16px; font-size: 0.82rem; color: #64748b;">${dateStr}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+};
+
+// CSV Export Generator
+const exportReportCSV = () => {
+    if (!activeReportDataset || activeReportDataset.length === 0) {
+        showAdminToast("No records available to export for the current filters.", "error");
+        return;
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    let csvRows = [];
+    let filename = `trustlink-${currentReportType}-report-${todayStr}.csv`;
+
+    const escapeCsvField = (val) => {
+        if (val === null || val === undefined) return '""';
+        const str = String(val).replace(/"/g, '""');
+        return `"${str}"`;
+    };
+
+    if (currentReportType === 'commissions') {
+        csvRows.push([
+            "Escrow ID",
+            "Item / Description",
+            "Order Amount (GHS)",
+            "Platform Fee (GHS)",
+            "Buyer Fee (GHS)",
+            "Seller Fee (GHS)",
+            "Fee Allocation",
+            "Commission Status",
+            "Buyer",
+            "Seller",
+            "Date Created"
+        ]);
+
+        activeReportDataset.forEach(r => {
+            csvRows.push([
+                r.id,
+                r.title,
+                r.amount.toFixed(2),
+                r.totalFee.toFixed(2),
+                r.buyerFee.toFixed(2),
+                r.sellerFee.toFixed(2),
+                r.feeAllocation,
+                r.commStatus,
+                r.buyer,
+                r.seller,
+                r.date ? r.date.toISOString() : ''
+            ]);
+        });
+    } else if (currentReportType === 'users') {
+        csvRows.push([
+            "User ID",
+            "Full Name",
+            "Email Address",
+            "Phone Number",
+            "Role",
+            "Email Verified",
+            "Date Registered"
+        ]);
+
+        activeReportDataset.forEach(u => {
+            const joinedDate = toDate(u.createdAt);
+            csvRows.push([
+                u.id,
+                u.fullName || '',
+                u.email || '',
+                u.phone || pickUserPhone(u) || '',
+                u.role || 'user',
+                u.emailVerified ? 'YES' : 'NO',
+                joinedDate ? joinedDate.toISOString() : ''
+            ]);
+        });
+    } else if (currentReportType === 'escrows') {
+        csvRows.push([
+            "Escrow ID",
+            "Item Description",
+            "Escrow Amount (GHS)",
+            "Order Status",
+            "Seller",
+            "Buyer",
+            "Created Date"
+        ]);
+
+        activeReportDataset.forEach(e => {
+            csvRows.push([
+                e.id,
+                e.item || e.description || '',
+                (e.parsedAmount || 0).toFixed(2),
+                e.normalizedStatus,
+                e.sellerName || e.sellerEmail || e.sellerPhone || '',
+                e.buyerName || e.buyerEmail || e.buyerPhone || '',
+                e.parsedDate ? e.parsedDate.toISOString() : ''
+            ]);
+        });
+    } else if (currentReportType === 'disputes') {
+        csvRows.push([
+            "Record Type",
+            "Reference ID",
+            "Title / Reason",
+            "Amount (GHS)",
+            "Parties / Beneficiary",
+            "Status",
+            "Date Logged"
+        ]);
+
+        activeReportDataset.forEach(it => {
+            csvRows.push([
+                it.type,
+                it.id,
+                it.title,
+                (it.amount || 0).toFixed(2),
+                it.party,
+                it.status,
+                it.date ? it.date.toISOString() : ''
+            ]);
+        });
+    }
+
+    const csvContent = "\uFEFF" + csvRows.map(row => row.map(escapeCsvField).join(",")).join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showAdminToast(`Report exported successfully as ${filename}! 📁`, 'success');
+};
+
+// Copy Report TSV to Clipboard
+const copyReportData = async () => {
+    if (!activeReportDataset || activeReportDataset.length === 0) {
+        showAdminToast("No report records to copy.", "error");
+        return;
+    }
+
+    let tsvRows = [];
+
+    if (currentReportType === 'commissions') {
+        tsvRows.push(["ID", "Description", "Order Amount (GHS)", "Platform Fee (GHS)", "Status", "Date"].join("\t"));
+        activeReportDataset.forEach(r => {
+            tsvRows.push([
+                r.id,
+                r.title,
+                r.amount.toFixed(2),
+                r.totalFee.toFixed(2),
+                r.commStatus,
+                r.date ? r.date.toLocaleDateString() : ''
+            ].join("\t"));
+        });
+    } else if (currentReportType === 'users') {
+        tsvRows.push(["Name", "Email", "Phone", "Role", "Verified", "Date"].join("\t"));
+        activeReportDataset.forEach(u => {
+            const joinedDate = toDate(u.createdAt);
+            tsvRows.push([
+                u.fullName || '',
+                u.email || '',
+                u.phone || pickUserPhone(u) || '',
+                u.role || 'user',
+                u.emailVerified ? 'Verified' : 'Unverified',
+                joinedDate ? joinedDate.toLocaleDateString() : ''
+            ].join("\t"));
+        });
+    } else if (currentReportType === 'escrows') {
+        tsvRows.push(["Escrow ID", "Item", "Amount (GHS)", "Status", "Seller", "Buyer", "Date"].join("\t"));
+        activeReportDataset.forEach(e => {
+            tsvRows.push([
+                e.id,
+                e.item || e.description || '',
+                (e.parsedAmount || 0).toFixed(2),
+                e.normalizedStatus,
+                e.sellerName || '',
+                e.buyerName || '',
+                e.parsedDate ? e.parsedDate.toLocaleDateString() : ''
+            ].join("\t"));
+        });
+    } else if (currentReportType === 'disputes') {
+        tsvRows.push(["Type", "ID", "Title", "Amount (GHS)", "Parties", "Status", "Date"].join("\t"));
+        activeReportDataset.forEach(it => {
+            tsvRows.push([
+                it.type,
+                it.id,
+                it.title,
+                (it.amount || 0).toFixed(2),
+                it.party,
+                it.status,
+                it.date ? it.date.toLocaleDateString() : ''
+            ].join("\t"));
+        });
+    }
+
+    const tsvContent = tsvRows.join("\n");
+    try {
+        await navigator.clipboard.writeText(tsvContent);
+        showAdminToast("Report data copied to clipboard! Ready to paste in Excel or Sheets 📋", 'success');
+    } catch (err) {
+        showAdminToast("Failed to copy to clipboard: " + err.message, 'error');
+    }
+};
+
+// Initialize Reports & Analytics Center Listeners
+const initReportsEngine = () => {
+    // Report Category Pill Switchers
+    document.querySelectorAll('.report-type-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            const type = pill.getAttribute('data-type');
+            if (type) setReportType(type);
+        });
+    });
+
+    // Date Range Presets
+    const datePresetSel = document.getElementById('report-date-preset');
+    const startWrap = document.getElementById('report-custom-start-wrap');
+    const endWrap = document.getElementById('report-custom-end-wrap');
+
+    datePresetSel?.addEventListener('change', () => {
+        const val = datePresetSel.value;
+        if (val === 'custom') {
+            startWrap?.classList.remove('hidden');
+            endWrap?.classList.remove('hidden');
+        } else {
+            startWrap?.classList.add('hidden');
+            endWrap?.classList.add('hidden');
+        }
+        renderActiveReport();
+    });
+
+    document.getElementById('report-start-date')?.addEventListener('input', renderActiveReport);
+    document.getElementById('report-end-date')?.addEventListener('input', renderActiveReport);
+    document.getElementById('report-status-filter')?.addEventListener('change', renderActiveReport);
+
+    // Live Search with Debounce
+    let searchDebounceTimer = null;
+    document.getElementById('report-search-input')?.addEventListener('input', () => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+            renderActiveReport();
+        }, 150);
+    });
+
+    // Action Buttons
+    document.getElementById('btn-export-csv')?.addEventListener('click', exportReportCSV);
+    document.getElementById('btn-copy-report')?.addEventListener('click', copyReportData);
+    document.getElementById('btn-print-report')?.addEventListener('click', () => {
+        window.print();
+    });
+
+    updateReportStatusOptions(currentReportType);
+};
+
+// Auto-run initReportsEngine
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initReportsEngine);
+} else {
+    initReportsEngine();
+}
+
