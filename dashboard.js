@@ -64,6 +64,23 @@ if (btnSettingsNav) {
     });
 }
 
+// Auto-switch tab based on URL hash or sessionStorage
+const handleInitialTabRouting = () => {
+    const hash = window.location.hash ? window.location.hash.replace('#', '') : null;
+    const tabToOpen = hash || sessionStorage.getItem('activeDashboardTab');
+    if (tabToOpen) {
+        const targetNav = document.querySelector(`.nav-item[data-target="${tabToOpen}"]`);
+        if (targetNav) {
+            targetNav.click();
+        } else if (tabToOpen === 'view-settings' && btnSettingsNav) {
+            btnSettingsNav.click();
+        }
+        sessionStorage.removeItem('activeDashboardTab');
+    }
+};
+window.addEventListener('DOMContentLoaded', handleInitialTabRouting);
+handleInitialTabRouting();
+
 // Collapse Sidebar Logic
 const collapseBtn = document.getElementById('btn-collapse');
 const topbarMenuToggle = document.getElementById('topbar-menu-toggle');

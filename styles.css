@@ -837,68 +837,101 @@ h1, h2, h3, h4 {
 /* Profile Dropdown */
 .profile-menu {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
 }
 .profile-btn {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
     color: var(--text-main);
     border: 1px solid var(--surface-border);
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: 100px;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     font-family: var(--font-body);
     font-weight: 500;
-    transition: all 0.3s ease;
+    font-size: 0.92rem;
+    transition: all 0.2s ease;
 }
-.profile-btn:hover {
+.profile-btn:hover,
+.profile-menu.open .profile-btn {
     border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
 }
 .profile-dropdown {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    background: var(--surface-color);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--surface-border);
-    border-radius: 12px;
-    width: 200px;
-    padding: 8px 0;
+    background: #0F172A;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    width: 220px;
+    padding: 8px;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px) translateZ(0);
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transform: translateY(-8px) scale(0.98);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2);
     z-index: 99999;
 }
-.profile-menu:hover .profile-dropdown {
+.profile-menu:hover .profile-dropdown,
+.profile-menu.open .profile-dropdown {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0) translateZ(0);
+    transform: translateY(0) scale(1);
 }
 .dropdown-item {
-    display: block;
-    padding: 12px 20px;
-    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    color: #F8FAFC;
     text-decoration: none;
-    transition: background 0.2s;
+    transition: all 0.15s ease;
     cursor: pointer;
     border: none;
     width: 100%;
     text-align: left;
     background: transparent;
     font-family: var(--font-body);
-    font-size: 0.95rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+    border-radius: 10px;
+}
+.dropdown-item svg {
+    color: #94A3B8;
+    flex-shrink: 0;
+    transition: color 0.15s ease;
 }
 .dropdown-item:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.08);
+    color: #FFFFFF;
+}
+.dropdown-item:hover svg {
+    color: #FFFFFF;
+}
+.dropdown-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 6px 0;
 }
 .dropdown-item.danger {
-    color: var(--danger);
+    color: #EF4444;
+    font-weight: 600;
+}
+.dropdown-item.danger svg {
+    color: #EF4444;
+}
+.dropdown-item.danger:hover {
+    background: rgba(239, 68, 68, 0.12);
+    color: #F87171;
+}
+.dropdown-item.danger:hover svg {
+    color: #F87171;
 }
 
 /* Modern Toast UI */

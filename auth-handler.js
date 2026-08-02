@@ -113,20 +113,56 @@ onAuthStateChanged(auth, async (user) => {
             if (!navLinks.querySelector(".profile-menu")) {
                 const profileMenu = document.createElement("div");
                 profileMenu.className = "profile-menu";
+                const initialLetter = displayName.charAt(0).toUpperCase();
                 profileMenu.innerHTML = `
-                    <button class="profile-btn">
-                        <div class="avatar" style="width: 24px; height: 24px; margin: 0; background: linear-gradient(135deg, var(--primary), var(--secondary));"></div>
-                        ${displayName}
+                    <button class="profile-btn" id="profile-menu-toggle" type="button" aria-haspopup="true" aria-expanded="false">
+                        <div class="avatar">${initialLetter}</div>
+                        <span class="profile-name">${displayName}</span>
+                        <svg class="profile-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
-                    <div class="profile-dropdown">
-                        <a href="dashboard.html" class="dropdown-item">Dashboard</a>
-                        <a href="#" class="dropdown-item">Settings</a>
-                        <hr style="border-color: var(--surface-border); margin: 5px 0;">
-                        <button class="dropdown-item danger" id="sign-out-btn">Sign Out</button>
+                    <div class="profile-dropdown" id="profile-dropdown-menu">
+                        <a href="dashboard.html" class="dropdown-item">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="dashboard.html#view-profile" class="dropdown-item" id="nav-profile-link">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            <span>Profile & Settings</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item danger" id="sign-out-btn" type="button">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            <span>Sign Out</span>
+                        </button>
                     </div>
                 `;
                 navLinks.appendChild(profileMenu);
                 
+                // Toggle dropdown on click (especially for mobile tap support)
+                const toggleBtn = profileMenu.querySelector("#profile-menu-toggle");
+                if (toggleBtn) {
+                    toggleBtn.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        const isOpen = profileMenu.classList.toggle("open");
+                        toggleBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+                    });
+                    
+                    document.addEventListener("click", (e) => {
+                        if (!profileMenu.contains(e.target)) {
+                            profileMenu.classList.remove("open");
+                            toggleBtn.setAttribute("aria-expanded", "false");
+                        }
+                    });
+                }
+                
+                // Route Profile link cleanly to view-profile
+                const profileLink = profileMenu.querySelector("#nav-profile-link");
+                if (profileLink) {
+                    profileLink.addEventListener("click", () => {
+                        sessionStorage.setItem("activeDashboardTab", "view-profile");
+                    });
+                }
+
                 document.getElementById("sign-out-btn").addEventListener("click", async () => {
                     await signOut(auth);
                     sessionStorage.setItem("authToast", "Successfully signed out.");

@@ -51,21 +51,204 @@ body.light-landing {
 .light-landing .nav-links a:not(.btn):hover { color: #111827; }
 .light-landing .mobile-menu-btn span { background: #111827; }
 
-/* Profile Button Override for Light Theme */
-.light-landing .profile-btn {
-    color: #111827;
-    background: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.1);
+/* Profile Menu & Dropdown Overrides for Light Theme */
+.light-landing .profile-menu {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
 }
-.light-landing .profile-btn:hover {
-    background: rgba(0, 0, 0, 0.1);
+
+.light-landing .profile-btn {
+    color: #0F172A;
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    font-weight: 600;
+    font-size: 0.92rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.light-landing .profile-btn:hover,
+.light-landing .profile-menu.open .profile-btn {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.light-landing .profile-btn .avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3B82F6, #06B6D4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+    flex-shrink: 0;
+    border: none;
+    margin: 0;
+}
+
+.light-landing .profile-btn .profile-chevron {
+    color: #64748B;
+    transition: transform 0.2s ease;
+}
+
+.light-landing .profile-menu.open .profile-chevron {
+    transform: rotate(180deg);
+}
+
+.light-landing .profile-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 18px !important;
+    width: 220px !important;
+    padding: 8px !important;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.16), 0 8px 16px -4px rgba(15, 23, 42, 0.08) !important;
+    z-index: 100000;
+}
+
+.light-landing .profile-menu:hover .profile-dropdown,
+.light-landing .profile-menu.open .profile-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.light-landing .dropdown-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 10px 14px !important;
+    color: #1E293B !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    cursor: pointer !important;
+    border: none !important;
+    width: 100% !important;
+    text-align: left !important;
+    background: transparent !important;
+    font-family: var(--font-body) !important;
+    font-size: 0.92rem !important;
+    font-weight: 500 !important;
+    border-radius: 12px !important;
+}
+
+.light-landing .dropdown-item svg {
+    color: #64748B !important;
+    flex-shrink: 0;
+    transition: color 0.15s ease;
+}
+
+.light-landing .dropdown-item:hover {
+    background: #F1F5F9 !important;
+    color: #0F172A !important;
+}
+
+.light-landing .dropdown-item:hover svg {
+    color: #0F172A !important;
+}
+
+.light-landing .dropdown-divider {
+    height: 1px;
+    background: #F1F5F9 !important;
+    margin: 6px 0 !important;
+}
+
+.light-landing .dropdown-item.danger {
+    color: #EF4444 !important;
+    font-weight: 600 !important;
+}
+
+.light-landing .dropdown-item.danger svg {
+    color: #EF4444 !important;
+}
+
+.light-landing .dropdown-item.danger:hover {
+    background: #FEF2F2 !important;
+    color: #DC2626 !important;
+}
+
+.light-landing .dropdown-item.danger:hover svg {
+    color: #DC2626 !important;
 }
 
 /* Mobile Menu Override for Light Theme */
 @media (max-width: 768px) {
     .light-landing .nav-links {
         background: rgba(255, 255, 255, 0.98);
-        border-bottom: 1px solid rgba(0,0,0,0.05);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        padding: 90px 24px 36px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .light-landing .nav-links a:not(.btn) {
+        font-size: 1.15rem;
+        font-weight: 500;
+        padding: 8px 0;
+    }
+
+    .light-landing .profile-menu {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .light-landing .profile-btn {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+        padding: 12px 20px;
+        font-size: 0.98rem;
+    }
+
+    .light-landing .profile-dropdown {
+        position: static !important;
+        width: 100% !important;
+        max-width: 280px !important;
+        margin-top: 10px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
+        border: 1.5px solid #E2E8F0 !important;
+        opacity: 0;
+        visibility: hidden;
+        max-height: 0;
+        overflow: hidden;
+        padding: 0 8px !important;
+        transform: none !important;
+        transition: all 0.25s ease !important;
+    }
+
+    .light-landing .profile-menu.open .profile-dropdown,
+    .light-landing .profile-menu:hover .profile-dropdown {
+        opacity: 1 !important;
+        visibility: visible !important;
+        max-height: 250px !important;
+        padding: 8px !important;
+        overflow: visible !important;
     }
 }
 
