@@ -320,11 +320,16 @@
                     <!-- Commission Ledger Table -->
                     <div style="margin-top: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                            <div>
+                            <div class="view-header-title-group">
                                 <h3 style="margin: 0 0 2px; font-size: 1.1rem; color: #111827;">Commission Ledger (Order Fees)</h3>
                                 <p style="margin: 0; font-size: 0.85rem; color: #64748b;">Itemized list of every fee collected by TrustLink from escrows and payments.</p>
                             </div>
-                            <input type="text" id="commission-search" placeholder="Search orders by item, buyer, seller..." style="background: #ffffff; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; color: #1e293b; font-size: 0.85rem; width: 280px;">
+                            <div class="search-input-wrapper">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.15 5.15a7.5 7.5 0 0011.5 11.5z" />
+                                </svg>
+                                <input type="text" id="commission-search" placeholder="Search orders by item, buyer, seller..." class="modern-search-input">
+                            </div>
                         </div>
 
                         <div class="portal-card admin-table-white" style="padding: 0; overflow-x: auto;">
@@ -352,8 +357,16 @@
                 <!-- Users View -->
                 <div id="view-users" class="view-section hidden">
                     <div class="view-header">
-                        <h2>User Management</h2>
-                        <input type="text" id="user-search" placeholder="Search by name or email..." style="background: rgba(0,0,0,0.2); border: 1px solid var(--surface-border); padding: 8px 16px; border-radius: 8px; color: white;">
+                        <div class="view-header-title-group">
+                            <h2>User Management</h2>
+                            <p>Manage and search all registered platform buyers, sellers, and administrators.</p>
+                        </div>
+                        <div class="search-input-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.15 5.15a7.5 7.5 0 0011.5 11.5z" />
+                            </svg>
+                            <input type="text" id="user-search" placeholder="Search by name or email..." class="modern-search-input">
+                        </div>
                     </div>
                     <div class="portal-card admin-table-white" style="padding: 0; overflow: hidden;">
                         <table class="transaction-table">
@@ -398,10 +411,17 @@
                 <!-- Escrow Management View -->
                 <div id="view-escrows-admin" class="view-section hidden">
                     <div class="view-header">
-                        <h2>Escrow Management</h2>
-                        <input type="text" id="escrow-search" placeholder="Search by item, buyer, or seller..." style="background: rgba(0,0,0,0.2); border: 1px solid var(--surface-border); padding: 8px 16px; border-radius: 8px; color: white;">
+                        <div class="view-header-title-group">
+                            <h2>Escrow Management</h2>
+                            <p>All escrows on the platform. Monitor, search, or clean up test transactions.</p>
+                        </div>
+                        <div class="search-input-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.15 5.15a7.5 7.5 0 0011.5 11.5z" />
+                            </svg>
+                            <input type="text" id="escrow-search" placeholder="Search by item, buyer, or seller..." class="modern-search-input">
+                        </div>
                     </div>
-                    <p style="color: var(--text-muted); margin-bottom: 16px;">All escrows on the platform. Deleting an escrow removes it from analytics permanently — use this to clean up test data.</p>
                     <div class="portal-card admin-table-white" style="padding: 0; overflow: hidden;">
                         <table class="transaction-table">
                             <thead>
