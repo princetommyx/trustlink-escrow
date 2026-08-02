@@ -1015,10 +1015,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Expected Delivery / Pickup Date</label>
-                    <input type="text" id="escrow-delivery-date" required placeholder="Select expected delivery date" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'" style="min-height: 48px; height: 48px;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">The buyer gets an SMS
-                        reminder on this day to collect the item and confirm delivery.</span>
+                    <label>Expected Delivery Window</label>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 140px;">
+                            <label style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; display: block; font-weight: 500;">Earliest Date</label>
+                            <input type="text" id="escrow-delivery-date-from" required placeholder="From date" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'" style="min-height: 48px; height: 48px; width: 100%;">
+                        </div>
+                        <span style="color: var(--text-muted); font-weight: 600; font-size: 1.1rem; margin-top: 18px;">—</span>
+                        <div style="flex: 1; min-width: 140px;">
+                            <label style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; display: block; font-weight: 500;">Latest Date</label>
+                            <input type="text" id="escrow-delivery-date-to" required placeholder="To date" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'" style="min-height: 48px; height: 48px; width: 100%;">
+                        </div>
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">The buyer gets an SMS reminder on the last day to collect the item and confirm delivery.</span>
                 </div>
 
                 <div class="form-row">

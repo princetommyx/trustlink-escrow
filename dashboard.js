@@ -10,6 +10,20 @@ let isPhoneVerified = false;
 let verifiedPhone = "";
 let pendingPhoneVerification = null;
 let resendInterval = null;
+let cachedPlatformFeePercent = 2.5;
+
+// Preload platform fee settings in background to avoid blocking escrow creation
+const loadPlatformSettings = async () => {
+    try {
+        const feeSnap = await getDoc(doc(db, "settings", "platform"));
+        if (feeSnap.exists() && feeSnap.data().feePercent !== undefined) {
+            cachedPlatformFeePercent = parseFloat(feeSnap.data().feePercent) || 2.5;
+        }
+    } catch (err) {
+        console.warn("Using default platform fee (2.5%):", err);
+    }
+};
+loadPlatformSettings();
 
 const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
@@ -325,17 +339,29 @@ function updateTrendBadge(elemId, currentCount, prevCount) {
 // delivery date and no reminder has gone out yet, SMS the buyer to go
 // collect the item, confirm delivery, and settle any outstanding payment.
 // ==========================================
-const deliveryDateLabel = (d) => {
+const formatSingleDate = (d) => {
     if (!d) return '';
     const date = new Date(d + 'T00:00:00');
     return isNaN(date) ? d : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+const deliveryDateLabel = (from, to) => {
+    // Support old single-date format (backward compat)
+    if (from && !to) return formatSingleDate(from);
+    if (!from && !to) return '';
+    const f = formatSingleDate(from);
+    const t = formatSingleDate(to);
+    if (f && t && f !== t) return `${f} – ${t}`;
+    return f || t;
+};
+
 const maybeSendDeliveryReminder = async (escrowId, data) => {
     try {
-        if (!data.deliveryDate || data.deliveryReminderSent || !data.buyerPhone) return;
+        // Use deliveryDateTo (latest date) for reminders, fall back to old deliveryDate field
+        const reminderDate = data.deliveryDateTo || data.deliveryDate;
+        if (!reminderDate || data.deliveryReminderSent || !data.buyerPhone) return;
         if (!['PENDING_PAYMENT', 'FUNDED', 'DISPATCHED'].includes(data.status)) return;
-        const due = new Date(data.deliveryDate + 'T00:00:00');
+        const due = new Date(reminderDate + 'T00:00:00');
         if (isNaN(due) || Date.now() < due.getTime()) return;
 
         // Mark as sent FIRST so two dashboards loading at once can't double-text
@@ -636,7 +662,7 @@ function loadEscrows() {
                             <span style="font-weight: 700; color: #0F172A; font-size: 1rem;">${escapeHtml(data.description || data.productName || 'Order')} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
                         </div>
-                        <p style="margin: 0 0 1rem 0; color: #64748B; font-size: 0.95rem;"><strong>Value:</strong> GH₵ ${formattedAmount}${data.deliveryDate ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDate)}` : ``}</p>
+                        <p style="margin: 0 0 1rem 0; color: #64748B; font-size: 0.95rem;"><strong>Value:</strong> GH₵ ${formattedAmount}${(data.deliveryDateFrom || data.deliveryDateTo || data.deliveryDate) ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDateFrom || data.deliveryDate, data.deliveryDateTo)}` : ``}</p>
                         ${actionBtn}
                     </div>
                 `;
@@ -708,7 +734,7 @@ function loadEscrows() {
                             <span style="font-weight: 700; color: #0F172A; font-size: 1rem;">${escapeHtml(data.description || data.productName || 'Order')} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
                         </div>
-                        <p style="margin: 0 0 1rem 0; color: #64748B; font-size: 0.95rem;"><strong>Value:</strong> GH₵ ${buyerAmount}${data.deliveryDate ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDate)}` : ``}</p>
+                        <p style="margin: 0 0 1rem 0; color: #64748B; font-size: 0.95rem;"><strong>Value:</strong> GH₵ ${buyerAmount}${(data.deliveryDateFrom || data.deliveryDateTo || data.deliveryDate) ? ` · <strong>Delivery:</strong> ${deliveryDateLabel(data.deliveryDateFrom || data.deliveryDate, data.deliveryDateTo)}` : ``}</p>
                         ${actionBtn}
                     </div>
                 `;
@@ -872,7 +898,7 @@ window.shareEscrowViaWhatsApp = async (escrowId) => {
         const formattedAmount = Number(escrow.amount || escrow.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const item = escrow.description || escrow.productName || `Order #${escrowId.substring(0, 8).toUpperCase()}`;
         const seller = escrow.sellerName || (currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink Seller");
-        const delivery = escrow.deliveryDate ? `\nEstimated Delivery: ${deliveryDateLabel(escrow.deliveryDate)}` : "";
+        const delivery = (escrow.deliveryDateFrom || escrow.deliveryDateTo || escrow.deliveryDate) ? `\nEstimated Delivery: ${deliveryDateLabel(escrow.deliveryDateFrom || escrow.deliveryDate, escrow.deliveryDateTo)}` : "";
 
         const message = 
 `TRUSTLINK ESCROW PAYMENT INVOICE
@@ -1835,9 +1861,11 @@ if (formNewEscrow) {
         e.preventDefault();
         
         const submitBtn = formNewEscrow.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Processing with Moolre...';
+        const originalText = submitBtn ? submitBtn.textContent : 'Create Escrow';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Escrow...';
+        }
         
         try {
             // Get the total amount calculated in the UI
@@ -1848,39 +1876,31 @@ if (formNewEscrow) {
                 throw new Error("Total escrow amount must be greater than 0");
             }
 
-            const description = document.getElementById('escrow-terms') ? document.getElementById('escrow-terms').value : "TrustLink Escrow Deposit";
-            
-            const customer = {
-                email: currentUser ? currentUser.email : "guest@example.com",
-                name: currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink User"
-            };
-
+            const description = document.getElementById('escrow-terms') ? document.getElementById('escrow-terms').value.trim() : "TrustLink Escrow Deposit";
             const buyerEmail = document.getElementById('buyer-email') ? document.getElementById('buyer-email').value.trim() : "";
             const buyerPhoneInput = document.getElementById('buyer-phone');
+            const buyerPhone = buyerPhoneInput ? buyerPhoneInput.value.trim() : "";
 
-            // Snapshot the platform fee rate at creation time so later changes
-            // in admin Settings don't retroactively alter existing escrows.
-            let feePercent = 2.5;
-            try {
-                const feeSnap = await getDoc(doc(db, "settings", "platform"));
-                if (feeSnap.exists() && feeSnap.data().feePercent !== undefined) {
-                    feePercent = parseFloat(feeSnap.data().feePercent) || 0;
-                }
-            } catch (feeErr) {
-                console.warn("Could not load platform fee, using default:", feeErr);
+            const feeAllocation = document.getElementById('escrow-fee-allocation') ? document.getElementById('escrow-fee-allocation').value : 'split';
+            const deliveryDateFrom = document.getElementById('escrow-delivery-date-from') ? document.getElementById('escrow-delivery-date-from').value : "";
+            const deliveryDateTo = document.getElementById('escrow-delivery-date-to') ? document.getElementById('escrow-delivery-date-to').value : "";
+
+            if (deliveryDateFrom && deliveryDateTo && deliveryDateTo < deliveryDateFrom) {
+                throw new Error("Latest delivery date cannot be before the earliest date.");
             }
 
-            // 1. SAVE TO FIREBASE
+            // 1. SAVE TO FIREBASE INSTANTLY
             const newEscrow = {
                 amount: totalAmount,
                 description: description,
                 sellerId: currentUser ? currentUser.uid : "GUEST",
                 sellerName: currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink User",
                 buyerEmail: buyerEmail,
-                buyerPhone: buyerPhoneInput ? buyerPhoneInput.value : "",
-                feeAllocation: document.getElementById('escrow-fee-allocation') ? document.getElementById('escrow-fee-allocation').value : 'split',
-                feePercent: feePercent,
-                deliveryDate: document.getElementById('escrow-delivery-date') ? document.getElementById('escrow-delivery-date').value : "",
+                buyerPhone: buyerPhone,
+                feeAllocation: feeAllocation,
+                feePercent: cachedPlatformFeePercent || 2.5,
+                deliveryDateFrom: deliveryDateFrom,
+                deliveryDateTo: deliveryDateTo,
                 deliveryReminderSent: false,
                 status: 'PENDING_PAYMENT',
                 createdAt: serverTimestamp()
@@ -1889,46 +1909,54 @@ if (formNewEscrow) {
             const docRef = await addDoc(collection(db, "escrows"), newEscrow);
             const escrowId = docRef.id;
             
-            // 2. Generate Moolre Payment ID for USSD Pull (Option B)
-            let moolrePaymentId = "";
-            try {
-                moolrePaymentId = await generateMoolrePaymentID(buyerPhoneInput ? buyerPhoneInput.value : "0000000000", "TrustLink Buyer", escrowId);
-            } catch (err) {
-                console.warn("Failed to generate USSD Payment ID, proceeding without it.", err);
-            }
-
-            // 3. SMS/WHATSAPP INTEGRATION
+            // 2. Prepare checkout URL & Copy Link Immediately
             const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
             try {
-                await navigator.clipboard.writeText(checkoutUrl);
-            } catch(e) { console.warn("Clipboard write failed silently."); }
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(checkoutUrl);
+                }
+            } catch(e) { 
+                console.warn("Clipboard write failed silently."); 
+            }
 
-            if (buyerPhoneInput && buyerPhoneInput.value) {
+            // 3. Immediately Close Modal & Reset Form for instant responsiveness
+            closeModal();
+            formNewEscrow.reset();
+
+            // 4. Show Instant Success Feedback
+            if (typeof showModernToast === 'function') {
+                showModernToast("Escrow Created! 📋", "Checkout link copied to clipboard.", "success");
+            }
+
+            // 5. Send SMS Notification Asynchronously in Background (Non-Blocking)
+            if (buyerPhone) {
                 const smsDetails = {
                     description: description,
                     amount: totalAmount,
                     sellerName: newEscrow.sellerName
                 };
-                try {
-                    await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, "", smsDetails);
-                    showModernToast("Escrow Created! 🎉", "Checkout link copied to clipboard & SMS sent to buyer.", "success");
-                } catch (smsError) {
-                    console.warn("SMS failed.", smsError);
-                    showModernToast("Escrow Created! 📋", "Checkout link copied to clipboard. Share it with buyer directly.", "warning");
-                }
-            } else {
-                showModernToast("Escrow Created! 📋", "Checkout link copied to clipboard. Share it with your buyer to get paid.", "success");
+                sendSMSNotification(buyerPhone, checkoutUrl, escrowId, "", smsDetails)
+                    .then(() => {
+                        if (typeof showModernToast === 'function') {
+                            showModernToast("SMS Sent! 📱", `Payment link delivered to ${buyerPhone}.`, "info");
+                        }
+                    })
+                    .catch((smsError) => {
+                        console.warn("Background SMS notification notice:", smsError);
+                    });
             }
-
-            closeModal();
-            // Optionally, refresh the UI here
-            if (typeof fetchProducts === 'function') fetchProducts();
         } catch (error) {
             console.error("Escrow creation error:", error);
-            showModernToast("Escrow Creation Failed", error.message || "Failed to initialize order.", "error");
+            if (typeof showModernToast === 'function') {
+                showModernToast("Escrow Creation Failed", error.message || "Failed to initialize order.", "error");
+            } else {
+                alert(error.message || "Failed to initialize order.");
+            }
         } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
         }
     });
 }
@@ -1938,10 +1966,8 @@ if (formNewEscrow) {
 // ==========================================
 let myProducts = [];
 
-// Firebase Storage isn't available on the free plan, so product images are
-// downscaled in the browser and stored inline (data URL) on the product doc.
-// Firestore documents cap at 1MB, hence the aggressive compression.
-const fileToCompressedDataURL = (file, maxDim = 640, quality = 0.72) => new Promise((resolve, reject) => {
+// Lightweight browser downscaling for instant uploads and crisp thumbnails (approx 20-35KB per image)
+const fileToCompressedDataURL = (file, maxDim = 380, quality = 0.7) => new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
@@ -1949,11 +1975,15 @@ const fileToCompressedDataURL = (file, maxDim = 640, quality = 0.72) => new Prom
         const canvas = document.createElement('canvas');
         canvas.width = Math.max(1, Math.round(img.width * scale));
         canvas.height = Math.max(1, Math.round(img.height * scale));
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
         resolve(canvas.toDataURL('image/jpeg', quality));
     };
-    img.onerror = (e) => { URL.revokeObjectURL(url); reject(new Error("Could not read that image file.")); };
+    img.onerror = () => { 
+        URL.revokeObjectURL(url); 
+        reject(new Error("Could not read that image file.")); 
+    };
     img.src = url;
 });
 
@@ -1968,24 +1998,18 @@ document.getElementById('new-prod-image')?.addEventListener('change', async (e) 
         return;
     }
     try {
-        let dataUrl = await fileToCompressedDataURL(file);
-        if (dataUrl.length > 900000) {
-            // Too big for a Firestore doc - compress harder
-            dataUrl = await fileToCompressedDataURL(file, 420, 0.6);
-        }
-        if (dataUrl.length > 900000) {
-            alert("That image is too large even after compression. Please choose a smaller one.");
-            e.target.value = "";
-            preview?.classList.add('hidden');
-            return;
-        }
+        let dataUrl = await fileToCompressedDataURL(file, 380, 0.7);
         newProductImage = dataUrl;
         if (preview) {
             preview.src = dataUrl;
             preview.classList.remove('hidden');
         }
     } catch (err) {
-        alert(err.message || "Could not process that image.");
+        if (typeof showModernToast === 'function') {
+            showModernToast("Image Error", err.message || "Could not process that image.", "warning");
+        } else {
+            alert(err.message || "Could not process that image.");
+        }
         e.target.value = "";
         preview?.classList.add('hidden');
     }
@@ -2253,39 +2277,80 @@ if(formNewProd) {
     formNewProd.addEventListener('submit', async (e) => {
         e.preventDefault();
         if(!currentUser) {
-            alert('You must be logged in to add products.');
+            if (typeof showModernToast === 'function') {
+                showModernToast("Login Required", "You must be logged in to add products.", "warning");
+            } else {
+                alert('You must be logged in to add products.');
+            }
             return;
         }
         
         const btnSubmit = formNewProd.querySelector('button[type="submit"]');
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Saving...';
+        const originalBtnText = btnSubmit ? btnSubmit.textContent : 'Add';
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Saving...';
+        }
         
         try {
+            const nameInput = document.getElementById('new-prod-name');
+            const priceInput = document.getElementById('new-prod-price');
+            const descInput = document.getElementById('new-prod-desc');
+
+            const name = nameInput ? nameInput.value.trim() : "";
+            const price = priceInput ? parseFloat(priceInput.value) : 0;
+            const desc = descInput ? descInput.value.trim() : "";
+
+            if (!name) throw new Error("Product name is required.");
+            if (isNaN(price) || price <= 0) throw new Error("Please enter a valid product price.");
+
             const newProd = {
-                name: document.getElementById('new-prod-name').value,
-                price: parseFloat(document.getElementById('new-prod-price').value),
-                desc: document.getElementById('new-prod-desc').value,
+                name: name,
+                price: price,
+                desc: desc,
                 image: newProductImage || "",
                 userId: currentUser.uid,
                 createdAt: serverTimestamp()
             };
 
-            await addDoc(collection(db, "products"), newProd);
-            await fetchProducts(); // Re-fetch to get Firestore IDs and render
+            // 1. Instantly save to Firestore
+            const docRef = await addDoc(collection(db, "products"), newProd);
 
+            // 2. Optimistic instant local update
+            const productWithId = {
+                id: docRef.id,
+                ...newProd,
+                createdAt: new Date()
+            };
+            myProducts.unshift(productWithId);
+            renderProducts();
+
+            // 3. Reset form and switch view immediately
             formNewProd.reset();
             newProductImage = "";
             document.getElementById('new-prod-preview')?.classList.add('hidden');
             
-            // Switch back to list view on success
+            closeProdModal();
             window.showProductSubView('list');
+            
+            if (typeof showModernToast === 'function') {
+                showModernToast("Product Added! 🛍️", `"${name}" was added successfully.`, "success");
+            }
+
+            // 4. Background re-sync
+            fetchProducts();
         } catch (error) {
-            console.error("Error adding document: ", error);
-            alert("Error adding product.");
+            console.error("Error adding product: ", error);
+            if (typeof showModernToast === 'function') {
+                showModernToast("Failed to Add Product", error.message || "Please try again.", "error");
+            } else {
+                alert("Error adding product: " + (error.message || ""));
+            }
         } finally {
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = 'Add'; // Updated to match the HTML button text
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = originalBtnText;
+            }
         }
     });
 }

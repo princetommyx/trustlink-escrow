@@ -109,12 +109,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('seller-name').textContent = escrow.sellerName || 'Verified Vendor';
         document.getElementById('escrow-desc').textContent = escrow.description || 'Secure Transaction';
         document.getElementById('escrow-id-display').textContent = escrowId;
-        if (escrow.deliveryDate) {
+        // Display delivery window (supports new range and old single-date)
+        const deliveryFrom = escrow.deliveryDateFrom || escrow.deliveryDate;
+        const deliveryTo = escrow.deliveryDateTo;
+        if (deliveryFrom || deliveryTo) {
             const deliveryRow = document.getElementById('escrow-delivery-row');
             const deliverySpan = document.getElementById('escrow-delivery');
             if (deliveryRow && deliverySpan) {
-                const dd = new Date(escrow.deliveryDate + 'T00:00:00');
-                deliverySpan.textContent = isNaN(dd) ? escrow.deliveryDate : dd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                const fmtDate = (d) => {
+                    if (!d) return '';
+                    const dt = new Date(d + 'T00:00:00');
+                    return isNaN(dt) ? d : dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                };
+                const f = fmtDate(deliveryFrom);
+                const t = fmtDate(deliveryTo);
+                if (f && t && f !== t) {
+                    deliverySpan.textContent = `${f} – ${t}`;
+                } else {
+                    deliverySpan.textContent = f || t;
+                }
                 deliveryRow.style.display = '';
             }
         }
