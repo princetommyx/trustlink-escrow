@@ -354,11 +354,11 @@ export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId, pay
     try {
         console.log(`[MOOLRE API] Sending WhatsApp link for ${escrowId} to ${phone}`);
 
-        const item = details.description ? `"${String(details.description).replace(/\s+/g, ' ').trim().substring(0, 80)}"` : `order #${escrowId.substring(0, 8)}`;
-        const amountText = details.amount ? `\nAmount: GH₵ ${parseFloat(details.amount).toFixed(2)}` : "";
+        const item = details.description ? `${String(details.description).replace(/\s+/g, ' ').trim().substring(0, 80)}` : `Order #${escrowId.substring(0, 8).toUpperCase()}`;
+        const amountText = details.amount ? `\nTotal Amount: GH₵ ${parseFloat(details.amount).toFixed(2)}` : "";
         const sellerText = details.sellerName ? `\nSeller: ${String(details.sellerName).substring(0, 30)}` : "";
-        const ussdText = paymentId ? `\n\nAlternatively, you can dial *203*${paymentId}# to pay via USSD.` : "";
-        const message = `TrustLink Escrow\n\nA secure escrow was created for you:\nItem: ${item}${amountText}${sellerText}\n\nYour money stays protected until you confirm delivery. Pay securely here:\n${checkoutUrl}${ussdText}`;
+        const ussdText = paymentId ? `\n\nAlternatively, dial *203*${paymentId}# to pay via USSD.` : "";
+        const message = `TRUSTLINK ESCROW PAYMENT INVOICE\n\nItem / Order: ${item}${amountText}${sellerText}\n\nYour payment remains securely protected in TrustLink Escrow until you receive and verify your order.\n\nPay securely here:\n${checkoutUrl}${ussdText}\n\nProtected by TrustLink Escrow Ghana`;
 
         // Remove any '+' or spaces for the API if necessary
         const cleanPhone = normalizePhone(phone);

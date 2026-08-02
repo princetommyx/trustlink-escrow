@@ -872,21 +872,21 @@ window.shareEscrowViaWhatsApp = async (escrowId) => {
         const formattedAmount = Number(escrow.amount || escrow.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const item = escrow.description || escrow.productName || `Order #${escrowId.substring(0, 8).toUpperCase()}`;
         const seller = escrow.sellerName || (currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink Seller");
-        const delivery = escrow.deliveryDate ? `\n📅 *Estimated Delivery:* ${deliveryDateLabel(escrow.deliveryDate)}` : "";
+        const delivery = escrow.deliveryDate ? `\nEstimated Delivery: ${deliveryDateLabel(escrow.deliveryDate)}` : "";
 
         const message = 
-`🤝 *TrustLink Secure Escrow Payment*
+`TRUSTLINK ESCROW PAYMENT INVOICE
 
-📦 *Item / Order:* ${item}
-💰 *Total Amount:* GH₵ ${formattedAmount}
-👤 *Seller:* ${seller}${delivery}
+Item / Order: ${item}
+Total Amount: GH₵ ${formattedAmount}
+Seller: ${seller}${delivery}
 
-🔒 *Your payment stays protected in TrustLink Escrow until you receive and verify your item.*
+Your payment remains securely protected in TrustLink Escrow until you receive and verify your order.
 
-👉 *Pay securely here:*
+Pay securely here:
 ${checkoutUrl}
 
-🛡️ *Protected by TrustLink Escrow Ghana*`;
+Protected by TrustLink Escrow Ghana`;
 
         const phone = escrow.buyerPhone ? String(escrow.buyerPhone).trim() : "";
         let whatsappUrl = "";
@@ -900,7 +900,7 @@ ${checkoutUrl}
 
         window.open(whatsappUrl, '_blank');
         if (typeof showModernToast === 'function') {
-            showModernToast("Opening WhatsApp 💬", "Payment link and order summary ready to send.", "success");
+            showModernToast("Opening WhatsApp", "Payment invoice ready to send.", "success");
         }
 
         // Background API trigger if available

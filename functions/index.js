@@ -72,7 +72,7 @@ app.post('/v1/escrows', authenticateApi, async (req, res) => {
                 if (client) {
                     const twilioNumber = process.env.TWILIO_WHATSAPP_NUMBER || "whatsapp:+16624904332";
                     const toWhatsAppNumber = escrowData.buyerPhone.startsWith('whatsapp:') ? escrowData.buyerPhone : `whatsapp:${escrowData.buyerPhone}`;
-                    const messageBody = `Hello from Trustlink Escrow! 👋\n\nYour transaction (#${escrowRef.id}) is ready for payment. Please use the secure link below to complete it:\n\n${checkoutUrl}`;
+                    const messageBody = `TRUSTLINK ESCROW PAYMENT INVOICE\n\nYour escrow payment (ID: ${escrowRef.id}) is ready for checkout.\n\nYour payment remains securely protected in TrustLink Escrow until you receive and verify your order.\n\nPay securely here:\n${checkoutUrl}\n\nProtected by TrustLink Escrow Ghana`;
                     
                     await client.messages.create({
                         body: messageBody,
@@ -740,8 +740,7 @@ exports.sendPaymentLinkViaWhatsApp = functions.https.onCall(async (data, context
     // Format the phone number (Twilio requires the "whatsapp:" prefix and E.164 format)
     const toWhatsAppNumber = buyerPhone.startsWith('whatsapp:') ? buyerPhone : `whatsapp:${buyerPhone}`;
 
-    // Formulate your message
-    const messageBody = `Hello from Trustlink Escrow! 👋\n\nYour transaction (#${transactionId}) is ready for payment. Please use the secure link below to complete it:\n\n${paymentLink}`;
+    const messageBody = `TRUSTLINK ESCROW PAYMENT INVOICE\n\nYour escrow payment (ID: ${transactionId}) is ready for checkout.\n\nYour payment remains securely protected in TrustLink Escrow until you receive and verify your order.\n\nPay securely here:\n${paymentLink}\n\nProtected by TrustLink Escrow Ghana`;
 
     try {
         // Send the message using Twilio
