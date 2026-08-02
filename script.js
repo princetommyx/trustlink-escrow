@@ -1,24 +1,85 @@
 // Execute immediately since script is placed at end of body
-    // Mobile Menu Toggle
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const navLinks = document.querySelector('.nav-links');
+// -------------------------------------------------------------
+// Mobile Menu Controller
+// -------------------------------------------------------------
+const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+const navLinks = document.querySelector('.nav-links');
 
-    if (mobileMenuBtn && navLinks) {
-        mobileMenuBtn.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            // Toggle hamburger animation
-            const spans = mobileMenuBtn.querySelectorAll('span');
-            if (navLinks.classList.contains('active')) {
-                spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-                spans[1].style.opacity = '0';
-                spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
-            } else {
-                spans[0].style.transform = 'none';
-                spans[1].style.opacity = '1';
-                spans[2].style.transform = 'none';
-            }
-        });
+// Ensure mobile navigation backdrop exists
+let navBackdrop = document.querySelector('.mobile-nav-backdrop');
+if (!navBackdrop) {
+    navBackdrop = document.createElement('div');
+    navBackdrop.className = 'mobile-nav-backdrop';
+    document.body.appendChild(navBackdrop);
+}
+
+const closeMobileMenu = () => {
+    if (!navLinks) return;
+    navLinks.classList.remove('active');
+    if (navBackdrop) navBackdrop.classList.remove('active');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.classList.remove('active');
+        mobileMenuBtn.setAttribute('aria-expanded', 'false');
     }
+    // Also close any profile dropdown inside navLinks
+    const profileMenu = navLinks.querySelector('.profile-menu');
+    if (profileMenu) {
+        profileMenu.classList.remove('open');
+    }
+};
+
+const openMobileMenu = () => {
+    if (!navLinks) return;
+    navLinks.classList.add('active');
+    if (navBackdrop) navBackdrop.classList.add('active');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.classList.add('active');
+        mobileMenuBtn.setAttribute('aria-expanded', 'true');
+    }
+};
+
+const toggleMobileMenu = (e) => {
+    if (e) e.stopPropagation();
+    if (navLinks && navLinks.classList.contains('active')) {
+        closeMobileMenu();
+    } else {
+        openMobileMenu();
+    }
+};
+
+if (mobileMenuBtn && navLinks) {
+    mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+
+    // Close when tapping anywhere on the backdrop
+    if (navBackdrop) {
+        navBackdrop.addEventListener('click', closeMobileMenu);
+        navBackdrop.addEventListener('touchstart', closeMobileMenu, { passive: true });
+    }
+
+    // Close on any click / tap outside the nav links and hamburger button (free space on page)
+    document.addEventListener('click', (e) => {
+        if (navLinks.classList.contains('active')) {
+            if (!navLinks.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                closeMobileMenu();
+            }
+        }
+    });
+
+    // Close when clicking any link inside the navigation menu
+    navLinks.addEventListener('click', (e) => {
+        const targetLink = e.target.closest('a');
+        if (targetLink) {
+            closeMobileMenu();
+        }
+    });
+
+    // Close on Escape key press
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+            closeMobileMenu();
+        }
+    });
+}
 
     // Navbar Scroll Effect
     const navbar = document.querySelector('.navbar');
