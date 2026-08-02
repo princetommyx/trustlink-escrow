@@ -1503,24 +1503,6 @@ input[type=number] {
 .form-group input[type="date"] {
     min-height: 48px;
     line-height: 1.4;
-    position: relative;
-}
-
-/* Show placeholder text on date inputs when empty */
-.form-group input[type="date"]:not(:focus):invalid,
-.form-group input[type="date"]:not(:focus)[value=""] {
-    color: transparent;
-}
-
-.form-group input[type="date"]:not(:focus):invalid::before,
-.form-group input[type="date"]:not(:focus)[value=""]::before {
-    content: attr(placeholder);
-    color: #94A3B8;
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
 }
 
 /* Ensure date picker icon is visible on WebKit */
@@ -1599,4 +1581,15 @@ input[type=number] {
     color: #64748B;
     line-height: 1.5;
     margin-top: 12px;
+}
+
+/* Tawk.to Chat Widget Mobile Positioning */
+@media (max-width: 768px) {
+    #tawk-bubble-container,
+    .tawk-min-container,
+    div[id*="tawk-bubble"],
+    div[id*="tawkchat-container"] {
+        bottom: 85px !important;
+        z-index: 2147483647 !important;
+    }
 }

@@ -937,7 +937,7 @@
 
                 <div class="form-group">
                     <label>Expected Delivery / Pickup Date</label>
-                    <input type="date" id="escrow-delivery-date" required placeholder="Select a date" style="min-height: 48px;">
+                    <input type="text" id="escrow-delivery-date" required placeholder="Select expected delivery date" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'" style="min-height: 48px; height: 48px;">
                     <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">The buyer gets an SMS
                         reminder on this day to collect the item and confirm delivery.</span>
                 </div>
@@ -1086,7 +1086,27 @@
     </script>
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+Tawk_API.customStyle = {
+    visibility: {
+        desktop: {
+            position: 'br',
+            xOffset: '20px',
+            yOffset: '20px'
+        },
+        mobile: {
+            position: 'br',
+            xOffset: '16px',
+            yOffset: '85px'
+        }
+    },
+    zIndex: 2147483647
+};
+Tawk_API.onLoad = function() {
+    if (typeof Tawk_API.showWidget === 'function') {
+        Tawk_API.showWidget();
+    }
+};
 (function(){
 var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
 s1.async=true;
