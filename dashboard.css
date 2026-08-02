@@ -1805,6 +1805,8 @@ input[type=number] {
     gap: 8px;
     align-items: center;
     margin-top: 14px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .btn-order-action {
@@ -1815,14 +1817,16 @@ input[type=number] {
     padding: 8px 14px;
     font-size: 0.82rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
-    border-radius: 8px;
+    letter-spacing: 0.01em;
+    border-radius: 9px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     line-height: 1;
     white-space: nowrap;
     outline: none;
+    box-sizing: border-box;
+    min-height: 38px;
 }
 
 .btn-order-action svg {
@@ -1874,18 +1878,27 @@ input[type=number] {
     box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 560px) {
     .order-action-group {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
         width: 100%;
+        box-sizing: border-box;
     }
-    .btn-order-action {
+    
+    .btn-order-copy {
+        grid-column: 1 / -1;
         width: 100%;
-        padding: 9px 6px;
-        font-size: 0.75rem;
-        gap: 4px;
+        padding: 9px 12px;
+        font-size: 0.82rem;
+    }
+    
+    .btn-order-sms,
+    .btn-order-whatsapp {
+        width: 100%;
+        padding: 9px 8px;
+        font-size: 0.8rem;
     }
 }
 

@@ -97,7 +97,7 @@ export async function sendEscrowStatusSMS(phone, message, ref = "") {
             senderid: MOOLRE_SENDER_ID,
             messages: [{
                 recipient: cleanPhone,
-                ref: ref || `status-${Date.now()}`,
+                ref: (ref ? `${ref}-` : 'status-') + Date.now() + '-' + Math.floor(Math.random() * 10000),
                 message: message
             }]
         })
@@ -132,7 +132,7 @@ export async function sendDeliveryConfirmationSMS(phone, confirmUrl, escrowId, d
             senderid: MOOLRE_SENDER_ID,
             messages: [{
                 recipient: cleanPhone,
-                ref: `${escrowId}-confirm`,
+                ref: `${escrowId.substring(0, 8)}-confirm-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
                 message: message
             }]
         })
@@ -320,7 +320,7 @@ export async function sendSMSNotification(phone, checkoutUrl, escrowId, paymentI
                 senderid: MOOLRE_SENDER_ID,
                 messages: [{
                     recipient: cleanPhone,
-                    ref: escrowId + '-SMS',
+                    ref: `${escrowId.substring(0, 8)}-sms-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
                     message: message
                 }]
             })
@@ -376,7 +376,7 @@ export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId, pay
                 senderid: MOOLRE_SENDER_ID,
                 messages: [{
                     recipient: cleanPhone,
-                    ref: escrowId + '-WA',
+                    ref: `${escrowId.substring(0, 8)}-wa-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
                     message: message
                 }]
             })
