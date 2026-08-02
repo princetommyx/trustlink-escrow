@@ -2,7 +2,7 @@ import { auth, db, firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { onAuthStateChanged, signOut, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { sendEscrowStatusSMS, pickUserPhone, executeMoolrePayout } from "./moolre-service.js";
+import { sendEscrowStatusSMS, pickUserPhone, executeMoolrePayout, computeFeeSplit } from "./moolre-service.js";
 
 // Navigation Logic
 const navItems = document.querySelectorAll('.nav-item');
@@ -371,6 +371,12 @@ const initCharts = () => {
     document.getElementById('tx-chart-range')?.addEventListener('change', renderTxChart);
 };
 
+// -------------------------------------------------------------
+// Commission Wallet State & Helpers
+// -------------------------------------------------------------
+let allCommissionRecords = [];
+let currentCommissionTimeframe = 'all';
+
 const fetchAdminStats = async () => {
     try {
         // Users
@@ -378,30 +384,81 @@ const fetchAdminStats = async () => {
         const totalUsersSnap = await getCountFromServer(usersCol);
         const totalUsers = totalUsersSnap.data().count;
         document.getElementById('stat-total-users').textContent = totalUsers.toLocaleString();
-        document.getElementById('stat-active-users').textContent = totalUsers.toLocaleString(); // Replace with active logic if needed
+        const statActive = document.getElementById('stat-active-users');
+        if (statActive) statActive.textContent = totalUsers.toLocaleString();
 
         const unvEmailSnap = await getCountFromServer(query(usersCol, where('emailVerified', '==', false)));
-        document.getElementById('stat-email-unverified-users').textContent = unvEmailSnap.data().count.toLocaleString();
+        const statUnvEmail = document.getElementById('stat-email-unverified-users');
+        if (statUnvEmail) statUnvEmail.textContent = unvEmailSnap.data().count.toLocaleString();
 
         const unvMobileSnap = await getCountFromServer(query(usersCol, where('phoneVerified', '==', false)));
-        document.getElementById('stat-mobile-unverified-users').textContent = unvMobileSnap.data().count.toLocaleString();
+        const statUnvMobile = document.getElementById('stat-mobile-unverified-users');
+        if (statUnvMobile) statUnvMobile.textContent = unvMobileSnap.data().count.toLocaleString();
 
         activityRecords = [];
         let recentTxList = [];
+        allCommissionRecords = [];
+        let totalCommissionAccumulated = 0;
+        let realizedCommissionTotal = 0;
 
-        // Escrow (statuses are stored uppercase, e.g. PENDING_PAYMENT / FUNDED)
+        // Escrows
         const escrowDocs = await getDocs(collection(db, 'escrows'));
         let tEscrow = 0, eFunded = 0, cEscrow = 0, dEscrow = 0;
+
         escrowDocs.forEach(doc => {
             const data = doc.data();
             const amt = parseFloat(data.amount) || 0;
             const status = normStatus(data.status);
-            tEscrow += amt;
-            if (status === 'funded' || status === 'active') eFunded += amt;
-            else if (status === 'canceled' || status === 'cancelled') cEscrow += amt;
-            else if (status === 'disputed') dEscrow += amt;
+            const feePercent = parseFloat(data.feePercent) || 2.5;
+            const feeAllocation = data.feeAllocation || 'split';
+            const fees = computeFeeSplit(amt, feePercent, feeAllocation);
+            const date = toDate(data.createdAt) || new Date();
 
-            const date = toDate(data.createdAt);
+            tEscrow += amt;
+            if (['funded', 'active', 'dispatched', 'in_escrow', 'pending_confirmation'].includes(status)) {
+                eFunded += amt;
+            } else if (['canceled', 'cancelled'].includes(status)) {
+                cEscrow += amt;
+            } else if (status === 'disputed') {
+                dEscrow += amt;
+            }
+
+            // Determine commission status & eligibility
+            let commStatus = 'UNFUNDED';
+            let isQualifying = false;
+            if (['completed', 'released'].includes(status)) {
+                commStatus = 'REALIZED';
+                isQualifying = true;
+                totalCommissionAccumulated += fees.totalFee;
+                realizedCommissionTotal += fees.totalFee;
+            } else if (['funded', 'active', 'dispatched', 'in_escrow', 'pending_confirmation'].includes(status)) {
+                commStatus = 'IN_ESCROW';
+                isQualifying = true;
+                totalCommissionAccumulated += fees.totalFee;
+            } else if (['canceled', 'cancelled', 'refunded'].includes(status)) {
+                commStatus = 'REFUNDED';
+            }
+
+            if (amt > 0) {
+                allCommissionRecords.push({
+                    id: doc.id,
+                    type: 'escrow',
+                    title: data.item || data.description || ('Escrow #' + doc.id.slice(0, 6)),
+                    amount: amt,
+                    feePercent: feePercent,
+                    feeAllocation: feeAllocation,
+                    buyerFee: fees.buyerFee,
+                    sellerFee: fees.sellerFee,
+                    totalFee: fees.totalFee,
+                    status: status,
+                    commStatus: commStatus,
+                    isQualifying: isQualifying,
+                    date: date,
+                    buyer: data.buyerName || data.buyerEmail || data.buyerPhone || 'Buyer',
+                    seller: data.sellerName || data.sellerEmail || data.sellerPhone || 'Seller'
+                });
+            }
+
             activityRecords.push({
                 date,
                 inAmt: ['funded', 'active', 'completed', 'released'].includes(status) ? amt : 0,
@@ -412,17 +469,13 @@ const fetchAdminStats = async () => {
             
             if (amt > 0) {
                 recentTxList.push({
-                    name: 'Escrow',
+                    name: data.item ? `Escrow: ${data.item.slice(0, 16)}` : 'Escrow Order',
                     amount: amt,
                     date: date,
                     isPositive: true
                 });
             }
         });
-        document.getElementById('stat-total-escrowed').textContent = formatGHS(eFunded); // Show currently funded escrows instead of all-time total
-        document.getElementById('stat-escrowed-funded').textContent = formatGHS(eFunded);
-        document.getElementById('stat-canceled-escrow').textContent = formatGHS(cEscrow);
-        document.getElementById('stat-disputed-escrow').textContent = formatGHS(dEscrow);
 
         // Transactions (Deposits/Withdrawals)
         const txDocs = await getDocs(collection(db, 'transactions'));
@@ -435,6 +488,8 @@ const fetchAdminStats = async () => {
             const fee = parseFloat(data.fee) || 0;
             const status = normStatus(data.status);
             const type = normStatus(data.type);
+            const date = toDate(data.createdAt) || new Date();
+
             if (type === 'deposit') {
                 if (status === 'completed') tDep += amt;
                 else if (status === 'pending') pDep += amt;
@@ -447,7 +502,28 @@ const fetchAdminStats = async () => {
                 wCharge += fee;
             }
 
-            const date = toDate(data.createdAt);
+            if (fee > 0 && status === 'completed') {
+                totalCommissionAccumulated += fee;
+                realizedCommissionTotal += fee;
+                allCommissionRecords.push({
+                    id: doc.id,
+                    type: 'tx_fee',
+                    title: (type === 'withdrawal' ? 'Payout' : 'Deposit') + ' Fee (' + (data.reference || doc.id.slice(0, 6)) + ')',
+                    amount: amt,
+                    feePercent: 0,
+                    feeAllocation: 'direct',
+                    buyerFee: type === 'deposit' ? fee : 0,
+                    sellerFee: type === 'withdrawal' ? fee : 0,
+                    totalFee: fee,
+                    status: status,
+                    commStatus: 'REALIZED',
+                    isQualifying: true,
+                    date: date,
+                    buyer: data.userName || data.userEmail || 'User',
+                    seller: 'TrustLink Platform'
+                });
+            }
+
             if (status === 'completed') {
                 activityRecords.push({
                     date: date,
@@ -468,6 +544,30 @@ const fetchAdminStats = async () => {
             }
         });
         
+        // Update Commission Hero & Record Cards
+        const heroEl = document.getElementById('stat-total-commission-hero');
+        if (heroEl) heroEl.textContent = formatGHS(totalCommissionAccumulated);
+
+        const heroRealizedEl = document.getElementById('stat-realized-commission-hero');
+        if (heroRealizedEl) heroRealizedEl.textContent = formatGHS(realizedCommissionTotal);
+
+        const cardCommissionEl = document.getElementById('stat-total-commission-card');
+        if (cardCommissionEl) cardCommissionEl.textContent = formatGHS(totalCommissionAccumulated);
+
+        document.getElementById('stat-total-escrowed').textContent = formatGHS(eFunded);
+        const statFunded = document.getElementById('stat-escrowed-funded');
+        if (statFunded) statFunded.textContent = formatGHS(eFunded);
+        const statCanceled = document.getElementById('stat-canceled-escrow');
+        if (statCanceled) statCanceled.textContent = formatGHS(cEscrow);
+        const statDisputed = document.getElementById('stat-disputed-escrow');
+        if (statDisputed) statDisputed.textContent = formatGHS(dEscrow);
+
+        // Sort commission records newest first
+        allCommissionRecords.sort((a, b) => b.date - a.date);
+
+        // Render Commission Wallet Section
+        renderCommissionWallet();
+
         // Render Recent Transactions in Sidebar
         recentTxList.sort((a, b) => b.date - a.date);
         const adminTxListEl = document.getElementById('admin-tx-list');
@@ -498,15 +598,23 @@ const fetchAdminStats = async () => {
             }
         }
 
-        document.getElementById('stat-total-deposits').textContent = formatGHS(tDep);
-        document.getElementById('stat-pending-deposits').textContent = formatGHS(pDep);
-        document.getElementById('stat-rejected-deposits').textContent = formatGHS(rDep);
-        document.getElementById('stat-deposit-charges').textContent = formatGHS(dCharge);
+        const statTotalDep = document.getElementById('stat-total-deposits');
+        if (statTotalDep) statTotalDep.textContent = formatGHS(tDep);
+        const statPendingDep = document.getElementById('stat-pending-deposits');
+        if (statPendingDep) statPendingDep.textContent = formatGHS(pDep);
+        const statRejectedDep = document.getElementById('stat-rejected-deposits');
+        if (statRejectedDep) statRejectedDep.textContent = formatGHS(rDep);
+        const statDepCharges = document.getElementById('stat-deposit-charges');
+        if (statDepCharges) statDepCharges.textContent = formatGHS(dCharge);
 
-        document.getElementById('stat-total-withdrawals').textContent = formatGHS(tWith);
-        document.getElementById('stat-pending-withdrawals').textContent = formatGHS(pWith);
-        document.getElementById('stat-rejected-withdrawals').textContent = formatGHS(rWith);
-        document.getElementById('stat-withdrawal-charges').textContent = formatGHS(wCharge);
+        const statTotalWith = document.getElementById('stat-total-withdrawals');
+        if (statTotalWith) statTotalWith.textContent = formatGHS(tWith);
+        const statPendingWith = document.getElementById('stat-pending-withdrawals');
+        if (statPendingWith) statPendingWith.textContent = formatGHS(pWith);
+        const statRejectedWith = document.getElementById('stat-rejected-withdrawals');
+        if (statRejectedWith) statRejectedWith.textContent = formatGHS(rWith);
+        const statWithCharges = document.getElementById('stat-withdrawal-charges');
+        if (statWithCharges) statWithCharges.textContent = formatGHS(wCharge);
 
         renderDwChart();
         renderTxChart();
@@ -514,6 +622,185 @@ const fetchAdminStats = async () => {
         console.error("Error loading stats:", error);
     }
 };
+
+// -------------------------------------------------------------
+// Commission Wallet & Revenue Ledger
+// -------------------------------------------------------------
+const renderCommissionWallet = () => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+
+    // Filter by timeframe
+    const filtered = allCommissionRecords.filter(r => {
+        if (!r.date) return currentCommissionTimeframe === 'all';
+        if (currentCommissionTimeframe === 'today') return r.date >= startOfToday;
+        if (currentCommissionTimeframe === 'week') return r.date >= sevenDaysAgo;
+        if (currentCommissionTimeframe === 'month') return r.date >= thirtyDaysAgo;
+        return true;
+    });
+
+    let totalComm = 0;
+    let realizedComm = 0;
+    let pendingComm = 0;
+    let gmv = 0;
+    let orderCount = 0;
+    let buyerFeeTotal = 0;
+    let sellerFeeTotal = 0;
+
+    filtered.forEach(r => {
+        if (r.isQualifying) {
+            totalComm += r.totalFee;
+            gmv += r.amount;
+            orderCount++;
+            buyerFeeTotal += r.buyerFee;
+            sellerFeeTotal += r.sellerFee;
+
+            if (r.commStatus === 'REALIZED') {
+                realizedComm += r.totalFee;
+            } else if (r.commStatus === 'IN_ESCROW') {
+                pendingComm += r.totalFee;
+            }
+        }
+    });
+
+    const avgFee = orderCount > 0 ? (totalComm / orderCount) : 0;
+
+    // Update UI Stats
+    const elTotal = document.getElementById('comm-stat-total');
+    if (elTotal) elTotal.textContent = formatGHS(totalComm);
+
+    const elRealized = document.getElementById('comm-stat-realized');
+    if (elRealized) elRealized.textContent = formatGHS(realizedComm);
+
+    const elPending = document.getElementById('comm-stat-pending');
+    if (elPending) elPending.textContent = formatGHS(pendingComm);
+
+    const elGmv = document.getElementById('comm-stat-gmv');
+    if (elGmv) elGmv.textContent = formatGHS(gmv);
+
+    const elCount = document.getElementById('comm-stat-orders-count');
+    if (elCount) elCount.textContent = `${orderCount} fee-earning order${orderCount === 1 ? '' : 's'}`;
+
+    const elBuyerFee = document.getElementById('comm-buyer-fee-total');
+    if (elBuyerFee) elBuyerFee.textContent = formatGHS(buyerFeeTotal);
+
+    const elSellerFee = document.getElementById('comm-seller-fee-total');
+    if (elSellerFee) elSellerFee.textContent = formatGHS(sellerFeeTotal);
+
+    const elAvgFee = document.getElementById('comm-avg-fee');
+    if (elAvgFee) elAvgFee.textContent = formatGHS(avgFee);
+
+    const subTotal = document.getElementById('comm-stat-total-sub');
+    if (subTotal) {
+        const labels = { all: 'All-time platform revenue', month: 'Last 30 days revenue', week: 'Last 7 days revenue', today: "Today's revenue" };
+        subTotal.textContent = labels[currentCommissionTimeframe] || 'Platform revenue';
+    }
+
+    renderCommissionLedgerTable(filtered);
+};
+
+const renderCommissionLedgerTable = (recordsToRender) => {
+    const tbody = document.getElementById('admin-commission-ledger-list');
+    if (!tbody) return;
+
+    const searchTerm = (document.getElementById('commission-search')?.value || '').trim().toLowerCase();
+    const list = recordsToRender.filter(r => {
+        if (!searchTerm) return true;
+        return (
+            (r.title || '').toLowerCase().includes(searchTerm) ||
+            (r.id || '').toLowerCase().includes(searchTerm) ||
+            (r.buyer || '').toLowerCase().includes(searchTerm) ||
+            (r.seller || '').toLowerCase().includes(searchTerm)
+        );
+    });
+
+    tbody.innerHTML = '';
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #64748b; padding: 28px;">${searchTerm ? 'No commission records match your search' : 'No commission records found for this period.'}</td></tr>`;
+        return;
+    }
+
+    list.forEach(r => {
+        const dateStr = r.date ? r.date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
+        
+        let statusBadge = '';
+        if (r.commStatus === 'REALIZED') {
+            statusBadge = '<span style="background: #ECFDF5; color: #059669; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.78rem;">✓ Realized</span>';
+        } else if (r.commStatus === 'IN_ESCROW') {
+            statusBadge = '<span style="background: #FFFBEB; color: #D97706; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.78rem;">🔒 In Escrow</span>';
+        } else if (r.commStatus === 'REFUNDED') {
+            statusBadge = '<span style="background: #FEF2F2; color: #DC2626; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.78rem;">↩ Refunded</span>';
+        } else {
+            statusBadge = '<span style="background: #F1F5F9; color: #64748B; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.78rem;">⏳ Pending</span>';
+        }
+
+        const rateStr = r.feePercent > 0 ? `${r.feePercent}% (${r.feeAllocation})` : 'Fixed';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-size: 0.85rem; color: #64748b; white-space: nowrap;">${dateStr}</td>
+            <td>
+                <div style="font-weight: 600; color: #1e293b;">${escapeHtml(r.title)}</div>
+                <div style="font-size: 0.75rem; color: #64748b;">Ref: ${escapeHtml(r.id.slice(0, 10))}...</div>
+            </td>
+            <td style="font-weight: 600; color: #334155;">${formatGHS(r.amount)}</td>
+            <td style="font-size: 0.82rem; color: #64748b;">${escapeHtml(rateStr)}</td>
+            <td style="font-size: 0.85rem; color: #10b981; font-weight: 600;">+${formatGHS(r.buyerFee)}</td>
+            <td style="font-size: 0.85rem; color: #6366f1; font-weight: 600;">-${formatGHS(r.sellerFee)}</td>
+            <td style="font-weight: 700; color: #059669; font-size: 0.95rem;">${formatGHS(r.totalFee)}</td>
+            <td>${statusBadge}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+};
+
+// Commission search and timeframe filter events
+document.getElementById('commission-search')?.addEventListener('input', () => {
+    renderCommissionWallet();
+});
+
+document.querySelectorAll('#commission-timeframe .tf-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('#commission-timeframe .tf-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCommissionTimeframe = btn.getAttribute('data-tf') || 'all';
+        renderCommissionWallet();
+    });
+});
+
+// CSV Export for Commissions
+document.getElementById('btn-export-commissions')?.addEventListener('click', () => {
+    if (!allCommissionRecords || allCommissionRecords.length === 0) {
+        alert("No commission records available to export.");
+        return;
+    }
+
+    const headers = ["Date", "Order Reference", "Item Description", "Gross Amount (GHS)", "Fee Rate", "Buyer Fee (GHS)", "Seller Fee (GHS)", "TrustLink Commission (GHS)", "Commission Status", "Buyer", "Seller"];
+    const rows = allCommissionRecords.map(r => [
+        r.date ? r.date.toISOString() : '',
+        `"${r.id}"`,
+        `"${(r.title || '').replace(/"/g, '""')}"`,
+        r.amount.toFixed(2),
+        `"${r.feePercent}% (${r.feeAllocation})"`,
+        r.buyerFee.toFixed(2),
+        r.sellerFee.toFixed(2),
+        r.totalFee.toFixed(2),
+        `"${r.commStatus}"`,
+        `"${(r.buyer || '').replace(/"/g, '""')}"`,
+        `"${(r.seller || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `trustlink_commissions_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
 
 // -------------------------------------------------------------
 // User Management (searchable) + Role Management

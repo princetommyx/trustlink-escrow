@@ -44,6 +44,9 @@
                 <a href="#" class="nav-item active" data-target="view-overview">
                     <span class="nav-text" data-short="Stats" style="color: #64748b;">Analytics</span>
                 </a>
+                <a href="#" class="nav-item" data-target="view-commissions">
+                    <span class="nav-text" data-short="Revenue" style="color: #64748b;">Commission Wallet</span>
+                </a>
                 <a href="#" class="nav-item" data-target="view-users">
                     <span class="nav-text" data-short="Users" style="color: #64748b;">Users & KYC</span>
                 </a>
@@ -98,9 +101,23 @@
                     <div class="dashboard-main-col">
                         <!-- Top Row: My Card & Financial Record -->
                         <div class="dashboard-top-row">
-                            <div class="my-card-widget">
-                                <h3 style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 24px; font-weight: 500;">Total Escrowed Funds</h3>
-                                <h2 id="stat-total-escrowed" style="color: white; font-size: 2.2rem; margin: 0; font-family: 'Outfit', sans-serif;">Loading...</h2>
+                            <div class="my-card-widget commission-hero-card">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                    <h3 style="color: rgba(255,255,255,0.75); font-size: 0.85rem; margin: 0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">TrustLink Commission Wallet</h3>
+                                    <span class="commission-badge">Revenue 💰</span>
+                                </div>
+                                <h2 id="stat-total-commission-hero" style="color: #34d399; font-size: 2.2rem; margin: 0 0 16px; font-family: 'Outfit', sans-serif; font-weight: 800;">GH₵ 0.00</h2>
+                                <div class="commission-hero-sub">
+                                    <div class="commission-sub-item">
+                                        <span class="sub-label">Active In Escrow</span>
+                                        <strong id="stat-total-escrowed" style="color: #ffffff;">Loading...</strong>
+                                    </div>
+                                    <div class="commission-sub-divider"></div>
+                                    <div class="commission-sub-item">
+                                        <span class="sub-label">Realized Revenue</span>
+                                        <strong id="stat-realized-commission-hero" style="color: #a7f3d0;">GH₵ 0.00</strong>
+                                    </div>
+                                </div>
                                 <div class="card-bg-shape"></div>
                             </div>
                             
@@ -109,6 +126,12 @@
                                     <h3 style="margin: 0; font-size: 1.1rem; color: #111827;">Trustlink Records</h3>
                                 </div>
                                 <div class="financial-cards-grid">
+                                    <div class="fin-card bg-purple">
+                                        <div class="fin-top">
+                                            <span class="fin-label">All-Time Commission</span>
+                                        </div>
+                                        <h3 class="fin-value" id="stat-total-commission-card" style="color: #7e22ce;">...</h3>
+                                    </div>
                                     <div class="fin-card bg-green">
                                         <div class="fin-top">
                                             <span class="fin-label">Total Users</span>
@@ -120,12 +143,6 @@
                                             <span class="fin-label">Total Deposited</span>
                                         </div>
                                         <h3 class="fin-value" id="stat-total-deposits">...</h3>
-                                    </div>
-                                    <div class="fin-card bg-blue">
-                                        <div class="fin-top">
-                                            <span class="fin-label">Total Withdrawn</span>
-                                        </div>
-                                        <h3 class="fin-value" id="stat-total-withdrawals">...</h3>
                                     </div>
                                 </div>
                             </div>
@@ -167,6 +184,7 @@
                         
                         <!-- Hidden old stats to prevent JS errors -->
                         <div style="display: none;">
+                            <span id="stat-total-withdrawals"></span>
                             <span id="stat-active-users"></span>
                             <span id="stat-email-unverified-users"></span>
                             <span id="stat-mobile-unverified-users"></span>
@@ -208,6 +226,125 @@
                                     <span>24ms</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Commission & Revenue Wallet View -->
+                <div id="view-commissions" class="view-section hidden">
+                    <div class="view-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+                        <div>
+                            <h2 style="margin: 0 0 4px;">Platform Commission Wallet</h2>
+                            <p style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">Real-time tracking of small transaction charges, fee splits, and platform revenue.</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <div class="timeframe-selector" id="commission-timeframe">
+                                <button class="tf-btn active" data-tf="all">All Time</button>
+                                <button class="tf-btn" data-tf="month">This Month</button>
+                                <button class="tf-btn" data-tf="week">This Week</button>
+                                <button class="tf-btn" data-tf="today">Today</button>
+                            </div>
+                            <button id="btn-export-commissions" class="btn btn-outline btn-sm" style="border-color: #cbd5e1; color: #334155; display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #ffffff;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.5V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                                Export CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Commission Highlights Cards -->
+                    <div class="commission-stats-grid">
+                        <div class="stat-card-modern commission-card-highlight">
+                            <div class="stat-info">
+                                <span class="stat-label">Total Commission Accumulated</span>
+                                <h3 class="stat-value" id="comm-stat-total" style="color: #059669;">GH₵ 0.00</h3>
+                                <span class="stat-sub" id="comm-stat-total-sub">Across all completed & active orders</span>
+                            </div>
+                            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.12); color: #10B981;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                        </div>
+
+                        <div class="stat-card-modern">
+                            <div class="stat-info">
+                                <span class="stat-label">Realized Revenue</span>
+                                <h3 class="stat-value" id="comm-stat-realized" style="color: #2563eb;">GH₵ 0.00</h3>
+                                <span class="stat-sub">From completed / released escrows</span>
+                            </div>
+                            <div class="stat-icon" style="background: rgba(37, 99, 235, 0.12); color: #2563eb;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                        </div>
+
+                        <div class="stat-card-modern">
+                            <div class="stat-info">
+                                <span class="stat-label">Pending In Escrow</span>
+                                <h3 class="stat-value" id="comm-stat-pending" style="color: #d97706;">GH₵ 0.00</h3>
+                                <span class="stat-sub">Locked in active transactions</span>
+                            </div>
+                            <div class="stat-icon" style="background: rgba(217, 119, 6, 0.12); color: #d97706;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                        </div>
+
+                        <div class="stat-card-modern">
+                            <div class="stat-info">
+                                <span class="stat-label">Gross Order Volume (GMV)</span>
+                                <h3 class="stat-value" id="comm-stat-gmv" style="color: #7c3aed;">GH₵ 0.00</h3>
+                                <span class="stat-sub" id="comm-stat-orders-count">0 orders total</span>
+                            </div>
+                            <div class="stat-icon" style="background: rgba(124, 58, 237, 0.12); color: #7c3aed;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6H2.25m0 0v1.5a60.082 60.082 0 0015.797 2.101c.727.198 1.453-.342 1.453-1.096V7.5M3.75 4.5v15M3.75 4.5h16.5" /></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fee Breakdown Cards -->
+                    <div class="commission-breakdown-row" style="margin-bottom: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                        <div class="portal-card admin-table-white" style="padding: 20px;">
+                            <div style="font-size: 0.85rem; color: #64748b; font-weight: 500;">Buyer Fee Surcharges</div>
+                            <div style="font-size: 1.4rem; font-weight: 700; color: #1e293b; margin-top: 6px;" id="comm-buyer-fee-total">GH₵ 0.00</div>
+                            <div style="font-size: 0.8rem; color: #10b981; margin-top: 4px;">Collected on top of item prices</div>
+                        </div>
+                        <div class="portal-card admin-table-white" style="padding: 20px;">
+                            <div style="font-size: 0.85rem; color: #64748b; font-weight: 500;">Seller Fee Deductions</div>
+                            <div style="font-size: 1.4rem; font-weight: 700; color: #1e293b; margin-top: 6px;" id="comm-seller-fee-total">GH₵ 0.00</div>
+                            <div style="font-size: 0.8rem; color: #6366f1; margin-top: 4px;">Deducted from final seller payouts</div>
+                        </div>
+                        <div class="portal-card admin-table-white" style="padding: 20px;">
+                            <div style="font-size: 0.85rem; color: #64748b; font-weight: 500;">Avg. Commission Per Order</div>
+                            <div style="font-size: 1.4rem; font-weight: 700; color: #1e293b; margin-top: 6px;" id="comm-avg-fee">GH₵ 0.00</div>
+                            <div style="font-size: 0.8rem; color: #9333ea; margin-top: 4px;">Standard Platform Cut: 2.5%</div>
+                        </div>
+                    </div>
+
+                    <!-- Commission Ledger Table -->
+                    <div style="margin-top: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <h3 style="margin: 0 0 2px; font-size: 1.1rem; color: #111827;">Commission Ledger (Order Fees)</h3>
+                                <p style="margin: 0; font-size: 0.85rem; color: #64748b;">Itemized list of every fee collected by TrustLink from escrows and payments.</p>
+                            </div>
+                            <input type="text" id="commission-search" placeholder="Search orders by item, buyer, seller..." style="background: #ffffff; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; color: #1e293b; font-size: 0.85rem; width: 280px;">
+                        </div>
+
+                        <div class="portal-card admin-table-white" style="padding: 0; overflow-x: auto;">
+                            <table class="transaction-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Order / Ref</th>
+                                        <th>Gross Amount</th>
+                                        <th>Fee Rate</th>
+                                        <th>Buyer Fee</th>
+                                        <th>Seller Fee</th>
+                                        <th>Platform Commission</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-commission-ledger-list">
+                                    <tr><td colspan="8" style="text-align: center; color: #64748b; padding: 24px;">Loading commission ledger...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
