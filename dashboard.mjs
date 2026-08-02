@@ -20,17 +20,23 @@ navItems.forEach(item => {
     item.addEventListener('click', (e) => {
         e.preventDefault();
         
+        const targetId = item.getAttribute('data-target');
+        if (!targetId) return;
+
         // Remove active class from all
         navItems.forEach(nav => nav.classList.remove('active'));
         views.forEach(view => view.classList.add('hidden'));
         
-        // Add active to clicked
-        item.classList.add('active');
-        const targetId = item.getAttribute('data-target');
-        document.getElementById(targetId).classList.remove('hidden');
+        // Add active to all matching nav items (sidebar + bottom nav)
+        document.querySelectorAll(`.nav-item[data-target="${targetId}"]`).forEach(nav => nav.classList.add('active'));
+        const targetView = document.getElementById(targetId);
+        if (targetView) targetView.classList.remove('hidden');
         
         // Update Title
-        topbarTitle.textContent = item.querySelector('.nav-text').textContent.trim();
+        const navTextEl = item.querySelector('.nav-text');
+        if (navTextEl && topbarTitle) {
+            topbarTitle.textContent = navTextEl.textContent.trim();
+        }
     });
 });
 
