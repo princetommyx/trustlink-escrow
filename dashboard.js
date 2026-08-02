@@ -721,40 +721,92 @@ document.getElementById('avatar-upload-input')?.addEventListener('change', async
     const saveBtn = document.getElementById('btn-save-profile');
     if(statusText) {
         statusText.style.display = 'block';
-        statusText.textContent = 'Uploading... Please wait.';
+        statusText.textContent = 'Optimizing & uploading... Please wait.';
         statusText.style.color = '#10B981';
     }
     if(saveBtn) saveBtn.disabled = true;
 
-    // Show immediate local preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const avatarEl = document.getElementById('profile-avatar');
-        if (avatarEl) avatarEl.style.backgroundImage = `url('${e.target.result}')`;
+    // Helper: compress image to fast, lightweight avatar (< 50KB)
+    const compressImage = (imageFile) => {
+        return new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onerror = reject;
+            r.onload = () => {
+                const img = new Image();
+                img.onerror = reject;
+                img.onload = () => {
+                    const maxSize = 256;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > h) {
+                        if (w > maxSize) {
+                            h = Math.round((h * maxSize) / w);
+                            w = maxSize;
+                        }
+                    } else {
+                        if (h > maxSize) {
+                            w = Math.round((w * maxSize) / h);
+                            h = maxSize;
+                        }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    canvas.toBlob((blob) => {
+                        resolve({ blob: blob || imageFile, dataUrl });
+                    }, 'image/jpeg', 0.85);
+                };
+                img.src = r.result;
+            };
+            r.readAsDataURL(imageFile);
+        });
     };
-    reader.readAsDataURL(file);
 
     try {
-        const fileExt = file.name.split('.').pop();
-        const storageRef = ref(storage, `users/${currentUser.uid}/profile_${Date.now()}.${fileExt}`);
-        
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
+        const { blob, dataUrl } = await compressImage(file);
+
+        // Immediate visual preview
+        const avatarEl = document.getElementById('profile-avatar');
+        if (avatarEl) avatarEl.style.backgroundImage = `url('${dataUrl}')`;
+
+        let finalPhotoURL = dataUrl;
+
+        // Attempt Firebase Storage with a 5s race timeout
+        try {
+            const storageRef = ref(storage, `users/${currentUser.uid}/profile_${Date.now()}.jpg`);
+            const uploadTask = uploadBytes(storageRef, blob).then(() => getDownloadURL(storageRef));
+            const timeoutTask = new Promise((_, reject) => setTimeout(() => reject(new Error('Storage Timeout')), 5000));
+            
+            const storageUrl = await Promise.race([uploadTask, timeoutTask]);
+            if (storageUrl) {
+                finalPhotoURL = storageUrl;
+            }
+        } catch (storageErr) {
+            console.warn("Storage upload timed out or unavailable; using optimized data URL:", storageErr);
+            finalPhotoURL = dataUrl;
+        }
 
         await updateDoc(doc(db, "users", currentUser.uid), {
-            photoURL: downloadURL
+            photoURL: finalPhotoURL
         });
 
+        if (avatarEl) avatarEl.style.backgroundImage = `url('${finalPhotoURL}')`;
+
         if(statusText) {
-            statusText.textContent = 'Uploaded successfully!';
-            setTimeout(() => { statusText.style.display = 'none'; }, 2000);
+            statusText.textContent = 'Avatar updated successfully!';
+            statusText.style.color = '#10B981';
+            setTimeout(() => { statusText.style.display = 'none'; }, 2500);
         }
     } catch (error) {
+        console.error("Avatar upload error:", error);
         if(statusText) {
             statusText.textContent = 'Upload failed. Please try again.';
             statusText.style.color = '#EF4444';
         }
-        alert("Failed to upload avatar: " + error.message);
+        alert("Failed to upload avatar: " + (error.message || "Please check your network connection."));
     } finally {
         if(saveBtn) saveBtn.disabled = false;
     }

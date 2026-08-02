@@ -8,5 +8,11 @@
       "firebase-debug.*.log",
       "*.local"
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
   }
 }
