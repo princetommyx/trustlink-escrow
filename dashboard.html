@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
     <title>TrustLink Dashboard - Control Center</title>
     <link rel="icon" href="img/logo.png">
     <!-- Syncing your team's core templates with your new separated style sheet -->
@@ -48,7 +49,7 @@
                     </span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-escrows">
-                    <span class="nav-text" data-short="Escrows">Escrow Contracts</span>
+                    <span class="nav-text" data-short="Orders">Orders</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-products">
                     <span class="nav-text" data-short="Products">My Products</span>
@@ -92,7 +93,7 @@
             </a>
             <a href="#" class="nav-item" data-target="view-escrows">
                 <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg></span>
-                <span class="nav-text">Escrows</span>
+                <span class="nav-text">Orders</span>
             </a>
             <a href="#" class="nav-item" data-target="view-wallet">
                 <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" /></svg></span>
@@ -185,7 +186,7 @@
                                 <div class="financial-cards-grid">
                                     <div class="fin-card bg-green">
                                         <div class="fin-top">
-                                            <span class="fin-label">Completed Escrows</span>
+                                            <span class="fin-label">Completed Orders</span>
                                             <span class="fin-dots">⋮</span>
                                         </div>
                                         <div class="fin-graph-placeholder">
@@ -198,7 +199,7 @@
                                     </div>
                                     <div class="fin-card bg-orange">
                                         <div class="fin-top">
-                                            <span class="fin-label">Active Escrows</span>
+                                            <span class="fin-label">Active Orders</span>
                                             <span class="fin-dots">⋮</span>
                                         </div>
                                         <div class="fin-graph-placeholder">
@@ -229,9 +230,9 @@
                         <!-- Money Flow (Chart Placeholder) -->
                         <div class="money-flow-widget" style="margin-top: 32px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
-                                <h3 style="margin: 0; font-size: 1.1rem; color: #111827; font-weight: 600;">Escrow Flow</h3>
+                                <h3 style="margin: 0; font-size: 1.1rem; color: #111827; font-weight: 600;">Order Flow</h3>
                                 <div style="display: flex; gap: 16px; font-size: 0.85rem; color: #64748B;">
-                                    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #111827;"></span> Total Escrows</span>
+                                    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #111827;"></span> Total Orders</span>
                                     <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #F97316;"></span> Pending Volumes</span>
                                 </div>
                                 <div class="dropdown" style="font-size: 0.85rem; color: #64748B; background: #F8F9FA; padding: 6px 12px; border-radius: 8px; border: 1px solid #E2E8F0; cursor: pointer;">Weekly ▼</div>
@@ -265,7 +266,7 @@
                             <!-- Create Escrow (like Send Money To) -->
                             <div class="action-card" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
-                                    <h3 style="margin: 0; font-size: 1.05rem; color: #111827; font-weight: 600;">Create Escrow</h3>
+                                    <h3 style="margin: 0; font-size: 1.05rem; color: #111827; font-weight: 600;">Create Order</h3>
                                     <span style="color: #64748B; cursor: pointer;">⋮</span>
                                 </div>
                                 <div style="display: flex; gap: 12px; align-items: center;">
@@ -375,10 +376,10 @@
                     </div>
                 </div>
 
-                <!-- Escrows View -->
+                <!-- Escrows/Orders View -->
                 <div id="view-escrows" class="view-section hidden">
                     <div class="view-header" style="justify-content: space-between; align-items: center; display: flex;">
-                        <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #111827;">Escrow Contracts</h2>
+                        <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #111827;">Orders</h2>
                         <button class="btn btn-primary" id="btn-new-escrow-trigger" style="background: #111827; border-radius: 20px; padding: 10px 20px;">+ Initiate Order</button>
                     </div>
                     <div class="view-toggles" style="margin-bottom: 24px; margin-top: 16px;">
@@ -583,8 +584,7 @@
                             </div>
                             <div style="display: flex; gap: 16px;">
                                 <button class="btn btn-primary"
-                                    onclick="if(document.getElementById('btn-new-escrow')) document.getElementById('btn-new-escrow').click();">New
-                                    Escrow</button>
+                                    onclick="if(document.getElementById('btn-new-escrow')) document.getElementById('btn-new-escrow').click();">Initiate Order</button>
                                 <button class="btn btn-outline" id="btn-withdraw">Withdraw</button>
                             </div>
                         </div>
@@ -660,6 +660,33 @@
                                 </button>
                             </div>
                             <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; display: block;">Used for SMS alerts: payment received, delivery confirmed, and withdrawal updates.</span>
+
+                            <!-- Inline OTP Verification Box -->
+                            <div id="inline-otp-section" style="display: none; margin-top: 14px; padding: 16px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; transition: all 0.3s ease;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <div style="font-size: 0.85rem; font-weight: 600; color: #1E293B;">
+                                        Enter 4-digit code sent to <span id="inline-otp-target-phone" style="font-weight: 700; color: #2563EB;"></span>
+                                    </div>
+                                    <button type="button" id="btn-inline-cancel-otp" style="background: none; border: none; font-size: 0.8rem; color: #64748B; cursor: pointer; text-decoration: underline;">Cancel</button>
+                                </div>
+
+                                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                    <input type="text" id="inline-phone-otp-input" placeholder="••••" maxlength="4" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{4}" style="width: 130px; text-align: center; font-size: 1.3rem; font-weight: 700; letter-spacing: 6px; padding: 10px; border-radius: 8px; border: 1.5px solid #CBD5E1; background: #FFFFFF; color: #0F172A; font-family: monospace;">
+                                    
+                                    <button type="button" id="btn-inline-verify-otp" class="btn btn-primary" style="padding: 11px 20px; font-weight: 600; font-size: 0.88rem; border-radius: 8px; background: #111827; color: white; border: none; cursor: pointer;">
+                                        Verify Code
+                                    </button>
+
+                                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #64748B; margin-left: auto;">
+                                        <button type="button" id="btn-inline-resend-otp" style="background: none; border: none; color: #2563EB; font-weight: 600; cursor: pointer; padding: 0; font-size: 0.8rem;">Resend Code</button>
+                                        <span id="inline-resend-timer" style="color: #94A3B8; display: none;">(in <span id="inline-resend-countdown">30</span>s)</span>
+                                    </div>
+                                </div>
+
+                                <div id="inline-phone-otp-error" style="color: #EF4444; font-size: 0.82rem; margin-top: 8px; font-weight: 500; display: none;">
+                                    Invalid verification code. Please check SMS and try again.
+                                </div>
+                            </div>
                         </div>
                         <button class="btn btn-primary" id="btn-save-profile"
                             style="margin-top: 8px; max-width: 200px;">Save Profile</button>
@@ -739,80 +766,86 @@
 
                 <!-- WhatsApp Bot Hub View -->
                 <div id="view-whatsapp" class="view-section hidden">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-                        <div>
-                            <h2 style="margin: 0 0 6px 0; font-size: 1.5rem; color: #111827;">WhatsApp Bot Assistant</h2>
-                            <p style="margin: 0; color: #64748B; font-size: 0.9rem;">Generate escrow links, mark deliveries as shipped, and track buyer payments directly from WhatsApp.</p>
-                        </div>
-                        <a href="https://wa.me/16624904332?text=MENU" target="_blank" class="btn" style="background: #10B981; color: white; border-radius: 12px; padding: 12px 20px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                            <span>💬</span> Open WhatsApp Chat
-                        </a>
+                    <div style="margin-bottom: 24px;">
+                        <h2 style="margin: 0 0 6px 0; font-size: 1.5rem; font-weight: 700; color: #111827;">WhatsApp Bot Assistant</h2>
+                        <p style="margin: 0; color: #64748B; font-size: 0.95rem;">Generate escrow links, mark deliveries, and track buyer payments directly from WhatsApp.</p>
                     </div>
 
                     <!-- Bot Status & Info Card -->
-                    <div class="portal-card portal-card-white" style="margin-bottom: 24px; background: linear-gradient(135deg, #064E3B 0%, #065F46 100%); color: white; border-radius: 20px; padding: 28px; box-shadow: 0 10px 25px -5px rgba(6, 78, 59, 0.3);">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
-                            <div>
-                                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.25); border: 1px solid #10B981; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px;">
-                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; display: inline-block; box-shadow: 0 0 8px #10B981;"></span>
-                                    <span style="font-size: 0.8rem; font-weight: 700; color: #A7F3D0; text-transform: uppercase; letter-spacing: 0.5px;">Live & Operational</span>
+                    <div class="portal-card portal-card-white wa-bot-hero-card" style="margin-bottom: 24px; border-radius: 20px; padding: 28px; border: 1px solid #E2E8F0;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 24px;">
+                            <div style="flex: 1; min-width: 280px;">
+                                <div style="display: inline-flex; align-items: center; gap: 8px; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 5px 12px; border-radius: 20px; margin-bottom: 16px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; display: inline-block; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);"></span>
+                                    <span style="font-size: 0.75rem; font-weight: 700; color: #065F46; text-transform: uppercase; letter-spacing: 0.5px;">Live & Operational</span>
                                 </div>
-                                <h3 style="margin: 0 0 8px 0; font-size: 1.4rem; color: white; font-weight: 700;">TrustLink WhatsApp Business Assistant</h3>
-                                <p style="margin: 0 0 16px 0; color: #D1FAE5; font-size: 0.95rem; max-width: 600px; line-height: 1.5;">
-                                    Chat directly with our automated bot number to create escrow contracts for your social media customers in less than 10 seconds.
+                                <h3 style="margin: 0 0 8px 0; font-size: 1.35rem; color: #111827; font-weight: 700;">TrustLink WhatsApp Assistant</h3>
+                                <p style="margin: 0 0 20px 0; color: #64748B; font-size: 0.95rem; max-width: 580px; line-height: 1.5;">
+                                    Chat directly with our verified automated bot to create escrow contracts for your social media customers in less than 10 seconds.
                                 </p>
+                                
                                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                    <div style="background: rgba(0,0,0,0.25); padding: 10px 16px; border-radius: 12px; font-family: monospace; font-size: 1.05rem; font-weight: 600; color: white; border: 1px solid rgba(255,255,255,0.15);">
-                                        📱 +1 (662) 490-4332
+                                    <div class="wa-number-box" style="display: inline-flex; align-items: center; gap: 10px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 16px;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366" style="flex-shrink: 0;"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.99.54 1.772.82 2.796.82 3.18 0 5.766-2.586 5.767-5.766.001-3.182-2.585-5.766-5.767-5.766zm3.374 8.163c-.144.405-.837.774-1.17.824-.312.045-.694.073-2.18-.545-1.579-.658-2.614-2.27-2.693-2.375-.078-.106-.639-.85-.639-1.623 0-.773.407-1.154.551-1.312.144-.158.314-.198.418-.198.105 0 .21.002.301.007.097.005.226-.037.353.268.131.314.445 1.087.485 1.166.039.08.066.173.013.279-.053.106-.079.172-.158.264-.078.093-.165.207-.236.279-.08.08-.163.167-.07.327.093.16.413.682.886 1.103.609.542 1.123.71 1.282.789.159.08.252.067.346-.04.093-.107.401-.468.508-.628.106-.16.213-.133.359-.08.147.053.931.439 1.09.519.16.08.266.12.306.186.039.067.039.387-.105.792z"/></svg>
+                                        <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1rem; font-weight: 700; color: #0F172A; text-decoration: none !important;">+1 (662) 490-4332</span>
+                                        <button class="btn-copy-num" style="background: white; border: 1px solid #CBD5E1; color: #334155; font-size: 0.8rem; font-weight: 600; padding: 4px 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;" onclick="navigator.clipboard.writeText('+16624904332'); if (window.showModernToast) window.showModernToast('Number copied to clipboard!', 'success'); else alert('Copied!');">
+                                            Copy
+                                        </button>
                                     </div>
-                                    <button class="btn btn-sm" style="background: white; color: #065F46; border: none; font-weight: 700; border-radius: 10px; padding: 10px 16px; cursor: pointer;" onclick="navigator.clipboard.writeText('+16624904332'); if (window.showModernToast) window.showModernToast('Number copied to clipboard!', 'success'); else alert('Copied!');">
-                                        Copy Number
-                                    </button>
+                                    <a href="https://wa.me/16624904332?text=MENU" target="_blank" class="btn btn-primary" style="background: #111827; color: white; border-radius: 12px; padding: 10px 18px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 0.9rem; transition: background 0.2s;">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.99.54 1.772.82 2.796.82 3.18 0 5.766-2.586 5.767-5.766.001-3.182-2.585-5.766-5.767-5.766z"/></svg> Open WhatsApp Chat
+                                    </a>
                                 </div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 16px 20px; text-align: center; min-width: 160px;">
-                                <div style="font-size: 2rem; margin-bottom: 4px;">⚡</div>
-                                <div style="font-size: 0.8rem; color: #A7F3D0; margin-bottom: 2px;">Avg. Link Creation</div>
-                                <div style="font-size: 1.3rem; font-weight: 700; color: white;">3 Seconds</div>
+                            
+                            <div class="wa-metrics-container" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 16px; padding: 18px 22px; text-align: center; min-width: 120px; flex: 1;">
+                                    <div style="font-size: 1.25rem; font-weight: 800; color: #111827; margin-bottom: 2px;">⚡ 3 Sec</div>
+                                    <div style="font-size: 0.78rem; color: #64748B; font-weight: 500;">Link Creation</div>
+                                </div>
+                                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 16px; padding: 18px 22px; text-align: center; min-width: 120px; flex: 1;">
+                                    <div style="font-size: 1.25rem; font-weight: 800; color: #111827; margin-bottom: 2px;">🔒 100%</div>
+                                    <div style="font-size: 0.78rem; color: #64748B; font-weight: 500;">Secure Escrow</div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Interactive Command Generator -->
-                    <div class="portal-card portal-card-white" style="margin-bottom: 24px; border-radius: 20px; padding: 28px;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                            <span style="font-size: 1.3rem;">🛠️</span>
-                            <h3 style="margin: 0; font-size: 1.15rem; color: #111827; font-weight: 700;">Interactive WhatsApp Command Builder</h3>
+                    <div class="portal-card portal-card-white" style="margin-bottom: 24px; border-radius: 20px; padding: 28px; border: 1px solid #E2E8F0;">
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 6px 0; font-size: 1.15rem; color: #111827; font-weight: 700;">Interactive Command Generator</h3>
+                            <p style="margin: 0; color: #64748B; font-size: 0.9rem;">
+                                Fill in your sale details to automatically compose a command ready to paste into WhatsApp.
+                            </p>
                         </div>
-                        <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 20px;">
-                            Fill in your sale details below to generate a pre-formatted command you can paste directly into WhatsApp.
-                        </p>
                         
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
-                            <div>
+                            <div class="form-group" style="margin-bottom: 0;">
                                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Price (GH₵)</label>
-                                <input type="number" id="wa-gen-price" placeholder="e.g. 450" style="width: 100%; padding: 12px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem;" oninput="window.updateWaPreviewCommand()">
+                                <input type="number" id="wa-gen-price" placeholder="e.g. 450" style="width: 100%; padding: 12px 14px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem; outline: none;" oninput="window.updateWaPreviewCommand()">
                             </div>
-                            <div>
+                            <div class="form-group" style="margin-bottom: 0;">
                                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Item Name / Description</label>
-                                <input type="text" id="wa-gen-item" placeholder="e.g. Nike Air Max" style="width: 100%; padding: 12px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem;" oninput="window.updateWaPreviewCommand()">
+                                <input type="text" id="wa-gen-item" placeholder="e.g. Nike Air Max" style="width: 100%; padding: 12px 14px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem; outline: none;" oninput="window.updateWaPreviewCommand()">
                             </div>
-                            <div>
+                            <div class="form-group" style="margin-bottom: 0;">
                                 <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Buyer Phone (Ghana MoMo)</label>
-                                <input type="tel" id="wa-gen-phone" placeholder="e.g. 0244123456" style="width: 100%; padding: 12px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem;" oninput="window.updateWaPreviewCommand()">
+                                <input type="tel" id="wa-gen-phone" placeholder="e.g. 0244123456" style="width: 100%; padding: 12px 14px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem; outline: none;" oninput="window.updateWaPreviewCommand()">
                             </div>
                         </div>
 
-                        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-                            <div>
-                                <div style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 4px;">Generated WhatsApp Message</div>
-                                <code id="wa-command-preview" style="font-family: monospace; font-size: 1.1rem; color: #0F172A; font-weight: 700;">CREATE 450 Nike Air Max 0244123456</code>
+                        <!-- Output Box -->
+                        <div style="background: #0F172A; border-radius: 14px; padding: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+                            <div style="min-width: 220px; flex: 1;">
+                                <div style="font-size: 0.72rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Generated Message</div>
+                                <code id="wa-command-preview" style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1.05rem; color: #34D399; font-weight: 700; word-break: break-all;">CREATE 450 Nike Air Max 0244123456</code>
                             </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button class="btn btn-outline" style="border: 1px solid #CBD5E1; background: white; color: #1E293B; border-radius: 10px; font-weight: 600; padding: 10px 16px;" onclick="window.copyWaCommand()">
-                                    📋 Copy Command
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button class="btn btn-outline" style="border: 1px solid #334155; background: rgba(255,255,255,0.08); color: white; border-radius: 10px; font-weight: 600; padding: 10px 16px; cursor: pointer; transition: all 0.2s;" onclick="window.copyWaCommand()">
+                                    📋 Copy
                                 </button>
-                                <a id="wa-direct-send-btn" href="https://wa.me/16624904332?text=CREATE%20450%20Nike%20Air%20Max%200244123456" target="_blank" class="btn" style="background: #10B981; color: white; border-radius: 10px; font-weight: 600; padding: 10px 18px; text-decoration: none;">
+                                <a id="wa-direct-send-btn" href="https://wa.me/16624904332?text=CREATE%20450%20Nike%20Air%20Max%200244123456" target="_blank" class="btn" style="background: #25D366; color: white; border-radius: 10px; font-weight: 700; padding: 10px 18px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                                     Send to Bot ➔
                                 </a>
                             </div>
@@ -824,62 +857,62 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 32px;">
                         
                         <!-- Command 1: CREATE Fast -->
-                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="background: #DCFCE7; color: #15803D; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">FAST CREATE</span>
+                        <div class="wa-cmd-card" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="background: #DCFCE7; color: #15803D; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">FAST CREATE</span>
                                 <button style="background: none; border: none; color: #059669; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('CREATE 350 Shoes 0244123456'); window.showModernToast('Copied example command!', 'success');">Copy</button>
                             </div>
-                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">CREATE &lt;Amount&gt; &lt;Item&gt; &lt;Phone&gt;</code>
-                            <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Creates an escrow link immediately and sends an automated SMS alert to the buyer.</p>
+                            <code style="display: block; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.88rem; font-family: monospace;">CREATE &lt;Amount&gt; &lt;Item&gt; &lt;Phone&gt;</code>
+                            <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Creates an order link immediately and sends an automated SMS alert to the buyer.</p>
                         </div>
 
                         <!-- Command 2: Guided Wizard -->
-                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="background: #E0E7FF; color: #4338CA; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">GUIDED WIZARD</span>
+                        <div class="wa-cmd-card" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="background: #E0E7FF; color: #4338CA; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">GUIDED WIZARD</span>
                                 <button style="background: none; border: none; color: #4338CA; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('NEW'); window.showModernToast('Copied command!', 'success');">Copy</button>
                             </div>
-                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">NEW</code>
+                            <code style="display: block; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.88rem; font-family: monospace;">NEW</code>
                             <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Starts an interactive 4-step wizard asking for Item, Price, Phone, and Fee Split.</p>
                         </div>
 
                         <!-- Command 3: STATUS -->
-                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="background: #FEF3C7; color: #B45309; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">ORDER TRACKING</span>
+                        <div class="wa-cmd-card" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="background: #FEF3C7; color: #B45309; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">ORDER TRACKING</span>
                                 <button style="background: none; border: none; color: #B45309; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('STATUS'); window.showModernToast('Copied command!', 'success');">Copy</button>
                             </div>
-                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">STATUS</code>
-                            <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Lists your recent orders and live payment statuses (Awaiting Payment, Escrowed, etc.).</p>
+                            <code style="display: block; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.88rem; font-family: monospace;">STATUS</code>
+                            <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Lists your recent orders and live payment statuses (Awaiting Payment, Funded, etc.).</p>
                         </div>
 
                         <!-- Command 4: SHIP -->
-                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="background: #F3E8FF; color: #7E22CE; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">DISPATCH</span>
+                        <div class="wa-cmd-card" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="background: #F3E8FF; color: #7E22CE; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">DISPATCH</span>
                                 <button style="background: none; border: none; color: #7E22CE; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('SHIP'); window.showModernToast('Copied command!', 'success');">Copy</button>
                             </div>
-                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">SHIP &lt;EscrowID&gt;</code>
+                            <code style="display: block; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.88rem; font-family: monospace;">SHIP &lt;OrderID&gt;</code>
                             <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Marks the package as dispatched and sends a delivery notification SMS to the buyer.</p>
                         </div>
 
                         <!-- Command 5: BALANCE -->
-                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="background: #E0F2FE; color: #0369A1; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">FINANCIALS</span>
+                        <div class="wa-cmd-card" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="background: #E0F2FE; color: #0369A1; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">FINANCIALS</span>
                                 <button style="background: none; border: none; color: #0369A1; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('BALANCE'); window.showModernToast('Copied command!', 'success');">Copy</button>
                             </div>
-                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">BALANCE</code>
+                            <code style="display: block; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.88rem; font-family: monospace;">BALANCE</code>
                             <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Returns your available wallet balance and funds currently locked in escrow.</p>
                         </div>
 
                         <!-- Command 6: MENU -->
-                        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="background: #F1F5F9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 8px;">NAVIGATION</span>
+                        <div class="wa-cmd-card" style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="background: #F1F5F9; color: #475569; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">NAVIGATION</span>
                                 <button style="background: none; border: none; color: #475569; font-weight: 600; font-size: 0.8rem; cursor: pointer;" onclick="navigator.clipboard.writeText('MENU'); window.showModernToast('Copied command!', 'success');">Copy</button>
                             </div>
-                            <code style="display: block; background: #F1F5F9; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.9rem;">MENU or HELP</code>
+                            <code style="display: block; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px 12px; border-radius: 8px; font-weight: 700; color: #0F172A; margin-bottom: 8px; font-size: 0.88rem; font-family: monospace;">MENU or HELP</code>
                             <p style="margin: 0; font-size: 0.85rem; color: #64748B; line-height: 1.4;">Displays the full interactive command list and options inside WhatsApp chat.</p>
                         </div>
 

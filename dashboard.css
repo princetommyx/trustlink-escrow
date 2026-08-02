@@ -660,6 +660,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .modal-actions {
@@ -720,6 +721,7 @@ input[type=number] {
     margin: 0 0 20px 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1669,3 +1671,75 @@ input[type=number] {
         z-index: 2147483647 !important;
     }
 }
+
+/* Inline Phone OTP Verification Section */
+#inline-otp-section {
+    background: #F8FAFC;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    animation: fadeInSlideDown 0.3s ease-out;
+}
+
+#inline-phone-otp-input:focus {
+    border-color: #2563EB !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    outline: none;
+}
+
+@keyframes fadeInSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* WhatsApp Bot Hub UI */
+.wa-bot-hero-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+}
+
+.wa-number-box {
+    transition: all 0.2s ease;
+}
+
+.wa-number-box:hover {
+    border-color: #CBD5E1;
+    background: #F1F5F9;
+}
+
+.btn-copy-num:hover {
+    background: #F8FAFC !important;
+    border-color: #94A3B8 !important;
+}
+
+.btn-copy-num:active {
+    transform: scale(0.96);
+}
+
+.wa-cmd-card {
+    transition: all 0.2s ease;
+}
+
+.wa-cmd-card:hover {
+    transform: translateY(-2px);
+    border-color: #CBD5E1 !important;
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06) !important;
+}
+
+@media (max-width: 768px) {
+    .wa-metrics-container {
+        width: 100%;
+    }
+    .wa-metrics-container > div {
+        flex: 1 1 calc(50% - 6px) !important;
+    }
+}
+
+

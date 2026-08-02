@@ -418,7 +418,7 @@ function loadEscrows() {
         if (!sellerEscrowsContainer) return;
         
         if (snapshot.empty) {
-            sellerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have not created any escrows as a seller.</p>';
+            sellerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have not created any orders as a seller.</p>';
             escrowStats.activeSeller = 0;
             escrowStats.pendingSeller = 0;
             escrowStats.completedSeller = 0;
@@ -491,7 +491,7 @@ function loadEscrows() {
         if (!buyerEscrowsContainer) return;
         
         if (snapshot.empty) {
-            buyerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have no active escrows as a buyer.</p>';
+            buyerEscrowsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">You have no active orders as a buyer.</p>';
             escrowStats.activeBuyer = 0;
             escrowStats.pendingBuyer = 0;
             escrowStats.completedBuyer = 0;
@@ -785,22 +785,47 @@ const btnResendPhoneOtp = document.getElementById('btn-resend-phone-otp');
 const resendTimer = document.getElementById('resend-timer');
 const resendCountdown = document.getElementById('resend-countdown');
 
+// Inline OTP elements
+const inlineOtpSection = document.getElementById('inline-otp-section');
+const inlineOtpTargetPhone = document.getElementById('inline-otp-target-phone');
+const inlinePhoneOtpInput = document.getElementById('inline-phone-otp-input');
+const inlinePhoneOtpError = document.getElementById('inline-phone-otp-error');
+const btnInlineVerifyOtp = document.getElementById('btn-inline-verify-otp');
+const btnInlineResendOtp = document.getElementById('btn-inline-resend-otp');
+const inlineResendTimer = document.getElementById('inline-resend-timer');
+const inlineResendCountdown = document.getElementById('inline-resend-countdown');
+const btnInlineCancelOtp = document.getElementById('btn-inline-cancel-otp');
+
 function startResendCountdown() {
     if (resendInterval) clearInterval(resendInterval);
     let secondsLeft = 30;
+
+    // Modal elements
     if (btnResendPhoneOtp) btnResendPhoneOtp.style.display = 'none';
     if (resendTimer) resendTimer.style.display = 'inline';
     if (resendCountdown) resendCountdown.textContent = secondsLeft;
 
+    // Inline elements
+    if (btnInlineResendOtp) btnInlineResendOtp.style.display = 'none';
+    if (inlineResendTimer) inlineResendTimer.style.display = 'inline';
+    if (inlineResendCountdown) inlineResendCountdown.textContent = secondsLeft;
+
     resendInterval = setInterval(() => {
         secondsLeft--;
         if (resendCountdown) resendCountdown.textContent = secondsLeft;
+        if (inlineResendCountdown) inlineResendCountdown.textContent = secondsLeft;
+        
         if (secondsLeft <= 0) {
             clearInterval(resendInterval);
             if (resendTimer) resendTimer.style.display = 'none';
             if (btnResendPhoneOtp) {
                 btnResendPhoneOtp.style.display = 'inline';
                 btnResendPhoneOtp.disabled = false;
+            }
+            if (inlineResendTimer) inlineResendTimer.style.display = 'none';
+            if (btnInlineResendOtp) {
+                btnInlineResendOtp.style.display = 'inline';
+                btnInlineResendOtp.disabled = false;
             }
         }
     }, 1000);
@@ -837,23 +862,25 @@ document.getElementById('btn-verify-phone-trigger')?.addEventListener('click', a
         console.log(`[PHONE VERIFICATION] Sending OTP ${generatedOtp} to ${phone}`);
         await sendMoolreOTP(phone, generatedOtp);
         
+        // Setup inline OTP box
+        if (inlineOtpSection) {
+            inlineOtpSection.style.display = 'block';
+            if (inlineOtpTargetPhone) inlineOtpTargetPhone.textContent = phone;
+            if (inlinePhoneOtpInput) {
+                inlinePhoneOtpInput.value = '';
+                inlinePhoneOtpInput.style.borderColor = '#CBD5E1';
+                setTimeout(() => inlinePhoneOtpInput.focus(), 150);
+            }
+            if (inlinePhoneOtpError) inlinePhoneOtpError.style.display = 'none';
+        }
+
+        // Setup modal fallback if needed
         if (verifyModalPhone) verifyModalPhone.textContent = phone;
         if (phoneOtpInput) {
             phoneOtpInput.value = '';
             phoneOtpInput.style.borderColor = '#E2E8F0';
         }
         if (phoneOtpError) phoneOtpError.style.display = 'none';
-        
-        if (phoneVerifyModal) {
-            phoneVerifyModal.classList.remove('hidden');
-            if (typeof gsap !== 'undefined') {
-                gsap.fromTo(phoneVerifyModal.querySelector('.modal-content'), 
-                    { scale: 0.9, opacity: 0, y: 20 },
-                    { scale: 1, opacity: 1, y: 0, duration: 0.3, ease: 'back.out(1.7)' }
-                );
-            }
-        }
-        if (phoneOtpInput) setTimeout(() => phoneOtpInput.focus(), 200);
         
         startResendCountdown();
         if (typeof showModernToast === 'function') {
@@ -869,6 +896,109 @@ document.getElementById('btn-verify-phone-trigger')?.addEventListener('click', a
     } finally {
         triggerBtn.disabled = false;
         triggerBtn.textContent = originalText;
+    }
+});
+
+btnInlineCancelOtp?.addEventListener('click', () => {
+    if (inlineOtpSection) inlineOtpSection.style.display = 'none';
+    if (resendInterval) clearInterval(resendInterval);
+});
+
+async function verifySubmittedOtp(enteredOtp, submitBtn, errorElement, inputElement) {
+    if (!currentUser || !pendingPhoneVerification) return;
+
+    if (enteredOtp !== pendingPhoneVerification.otp) {
+        if (errorElement) {
+            errorElement.textContent = "Invalid verification code. Please check your SMS and try again.";
+            errorElement.style.display = 'block';
+        }
+        if (inputElement) {
+            inputElement.style.borderColor = '#EF4444';
+            inputElement.focus();
+        }
+        return;
+    }
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying...';
+    }
+
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), {
+            phone: pendingPhoneVerification.phone,
+            phoneVerified: true,
+            phoneVerifiedAt: serverTimestamp()
+        });
+
+        isPhoneVerified = true;
+        verifiedPhone = pendingPhoneVerification.phone;
+        updatePhoneBadgeUI();
+
+        if (inlineOtpSection) inlineOtpSection.style.display = 'none';
+        if (phoneVerifyModal) phoneVerifyModal.classList.add('hidden');
+        if (resendInterval) clearInterval(resendInterval);
+        
+        if (typeof showModernToast === 'function') {
+            showModernToast("Phone Verified! 🎉", "Your phone number has been verified successfully.", "success");
+        }
+    } catch (error) {
+        console.error("Error saving phone verification:", error);
+        if (errorElement) {
+            errorElement.textContent = "Failed to save verification: " + error.message;
+            errorElement.style.display = 'block';
+        }
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify Code';
+        }
+    }
+}
+
+// Inline verify button click
+btnInlineVerifyOtp?.addEventListener('click', () => {
+    const enteredOtp = (inlinePhoneOtpInput ? inlinePhoneOtpInput.value.trim() : '');
+    verifySubmittedOtp(enteredOtp, btnInlineVerifyOtp, inlinePhoneOtpError, inlinePhoneOtpInput);
+});
+
+// Inline OTP Enter key and auto-submit on 4th digit
+inlinePhoneOtpInput?.addEventListener('keyup', (e) => {
+    if (inlinePhoneOtpError) inlinePhoneOtpError.style.display = 'none';
+    if (inlinePhoneOtpInput) inlinePhoneOtpInput.style.borderColor = '#CBD5E1';
+    
+    if (e.key === 'Enter') {
+        const enteredOtp = inlinePhoneOtpInput.value.trim();
+        verifySubmittedOtp(enteredOtp, btnInlineVerifyOtp, inlinePhoneOtpError, inlinePhoneOtpInput);
+    } else if (inlinePhoneOtpInput.value.trim().length === 4) {
+        const enteredOtp = inlinePhoneOtpInput.value.trim();
+        verifySubmittedOtp(enteredOtp, btnInlineVerifyOtp, inlinePhoneOtpError, inlinePhoneOtpInput);
+    }
+});
+
+// Inline resend button click
+btnInlineResendOtp?.addEventListener('click', async () => {
+    if (!pendingPhoneVerification) return;
+    
+    btnInlineResendOtp.disabled = true;
+    btnInlineResendOtp.textContent = 'Sending...';
+
+    const newOtp = Math.floor(1000 + Math.random() * 9000).toString();
+    pendingPhoneVerification.otp = newOtp;
+
+    try {
+        await sendMoolreOTP(pendingPhoneVerification.phone, newOtp);
+        if (typeof showModernToast === 'function') {
+            showModernToast("Code Resent", `A new 4-digit code was sent to ${pendingPhoneVerification.phone}`, "info");
+        }
+        startResendCountdown();
+    } catch (error) {
+        console.error("Resend error:", error);
+        if (typeof showModernToast === 'function') {
+            showModernToast("Failed to resend code", error.message, "error");
+        }
+    } finally {
+        btnInlineResendOtp.textContent = 'Resend Code';
     }
 });
 
@@ -904,57 +1034,9 @@ btnResendPhoneOtp?.addEventListener('click', async () => {
 
 phoneOtpForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!currentUser || !pendingPhoneVerification) return;
-
     const enteredOtp = (phoneOtpInput ? phoneOtpInput.value.trim() : '');
     const submitBtn = document.getElementById('btn-submit-phone-otp');
-
-    if (enteredOtp !== pendingPhoneVerification.otp) {
-        if (phoneOtpError) {
-            phoneOtpError.textContent = "Invalid verification code. Please check your SMS and try again.";
-            phoneOtpError.style.display = 'block';
-        }
-        if (phoneOtpInput) {
-            phoneOtpInput.style.borderColor = '#EF4444';
-            phoneOtpInput.focus();
-        }
-        return;
-    }
-
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Verifying...';
-    }
-
-    try {
-        await updateDoc(doc(db, "users", currentUser.uid), {
-            phone: pendingPhoneVerification.phone,
-            phoneVerified: true,
-            phoneVerifiedAt: serverTimestamp()
-        });
-
-        isPhoneVerified = true;
-        verifiedPhone = pendingPhoneVerification.phone;
-        updatePhoneBadgeUI();
-
-        if (phoneVerifyModal) phoneVerifyModal.classList.add('hidden');
-        if (resendInterval) clearInterval(resendInterval);
-        
-        if (typeof showModernToast === 'function') {
-            showModernToast("Phone Verified! 🎉", "Your phone number has been verified successfully.", "success");
-        }
-    } catch (error) {
-        console.error("Error saving phone verification:", error);
-        if (phoneOtpError) {
-            phoneOtpError.textContent = "Failed to save verification: " + error.message;
-            phoneOtpError.style.display = 'block';
-        }
-    } finally {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Verify Code';
-        }
-    }
+    verifySubmittedOtp(enteredOtp, submitBtn, phoneOtpError, phoneOtpInput);
 });
 
 document.getElementById('btn-save-profile')?.addEventListener('click', async () => {
@@ -1801,3 +1883,38 @@ if (webhookForm) {
         }
     });
 }
+
+// WhatsApp Command Builder Interactive Helpers
+window.updateWaPreviewCommand = function() {
+    const priceInput = document.getElementById('wa-gen-price');
+    const itemInput = document.getElementById('wa-gen-item');
+    const phoneInput = document.getElementById('wa-gen-phone');
+    const previewEl = document.getElementById('wa-command-preview');
+    const directBtn = document.getElementById('wa-direct-send-btn');
+    
+    if (!previewEl) return;
+    
+    const price = priceInput && priceInput.value.trim() ? priceInput.value.trim() : '450';
+    const item = itemInput && itemInput.value.trim() ? itemInput.value.trim() : 'Nike Air Max';
+    const phone = phoneInput && phoneInput.value.trim() ? phoneInput.value.trim() : '0244123456';
+    
+    const cmd = `CREATE ${price} ${item} ${phone}`;
+    previewEl.textContent = cmd;
+    
+    if (directBtn) {
+        directBtn.href = `https://wa.me/16624904332?text=${encodeURIComponent(cmd)}`;
+    }
+};
+
+window.copyWaCommand = function() {
+    const previewEl = document.getElementById('wa-command-preview');
+    if (!previewEl) return;
+    navigator.clipboard.writeText(previewEl.textContent.trim()).then(() => {
+        if (typeof showModernToast === 'function') {
+            showModernToast('Command copied to clipboard!', 'success');
+        } else {
+            alert('Copied to clipboard!');
+        }
+    });
+};
+
