@@ -1483,6 +1483,7 @@ input[type=number] {
 .form-group input[type="date"],
 .form-group input[type="email"],
 .form-group input[type="tel"],
+.form-group input[type="password"],
 .form-group select,
 .form-group textarea {
     width: 100%;
@@ -1496,6 +1497,40 @@ input[type=number] {
     color: #111827;
     -webkit-appearance: none; /* Fix iOS gray background issue */
     appearance: none;
+}
+
+/* Date input specific fixes — match height of other inputs */
+.form-group input[type="date"] {
+    min-height: 48px;
+    line-height: 1.4;
+    position: relative;
+}
+
+/* Show placeholder text on date inputs when empty */
+.form-group input[type="date"]:not(:focus):invalid,
+.form-group input[type="date"]:not(:focus)[value=""] {
+    color: transparent;
+}
+
+.form-group input[type="date"]:not(:focus):invalid::before,
+.form-group input[type="date"]:not(:focus)[value=""]::before {
+    content: attr(placeholder);
+    color: #94A3B8;
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* Ensure date picker icon is visible on WebKit */
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 4px;
+}
+.form-group input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
 }
 .form-group input:focus,
 .form-group select:focus,
