@@ -690,11 +690,41 @@ function loadEscrows() {
 
 // Global functions for inline HTML event handlers
 window.copyToClipboard = async (text) => {
+    let copied = false;
     try {
-        await navigator.clipboard.writeText(text);
-        alert("Payment link copied to clipboard! You can now paste and send it to the buyer.");
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            copied = true;
+        }
     } catch (err) {
-        prompt("Copy the link below:", text);
+        console.warn("Clipboard API failed, trying execCommand fallback:", err);
+    }
+
+    if (!copied) {
+        try {
+            const tempInput = document.createElement("textarea");
+            tempInput.value = text;
+            tempInput.style.position = "fixed";
+            tempInput.style.left = "-9999px";
+            tempInput.style.top = "0";
+            document.body.appendChild(tempInput);
+            tempInput.focus();
+            tempInput.select();
+            copied = document.execCommand('copy');
+            document.body.removeChild(tempInput);
+        } catch (copyErr) {
+            console.warn("execCommand fallback failed:", copyErr);
+        }
+    }
+
+    if (copied) {
+        if (typeof showModernToast === 'function') {
+            showModernToast("Link Copied! 📋", "Payment link copied to clipboard. You can now paste and send it to the buyer.", "success");
+        } else if (typeof window.showModernToast === 'function') {
+            window.showModernToast("Link Copied! 📋", "Payment link copied to clipboard. You can now paste and send it to the buyer.", "success");
+        }
+    } else {
+        prompt("Copy the payment link below:", text);
     }
 };
 
@@ -725,7 +755,9 @@ window.dispatchItem = async (escrowId) => {
             if (buyerPhone) {
                 try {
                     await sendDeliveryConfirmationSMS(buyerPhone, confirmUrl, escrowId, itemDesc);
-                    alert("Item marked as dispatched!\n\nThe buyer has been sent a private one-time link to confirm delivery.");
+                    if (typeof showModernToast === 'function') {
+                        showModernToast("Item Dispatched! 🚚", "The buyer has been sent a private link to confirm delivery.", "success");
+                    }
                 } catch (smsErr) {
                     console.warn("Confirmation SMS failed:", smsErr);
                     prompt("Dispatched! SMS failed, so share this private confirmation link with the buyer yourself:", confirmUrl);
@@ -735,7 +767,11 @@ window.dispatchItem = async (escrowId) => {
             }
         } catch (error) {
             console.error("Error dispatching:", error);
-            alert("Error: " + error.message);
+            if (typeof showModernToast === 'function') {
+                showModernToast("Dispatch Error", error.message, "error");
+            } else {
+                alert("Error: " + error.message);
+            }
         }
     }
 };
@@ -787,10 +823,16 @@ window.releaseFunds = async (escrowId) => {
                 createdAt: serverTimestamp()
             });
 
-            alert("Funds Released! Thank you for using TrustLink.");
+            if (typeof showModernToast === 'function') {
+                showModernToast("Funds Released! 💰", "Thank you for using TrustLink. Funds credited to seller.", "success");
+            }
         } catch (error) {
             console.error("Error releasing funds:", error);
-            alert("Error: " + error.message);
+            if (typeof showModernToast === 'function') {
+                showModernToast("Release Error", error.message, "error");
+            } else {
+                alert("Error: " + error.message);
+            }
         }
     }
 };
@@ -799,10 +841,16 @@ window.raiseDispute = async (escrowId) => {
     if(confirm("Are you sure you want to raise a dispute? Escrow funds will remain locked.")) {
         try {
             await updateDoc(doc(db, "escrows", escrowId), { status: 'DISPUTED' });
-            alert("Dispute Raised. Support will contact you shortly.");
+            if (typeof showModernToast === 'function') {
+                showModernToast("Dispute Raised ⚠️", "Escrow locked. TrustLink support will review and reach out.", "warning");
+            }
         } catch (error) {
             console.error("Error raising dispute:", error);
-            alert("Error: " + error.message);
+            if (typeof showModernToast === 'function') {
+                showModernToast("Dispute Error", error.message, "error");
+            } else {
+                alert("Error: " + error.message);
+            }
         }
     }
 };
@@ -1670,20 +1718,21 @@ if (formNewEscrow) {
                 };
                 try {
                     await sendSMSNotification(buyerPhoneInput.value, checkoutUrl, escrowId, "", smsDetails);
-                    showModernToast("Escrow Created Successfully!", "An SMS notification has been sent to the buyer.");
+                    showModernToast("Escrow Created! 🎉", "Checkout link copied to clipboard & SMS sent to buyer.", "success");
                 } catch (smsError) {
                     console.warn("SMS failed.", smsError);
-                    showModernToast("Escrow Created!", "Failed to send automatic SMS. Please share the link with the buyer directly.", "warning");
+                    showModernToast("Escrow Created! 📋", "Checkout link copied to clipboard. Share it with buyer directly.", "warning");
                 }
             } else {
-                showModernToast("Escrow Created Successfully!", "No phone number provided, so SMS was skipped.");
+                showModernToast("Escrow Created! 📋", "Checkout link copied to clipboard. Share it with your buyer to get paid.", "success");
             }
 
             closeModal();
             // Optionally, refresh the UI here
             if (typeof fetchProducts === 'function') fetchProducts();
         } catch (error) {
-            alert(error.message || "Failed to initialize Moolre Checkout.");
+            console.error("Escrow creation error:", error);
+            showModernToast("Escrow Creation Failed", error.message || "Failed to initialize order.", "error");
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
@@ -1921,6 +1970,11 @@ document.addEventListener('click', (e) => {
 
 // Modern Toast Notification
 window.showModernToast = function(title, message, type = "success") {
+    if (message === "success" || message === "warning" || message === "error" || message === "info") {
+        type = message;
+        message = "";
+    }
+
     let container = document.getElementById("modern-toast-container");
     if (!container) {
         container = document.createElement("div");
@@ -1933,18 +1987,22 @@ window.showModernToast = function(title, message, type = "success") {
     
     let iconSvg = '';
     if (type === "success") {
-        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #10B981;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px; color: #10B981;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+    } else if (type === "info") {
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px; color: #3B82F6;"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>`;
     } else if (type === "warning") {
-        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #F59E0B;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px; color: #F59E0B;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
     } else if (type === "error") {
-        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #EF4444;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px; color: #EF4444;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
     }
+
+    const messageHtml = message ? `<p>${escapeHtml(message)}</p>` : '';
 
     toast.innerHTML = `
         <div class="modern-toast-icon">${iconSvg}</div>
         <div class="modern-toast-content">
             <h4>${escapeHtml(title)}</h4>
-            <p>${escapeHtml(message)}</p>
+            ${messageHtml}
         </div>
         <button class="modern-toast-close" onclick="this.parentElement.classList.add('hide'); setTimeout(() => this.parentElement.remove(), 400);">&times;</button>
         <div class="modern-toast-progress"></div>
@@ -1964,7 +2022,7 @@ window.showModernToast = function(title, message, type = "success") {
                 if(toast.parentElement) toast.remove();
             }, 400);
         }
-    }, 6000);
+    }, 5000);
 };
 
 // Add Product Modal
