@@ -89,14 +89,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('escrow-content').classList.remove('hidden');
 
         // Platform fee: buyer's share is added on top of the item amount.
-        // Old escrows without feePercent are charged no fee.
-        const fees = computeFeeSplit(escrow.amount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
+        const rawAmount = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
+        const fees = computeFeeSplit(rawAmount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
 
         // Populate Data
-        document.getElementById('escrow-amount').textContent = `GH₵ ${fees.buyerTotal.toFixed(2)}`;
+        const formattedBuyerTotal = Number(fees.buyerTotal || rawAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formattedRawAmount = rawAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        
+        document.getElementById('escrow-amount').textContent = `GH₵ ${formattedBuyerTotal}`;
+        const itemSubtotalEl = document.getElementById('item-subtotal-display');
+        if (itemSubtotalEl) itemSubtotalEl.textContent = `GH₵ ${formattedRawAmount}`;
+        const summarySubtotalEl = document.getElementById('summary-subtotal-display');
+        if (summarySubtotalEl) summarySubtotalEl.textContent = `GH₵ ${formattedRawAmount}`;
+
         if (fees.buyerFee > 0) {
             document.getElementById('escrow-amount').insertAdjacentHTML('afterend',
-                `<p style="color: var(--text-muted); font-size: 0.85rem; margin: -12px 0 16px;">Item: GH₵ ${parseFloat(escrow.amount).toFixed(2)} + GH₵ ${fees.buyerFee.toFixed(2)} platform fee</p>`);
+                `<p style="color: var(--text-muted); font-size: 0.85rem; margin: -12px 0 16px;">Item: GH₵ ${formattedRawAmount} + GH₵ ${Number(fees.buyerFee).toFixed(2)} platform fee</p>`);
         }
         document.getElementById('seller-name').textContent = escrow.sellerName || 'Verified Vendor';
         document.getElementById('escrow-desc').textContent = escrow.description || 'Secure Transaction';

@@ -256,10 +256,10 @@
 </head>
 <body class="light-landing">
     
-    <nav class="navbar" style="position: static; background: #fff; border-bottom: 1px solid #E5E7EB; padding: 16px 0;">
+    <nav class="navbar" style="position: static; background: #fff; border-bottom: 1px solid #E5E7EB; padding: 20px 0;">
         <div class="container nav-container" style="justify-content: center;">
             <a href="index.html" class="logo" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                <img src="img/logo.png" alt="TrustLink Logo" style="height: 48px; width: auto; object-fit: contain; transform: none !important; margin: 0 auto;">
+                <img src="img/logo.png" alt="TrustLink Logo" style="height: 80px; width: auto; max-width: 220px; object-fit: contain; transform: none !important; margin: 0 auto;">
             </a>
         </div>
     </nav>
@@ -425,14 +425,26 @@
                 const docSnap = await getDoc(doc(db, "escrows", escrowId));
                 if(docSnap.exists()) {
                     const escrow = docSnap.data();
-                    const fees = computeFeeSplit(escrow.amount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
+                    const rawAmount = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
+                    const fees = computeFeeSplit(rawAmount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
                     
-                    document.getElementById('item-subtotal-display').textContent = `GH₵ ${parseFloat(escrow.amount).toFixed(2)}`;
-                    document.getElementById('summary-subtotal-display').textContent = `GH₵ ${parseFloat(escrow.amount).toFixed(2)}`;
+                    const formattedItemAmount = rawAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    const formattedTotal = Number(fees.buyerTotal || rawAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                    const itemSub = document.getElementById('item-subtotal-display');
+                    if (itemSub) itemSub.textContent = `GH₵ ${formattedItemAmount}`;
+                    
+                    const summarySub = document.getElementById('summary-subtotal-display');
+                    if (summarySub) summarySub.textContent = `GH₵ ${formattedItemAmount}`;
+                    
+                    const totalEl = document.getElementById('escrow-amount');
+                    if (totalEl) totalEl.textContent = `GH₵ ${formattedTotal}`;
                     
                     if (fees.buyerFee > 0) {
-                        document.getElementById('fee-row').style.display = 'flex';
-                        document.getElementById('summary-fee-display').textContent = `GH₵ ${fees.buyerFee.toFixed(2)}`;
+                        const feeRow = document.getElementById('fee-row');
+                        if (feeRow) feeRow.style.display = 'flex';
+                        const feeDisp = document.getElementById('summary-fee-display');
+                        if (feeDisp) feeDisp.textContent = `GH₵ ${fees.buyerFee.toFixed(2)}`;
                     }
 
                     // Re-apply button styling to the dynamically generated button
@@ -442,7 +454,7 @@
                     }
                 }
             } catch(e) {}
-        }, 1000); // 1s delay to let checkout.js run first
+        }, 100);
     </script>
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
