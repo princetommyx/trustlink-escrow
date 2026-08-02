@@ -1778,14 +1778,14 @@ const renderActiveReport = () => {
 
         tableHead.innerHTML = `
             <tr>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Reference / ID</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Description / Item</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Order Amount</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Platform Fee (2.5%)</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Buyer Fee</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Seller Fee</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Commission Status</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Date Created</th>
+                <th style="width: 13%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Ref / ID</th>
+                <th style="width: 24%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Description / Item</th>
+                <th style="width: 13%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Order Amount</th>
+                <th style="width: 13%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Platform Fee (2.5%)</th>
+                <th style="width: 10%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Buyer Fee</th>
+                <th style="width: 10%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Seller Fee</th>
+                <th style="width: 17%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Commission Status</th>
+                <th style="width: 14%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Date Created</th>
             </tr>
         `;
 
@@ -1849,37 +1849,37 @@ const renderActiveReport = () => {
         if (countBadge) countBadge.textContent = `${filtered.length} Record${filtered.length === 1 ? '' : 's'}`;
 
         if (filtered.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 0.95rem;">No commission records found for the selected filters.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 36px; color: #94a3b8; font-size: 0.9rem;">No commission records found for the selected filters.</td></tr>`;
             return;
         }
 
         tableBody.innerHTML = filtered.map(r => {
             let statusBadge = '';
             if (r.commStatus === 'REALIZED') {
-                statusBadge = '<span class="badge badge-success" style="font-size: 0.75rem;">Realized Profit ✓</span>';
+                statusBadge = '<span class="badge badge-success">Realized ✓</span>';
             } else if (r.commStatus === 'IN_ESCROW') {
-                statusBadge = '<span class="badge badge-warning" style="font-size: 0.75rem;">In Escrow</span>';
+                statusBadge = '<span class="badge badge-warning">In Escrow</span>';
             } else if (r.commStatus === 'REFUNDED') {
-                statusBadge = '<span class="badge badge-danger" style="font-size: 0.75rem;">Refunded</span>';
+                statusBadge = '<span class="badge badge-danger">Refunded</span>';
             } else {
-                statusBadge = '<span class="badge" style="background: #e2e8f0; color: #64748b; font-size: 0.75rem;">Unfunded</span>';
+                statusBadge = '<span class="badge" style="background: #e2e8f0; color: #64748b;">Unfunded</span>';
             }
 
             const dateStr = r.date ? r.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
 
             return `
-                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;">
-                    <td style="padding: 12px 16px; font-family: monospace; font-weight: 700; color: #64748b; font-size: 0.85rem;">#${escapeHtml(r.id.slice(0, 8).toUpperCase())}</td>
-                    <td style="padding: 12px 16px;">
-                        <strong style="color: #0f172a; font-size: 0.9rem;">${escapeHtml(r.title)}</strong>
-                        <div style="font-size: 0.78rem; color: #64748b;">${escapeHtml(r.buyer)} ➔ ${escapeHtml(r.seller)}</div>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 8px 12px; font-family: monospace; font-weight: 700; color: #64748b; font-size: 0.82rem;">#${escapeHtml(r.id.slice(0, 8).toUpperCase())}</td>
+                    <td style="padding: 8px 12px;">
+                        <div style="font-weight: 700; color: #0f172a; font-size: 0.85rem; line-height: 1.25;">${escapeHtml(r.title)}</div>
+                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 1px;">${escapeHtml(r.buyer)} ➔ ${escapeHtml(r.seller)}</div>
                     </td>
-                    <td style="padding: 12px 16px; font-weight: 600; color: #334155;">${formatGHS(r.amount)}</td>
-                    <td style="padding: 12px 16px; font-weight: 700; color: #059669; font-size: 0.95rem;">${formatGHS(r.totalFee)}</td>
-                    <td style="padding: 12px 16px; color: #10b981; font-weight: 600; font-size: 0.85rem;">+${formatGHS(r.buyerFee)}</td>
-                    <td style="padding: 12px 16px; color: #6366f1; font-weight: 600; font-size: 0.85rem;">-${formatGHS(r.sellerFee)}</td>
-                    <td style="padding: 12px 16px;">${statusBadge}</td>
-                    <td style="padding: 12px 16px; font-size: 0.82rem; color: #64748b;">${dateStr}</td>
+                    <td style="padding: 8px 12px; font-weight: 600; color: #334155; font-size: 0.85rem;">${formatGHS(r.amount)}</td>
+                    <td style="padding: 8px 12px; font-weight: 700; color: #059669; font-size: 0.88rem;">${formatGHS(r.totalFee)}</td>
+                    <td style="padding: 8px 12px; color: #10b981; font-weight: 600; font-size: 0.82rem;">+${formatGHS(r.buyerFee)}</td>
+                    <td style="padding: 8px 12px; color: #6366f1; font-weight: 600; font-size: 0.82rem;">-${formatGHS(r.sellerFee)}</td>
+                    <td style="padding: 8px 12px;">${statusBadge}</td>
+                    <td style="padding: 8px 12px; font-size: 0.78rem; color: #64748b; white-space: nowrap;">${dateStr}</td>
                 </tr>
             `;
         }).join('');
@@ -1892,12 +1892,12 @@ const renderActiveReport = () => {
 
         tableHead.innerHTML = `
             <tr>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">User / Name</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Email Address</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Phone Contact</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Account Role</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Email Status</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Date Registered</th>
+                <th style="width: 22%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">User / Name</th>
+                <th style="width: 26%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Email Address</th>
+                <th style="width: 16%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Phone Contact</th>
+                <th style="width: 12%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Account Role</th>
+                <th style="width: 11%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Email Status</th>
+                <th style="width: 13%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Registered</th>
             </tr>
         `;
 
@@ -1953,7 +1953,7 @@ const renderActiveReport = () => {
         if (countBadge) countBadge.textContent = `${filtered.length} User${filtered.length === 1 ? '' : 's'}`;
 
         if (filtered.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 0.95rem;">No user records found matching the filter criteria.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 36px; color: #94a3b8; font-size: 0.9rem;">No user records found matching the filter criteria.</td></tr>`;
             return;
         }
 
@@ -1964,25 +1964,25 @@ const renderActiveReport = () => {
             const joinedDate = toDate(u.createdAt);
             const dateStr = joinedDate ? joinedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Unknown';
             const verifiedBadge = u.emailVerified ? 
-                '<span class="badge badge-success" style="font-size: 0.75rem;">Verified ✓</span>' : 
-                '<span class="badge badge-warning" style="font-size: 0.75rem;">Unverified</span>';
+                '<span class="badge badge-success">Verified ✓</span>' : 
+                '<span class="badge badge-warning">Unverified</span>';
             const roleBadge = (u.role === 'admin' || u.role === 'support') ? 
-                `<span class="badge badge-purple" style="font-size: 0.75rem; text-transform: uppercase;">${escapeHtml(u.role)}</span>` : 
-                '<span class="badge" style="background: #f1f5f9; color: #475569; font-size: 0.75rem;">Customer</span>';
+                `<span class="badge badge-purple" style="text-transform: uppercase;">${escapeHtml(u.role)}</span>` : 
+                '<span class="badge" style="background: #f1f5f9; color: #475569;">Customer</span>';
 
             return `
                 <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 12px 16px;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="width: 32px; height: 32px; border-radius: 50%; background: #9333ea; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;">${name.charAt(0).toUpperCase()}</div>
-                            <strong style="color: #0f172a; font-size: 0.9rem;">${escapeHtml(name)}</strong>
+                    <td style="padding: 8px 12px;">
+                        <div class="report-user-cell" style="display: flex; align-items: center; gap: 8px;">
+                            <div class="report-user-avatar" style="width: 28px; height: 28px; min-width: 28px; border-radius: 50%; background: #9333ea; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem;">${name.charAt(0).toUpperCase()}</div>
+                            <span class="report-user-name" style="font-weight: 700; color: #0f172a; font-size: 0.85rem;">${escapeHtml(name)}</span>
                         </div>
                     </td>
-                    <td style="padding: 12px 16px; color: #334155; font-size: 0.88rem;">${escapeHtml(email)}</td>
-                    <td style="padding: 12px 16px; font-family: monospace; color: #475569; font-size: 0.88rem;">${escapeHtml(phone)}</td>
-                    <td style="padding: 12px 16px;">${roleBadge}</td>
-                    <td style="padding: 12px 16px;">${verifiedBadge}</td>
-                    <td style="padding: 12px 16px; font-size: 0.82rem; color: #64748b;">${dateStr}</td>
+                    <td style="padding: 8px 12px; color: #334155; font-size: 0.82rem; font-family: monospace; word-break: break-all;">${escapeHtml(email)}</td>
+                    <td style="padding: 8px 12px; font-family: monospace; color: #475569; font-size: 0.82rem; white-space: nowrap;">${escapeHtml(phone)}</td>
+                    <td style="padding: 8px 12px;">${roleBadge}</td>
+                    <td style="padding: 8px 12px;">${verifiedBadge}</td>
+                    <td style="padding: 8px 12px; font-size: 0.78rem; color: #64748b; white-space: nowrap;">${dateStr}</td>
                 </tr>
             `;
         }).join('');
@@ -1995,13 +1995,13 @@ const renderActiveReport = () => {
 
         tableHead.innerHTML = `
             <tr>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Escrow ID</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Item / Description</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Escrow Value</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Seller</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Buyer</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Current Status</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Created</th>
+                <th style="width: 14%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Escrow ID</th>
+                <th style="width: 24%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Item / Description</th>
+                <th style="width: 14%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Value</th>
+                <th style="width: 14%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Seller</th>
+                <th style="width: 14%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Buyer</th>
+                <th style="width: 10%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Status</th>
+                <th style="width: 10%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Created</th>
             </tr>
         `;
 
@@ -2066,7 +2066,7 @@ const renderActiveReport = () => {
         if (countBadge) countBadge.textContent = `${filtered.length} Order${filtered.length === 1 ? '' : 's'}`;
 
         if (filtered.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 0.95rem;">No escrow orders match the filter criteria.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 36px; color: #94a3b8; font-size: 0.9rem;">No escrow orders match the filter criteria.</td></tr>`;
             return;
         }
 
@@ -2074,30 +2074,30 @@ const renderActiveReport = () => {
             const dateStr = e.parsedDate ? e.parsedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
             let badge = '';
             if (['completed', 'released'].includes(e.normalizedStatus)) {
-                badge = '<span class="badge badge-success" style="font-size: 0.75rem;">Completed ✓</span>';
+                badge = '<span class="badge badge-success">Completed ✓</span>';
             } else if (['funded', 'active', 'in_escrow', 'pending_confirmation'].includes(e.normalizedStatus)) {
-                badge = '<span class="badge badge-warning" style="font-size: 0.75rem;">Funded (In Escrow)</span>';
+                badge = '<span class="badge badge-warning">Funded</span>';
             } else if (e.normalizedStatus === 'dispatched') {
-                badge = '<span class="badge badge-purple" style="font-size: 0.75rem;">Dispatched 🚚</span>';
+                badge = '<span class="badge badge-purple">Dispatched</span>';
             } else if (e.normalizedStatus === 'disputed') {
-                badge = '<span class="badge badge-danger" style="font-size: 0.75rem;">Disputed ⚠️</span>';
+                badge = '<span class="badge badge-danger">Disputed</span>';
             } else if (['canceled', 'cancelled', 'refunded'].includes(e.normalizedStatus)) {
-                badge = '<span class="badge" style="background: #f1f5f9; color: #64748b; font-size: 0.75rem;">Cancelled</span>';
+                badge = '<span class="badge" style="background: #f1f5f9; color: #64748b;">Cancelled</span>';
             } else {
-                badge = '<span class="badge" style="background: #e2e8f0; color: #64748b; font-size: 0.75rem;">Awaiting Payment</span>';
+                badge = '<span class="badge" style="background: #e2e8f0; color: #64748b;">Awaiting Payment</span>';
             }
 
             return `
                 <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 12px 16px; font-family: monospace; font-weight: 700; color: #64748b; font-size: 0.85rem;">#${escapeHtml(e.id.slice(0, 8).toUpperCase())}</td>
-                    <td style="padding: 12px 16px;">
-                        <strong style="color: #0f172a; font-size: 0.9rem;">${escapeHtml(e.item || e.description || 'Escrow Order')}</strong>
+                    <td style="padding: 8px 12px; font-family: monospace; font-weight: 700; color: #64748b; font-size: 0.82rem;">#${escapeHtml(e.id.slice(0, 8).toUpperCase())}</td>
+                    <td style="padding: 8px 12px;">
+                        <span style="font-weight: 700; color: #0f172a; font-size: 0.85rem;">${escapeHtml(e.item || e.description || 'Escrow Order')}</span>
                     </td>
-                    <td style="padding: 12px 16px; font-weight: 700; color: #0f172a; font-size: 0.95rem;">${formatGHS(e.parsedAmount)}</td>
-                    <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">${escapeHtml(e.sellerName || e.sellerEmail || e.sellerPhone || 'Seller')}</td>
-                    <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">${escapeHtml(e.buyerName || e.buyerEmail || e.buyerPhone || 'Buyer')}</td>
-                    <td style="padding: 12px 16px;">${badge}</td>
-                    <td style="padding: 12px 16px; font-size: 0.82rem; color: #64748b;">${dateStr}</td>
+                    <td style="padding: 8px 12px; font-weight: 700; color: #0f172a; font-size: 0.88rem;">${formatGHS(e.parsedAmount)}</td>
+                    <td style="padding: 8px 12px; font-size: 0.82rem; color: #334155;">${escapeHtml(e.sellerName || e.sellerEmail || e.sellerPhone || 'Seller')}</td>
+                    <td style="padding: 8px 12px; font-size: 0.82rem; color: #334155;">${escapeHtml(e.buyerName || e.buyerEmail || e.buyerPhone || 'Buyer')}</td>
+                    <td style="padding: 8px 12px;">${badge}</td>
+                    <td style="padding: 8px 12px; font-size: 0.78rem; color: #64748b; white-space: nowrap;">${dateStr}</td>
                 </tr>
             `;
         }).join('');
@@ -2110,12 +2110,12 @@ const renderActiveReport = () => {
 
         tableHead.innerHTML = `
             <tr>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Record Type / ID</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Details / Reason</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Amount</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Beneficiary / Parties</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Status</th>
-                <th style="padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1.5px solid #e2e8f0; font-size: 0.8rem; text-transform: uppercase;">Logged Date</th>
+                <th style="width: 18%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Record / ID</th>
+                <th style="width: 26%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Details / Subject</th>
+                <th style="width: 14%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Amount</th>
+                <th style="width: 18%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Party / Parties</th>
+                <th style="width: 12%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Status</th>
+                <th style="width: 12%; padding: 10px 12px; font-weight: 700; color: #334155; border-bottom: 1.5px solid #e2e8f0; font-size: 0.78rem; text-transform: uppercase;">Logged Date</th>
             </tr>
         `;
 
@@ -2209,7 +2209,7 @@ const renderActiveReport = () => {
         if (countBadge) countBadge.textContent = `${filtered.length} Case${filtered.length === 1 ? '' : 's'}`;
 
         if (filtered.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 0.95rem;">No disputes or payouts found matching current criteria.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 36px; color: #94a3b8; font-size: 0.9rem;">No disputes or payouts found matching current criteria.</td></tr>`;
             return;
         }
 
@@ -2217,30 +2217,30 @@ const renderActiveReport = () => {
             const dateStr = it.date ? it.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
             let badge = '';
             if (it.status === 'Active Dispute') {
-                badge = '<span class="badge badge-danger" style="font-size: 0.75rem;">Dispute Active ⚠️</span>';
+                badge = '<span class="badge badge-danger">Dispute Active</span>';
             } else if (it.status === 'Resolved') {
-                badge = '<span class="badge badge-success" style="font-size: 0.75rem;">Resolved ✓</span>';
+                badge = '<span class="badge badge-success">Resolved ✓</span>';
             } else if (it.status === 'Pending Approval') {
-                badge = '<span class="badge badge-warning" style="font-size: 0.75rem;">Pending Approval</span>';
+                badge = '<span class="badge badge-warning">Pending</span>';
             } else if (it.status === 'Approved & Paid') {
-                badge = '<span class="badge badge-success" style="font-size: 0.75rem;">Disbursed ✓</span>';
+                badge = '<span class="badge badge-success">Disbursed ✓</span>';
             } else {
-                badge = '<span class="badge" style="background: #f1f5f9; color: #64748b; font-size: 0.75rem;">Declined</span>';
+                badge = '<span class="badge" style="background: #f1f5f9; color: #64748b;">Declined</span>';
             }
 
             return `
                 <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 12px 16px;">
-                        <span class="badge ${it.type === 'Dispute' ? 'badge-danger' : 'badge-purple'}" style="font-size: 0.75rem; margin-bottom: 4px; display: inline-block;">${it.type}</span>
-                        <div style="font-family: monospace; font-weight: 700; color: #64748b; font-size: 0.82rem;">#${escapeHtml(it.id.slice(0, 8).toUpperCase())}</div>
+                    <td style="padding: 8px 12px;">
+                        <span class="badge ${it.type === 'Dispute' ? 'badge-danger' : 'badge-purple'}" style="font-size: 0.72rem; margin-bottom: 2px; display: inline-block;">${it.type}</span>
+                        <div style="font-family: monospace; font-weight: 700; color: #64748b; font-size: 0.8rem;">#${escapeHtml(it.id.slice(0, 8).toUpperCase())}</div>
                     </td>
-                    <td style="padding: 12px 16px;">
-                        <strong style="color: #0f172a; font-size: 0.9rem;">${escapeHtml(it.title)}</strong>
+                    <td style="padding: 8px 12px;">
+                        <span style="font-weight: 700; color: #0f172a; font-size: 0.85rem;">${escapeHtml(it.title)}</span>
                     </td>
-                    <td style="padding: 12px 16px; font-weight: 700; color: #0f172a; font-size: 0.95rem;">${formatGHS(it.amount)}</td>
-                    <td style="padding: 12px 16px; font-size: 0.85rem; color: #334155;">${escapeHtml(it.party)}</td>
-                    <td style="padding: 12px 16px;">${badge}</td>
-                    <td style="padding: 12px 16px; font-size: 0.82rem; color: #64748b;">${dateStr}</td>
+                    <td style="padding: 8px 12px; font-weight: 700; color: #0f172a; font-size: 0.88rem;">${formatGHS(it.amount)}</td>
+                    <td style="padding: 8px 12px; font-size: 0.82rem; color: #334155;">${escapeHtml(it.party)}</td>
+                    <td style="padding: 8px 12px;">${badge}</td>
+                    <td style="padding: 8px 12px; font-size: 0.78rem; color: #64748b; white-space: nowrap;">${dateStr}</td>
                 </tr>
             `;
         }).join('');
@@ -2486,12 +2486,63 @@ const initReportsEngine = () => {
         }, 150);
     });
 
+    // Prepare Print Metadata Helper
+    const preparePrintReport = () => {
+        const titleMap = {
+            'commissions': 'Commission Revenue & Fee Ledger',
+            'users': 'Platform Registered Users & KYC Audit',
+            'escrows': 'Escrow Contracts & Transaction Lifecycle Report',
+            'disputes': 'Dispute Arbitration & Payout Approvals Audit'
+        };
+
+        const titleEl = document.getElementById('print-meta-report-title');
+        if (titleEl) {
+            titleEl.textContent = titleMap[currentReportType] || 'TrustLink Platform Report';
+        }
+
+        const dateEl = document.getElementById('print-meta-generated-date');
+        if (dateEl) {
+            dateEl.textContent = new Date().toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        const presetVal = document.getElementById('report-date-preset')?.value || '30d';
+        const rangeEl = document.getElementById('print-meta-date-range');
+        if (rangeEl) {
+            if (presetVal === 'today') rangeEl.textContent = 'Today';
+            else if (presetVal === '7d') rangeEl.textContent = 'Last 7 Days';
+            else if (presetVal === '30d') rangeEl.textContent = 'Last 30 Days';
+            else if (presetVal === 'custom') {
+                const s = document.getElementById('report-start-date')?.value || '';
+                const e = document.getElementById('report-end-date')?.value || '';
+                rangeEl.textContent = s && e ? `${s} to ${e}` : 'Custom Range';
+            } else {
+                rangeEl.textContent = 'All Time Records';
+            }
+        }
+
+        const statusSelect = document.getElementById('report-status-filter');
+        const statusEl = document.getElementById('print-meta-status-filter');
+        if (statusEl && statusSelect) {
+            const selectedText = statusSelect.options[statusSelect.selectedIndex]?.text || 'All Statuses';
+            statusEl.textContent = selectedText;
+        }
+    };
+
     // Action Buttons
     document.getElementById('btn-export-csv')?.addEventListener('click', exportReportCSV);
     document.getElementById('btn-copy-report')?.addEventListener('click', copyReportData);
     document.getElementById('btn-print-report')?.addEventListener('click', () => {
+        preparePrintReport();
         window.print();
     });
+
+    window.addEventListener('beforeprint', preparePrintReport);
 
     updateReportStatusOptions(currentReportType);
 };

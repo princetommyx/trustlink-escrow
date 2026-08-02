@@ -942,60 +942,325 @@
     }
 }
 
-/* Print Specific Report Format */
+/* Printable Report Banner (Hidden on Screen, Visible on Print) */
+.report-print-banner {
+    display: none;
+}
+
+.report-print-footer {
+    display: none;
+}
+
+/* ==========================================================================
+   Print & PDF Dedicated Stylesheet
+   ========================================================================== */
 @media print {
-    body * {
-        visibility: hidden;
+    @page {
+        size: A4 portrait;
+        margin: 10mm 12mm 12mm 12mm;
     }
-    
+
+    /* Reset global page container for clean continuous multi-page printing */
+    html, body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+        font-size: 9.5pt !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Hide non-report UI elements */
     .sidebar,
     .dashboard-topbar,
+    .mobile-header,
+    .mobile-bottom-nav,
+    .view-header,
     .report-type-pills,
     .report-filter-card,
     .report-export-actions,
+    .notif-wrapper,
     .btn,
-    .notif-wrapper {
+    .modal-overlay,
+    .view-section:not(#view-reports) {
         display: none !important;
     }
-    
-    #view-reports,
-    #view-reports * {
-        visibility: visible;
-    }
-    
+
+    .dashboard-container,
+    .main-content,
+    .content-area,
     #view-reports {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        padding: 0;
-        margin: 0;
-        background: #ffffff !important;
+        position: static !important;
         display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: transparent !important;
+        overflow: visible !important;
     }
-    
+
+    /* Professional Printable Header */
+    .report-print-banner {
+        display: block !important;
+        margin-bottom: 14px !important;
+        padding-bottom: 12px !important;
+        border-bottom: 2px solid #0f172a !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .report-print-top {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+    }
+
+    .report-print-brand {
+        flex: 1 !important;
+    }
+
+    .report-print-logo {
+        font-size: 15pt !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        margin: 0 0 2px 0 !important;
+        letter-spacing: -0.5px !important;
+        font-family: 'Outfit', sans-serif !important;
+    }
+
+    .report-print-tagline {
+        font-size: 7.5pt !important;
+        color: #64748b !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .report-print-meta-box {
+        text-align: right !important;
+        font-size: 7.5pt !important;
+        color: #334155 !important;
+        line-height: 1.45 !important;
+    }
+
+    .report-print-meta-item strong {
+        color: #0f172a !important;
+    }
+
+    /* Executive KPI Grid in Print */
     .report-kpi-grid {
+        display: grid !important;
         grid-template-columns: repeat(4, 1fr) !important;
-        gap: 10px !important;
-        margin-bottom: 20px !important;
+        gap: 8px !important;
+        margin-bottom: 14px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
-    
+
     .report-kpi-card {
         border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding: 8px 10px !important;
+        background: #f8fafc !important;
         box-shadow: none !important;
-        padding: 12px !important;
     }
-    
-    .table-modern {
+
+    .report-kpi-label {
+        font-size: 6.8pt !important;
+        font-weight: 700 !important;
+        color: #64748b !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.4px !important;
+        margin-bottom: 2px !important;
+    }
+
+    .report-kpi-value {
+        font-size: 12pt !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        line-height: 1.15 !important;
+        margin: 2px 0 !important;
+        font-family: 'Outfit', sans-serif !important;
+    }
+
+    .report-kpi-sub {
+        font-size: 6.8pt !important;
+        color: #64748b !important;
+        margin: 0 !important;
+    }
+
+    /* Table Container & Layout */
+    .report-table-portal-card,
+    .portal-card {
         border: 1px solid #cbd5e1 !important;
-        font-size: 0.8rem !important;
+        border-radius: 6px !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        page-break-inside: auto !important;
+    }
+
+    .report-table-header-box {
+        padding: 8px 12px !important;
+        border-bottom: 1.5px solid #cbd5e1 !important;
+        background: #f8fafc !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        page-break-inside: avoid !important;
+    }
+
+    #report-table-title {
+        font-size: 10pt !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+    }
+
+    #report-table-subtitle {
+        font-size: 7.2pt !important;
+        color: #64748b !important;
+        display: block !important;
+    }
+
+    #report-record-count-badge {
+        font-size: 7.2pt !important;
+        padding: 2px 8px !important;
+        background: #e2e8f0 !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 12px !important;
+        color: #334155 !important;
+        font-weight: 700 !important;
+    }
+
+    .report-table-responsive-box {
+        overflow: visible !important;
+        width: 100% !important;
+    }
+
+    .table-modern,
+    .report-data-table {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        font-size: 7.8pt !important;
+        page-break-inside: auto !important;
+    }
+
+    thead {
+        display: table-header-group !important;
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    th {
+        background: #f1f5f9 !important;
+        color: #334155 !important;
+        font-size: 6.8pt !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.3px !important;
+        padding: 5px 5px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-bottom: 1.5px solid #94a3b8 !important;
+        line-height: 1.2 !important;
+        vertical-align: middle !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    td {
+        padding: 4.5px 5px !important;
+        border: 1px solid #e2e8f0 !important;
+        font-size: 7.5pt !important;
+        color: #1e293b !important;
+        vertical-align: middle !important;
+        line-height: 1.25 !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+
+    /* Print Avatar Handling: hide avatar circle in print for clean, non-wrapping names */
+    .report-user-avatar {
+        display: none !important;
+    }
+
+    .report-user-cell {
+        display: block !important;
+    }
+
+    .report-user-name {
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        font-size: 7.8pt !important;
+        line-height: 1.2 !important;
+        word-break: normal !important;
+    }
+
+    .badge {
+        display: inline-block !important;
+        padding: 1px 4px !important;
+        font-size: 6.5pt !important;
+        font-weight: 700 !important;
+        border-radius: 3px !important;
+        white-space: nowrap !important;
+        border: 1px solid currentColor !important;
+        background: transparent !important;
+        line-height: 1.2 !important;
     }
     
-    .table-modern th,
-    .table-modern td {
-        padding: 6px 10px !important;
-        border-bottom: 1px solid #e2e8f0 !important;
+    .badge-success {
+        color: #059669 !important;
+        border-color: #059669 !important;
+        background: #ecfdf5 !important;
+    }
+    
+    .badge-warning {
+        color: #b45309 !important;
+        border-color: #d97706 !important;
+        background: #fffbeb !important;
+    }
+    
+    .badge-danger {
+        color: #b91c1c !important;
+        border-color: #dc2626 !important;
+        background: #fef2f2 !important;
+    }
+    
+    .badge-purple {
+        color: #6d28d9 !important;
+        border-color: #7c3aed !important;
+        background: #f5f3ff !important;
+    }
+
+    /* Clean Print Footer */
+    .report-print-footer {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-top: 14px !important;
+        padding-top: 8px !important;
+        border-top: 1px solid #cbd5e1 !important;
+        font-size: 6.8pt !important;
+        color: #94a3b8 !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 }
+
 
 
