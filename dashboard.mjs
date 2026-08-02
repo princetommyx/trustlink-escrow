@@ -1351,6 +1351,19 @@ if (productSelect) {
 if (btnNewEscrow) {
     btnNewEscrow.addEventListener('click', openModal);
 }
+const btnWalletInitiateOrder = document.getElementById('btn-wallet-initiate-order');
+if (btnWalletInitiateOrder) {
+    btnWalletInitiateOrder.addEventListener('click', openModal);
+}
+
+// Delegated listener for all Initiate Order triggers
+document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('#btn-new-escrow-trigger, #btn-wallet-initiate-order, [data-action="initiate-order"]');
+    if (trigger && trigger !== btnNewEscrow && trigger !== btnWalletInitiateOrder) {
+        e.preventDefault();
+        openModal();
+    }
+});
 if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
 if (btnCancelEscrow) btnCancelEscrow.addEventListener('click', closeModal);
 if (formNewEscrow) {
