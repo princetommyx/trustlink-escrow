@@ -8,7 +8,7 @@
 
 ---
 
-![TrustLink Escrow Platform Preview](img/hero-vendor.png)
+![TrustLink Escrow Logo](img/logo.png)
 
 ---
 
@@ -31,40 +31,45 @@ Social commerce in Ghana relies heavily on Direct Messages (DMs) across WhatsApp
 
 ## 💻 Tech Stack & Architecture
 
-- **Frontend Core:** HTML5, Modern Vanilla CSS3 (Design Tokens & CSS Variables), JavaScript (ES6+ Modules).
-- **Animations:** Lightweight CSS Transitions & IntersectionObserver, GSAP utilities.
-- **Authentication & Database:** Google Firebase (Auth, Firestore, Cloud Storage).
-- **Backend & Cloud Services:** Firebase Cloud Functions (Node.js/Express REST API endpoints, webhooks, WhatsApp state machine).
-- **Payment Gateway:** Moolre Fintech API (Automated Mobile Money USSD Push collections, payouts/disbursements, transactional SMS gateway).
-- **Messaging Gateways:** Meta WhatsApp Business Cloud API & Twilio WhatsApp API.
-- **E-commerce Plugin:** Official WooCommerce WordPress Payment Gateway Plugin (`trustlink-woocommerce-plugin/`).
+* **Frontend Core:** HTML5, Modern Vanilla CSS3 (Design Tokens & CSS Variables), JavaScript (ES6+ Modules).
+* **Animations:** Lightweight CSS Transitions & IntersectionObserver, GSAP utilities.
+* **Authentication & Database:** Google Firebase (Auth, Firestore, Cloud Storage).
+* **Backend & Cloud Services:** Firebase Cloud Functions (Node.js/Express REST API endpoints, webhooks, WhatsApp state machine).
+* **Payment Gateway:** Moolre Fintech API (Automated Mobile Money USSD Push collections, payouts/disbursements, transactional SMS gateway).
+* **Messaging Gateways:** Meta WhatsApp Business Cloud API & Twilio WhatsApp API.
+* **E-commerce Plugin:** Official WooCommerce WordPress Payment Gateway Plugin (`trustlink-woocommerce-plugin/`).
 
 ---
 
 ## 🔥 Key Platform Features & Functions
 
 ### 1. Vendor & Seller Control Center (`dashboard.html`)
+
 * **Real-time Wallet Overview:** Live snapshot indicators for Available Balance, Escrowed Funds, and Total Completed Volume.
 * **Instant Link Generator:** Mint shareable payment links with custom descriptions, item amounts in Ghana Cedis (`GH₵`), buyer contact details, and flexible fee split configurations (*50/50 split*, *Buyer pays 100%*, *Seller pays 100%*).
 * **Product Catalog:** Manage saved product items and generate checkout links with 1 click.
 * **Mobile Money Disbursements:** Withdraw funds directly to Ghanaian mobile money accounts (MTN, Telecel, AT) with automated validation and safety refund fallback.
 
 ### 2. Buyer Checkout & Payment Room (`checkout.html`)
+
 * **In-App Social Browser Optimization:** Ultra-fast loading inside Instagram, TikTok, and WhatsApp browsers.
 * **Dual Mobile Money Gateway:** USSD Push Prompt directly to buyer's handset or fallback dynamic virtual account transfer.
 * **Real-Time Payment Verification:** Automated polling and webhook listeners transition transaction state to `FUNDS_ESCROWED`.
 
 ### 3. Buyer Confirmation & Delivery Room (`confirm.html`)
+
 * **Live Progress Timeline:** Interactive visual status tracker (`Awaiting Payment` ➔ `Funds Escrowed` ➔ `Shipped` ➔ `Delivered`).
 * **4-Digit Delivery Verification:** Secure confirmation interface allowing buyers to release funds to the seller upon receiving goods.
 * **Dispute Lock:** One-click dispute trigger freezing payouts in state `DISPUTED` for admin review.
 
 ### 4. Interactive WhatsApp Bot Engine (`functions/index.js`)
+
 * **1-Line Escrow Creation:** Mint checkout links directly from WhatsApp text (`CREATE <Amount> <Item> <Buyer Phone>`).
 * **Conversational Order Wizard:** Multi-step guided bot flow walking sellers through order setup.
 * **Order Tracking & Balance:** Send `STATUS`, `SHIP <EscrowID>`, or `BALANCE` directly via chat.
 
 ### 5. Developer REST API & WooCommerce Plugin (`api-docs.html`)
+
 * **REST API Sandbox:** Developer preview documentation portal with interactive sandbox and code snippets in Python, Node.js, cURL, and PHP.
 * **WooCommerce Plugin:** Ready-to-deploy PHP plugin file enabling WooCommerce webstores to offer TrustLink Escrow checkout.
 
