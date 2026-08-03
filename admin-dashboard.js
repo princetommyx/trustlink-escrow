@@ -1,8 +1,8 @@
-import { auth, db, firebaseConfig } from "./firebase-config.js";
+import { auth, db, firebaseConfig, functionsApp, httpsCallable } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { onAuthStateChanged, signOut, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { sendEscrowStatusSMS, pickUserPhone, executeMoolrePayout, computeFeeSplit } from "./moolre-service.js";
+import { pickUserPhone, computeFeeSplit } from "./moolre-service.js";
 
 // Navigation Logic
 const navItems = document.querySelectorAll('.nav-item');
@@ -1276,21 +1276,9 @@ const loadPayoutsAdmin = async () => {
                     approveBtn.disabled = true;
                     approveBtn.textContent = 'Processing...';
                     try {
-                        // Fast MVP Approach: Call Moolre directly from frontend
-                        await executeMoolrePayout(t.id, parseFloat(t.amount) || 0, t.momoNumber, t.network);
+                        const processPayoutFn = httpsCallable(functionsApp, 'processPayout');
+                        await processPayoutFn({ transactionId: t.id });
                         
-                        await updateDoc(doc(db, "transactions", t.id), {
-                            status: 'completed',
-                            processedAt: new Date(),
-                            processedBy: auth.currentUser ? auth.currentUser.email : 'admin'
-                        });
-                        
-                        // SMS the seller that their payout is on its way
-                        try {
-                            if (t.momoNumber) {
-                                await sendEscrowStatusSMS(t.momoNumber, `TrustLink: Your withdrawal of ${formatGHS(parseFloat(t.amount) || 0)} has been approved and sent to your ${NETWORK_NAMES[t.network] || 'mobile money'} wallet (${t.momoNumber}).`, `${t.id}-payout`);
-                            }
-                        } catch (smsErr) { console.warn("Payout SMS failed:", smsErr); }
                         loadPayoutsAdmin();
                         fetchAdminStats();
                     } catch (error) {

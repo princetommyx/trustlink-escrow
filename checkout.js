@@ -1,6 +1,6 @@
-import { db } from "./firebase-config.js";
+import { db, functionsApp, httpsCallable } from "./firebase-config.js";
 import { doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { initiateMoolreCheckout, MOOLRE_STATIC_POS_LINK, verifyMoolrePayment, initiateUSSDPushPayment, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone } from "./moolre-service.js";
+import { computeFeeSplit, pickUserPhone } from "./moolre-service.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Extract ID from URL
@@ -25,57 +25,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const escrow = docSnap.data();
 
-        // Best-effort SMS to the seller when their escrow changes state
-        const notifySellerSMS = async (text) => {
-            try {
-                if (!escrow.sellerId) return;
-                const sellerSnap = await getDoc(doc(db, "users", escrow.sellerId));
-                const sellerPhone = pickUserPhone(sellerSnap.exists() ? sellerSnap.data() : null);
-                if (sellerPhone) await sendEscrowStatusSMS(sellerPhone, text, `${escrowId}-status`);
-            } catch (smsErr) {
-                console.warn("Seller status SMS failed:", smsErr);
-            }
-        };
-        const itemLabel = (escrow.description || 'your item').replace(/\s+/g, ' ').trim().substring(0, 60);
-
-        // Buyer receipt SMS: Moolre only sends its generic deposit alert, so
-        // we send our own with the actual purchase details.
-        const notifyBuyerSMS = async () => {
-            try {
-                if (!escrow.buyerPhone) return;
-                const trackUrl = window.location.origin + window.location.pathname + "?id=" + escrowId;
-                await sendEscrowStatusSMS(escrow.buyerPhone, `TrustLink: Payment received! GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}" is now held safely in escrow. It will only be released to the seller after you confirm delivery. Track your order: ${trackUrl}`, `${escrowId}-receipt`);
-            } catch (smsErr) {
-                console.warn("Buyer receipt SMS failed:", smsErr);
-            }
-        };
-
-        // Handle Moolre Callback / Redirect
+        // Handle Moolre Callback / Redirect Verification
         const paymentStatus = urlParams.get('payment');
         if (paymentStatus === 'success' && escrow.status === 'PENDING_PAYMENT') {
-            document.getElementById('loading-text').textContent = "Verifying Payment with Moolre...";
+            document.getElementById('loading-text').textContent = "Verifying Payment...";
             try {
-                // Verify the transaction securely with Moolre
-                const verificationResult = await verifyMoolrePayment(escrowId);
+                const verifyCallable = httpsCallable(functionsApp, 'verifyMoolrePayment');
+                const res = await verifyCallable({ escrowId });
                 
-                // Moolre txstatus: 1 means Success
-                if (verificationResult && verificationResult.txstatus == 1) {
-                    // Update Firestore
-                    await updateDoc(docRef, { status: 'FUNDED' });
-                    escrow.status = 'FUNDED';
-                    await notifyBuyerSMS(); await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
+                if (res.data && res.data.paid) {
                     alert("Payment Successful! Your funds are now securely held in escrow.");
-                    
                     if (escrow.redirectUrl) {
                         const sep = escrow.redirectUrl.includes('?') ? '&' : '?';
                         window.location.href = `${escrow.redirectUrl}${sep}escrow_id=${escrowId}&status=funded&reference=${escrow.customReference || ''}`;
-                        return; // Stop execution to allow redirect
+                        return;
                     }
-                } else {
-                    throw new Error("Moolre says the transaction is not fully successful yet.");
                 }
                 
-                // Clear URL params to prevent re-triggering on reload
                 window.history.replaceState({}, document.title, window.location.pathname + "?id=" + escrowId);
             } catch (err) {
                 console.error("Payment Verification Failed:", err);
@@ -109,7 +75,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('seller-name').textContent = escrow.sellerName || 'Verified Vendor';
         document.getElementById('escrow-desc').textContent = escrow.description || 'Secure Transaction';
         document.getElementById('escrow-id-display').textContent = escrowId;
-        // Display delivery window (supports new range and old single-date)
+
+        // Display delivery window
         const deliveryFrom = escrow.deliveryDateFrom || escrow.deliveryDate;
         const deliveryTo = escrow.deliveryDateTo;
         if (deliveryFrom || deliveryTo) {
@@ -137,49 +104,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         const actionButtons = document.getElementById('action-buttons');
         
         const updateStatusUI = (status) => {
-            statusBadge.className = 'status-badge'; // reset
+            statusBadge.className = 'status-badge';
             if (status === 'PENDING_PAYMENT') {
                 statusBadge.textContent = 'Status: Pending Payment';
                 statusBadge.classList.add('status-pending');
                 
                 actionButtons.innerHTML = `
-                    <button id="btn-pay" class="btn btn-primary btn-large" style="width: 100%; margin-bottom: 8px;">Pay securely via Moolre</button>
+                    <button id="btn-pay" class="btn btn-primary btn-large" style="width: 100%; margin-bottom: 8px;">Pay securely via Mobile Money</button>
                 `;
                 
                 document.getElementById('btn-pay').addEventListener('click', async (e) => {
+                    const phonePrompt = prompt("Enter your Mobile Money phone number (e.g. 0551234567):", escrow.buyerPhone || "");
+                    if (!phonePrompt) return;
+
                     const btn = e.target;
                     btn.disabled = true;
-                    btn.textContent = "Connecting to Moolre...";
+                    btn.textContent = "Sending USSD Payment Prompt...";
 
-                    // Try the dynamic checkout API first: it carries the escrow ID as
-                    // externalref, which lets the webhook auto-mark this escrow FUNDED.
-                    // While Moolre keeps returning AIN01 (see HANDOFF.md) we fall back
-                    // to the static POS link so the buyer flow stays testable.
                     try {
-                        const customer = {
-                            email: escrow.buyerEmail || "buyer@trustlink.com",
-                            name: escrow.sellerName || "TrustLink Buyer"
-                        };
-                        // Send the buyer straight back to THIS checkout page after payment.
-                        // The ?payment=success flag triggers verifyMoolrePayment() on load,
-                        // which confirms with Moolre and marks the escrow FUNDED.
-                        const callbackUrl = window.location.origin + window.location.pathname + "?id=" + escrowId + "&payment=success";
-                        const checkout = await initiateMoolreCheckout(fees.buyerTotal, escrow.description, customer, escrowId, callbackUrl);
-                        const payUrl = checkout && (checkout.authorization_url || checkout.url || checkout.link);
-                        if (!payUrl) throw new Error("Moolre response did not include a checkout URL.");
-                        
-                        // Open Moolre POS in a new tab so TrustLink can listen for the webhook!
-                        window.open(payUrl, "_blank");
-                        btn.textContent = "Awaiting Payment Confirmation...";
+                        const createCheckout = httpsCallable(functionsApp, 'createMoolreCheckout');
+                        const res = await createCheckout({
+                            escrowId,
+                            buyerPhone: phonePrompt,
+                            channel: 13
+                        });
+
+                        if (res.data && res.data.success) {
+                            alert(`USSD Payment prompt sent to ${phonePrompt}. Please enter your MoMo PIN on your phone to complete payment.`);
+                            btn.textContent = "Awaiting Payment Confirmation...";
+                        } else {
+                            throw new Error("Failed to dispatch USSD prompt.");
+                        }
                     } catch(err) {
-                        console.warn("Moolre API Failed, falling back to static POS link.", err.message);
-                        window.open(MOOLRE_STATIC_POS_LINK, "_blank");
-                        btn.disabled = true;
-                        btn.textContent = "Awaiting Payment Confirmation...";
+                        btn.disabled = false;
+                        btn.textContent = "Pay securely via Mobile Money";
+                        alert("Payment prompt dispatch failed: " + err.message);
                     }
                 });
 
-                // Handle USSD Push Payment
+                // Handle USSD Push Payment Form if present
                 const btnUssd = document.getElementById('btn-pay-ussd');
                 if (btnUssd) {
                     btnUssd.addEventListener('click', async () => {
@@ -195,55 +158,40 @@ document.addEventListener('DOMContentLoaded', async () => {
                         btnUssd.disabled = true;
                         
                         try {
-                            await initiateUSSDPushPayment(phone, fees.buyerTotal, network, escrowId);
-                            alert(`A prompt has been sent to ${phone}. Please check your phone and enter your PIN to approve the payment.\n\nClick OK once you have paid.`);
+                            const createCheckout = httpsCallable(functionsApp, 'createMoolreCheckout');
+                            await createCheckout({
+                                escrowId,
+                                buyerPhone: phone,
+                                channel: network
+                            });
+
+                            alert(`A prompt has been sent to ${phone}. Check your mobile phone and enter your PIN to approve the payment.`);
                             
-                            document.getElementById('loading-text').textContent = "Verifying Payment with Moolre...";
+                            document.getElementById('loading-text').textContent = "Verifying Payment...";
                             document.getElementById('loader').style.display = 'block';
                             document.getElementById('loading-text').style.display = 'block';
                             document.getElementById('escrow-content').classList.add('hidden');
                             
-                            // Check status after they click OK
-                            let verificationResult = await verifyMoolrePayment(escrowId);
-                            
-                            if (verificationResult && verificationResult.txstatus == 1) {
-                                await updateDoc(docRef, { status: 'FUNDED' });
-                                await notifyBuyerSMS(); await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
-                                alert("Payment Successful! Funds are now securely held in escrow.");
-                                if (escrow.redirectUrl) {
-                                    const sep = escrow.redirectUrl.includes('?') ? '&' : '?';
-                                    window.location.href = `${escrow.redirectUrl}${sep}escrow_id=${escrowId}&status=funded&reference=${escrow.customReference || ''}`;
-                                } else {
-                                    window.location.reload();
-                                }
-                            } else {
-                                // Let's poll for up to 30 seconds
-                                let attempts = 0;
-                                let interval = setInterval(async () => {
-                                    attempts++;
-                                    try {
-                                        verificationResult = await verifyMoolrePayment(escrowId);
-                                        if (verificationResult && verificationResult.txstatus == 1) {
-                                            clearInterval(interval);
-                                            await updateDoc(docRef, { status: 'FUNDED' });
-                                            await notifyBuyerSMS(); await notifySellerSMS(`TrustLink: Great news! The buyer has paid GH₵ ${parseFloat(escrow.amount).toFixed(2)} for "${itemLabel}". The money is secured in escrow - please dispatch the item and mark it as dispatched on your dashboard.`);
-                                            alert("Payment Successful! Funds are now securely held in escrow.");
-                                            if (escrow.redirectUrl) {
-                                                const sep = escrow.redirectUrl.includes('?') ? '&' : '?';
-                                                window.location.href = `${escrow.redirectUrl}${sep}escrow_id=${escrowId}&status=funded&reference=${escrow.customReference || ''}`;
-                                            } else {
-                                                window.location.reload();
-                                            }
-                                        }
-                                    } catch(e) { }
-                                    
-                                    if (attempts > 6) {
+                            // Poll status via server-side Callable function
+                            const verifyCallable = httpsCallable(functionsApp, 'verifyMoolrePayment');
+                            let attempts = 0;
+                            let interval = setInterval(async () => {
+                                attempts++;
+                                try {
+                                    const vRes = await verifyCallable({ escrowId });
+                                    if (vRes.data && vRes.data.paid) {
                                         clearInterval(interval);
-                                        alert("Payment verification timed out. If you already paid, the status will automatically update shortly.");
+                                        alert("Payment Successful! Funds are now securely held in escrow.");
                                         window.location.reload();
                                     }
-                                }, 5000);
-                            }
+                                } catch(e) { }
+
+                                if (attempts > 6) {
+                                    clearInterval(interval);
+                                    alert("Payment verification pending. The status will automatically update once confirmed.");
+                                    window.location.reload();
+                                }
+                            }, 5000);
                         } catch (error) {
                             btnUssd.textContent = "Send USSD Prompt to Phone";
                             btnUssd.disabled = false;
@@ -252,7 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 }
 
-            } else if (status === 'FUNDED') {
+            } else if (status === 'FUNDS_ESCROWED' || status === 'FUNDED') {
                 statusBadge.textContent = 'Status: Paid (Awaiting Dispatch)';
                 statusBadge.classList.add('status-funded');
                 actionButtons.innerHTML = `<p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Your funds are securely locked in TrustLink Escrow. The seller has been notified to dispatch the item.</p>`;
@@ -261,7 +209,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     actionButtons.innerHTML += `<button class="btn btn-primary btn-large" style="width: 100%; margin-top: 12px;" onclick="window.location.href='${escrow.redirectUrl}${sep}escrow_id=${escrowId}&status=funded&reference=${escrow.customReference || ''}'">Return to Vendor</button>`;
                 }
                 
-            } else if (status === 'DISPATCHED') {
+            } else if (status === 'ITEM_SHIPPED' || status === 'DISPATCHED') {
                 statusBadge.textContent = 'Status: Dispatched';
                 statusBadge.classList.add('status-dispatched');
                 
@@ -277,10 +225,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             const sellerId = escrow.sellerId;
                             const amount = parseFloat(escrow.amount);
                             
-                            // 1. Complete the Escrow
                             await updateDoc(docRef, { status: 'COMPLETED' });
                             
-                            // 2. Add to Seller Wallet Balance
                             const sellerRef = doc(db, "users", sellerId);
                             const sellerSnap = await getDoc(sellerRef);
                             if (sellerSnap.exists()) {
@@ -310,14 +256,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 actionButtons.innerHTML = `<p style="color: var(--success); font-weight: 600;">This escrow has been successfully completed and funds were released to the seller.</p>`;
             } else if (status === 'DISPUTED') {
                 statusBadge.textContent = 'Status: Disputed';
-                statusBadge.classList.add('status-pending'); // Yellow/warning
+                statusBadge.classList.add('status-pending');
                 actionButtons.innerHTML = `<p style="color: var(--warning); font-weight: 600;">This escrow is currently under dispute review.</p>`;
             }
         };
 
         updateStatusUI(escrow.status);
 
-        // Listen for real-time updates (e.g. from the Moolre Webhook)
+        // Listen for real-time updates
         onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
                 const updatedData = snap.data();
@@ -325,7 +271,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     escrow.status = updatedData.status;
                     updateStatusUI(escrow.status);
                     
-                    if (escrow.status === 'FUNDED') {
+                    if (escrow.status === 'FUNDS_ESCROWED' || escrow.status === 'FUNDED') {
                         alert("Payment Successful! Your funds are now securely held in escrow.");
                     }
                 }

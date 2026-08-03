@@ -2,7 +2,7 @@ import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { initiateMoolreCheckout, sendSMSNotification, sendWhatsAppNotification, generateMoolrePaymentID, generateSecureToken, sha256Hex, sendDeliveryConfirmationSMS, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone, executeMoolrePayout, sendMoolreOTP } from "./moolre-service.js";
+import { generateSecureToken, sha256Hex, computeFeeSplit, pickUserPhone, normalizePhone } from "./moolre-service.js";
 
 let currentUser = null;
 let currentBalance = 0;
