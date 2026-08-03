@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="dashboard.css">
@@ -601,7 +601,7 @@
                                 <p style="color: var(--text-muted); margin: 0 0 8px;">Available Balance</p>
                                 <h1 style="margin: 0; font-size: 2.5rem;" id="wallet-available-balance">GH₵ 0.00</h1>
                             </div>
-                    <div style="display: flex; gap: 16px;">
+                            <div style="display: flex; gap: 16px;">
                                 <button class="btn btn-primary" id="btn-wallet-initiate-order">Initiate Order</button>
                                 <button class="btn btn-outline" id="btn-withdraw">Withdraw</button>
                             </div>
@@ -611,138 +611,23 @@
 
                 <!-- Messages View -->
                 <div id="view-messages" class="view-section hidden">
-                    <div class="tl-msg-wrapper">
-                        <div class="tl-msg-container" id="tl-msg-container">
-                            <!-- Left: Messages & Conversations List -->
-                            <div class="tl-msg-sidebar" id="tl-msg-sidebar">
-                                <div class="tl-msg-sidebar-header">
-                                    <div class="tl-msg-header-left">
-                                        <button type="button" class="tl-msg-icon-btn" id="tl-msg-back-btn" title="Back to Overview" aria-label="Back">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                                            </svg>
-                                        </button>
-                                        <h2 class="tl-msg-main-title">Messages</h2>
-                                    </div>
-                                    <div class="tl-msg-header-actions">
-                                        <button type="button" class="tl-msg-icon-btn" id="tl-msg-camera-action" title="Open Camera" aria-label="Camera">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                                            </svg>
-                                        </button>
-                                        <button type="button" class="tl-msg-icon-btn" id="tl-msg-compose-action" title="New Message" aria-label="New Message">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Search & Filter -->
-                                <div class="tl-msg-search-section">
-                                    <div class="tl-msg-search-box">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="tl-msg-search-icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                        </svg>
-                                        <input type="text" id="tl-msg-search-input" placeholder="Search" autocomplete="off" aria-label="Search conversations">
-                                    </div>
-                                    <button type="button" class="tl-msg-filter-btn" id="tl-msg-filter-btn" title="Filter options" aria-label="Filter">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Category Filter Pills -->
-                                <div class="tl-msg-pills-bar">
-                                    <button type="button" class="tl-msg-pill active" data-filter="all">All</button>
-                                    <button type="button" class="tl-msg-pill" data-filter="contacts">Contacts</button>
-                                    <button type="button" class="tl-msg-pill" data-filter="unknown">Unknown</button>
-                                    <button type="button" class="tl-msg-pill" data-filter="new">New</button>
-                                </div>
-
-                                <!-- Conversations / Thread List -->
-                                <div class="tl-msg-threads-container" id="tl-msg-threads-list">
-                                    <!-- Injected dynamically via JS -->
-                                </div>
+                    <h2 style="margin-bottom: 24px;">In-App Messaging</h2>
+                    <div class="portal-card portal-card-white chat-container">
+                        <div class="chat-sidebar" id="chat-contacts">
+                            <p style="padding: 16px; color: var(--text-muted); font-size: 0.9rem;">No active chats.</p>
+                        </div>
+                        <div class="chat-main">
+                            <div class="chat-header">
+                                <h3 style="margin: 0;" id="chat-title">No chat selected</h3>
                             </div>
-
-                            <!-- Right: Chat Conversation Stream -->
-                            <div class="tl-msg-chat-panel" id="tl-msg-chat-panel">
-                                <!-- Chat Header -->
-                                <div class="tl-msg-chat-header">
-                                    <div class="tl-msg-chat-header-user">
-                                        <button type="button" class="tl-msg-back-to-threads" id="tl-msg-back-to-threads" aria-label="Back to conversations">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                            </svg>
-                                        </button>
-                                        <div class="tl-msg-header-avatar-wrap">
-                                            <div class="tl-msg-avatar" id="tl-msg-active-avatar">
-                                                <img src="" alt="" id="tl-msg-active-avatar-img">
-                                                <span class="tl-msg-avatar-initials" id="tl-msg-active-initials">JK</span>
-                                            </div>
-                                            <span class="tl-msg-online-dot" id="tl-msg-active-dot"></span>
-                                        </div>
-                                        <div class="tl-msg-header-text">
-                                            <h3 class="tl-msg-active-name" id="tl-msg-active-name">Jack king</h3>
-                                            <span class="tl-msg-active-status" id="tl-msg-active-status">Online</span>
-                                        </div>
-                                    </div>
-                                    <div class="tl-msg-chat-header-actions">
-                                        <button type="button" class="tl-msg-action-pill-btn" id="tl-msg-call-video" title="Video Call" aria-label="Video Call">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                                            </svg>
-                                        </button>
-                                        <button type="button" class="tl-msg-action-pill-btn" id="tl-msg-call-phone" title="Audio Call" aria-label="Voice Call">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Messages Feed -->
-                                <div class="tl-msg-feed" id="tl-msg-feed">
-                                    <!-- Injected dynamically via JS -->
-                                </div>
-
-                                <!-- Bottom Floating Input Bar -->
-                                <div class="tl-msg-input-container">
-                                    <form class="tl-msg-input-dock" id="tl-msg-form" autocomplete="off">
-                                        <button type="button" class="tl-msg-dock-icon-btn" id="tl-msg-emoji-btn" title="Add Emoji" aria-label="Emoji">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm6 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75z" />
-                                            </svg>
-                                        </button>
-                                        <input type="text" id="tl-msg-input-field" class="tl-msg-text-input" placeholder="Enter Text" aria-label="Type message">
-                                        <div class="tl-msg-dock-actions">
-                                            <button type="button" class="tl-msg-dock-icon-btn" id="tl-msg-attach-btn" title="Attach file" aria-label="Attach">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.373L8.559 18.32a1.5 1.5 0 11-2.122-2.122L16.2 6.438" />
-                                                </svg>
-                                            </button>
-                                            <button type="button" class="tl-msg-dock-icon-btn" id="tl-msg-cam-btn" title="Send photo" aria-label="Camera">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-                                                </svg>
-                                            </button>
-                                            <button type="button" class="tl-msg-dock-icon-btn" id="tl-msg-mic-btn" title="Voice note" aria-label="Microphone">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15a3 3 0 003-3V6a3 3 0 00-3-3 3 3 0 00-3 3v6a3 3 0 003 3z" />
-                                                </svg>
-                                            </button>
-                                            <button type="submit" class="tl-msg-send-btn" id="tl-msg-send-btn" title="Send message" aria-label="Send">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
+                            <div class="chat-messages" id="chat-messages">
+                                <p style="text-align: center; color: var(--text-muted); padding: 20px;">In-app messaging
+                                    is coming soon. For now, buyers and sellers are connected automatically via SMS
+                                    notifications.</p>
+                            </div>
+                            <div class="chat-input-area">
+                                <input type="text" placeholder="Messaging coming soon..." disabled>
+                                <button class="btn btn-primary" disabled>Send</button>
                             </div>
                         </div>
                     </div>
