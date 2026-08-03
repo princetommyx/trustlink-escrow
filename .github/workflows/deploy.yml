@@ -24,8 +24,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Inject DeepSeek API Key
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          sed -i "s|YOUR_DEEPSEEK_API_KEY_HERE|${{ secrets.DEEPSEEK_API_KEY }}|g" chatbot.js
+          sed -i "s|YOUR_DEEPSEEK_API_KEY_HERE|${DEEPSEEK_API_KEY}|g" chatbot.js
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
