@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "princetommyx",
+        "projectKey": "princetommyx_trustlink-escrow"
+    }
+}

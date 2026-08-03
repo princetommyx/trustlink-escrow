@@ -17,7 +17,7 @@ async function initiateMoolreCheckout(amount, description, customer, externalRef
         },
         body: JSON.stringify({
             type: 1,
-            amount: parseFloat(amount).toFixed(2),
+            amount: Number.parseFloat(amount).toFixed(2),
             email: customer.email,
             externalref: externalRef || `ESC-${Date.now()}`,
             reusable: "0",
@@ -28,7 +28,7 @@ async function initiateMoolreCheckout(amount, description, customer, externalRef
         })
     });
     const data = await response.json();
-    if (!response.ok || data.status == 0) {
+    if (!response.ok || Number(data.status) === 0) {
         throw new Error(data.message || "Failed to generate Moolre payment link.");
     }
     return data.data; 
@@ -54,38 +54,34 @@ async function initiateUSSDPushPayment(phone, amount, channel, escrowId) {
         })
     });
     const data = await response.json();
-    if (!response.ok || data.status == 0) {
+    if (!response.ok || Number(data.status) === 0) {
         throw new Error(data.message || "Failed to push USSD prompt");
     }
     return data;
 }
 
-async function runTests() {
-    console.log("=== Testing Moolre APIs ===");
-    
+console.log("=== Testing Moolre APIs ===");
+
+try {
+    console.log("\n1. Testing /embed/link (Dynamic Checkout)...");
+    const customer = { email: "test@trustlink.com", name: "Test User" };
+    const checkout = await initiateMoolreCheckout(10, "Test Transaction", customer, "TEST-ESC-123", "http://localhost");
+    console.log("✅ Success! Checkout Data:", checkout);
+} catch (err) {
+    console.log("❌ Failed:", err.message);
+}
+
+// USSD push sends a REAL payment prompt to a REAL phone, so it only runs
+// if you pass a phone number: node test-moolre.mjs 05XXXXXXXX
+const testPhone = process.argv[2];
+if (testPhone) {
     try {
-        console.log("\n1. Testing /embed/link (Dynamic Checkout)...");
-        const customer = { email: "test@trustlink.com", name: "Test User" };
-        const checkout = await initiateMoolreCheckout(10, "Test Transaction", customer, "TEST-ESC-123", "http://localhost");
-        console.log("✅ Success! Checkout Data:", checkout);
+        console.log(`\n2. Testing /open/transact/payment (USSD Push) to ${testPhone}...`);
+        const ussd = await initiateUSSDPushPayment(testPhone, 1, 13, "TEST-ESC-" + Date.now());
+        console.log("✅ Success! USSD Data:", ussd);
     } catch (err) {
         console.log("❌ Failed:", err.message);
     }
-
-    // USSD push sends a REAL payment prompt to a REAL phone, so it only runs
-    // if you pass a phone number: node test-moolre.mjs 05XXXXXXXX
-    const testPhone = process.argv[2];
-    if (testPhone) {
-        try {
-            console.log(`\n2. Testing /open/transact/payment (USSD Push) to ${testPhone}...`);
-            const ussd = await initiateUSSDPushPayment(testPhone, 1, 13, "TEST-ESC-" + Date.now());
-            console.log("✅ Success! USSD Data:", ussd);
-        } catch (err) {
-            console.log("❌ Failed:", err.message);
-        }
-    } else {
-        console.log("\n2. Skipping USSD Push test (pass a phone number to run it: node test-moolre.mjs 05XXXXXXXX)");
-    }
+} else {
+    console.log("\n2. Skipping USSD Push test (pass a phone number to run it: node test-moolre.mjs 05XXXXXXXX)");
 }
-
-runTests();

@@ -43,7 +43,7 @@
                     <p style="color: var(--text-secondary); margin-bottom: 30px; font-size: 0.95rem;" id="verify-subtitle">Loading...</p>
 
                     <div id="phone-verification-section" style="display: none;">
-                        <input type="text" id="otp-input" placeholder="XXXX" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px; padding: 15px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--surface-border); background: var(--bg-dark); color: var(--text-primary); width: 100%; box-sizing: border-box;" required>
+                        <input type="text" id="otp-input" aria-label="One-time verification code" placeholder="XXXX" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px; padding: 15px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--surface-border); background: var(--bg-dark); color: var(--text-primary); width: 100%; box-sizing: border-box;" required>
                         <div id="otp-error" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 15px; display: none;">Invalid code. Please try again.</div>
                         <button type="submit" class="btn btn-primary btn-large auth-btn" id="verify-otp-btn">VERIFY CODE</button>
                     </div>
@@ -64,7 +64,7 @@
 
     <script type="module" src="auth-handler.js"></script>
 <!--Start of Tawk.to Script-->
-<script type="text/javascript">
+<script>
 var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
 Tawk_API.customStyle = {
     visibility: {

@@ -394,18 +394,15 @@ body {
     height: 64px;
     margin: 0 auto 16px;
     border-radius: 20px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(6, 182, 212, 0.12));
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background-color: #EFF6FF;
+    border: 1px solid #BFDBFE;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #60A5FA;
+    color: #1D4ED8;
 }
 .empty-state h3 { color: var(--text-main); margin-bottom: 8px; font-size: 1.1rem; }
 .empty-state p { font-size: 0.9rem; margin-bottom: 20px; }
-.order-ledger-row:hover {
-    background: #F8F9FA;
-}
 
 /* Chat UI */
 .chat-container {
@@ -467,7 +464,7 @@ body {
 .message.received { align-self: flex-start; }
 .message.received p { background: #F4F7FE; border-bottom-left-radius: 4px; }
 .message.sent { align-self: flex-end; }
-.message.sent p { background: #3B82F6; color: #FFFFFF; border-bottom-right-radius: 4px; }
+.message.sent p { background: #1D4ED8; color: #FFFFFF; border-bottom-right-radius: 4px; }
 
 .system-message {
     align-self: center;
@@ -633,14 +630,17 @@ body {
     flex: 1;
 }
 
-.form-group label {
+/* Dark-mode form styles scoped to the glassmorphism modal overlay */
+.modal-content:not(.modal-content-light) .form-group label {
     font-size: 0.9rem;
     color: rgba(255,255,255,0.7);
     margin-bottom: 8px;
     font-weight: 500;
 }
 
-.form-group input, .form-group select, .form-group textarea {
+.modal-content:not(.modal-content-light) .form-group input,
+.modal-content:not(.modal-content-light) .form-group select,
+.modal-content:not(.modal-content-light) .form-group textarea {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
     padding: 14px 16px;
@@ -651,13 +651,15 @@ body {
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+.modal-content:not(.modal-content-light) .form-group input:focus,
+.modal-content:not(.modal-content-light) .form-group select:focus,
+.modal-content:not(.modal-content-light) .form-group textarea:focus {
     border-color: #3b82f6;
     background: rgba(0, 0, 0, 0.5);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
 }
 
-.form-group select option {
+.modal-content:not(.modal-content-light) .form-group select option {
     background: var(--bg-color);
     color: var(--text-main);
 }
@@ -924,7 +926,13 @@ input[type=number] {
 @media (max-width: 768px) {
     .dashboard-layout { flex-direction: column; }
     .dashboard-main { margin-left: 0; margin-bottom: calc(70px + env(safe-area-inset-bottom)); }
-    .dashboard-topbar { padding: 0 20px; height: 70px; }
+    .dashboard-topbar {
+        padding: 10px 16px;
+        height: auto;
+        min-height: 60px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
     .topbar-title { font-size: 1.1rem; }
     #topbar-menu-toggle { display: flex !important; }
     .dashboard-content { padding: 20px; }
@@ -1072,14 +1080,7 @@ input[type=number] {
         max-width: 85%;
     }
 
-    /* Topbar: responsive wrap */
-    .dashboard-topbar {
-        height: auto;
-        min-height: 60px;
-        flex-wrap: wrap;
-        padding: 10px 16px;
-        justify-content: space-between;
-    }
+    /* Topbar: responsive actions */
     .topbar-left {
         order: 1;
     }
@@ -1458,9 +1459,9 @@ input[type=number] {
     height: 20px;
 }
 
-.bg-green-light { background: #ECFDF5; color: #10B981; }
-.bg-orange-light { background: #FFF7ED; color: #F97316; }
-.bg-blue-light { background: #EFF6FF; color: #3B82F6; }
+.bg-green-light { background: #ECFDF5; color: #065F46; }
+.bg-orange-light { background: #FFF7ED; color: #9A3412; }
+.bg-blue-light { background: #EFF6FF; color: #1D4ED8; }
 
 .tx-info {
     flex: 1;
@@ -1560,7 +1561,7 @@ input[type=number] {
     display: inline-block;
     padding: 4px 12px;
     background: #ECFDF5;
-    color: #10B981;
+    color: #065F46;
     border-radius: 12px;
     font-size: 0.85rem;
     font-weight: 500;
@@ -1569,7 +1570,7 @@ input[type=number] {
     display: inline-block;
     padding: 4px 12px;
     background: #F1F5F9;
-    color: #64748B;
+    color: #334155;
     border-radius: 12px;
     font-size: 0.85rem;
     font-weight: 500;
@@ -1602,24 +1603,35 @@ input[type=number] {
     margin-bottom: 24px;
 }
 
-.form-group {
+/* Light-mode form styles for dashboard cards/forms (overrides modal dark defaults) */
+.portal-card-white .form-group,
+.form-section .form-group {
     margin-bottom: 20px;
 }
-.form-group label {
+.portal-card-white .form-group label,
+.form-section .form-group label {
     display: block;
     font-size: 0.9rem;
     font-weight: 500;
     color: #475569;
     margin-bottom: 8px;
 }
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group input[type="date"],
-.form-group input[type="email"],
-.form-group input[type="tel"],
-.form-group input[type="password"],
-.form-group select,
-.form-group textarea {
+.portal-card-white .form-group input[type="text"],
+.portal-card-white .form-group input[type="number"],
+.portal-card-white .form-group input[type="date"],
+.portal-card-white .form-group input[type="email"],
+.portal-card-white .form-group input[type="tel"],
+.portal-card-white .form-group input[type="password"],
+.portal-card-white .form-group select,
+.portal-card-white .form-group textarea,
+.form-section .form-group input[type="text"],
+.form-section .form-group input[type="number"],
+.form-section .form-group input[type="date"],
+.form-section .form-group input[type="email"],
+.form-section .form-group input[type="tel"],
+.form-section .form-group input[type="password"],
+.form-section .form-group select,
+.form-section .form-group textarea {
     width: 100%;
     padding: 12px 16px;
     border: 1px solid #E2E8F0;
@@ -1627,9 +1639,9 @@ input[type=number] {
     font-size: 0.95rem;
     outline: none;
     box-sizing: border-box;
-    background-color: #F8FAFC !important; /* Force light background */
+    background-color: #F8FAFC !important;
     color: #111827;
-    -webkit-appearance: none; /* Fix iOS gray background issue */
+    -webkit-appearance: none;
     appearance: none;
 }
 
@@ -1648,11 +1660,14 @@ input[type=number] {
 .form-group input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
 }
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.portal-card-white .form-group input:focus,
+.portal-card-white .form-group select:focus,
+.portal-card-white .form-group textarea:focus,
+.form-section .form-group input:focus,
+.form-section .form-group select:focus,
+.form-section .form-group textarea:focus {
     border-color: #3B82F6;
-    background: white;
+    background: white !important;
 }
 
 /* Rich Text Editor Mockup */
@@ -1865,17 +1880,17 @@ input[type=number] {
 }
 
 .btn-order-whatsapp {
-    background: #25D366 !important;
+    background-color: #166534 !important;
     color: #FFFFFF !important;
-    border: 1.5px solid #1EBE5D !important;
-    box-shadow: 0 1px 3px rgba(37, 211, 102, 0.28);
+    border: 1.5px solid #14532D !important;
+    box-shadow: 0 1px 3px rgba(22, 101, 52, 0.28);
 }
 
 .btn-order-whatsapp:hover {
-    background: #1EBE5D !important;
-    border-color: #179B4B !important;
+    background-color: #14532D !important;
+    border-color: #052E16 !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+    box-shadow: 0 4px 10px rgba(22, 101, 52, 0.4);
 }
 
 @media (max-width: 560px) {
