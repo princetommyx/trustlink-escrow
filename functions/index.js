@@ -6,6 +6,7 @@ const fetch = typeof globalThis.fetch === 'function' ? globalThis.fetch : (...ar
 const twilio = require('twilio');
 admin.initializeApp();
 const db = admin.firestore();
+const APP_BASE_URL = process.env.APP_BASE_URL || 'https://www.trustlinkgh.online';
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -63,7 +64,7 @@ app.post('/v1/escrows', authenticateApi, async (req, res) => {
         const escrowRef = await db.collection('escrows').add(escrowData);
         
         // Return a checkout URL for the buyer to visit
-        const checkoutUrl = `https://trustlink.co/checkout.html?id=${escrowRef.id}`; // Assuming trustlink.co is the domain
+        const checkoutUrl = `${APP_BASE_URL}/checkout.html?id=${escrowRef.id}`;
 
         // Attempt to send WhatsApp message if buyerPhone is provided
         if (escrowData.buyerPhone) {
@@ -273,7 +274,7 @@ async function handleWhatsAppEngine(from, body, profileName) {
                     source: 'whatsapp_bot'
                 });
 
-                const checkoutUrl = `https://trustlink.co/checkout.html?id=${escrowRef.id}`;
+                const checkoutUrl = `${APP_BASE_URL}/checkout.html?id=${escrowRef.id}`;
                 
                 // Dispatch SMS Alert to Buyer
                 sendBuyerSmsAlert(
@@ -364,7 +365,7 @@ async function handleWhatsAppEngine(from, body, profileName) {
             // Reset session
             await sessionRef.set({ step: 'IDLE', draft: {}, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
 
-            const checkoutUrl = `https://trustlink.co/checkout.html?id=${escrowRef.id}`;
+            const checkoutUrl = `${APP_BASE_URL}/checkout.html?id=${escrowRef.id}`;
             
             // Dispatch SMS Alert to Buyer
             sendBuyerSmsAlert(
@@ -423,7 +424,7 @@ async function handleWhatsAppEngine(from, body, profileName) {
             const balance = (vendorData && vendorData.wallet && vendorData.wallet.balance) || 0;
             const escrowLocked = (vendorData && vendorData.wallet && vendorData.wallet.escrowLocked) || 0;
 
-            reply = `💼 *TrustLink Wallet Summary*\n\n💵 *Available Balance:* GH₵ ${balance.toFixed(2)}\n🔒 *Locked in Escrow:* GH₵ ${escrowLocked.toFixed(2)}\n\n_Log in to trustlink.co/dashboard.html to withdraw funds directly to MoMo._`;
+            reply = `💼 *TrustLink Wallet Summary*\n\n💵 *Available Balance:* GH₵ ${balance.toFixed(2)}\n🔒 *Locked in Escrow:* GH₵ ${escrowLocked.toFixed(2)}\n\n_Log in to ${APP_BASE_URL.replace(/^https?:\/\//, '')}/dashboard.html to withdraw funds directly to MoMo._`;
         }
         // Ship Order: 3 or SHIP <id>
         else if (upperBody === '3' || upperBody.startsWith('SHIP')) {
@@ -453,7 +454,7 @@ async function handleWhatsAppEngine(from, body, profileName) {
                         if (esc.buyerPhone) {
                             sendBuyerSmsAlert(
                                 esc.buyerPhone,
-                                `TrustLink: The seller has marked your order "${esc.description}" as shipped! Please confirm receipt once delivered at: https://trustlink.co/confirm.html?id=${escrowId}`
+                                `TrustLink: The seller has marked your order "${esc.description}" as shipped! Please confirm receipt once delivered at: ${APP_BASE_URL}/confirm.html?id=${escrowId}`
                             );
                         }
 

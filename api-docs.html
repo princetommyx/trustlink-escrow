@@ -84,7 +84,7 @@
                 <section class="request-column">
                     <div class="breadcrumb">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        API Endpoints <span class="divider">></span> <strong>Create Escrow</strong>
+                        API Endpoints <span class="divider">></span> <strong>Create Escrow</strong> <span class="badge" style="background: #3B82F6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">Developer Preview</span>
                     </div>
 
                     <div class="endpoint-header">
@@ -103,11 +103,11 @@
                                 <option value="POST">POST</option>
                                 <option value="GET">GET</option>
                             </select>
-                            <input type="text" class="url-input" value="https://trustlink.co/api/v1/escrows" readonly>
+                            <input type="text" class="url-input" value="https://www.trustlinkgh.online/api/v1/escrows" readonly>
                         </div>
                         <button class="btn-send" id="btn-send-test">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Send Request
+                            Send Request (Sandbox)
                         </button>
 
                         <div class="tabs-container">
@@ -122,6 +122,10 @@
                                 <div class="param-row">
                                     <input type="text" class="param-key" value="amount" readonly>
                                     <input type="text" class="param-value" value="450.00" readonly>
+                                </div>
+                                <div class="param-row">
+                                    <input type="text" class="param-key" value="currency" readonly>
+                                    <input type="text" class="param-value" value="GHS" readonly>
                                 </div>
                                 <div class="param-row">
                                     <input type="text" class="param-key" value="description" readonly>
@@ -164,7 +168,7 @@
                 <!-- Response / Code Column -->
                 <section class="response-column">
                     <div class="response-metrics">
-                        <div class="metric"><span class="label">Status:</span> <span class="value success"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> 201 Created</span></div>
+                        <div class="metric"><span class="label">Status:</span> <span class="value success"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> 201 Created (Example)</span></div>
                         <div class="metric"><span class="label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span> <span class="value">124ms</span></div>
                         <div class="metric"><span class="label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></span> <span class="value">1.2 KB</span></div>
                     </div>
@@ -172,7 +176,7 @@
                     <div class="code-panel">
                         <div class="tabs-header code-tabs">
                             <button class="tab-btn active" data-code-tab="code">Code</button>
-                            <button class="tab-btn" data-code-tab="response">Response</button>
+                            <button class="tab-btn" data-code-tab="response">Example Response</button>
                             <div style="flex-grow: 1;"></div>
                             <select class="lang-select">
                                 <option>Python</option>
@@ -191,10 +195,11 @@
 <pre><code><span style="color: #c678dd;">import</span> requests
 <span style="color: #c678dd;">import</span> json
 
-url = <span style="color: #98c379;">"https://trustlink.co/api/v1/escrows"</span>
+url = <span style="color: #98c379;">"https://www.trustlinkgh.online/api/v1/escrows"</span>
 
 payload = json.dumps({
   <span style="color: #98c379;">"amount"</span>: <span style="color: #d19a66;">450.00</span>,
+  <span style="color: #98c379;">"currency"</span>: <span style="color: #98c379;">"GHS"</span>,
   <span style="color: #98c379;">"description"</span>: <span style="color: #98c379;">"Used iPhone 13 Pro"</span>,
   <span style="color: #98c379;">"buyerEmail"</span>: <span style="color: #98c379;">"buyer@example.com"</span>,
   <span style="color: #98c379;">"buyerPhone"</span>: <span style="color: #98c379;">"+233550000000"</span>,
@@ -216,7 +221,7 @@ response = requests.request(<span style="color: #98c379;">"POST"</span>, url, he
 <pre><code>{
   <span style="color: #98c379;">"id"</span>: <span style="color: #98c379;">"escrow_12345abcde"</span>,
   <span style="color: #98c379;">"status"</span>: <span style="color: #98c379;">"PENDING_PAYMENT"</span>,
-  <span style="color: #98c379;">"checkoutUrl"</span>: <span style="color: #98c379;">"https://trustlink.co/checkout.html?id=escrow_12345abcde"</span>,
+  <span style="color: #98c379;">"checkoutUrl"</span>: <span style="color: #98c379;">"https://www.trustlinkgh.online/checkout.html?id=escrow_12345abcde"</span>,
   <span style="color: #98c379;">"customReference"</span>: <span style="color: #98c379;">"ORDER-1234"</span>
 }
 </code></pre>
@@ -258,7 +263,7 @@ response = requests.request(<span style="color: #98c379;">"POST"</span>, url, he
                         
                         <h4 style="margin-top: 32px; margin-bottom: 12px; font-size: 1.05rem;">Authentication</h4>
                         <p style="color: #475569; line-height: 1.6; margin-bottom: 16px;">Pass your API key in the <code>x-api-key</code> header for all requests.</p>
-                        <pre style="background: #F8FAFC; padding: 16px; border-radius: 8px; overflow-x: auto; color: #1E293B; border: 1px solid #E2E8F0;"><code>curl -H "x-api-key: tl_live_your_key" https://trustlink.co/api/v1/escrows</code></pre>
+                        <pre style="background: #F8FAFC; padding: 16px; border-radius: 8px; overflow-x: auto; color: #1E293B; border: 1px solid #E2E8F0;"><code>curl -H "x-api-key: tl_live_your_key" https://www.trustlinkgh.online/api/v1/escrows</code></pre>
 
                         <h4 style="margin-top: 32px; margin-bottom: 12px; font-size: 1.05rem;">Webhooks</h4>
                         <p style="color: #475569; line-height: 1.6; margin-bottom: 16px;">Configure your Webhook URL in your API Keys settings to receive real-time updates.</p>
