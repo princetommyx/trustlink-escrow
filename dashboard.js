@@ -2612,4 +2612,443 @@ if (btnNotifyWhatsAppModal) {
     });
 }
 
+/* ==========================================================================
+   TrustLink In-App Messaging Engine (Interactive Controller)
+   ========================================================================== */
+(function initTrustLinkMessaging() {
+    // Initial conversation threads matching sample UI design
+    let conversations = [
+        {
+            id: 'conv-jack-king',
+            name: 'Jack king',
+            category: 'contacts',
+            avatarImg: '',
+            initials: 'JK',
+            status: 'Online',
+            online: true,
+            time: 'Now',
+            unread: 8,
+            messages: [
+                { type: 'received', text: "Hi! I'm interested in your property. is it still available", time: '12:43 PM' },
+                { type: 'received', text: "Yes, it's still available! would you like to schedule a viewing", time: '12:43 PM' },
+                { type: 'received', text: "Can you meeting with tomorrow?", time: '12:43 PM' },
+                { type: 'sent', text: "Sure", time: '12:43 PM' },
+                { type: 'received', text: "Please let me know when you're available.", time: '12:43 PM' }
+            ]
+        },
+        {
+            id: 'conv-michael',
+            name: 'Michael',
+            category: 'contacts',
+            avatarImg: '',
+            initials: 'M',
+            status: 'Online',
+            online: true,
+            time: '8:05 PM',
+            unread: 0,
+            messages: [
+                { type: 'received', text: "Hello! Is the apartment still available for escrow inspection?", time: '8:02 PM' },
+                { type: 'sent', text: "Yes Michael, it is available for inspection and release.", time: '8:05 PM' }
+            ]
+        },
+        {
+            id: 'conv-patel',
+            name: 'Patel, G',
+            category: 'unknown',
+            avatarImg: '',
+            initials: 'PG',
+            status: '1 hour ago',
+            online: false,
+            time: '1 hour ago',
+            unread: 0,
+            messages: [
+                { type: 'received', text: "A place to slow down. Thanks for the quick escrow verification!", time: '1 hour ago' },
+                { type: 'sent', text: "You're welcome Patel, safe transacting always.", time: '50 min ago' }
+            ]
+        },
+        {
+            id: 'conv-johan',
+            name: 'Johan. K',
+            category: 'new',
+            avatarImg: '',
+            initials: 'JK',
+            status: 'Yesterday',
+            online: false,
+            time: 'Yesterday',
+            unread: 0,
+            messages: [
+                { type: 'received', text: "Payment link received and verified. Looking forward to delivery.", time: 'Yesterday' }
+            ]
+        }
+    ];
+
+    let activeConvId = 'conv-jack-king';
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    // DOM Elements
+    const msgContainer = document.getElementById('tl-msg-container');
+    const threadsListEl = document.getElementById('tl-msg-threads-list');
+    const feedEl = document.getElementById('tl-msg-feed');
+    const searchInput = document.getElementById('tl-msg-search-input');
+    const filterPills = document.querySelectorAll('.tl-msg-pill');
+    const msgForm = document.getElementById('tl-msg-form');
+    const msgInput = document.getElementById('tl-msg-input-field');
+    const backToThreadsBtn = document.getElementById('tl-msg-back-to-threads');
+    const backToDashboardBtn = document.getElementById('tl-msg-back-btn');
+    const cameraActionBtn = document.getElementById('tl-msg-camera-action');
+    const composeActionBtn = document.getElementById('tl-msg-compose-action');
+    const videoCallBtn = document.getElementById('tl-msg-call-video');
+    const phoneCallBtn = document.getElementById('tl-msg-call-phone');
+    const emojiBtn = document.getElementById('tl-msg-emoji-btn');
+    const attachBtn = document.getElementById('tl-msg-attach-btn');
+    const camBtn = document.getElementById('tl-msg-cam-btn');
+    const micBtn = document.getElementById('tl-msg-mic-btn');
+
+    // Header active user elements
+    const activeAvatarImg = document.getElementById('tl-msg-active-avatar-img');
+    const activeInitials = document.getElementById('tl-msg-active-initials');
+    const activeDot = document.getElementById('tl-msg-active-dot');
+    const activeName = document.getElementById('tl-msg-active-name');
+    const activeStatus = document.getElementById('tl-msg-active-status');
+
+    // Format current time helper (e.g. 12:45 PM)
+    function formatCurrentTime() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const strMinutes = minutes < 10 ? '0' + minutes : minutes;
+        return `${hours}:${strMinutes} ${ampm}`;
+    }
+
+    // Render Conversation List
+    function renderThreads() {
+        if (!threadsListEl) return;
+        threadsListEl.innerHTML = '';
+
+        const filtered = conversations.filter(conv => {
+            const matchesFilter = currentFilter === 'all' || conv.category === currentFilter;
+            const matchesSearch = !searchQuery || 
+                conv.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                (conv.messages.length > 0 && conv.messages[conv.messages.length - 1].text.toLowerCase().includes(searchQuery.toLowerCase()));
+            return matchesFilter && matchesSearch;
+        });
+
+        if (filtered.length === 0) {
+            threadsListEl.innerHTML = `
+                <div style="text-align: center; padding: 40px 16px; color: #94A3B8;">
+                    <p style="margin: 0; font-size: 0.9rem; font-weight: 500;">No conversations found.</p>
+                </div>
+            `;
+            return;
+        }
+
+        filtered.forEach(conv => {
+            const item = document.createElement('div');
+            item.className = `tl-msg-thread-item ${conv.id === activeConvId ? 'active' : ''}`;
+            item.setAttribute('data-id', conv.id);
+
+            const lastMsg = conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].text : 'No messages yet';
+            const isTyping = conv.isTyping;
+
+            item.innerHTML = `
+                <div class="tl-msg-avatar">
+                    ${conv.avatarImg ? `<img src="${conv.avatarImg}" alt="${conv.name}">` : `<span class="tl-msg-avatar-initials">${conv.initials}</span>`}
+                </div>
+                <div class="tl-msg-thread-content">
+                    <div class="tl-msg-thread-top">
+                        <span class="tl-msg-thread-name">${conv.name}</span>
+                        <span class="tl-msg-thread-time">${conv.time}</span>
+                    </div>
+                    <div class="tl-msg-thread-bottom">
+                        <span class="tl-msg-thread-preview ${isTyping ? 'typing' : ''}">${isTyping ? 'Type...' : lastMsg}</span>
+                        ${conv.unread > 0 ? `<span class="tl-msg-unread-badge">${conv.unread}</span>` : ''}
+                    </div>
+                </div>
+            `;
+
+            item.addEventListener('click', () => {
+                selectConversation(conv.id);
+            });
+
+            threadsListEl.appendChild(item);
+        });
+    }
+
+    // Select Active Conversation
+    function selectConversation(id) {
+        activeConvId = id;
+        const conv = conversations.find(c => c.id === id);
+        if (!conv) return;
+
+        // Reset unread count
+        conv.unread = 0;
+
+        // Update active header
+        if (activeName) activeName.textContent = conv.name;
+        if (activeStatus) activeStatus.textContent = conv.isTyping ? 'Typing...' : conv.status;
+        if (activeInitials) activeInitials.textContent = conv.initials;
+        if (activeAvatarImg) {
+            if (conv.avatarImg) {
+                activeAvatarImg.src = conv.avatarImg;
+                activeAvatarImg.style.display = 'block';
+                if (activeInitials) activeInitials.style.display = 'none';
+            } else {
+                activeAvatarImg.style.display = 'none';
+                if (activeInitials) activeInitials.style.display = 'block';
+            }
+        }
+        if (activeDot) {
+            activeDot.className = `tl-msg-online-dot ${conv.online ? '' : 'offline'}`;
+        }
+
+        // On mobile/tablets, trigger slide to chat panel
+        if (msgContainer) {
+            msgContainer.classList.add('show-chat');
+        }
+
+        renderThreads();
+        renderFeed(conv);
+    }
+
+    // Render Chat Message Stream
+    function renderFeed(conv) {
+        if (!feedEl) return;
+        feedEl.innerHTML = `
+            <div class="tl-msg-date-divider">
+                <span>Today jun 14</span>
+            </div>
+        `;
+
+        conv.messages.forEach(msg => {
+            const bubbleRow = document.createElement('div');
+            bubbleRow.className = `tl-msg-bubble-row ${msg.type}`;
+            bubbleRow.innerHTML = `
+                <div class="tl-msg-bubble">${escapeHtml(msg.text)}</div>
+                <span class="tl-msg-time">${msg.time}</span>
+            `;
+            feedEl.appendChild(bubbleRow);
+        });
+
+        // Scroll to bottom smoothly
+        setTimeout(() => {
+            feedEl.scrollTop = feedEl.scrollHeight;
+        }, 10);
+    }
+
+    // Helper: Escape HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Send Message Handler
+    if (msgForm) {
+        msgForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = msgInput ? msgInput.value.trim() : '';
+            if (!text) return;
+
+            const conv = conversations.find(c => c.id === activeConvId);
+            if (!conv) return;
+
+            const currentTime = formatCurrentTime();
+            conv.messages.push({
+                type: 'sent',
+                text: text,
+                time: currentTime
+            });
+            conv.time = 'Now';
+
+            if (msgInput) msgInput.value = '';
+
+            renderFeed(conv);
+            renderThreads();
+
+            // Simulate realistic reply after short delay
+            setTimeout(() => {
+                conv.isTyping = true;
+                if (activeStatus && activeConvId === conv.id) activeStatus.textContent = 'Typing...';
+                renderThreads();
+
+                setTimeout(() => {
+                    conv.isTyping = false;
+                    const replies = [
+                        "Got it, thanks!",
+                        "Sounds great, will review right away.",
+                        "Understood, let's proceed with the escrow verification.",
+                        "Thanks for the update!",
+                        "Perfect. Everything is looking good on my end."
+                    ];
+                    const randomReply = replies[Math.floor(Math.random() * replies.length)];
+                    conv.messages.push({
+                        type: 'received',
+                        text: randomReply,
+                        time: formatCurrentTime()
+                    });
+                    conv.time = 'Now';
+                    if (activeStatus && activeConvId === conv.id) activeStatus.textContent = conv.status;
+                    renderFeed(conv);
+                    renderThreads();
+                }, 1600);
+            }, 800);
+        });
+    }
+
+    // Search Bar Live Filter
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderThreads();
+        });
+    }
+
+    // Category Filter Pills
+    filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            filterPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            currentFilter = pill.getAttribute('data-filter') || 'all';
+            renderThreads();
+        });
+    });
+
+    // Mobile Back to Threads List Button
+    if (backToThreadsBtn) {
+        backToThreadsBtn.addEventListener('click', () => {
+            if (msgContainer) {
+                msgContainer.classList.remove('show-chat');
+            }
+        });
+    }
+
+    // Back to Dashboard Overview Button
+    if (backToDashboardBtn) {
+        backToDashboardBtn.addEventListener('click', () => {
+            const overviewNav = document.querySelector('.nav-item[data-target="view-dashboard"]');
+            if (overviewNav) overviewNav.click();
+        });
+    }
+
+    // Action button handlers with toasts / prompts
+    if (videoCallBtn) {
+        videoCallBtn.addEventListener('click', () => {
+            const conv = conversations.find(c => c.id === activeConvId);
+            const name = conv ? conv.name : "Contact";
+            if (typeof showModernToast === 'function') {
+                showModernToast("Video Call Initialized 📹", `Starting secure video stream with ${name}...`, "info");
+            }
+        });
+    }
+
+    if (phoneCallBtn) {
+        phoneCallBtn.addEventListener('click', () => {
+            const conv = conversations.find(c => c.id === activeConvId);
+            const name = conv ? conv.name : "Contact";
+            if (typeof showModernToast === 'function') {
+                showModernToast("Voice Call Initialized 📞", `Calling ${name} via secure encrypted voice line...`, "info");
+            }
+        });
+    }
+
+    if (composeActionBtn) {
+        composeActionBtn.addEventListener('click', () => {
+            const recipient = prompt("Start a new conversation - Enter buyer or seller name:");
+            if (recipient && recipient.trim()) {
+                const newName = recipient.trim();
+                const initials = newName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'TL';
+                const newId = 'conv-' + Date.now();
+                conversations.unshift({
+                    id: newId,
+                    name: newName,
+                    category: 'contacts',
+                    avatarImg: '',
+                    initials: initials,
+                    status: 'Online',
+                    online: true,
+                    time: 'Now',
+                    unread: 0,
+                    messages: [
+                        { type: 'received', text: `Hi! Connected regarding our TrustLink Escrow order.`, time: formatCurrentTime() }
+                    ]
+                });
+                selectConversation(newId);
+                if (typeof showModernToast === 'function') {
+                    showModernToast("Chat Created", `Started conversation with ${newName}.`, "success");
+                }
+            }
+        });
+    }
+
+    if (cameraActionBtn || camBtn) {
+        const handleCam = () => {
+            if (typeof showModernToast === 'function') {
+                showModernToast("Camera Ready 📷", "Camera capture mode activated for secure document verification.", "info");
+            }
+        };
+        if (cameraActionBtn) cameraActionBtn.addEventListener('click', handleCam);
+        if (camBtn) camBtn.addEventListener('click', handleCam);
+    }
+
+    if (emojiBtn && msgInput) {
+        emojiBtn.addEventListener('click', () => {
+            msgInput.value += " 😊";
+            msgInput.focus();
+        });
+    }
+
+    if (attachBtn) {
+        attachBtn.addEventListener('click', () => {
+            if (typeof showModernToast === 'function') {
+                showModernToast("Attach Document 📎", "File attachment feature ready for receipts and proof of delivery.", "info");
+            }
+        });
+    }
+
+    if (micBtn) {
+        micBtn.addEventListener('click', () => {
+            if (typeof showModernToast === 'function') {
+                showModernToast("Voice Note 🎙️", "Recording voice message for encrypted transmission...", "info");
+            }
+        });
+    }
+
+    // Initial render
+    selectConversation(activeConvId);
+
+    // Sync escrows if available
+    window.syncEscrowConversations = function() {
+        if (typeof allLoadedSellerEscrows !== 'undefined' && Array.isArray(allLoadedSellerEscrows)) {
+            allLoadedSellerEscrows.forEach(escrow => {
+                const buyerName = escrow.buyerName || (escrow.buyerPhone ? `Buyer (${escrow.buyerPhone})` : `Order #${escrow.id.substring(0, 6)}`);
+                const existing = conversations.find(c => c.escrowId === escrow.id);
+                if (!existing && escrow.status !== 'completed') {
+                    const initials = buyerName.substring(0, 2).toUpperCase();
+                    conversations.push({
+                        id: 'escrow-' + escrow.id,
+                        escrowId: escrow.id,
+                        name: buyerName,
+                        category: 'contacts',
+                        avatarImg: '',
+                        initials: initials,
+                        status: `Escrow #${escrow.id.substring(0, 6)}`,
+                        online: true,
+                        time: 'Active',
+                        unread: 0,
+                        messages: [
+                            { type: 'received', text: `Order for ${escrow.description || 'items'} (GH₵ ${escrow.amount || 0}) is active in escrow.`, time: 'Escrow' }
+                        ]
+                    });
+                }
+            });
+            renderThreads();
+        }
+    };
+})();
+
+
 
