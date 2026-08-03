@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "firebase": "^12.15.0",
+    "firebase": "^12.17.0",
     "gsap": "^3.15.0",
     "lucide": "^1.23.0",
     "nodemon": "^3.1.14"
