@@ -18,7 +18,7 @@
             <div class="sidebar-top">
                 <div class="brand">
                     <img src="img/logo.png" alt="TrustLink Logo" class="brand-logo">
-                    <button class="mobile-close" id="mobile-close" aria-label="Close sidebar">
+                    <button class="mobile-close" id="mobile-close">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -64,17 +64,17 @@
             <!-- Topbar -->
             <header class="api-topbar">
                 <div class="topbar-left">
-                    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open mobile menu">
+                    <button class="mobile-menu-btn" id="mobile-menu-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
                     <div class="search-bar">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <input type="text" aria-label="Search APIs, endpoints, logs" placeholder="Search APIs, endpoints, logs...">
+                        <input type="text" placeholder="Search APIs, endpoints, logs...">
                     </div>
                 </div>
                 <div class="topbar-right">
-                    <button class="icon-btn" aria-label="Logout"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></button>
-                    <button class="icon-btn" aria-label="Notifications"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></button>
+                    <button class="icon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></button>
+                    <button class="icon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></button>
                 </div>
             </header>
 
@@ -99,11 +99,11 @@
                     <div class="request-card">
                         <h3 class="card-title">Request URL</h3>
                         <div class="url-bar">
-                            <select class="method-select" aria-label="HTTP Method">
+                            <select class="method-select">
                                 <option value="POST">POST</option>
                                 <option value="GET">GET</option>
                             </select>
-                            <input type="text" class="url-input" aria-label="Request URL" value="https://trustlink.co/api/v1/escrows" readonly>
+                            <input type="text" class="url-input" value="https://trustlink.co/api/v1/escrows" readonly>
                         </div>
                         <button class="btn-send" id="btn-send-test">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -120,36 +120,36 @@
                             <!-- Body Tab -->
                             <div class="tab-content active" id="tab-body">
                                 <div class="param-row">
-                                    <input type="text" class="param-key" aria-label="Parameter key: amount" value="amount" readonly>
-                                    <input type="text" class="param-value" aria-label="Parameter value: 450.00" value="450.00" readonly>
+                                    <input type="text" class="param-key" value="amount" readonly>
+                                    <input type="text" class="param-value" value="450.00" readonly>
                                 </div>
                                 <div class="param-row">
-                                    <input type="text" class="param-key" aria-label="Parameter key: description" value="description" readonly>
-                                    <input type="text" class="param-value" aria-label="Parameter value: Used iPhone 13 Pro" value="Used iPhone 13 Pro" readonly>
+                                    <input type="text" class="param-key" value="description" readonly>
+                                    <input type="text" class="param-value" value="Used iPhone 13 Pro" readonly>
                                 </div>
                                 <div class="param-row">
-                                    <input type="text" class="param-key" aria-label="Parameter key: buyerEmail" value="buyerEmail" readonly>
-                                    <input type="text" class="param-value" aria-label="Parameter value: buyer@example.com" value="buyer@example.com" readonly>
+                                    <input type="text" class="param-key" value="buyerEmail" readonly>
+                                    <input type="text" class="param-value" value="buyer@example.com" readonly>
                                 </div>
                                 <div class="param-row">
-                                    <input type="text" class="param-key" aria-label="Parameter key: buyerPhone" value="buyerPhone" readonly>
-                                    <input type="text" class="param-value" aria-label="Parameter value: +233550000000" value="+233550000000" readonly>
+                                    <input type="text" class="param-key" value="buyerPhone" readonly>
+                                    <input type="text" class="param-value" value="+233550000000" readonly>
                                 </div>
                                 <div class="param-row">
-                                    <input type="text" class="param-key" aria-label="Parameter key: customReference" value="customReference" readonly>
-                                    <input type="text" class="param-value" aria-label="Parameter value: ORDER-1234" value="ORDER-1234" readonly>
+                                    <input type="text" class="param-key" value="customReference" readonly>
+                                    <input type="text" class="param-value" value="ORDER-1234" readonly>
                                 </div>
                             </div>
                             
                             <!-- Headers Tab -->
                             <div class="tab-content" id="tab-headers">
                                 <div class="param-row">
-                                    <input type="text" class="param-key" aria-label="Header key: Content-Type" value="Content-Type" readonly>
-                                    <input type="text" class="param-value" aria-label="Header value: application/json" value="application/json" readonly>
+                                    <input type="text" class="param-key" value="Content-Type" readonly>
+                                    <input type="text" class="param-value" value="application/json" readonly>
                                 </div>
                                 <div class="param-row">
-                                    <input type="text" class="param-key" aria-label="Header key: x-api-key" value="x-api-key" readonly>
-                                    <input type="text" class="param-value" aria-label="Header value: tl_live_your_api_key_here" value="tl_live_your_api_key_here" readonly>
+                                    <input type="text" class="param-key" value="x-api-key" readonly>
+                                    <input type="text" class="param-value" value="tl_live_your_api_key_here" readonly>
                                 </div>
                             </div>
                             
@@ -174,7 +174,7 @@
                             <button class="tab-btn active" data-code-tab="code">Code</button>
                             <button class="tab-btn" data-code-tab="response">Response</button>
                             <div style="flex-grow: 1;"></div>
-                            <select class="lang-select" aria-label="Programming language">
+                            <select class="lang-select">
                                 <option>Python</option>
                                 <option>Node.js</option>
                                 <option>cURL</option>
@@ -233,7 +233,7 @@ response = requests.request(<span style="color: #98c379;">"POST"</span>, url, he
                         <h3 style="margin-bottom: 16px;">Your Secret Key</h3>
                         <p style="color: #64748B; font-size: 0.95rem; margin-bottom: 16px;">Use this key in the <code>x-api-key</code> header to authenticate API requests.</p>
                         <div style="display: flex; gap: 12px; margin-top: 16px; align-items: center;">
-                            <input type="password" id="api-docs-key-display" aria-label="Secret API Key" value="tl_live_your_api_key_here" readonly style="padding: 12px; border: 1px solid #E2E8F0; border-radius: 8px; flex-grow: 1; background: #F8FAFC;">
+                            <input type="password" id="api-docs-key-display" value="tl_live_your_api_key_here" readonly style="padding: 12px; border: 1px solid #E2E8F0; border-radius: 8px; flex-grow: 1; background: #F8FAFC;">
                         </div>
                         <p style="margin-top: 20px; font-size: 0.9rem; color: #64748B;">Head back to the main dashboard Settings tab to generate or revoke API keys.</p>
                     </div>
@@ -273,7 +273,7 @@ response = requests.request(<span style="color: #98c379;">"POST"</span>, url, he
     <script type="module" src="firebase-config.js"></script>
     <script type="module" src="api-docs.js"></script>
 <!--Start of Tawk.to Script-->
-<script>
+<script type="text/javascript">
 var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
 Tawk_API.customStyle = {
     visibility: {

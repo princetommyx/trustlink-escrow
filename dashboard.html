@@ -342,7 +342,7 @@
                         <div class="transactions-widget">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                                 <h3 style="margin: 0; font-size: 1.1rem; color: #111827; font-weight: 600;">Transactions</h3>
-                                <div class="dropdown" style="font-size: 0.85rem; color: #64748B; background: #F8F9FA; padding: 6px 12px; border-radius: 8px; border: 1px solid #E2E8F0; cursor: pointer;">Month ▼</div>
+                                <div class="dropdown" style="font-size: 0.85rem; color: #334155; background: #F8F9FA; padding: 6px 12px; border-radius: 8px; border: 1px solid #E2E8F0; cursor: pointer;">Month ▼</div>
                             </div>
                             <div class="tx-list ibanko-tx-list" id="recent-activity-list">
                                 <!-- Injected dynamically, styled via CSS .ibanko-tx-item -->
@@ -509,11 +509,11 @@
                                 <div class="form-section">
                                     <h3 class="section-title">Product</h3>
                                     <div class="form-group">
-                                        <label for="page-prod-name">Title</label>
-                                        <input type="text" id="page-prod-name" placeholder="Enter title" required>
+                                        <label>Title</label>
+                                        <input type="text" id="new-prod-name" placeholder="Enter title" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="page-prod-desc">Description</label>
+                                        <label>Description</label>
                                         <div class="rich-text-editor">
                                             <div class="editor-toolbar">
                                                 <span>↩</span> <span>↪</span>
@@ -529,20 +529,20 @@
                                                 <span>🔗</span>
                                                 <span>"</span>
                                             </div>
-                                            <textarea id="page-prod-desc" placeholder="Product description" style="height: 150px;"></textarea>
+                                            <textarea id="new-prod-desc" placeholder="Product description" style="height: 150px;"></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div class="form-section">
                                     <h3 class="section-title">Media</h3>
-                                    <div class="media-dropzone" onclick="document.getElementById('page-prod-image').click()">
-                                        <input type="file" id="page-prod-image" accept="image/*" style="display: none;">
+                                    <div class="media-dropzone" onclick="document.getElementById('new-prod-image').click()">
+                                        <input type="file" id="new-prod-image" accept="image/*" style="display: none;">
                                         <svg xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px; margin-bottom: 12px; color: #111827;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                                         <div style="font-weight: 500; color: #111827; margin-bottom: 4px;">Choose a file or drag & drop it here</div>
                                         <div style="font-size: 0.8rem; color: #64748B; margin-bottom: 16px;">JPG or PNG formats, up to 5MB</div>
                                         <button type="button" class="btn btn-outline" style="border-radius: 20px; font-size: 0.85rem; padding: 6px 16px; background: white; border: 1px solid #E2E8F0;">Browse File</button>
-                                        <img id="page-prod-preview" class="hidden" src="" alt="Preview" style="max-width: 100%; max-height: 150px; margin-top: 16px; border-radius: 8px; border: 1px solid #E2E8F0; object-fit: cover;">
+                                        <img id="new-prod-preview" class="hidden" src="" alt="Preview" style="max-width: 100%; max-height: 150px; margin-top: 16px; border-radius: 8px; border: 1px solid #E2E8F0; object-fit: cover;">
                                     </div>
                                 </div>
 
@@ -550,12 +550,12 @@
                                     <h3 class="section-title">Pricing & Date</h3>
                                     <div style="display: flex; gap: 16px;">
                                         <div class="form-group" style="flex: 1;">
-                                            <label for="page-prod-price">Price</label>
-                                            <input type="number" id="page-prod-price" placeholder="0.00" required step="0.01">
+                                            <label>Price</label>
+                                            <input type="number" id="new-prod-price" placeholder="0.00" required step="0.01">
                                         </div>
                                         <div class="form-group" style="flex: 1;">
-                                            <label for="page-prod-date">Date</label>
-                                            <input type="date" id="page-prod-date">
+                                            <label>Date</label>
+                                            <input type="date">
                                         </div>
                                     </div>
                                 </div>
@@ -565,8 +565,8 @@
                                 <div class="form-section">
                                     <h3 class="section-title">Product Status</h3>
                                     <div class="form-group">
-                                        <label for="page-prod-status">Status</label>
-                                        <select id="page-prod-status">
+                                        <label>Status</label>
+                                        <select>
                                             <option>Published</option>
                                             <option>Draft</option>
                                             <option>Hidden</option>
@@ -582,8 +582,8 @@
                                 <div class="form-section">
                                     <h3 class="section-title">Inventory</h3>
                                     <div class="form-group">
-                                        <label for="page-prod-stock">Product Amount (Stock)</label>
-                                        <input type="number" id="page-prod-stock" placeholder="Enter amount (e.g. 100)">
+                                        <label>Product Amount (Stock)</label>
+                                        <input type="number" placeholder="Enter amount (e.g. 100)">
                                     </div>
                                 </div>
                             </div>
@@ -651,16 +651,16 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="profile-name">Full Name</label>
+                            <label>Full Name</label>
                             <input type="text" id="profile-name" placeholder="Your name">
                         </div>
                         <div class="form-group">
-                            <label for="profile-email">Email</label>
+                            <label>Email</label>
                             <input type="email" id="profile-email" disabled style="opacity: 0.6;">
                         </div>
                         <div class="form-group">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <label for="profile-phone" style="margin-bottom: 0;">Phone Number</label>
+                                <label style="margin-bottom: 0;">Phone Number</label>
                                 <div id="phone-status-wrapper">
                                     <span id="phone-verified-badge" class="badge-status" style="display: none; background: rgba(16, 185, 129, 0.1); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; align-items: center; gap: 4px;">
                                         <svg style="width: 12px; height: 12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
@@ -714,16 +714,16 @@
                     <div class="portal-card portal-card-white">
                         <form id="change-password-form">
                             <div class="form-group">
-                                <label for="current-password">Current Password</label>
+                                <label>Current Password</label>
                                 <input type="password" id="current-password" placeholder="Enter current password"
                                     required>
                             </div>
                             <div class="form-group">
-                                <label for="new-password">New Password</label>
+                                <label>New Password</label>
                                 <input type="password" id="new-password" placeholder="Min. 8 characters" required>
                             </div>
                             <div class="form-group">
-                                <label for="confirm-new-password">Confirm New Password</label>
+                                <label>Confirm New Password</label>
                                 <input type="password" id="confirm-new-password" placeholder="Re-enter new password"
                                     required>
                             </div>
@@ -840,15 +840,15 @@
                         
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label for="wa-gen-price" style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Price (GH₵)</label>
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Price (GH₵)</label>
                                 <input type="number" id="wa-gen-price" placeholder="e.g. 450" style="width: 100%; padding: 12px 14px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem; outline: none;" oninput="window.updateWaPreviewCommand()">
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label for="wa-gen-item" style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Item Name / Description</label>
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Item Name / Description</label>
                                 <input type="text" id="wa-gen-item" placeholder="e.g. Nike Air Max" style="width: 100%; padding: 12px 14px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem; outline: none;" oninput="window.updateWaPreviewCommand()">
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label for="wa-gen-phone" style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Buyer Phone (Ghana MoMo)</label>
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Buyer Phone (Ghana MoMo)</label>
                                 <input type="tel" id="wa-gen-phone" placeholder="e.g. 0244123456" style="width: 100%; padding: 12px 14px; border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.95rem; outline: none;" oninput="window.updateWaPreviewCommand()">
                             </div>
                         </div>
@@ -943,19 +943,19 @@
                     <div class="portal-card portal-card-white" style="margin-bottom: 24px;">
                         <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: #111827;">Notifications</h3>
                         <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <label for="setting-email-notif" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
                                 <div>
                                     <h4 style="margin: 0; color: #111827;">Email Notifications</h4>
                                     <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748B;">Receive updates about your escrows via email.</p>
                                 </div>
-                                <input type="checkbox" id="setting-email-notif" checked style="width: 20px; height: 20px;">
+                                <input type="checkbox" checked style="width: 20px; height: 20px;">
                             </label>
-                            <label for="setting-sms-notif" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
                                 <div>
                                     <h4 style="margin: 0; color: #111827;">SMS Notifications</h4>
                                     <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748B;">Get text messages for important events.</p>
                                 </div>
-                                <input type="checkbox" id="setting-sms-notif" style="width: 20px; height: 20px;">
+                                <input type="checkbox" style="width: 20px; height: 20px;">
                             </label>
                         </div>
                     </div>
@@ -966,12 +966,10 @@
                             <div>
                                 <h4 style="margin: 0 0 8px; color: #111827;">Change Password</h4>
                                 <div class="form-group" style="margin-bottom: 12px;">
-                                    <label for="settings-current-pass">Current Password</label>
-                                    <input type="password" id="settings-current-pass" placeholder="Current Password">
+                                    <input type="password" placeholder="Current Password">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 12px;">
-                                    <label for="settings-new-pass">New Password</label>
-                                    <input type="password" id="settings-new-pass" placeholder="New Password">
+                                    <input type="password" placeholder="New Password">
                                 </div>
                                 <button class="btn btn-primary" style="max-width: max-content;">Update Password</button>
                             </div>
@@ -995,37 +993,37 @@
             </div>
             <form id="new-escrow-form" class="modal-form">
                 <div class="form-group">
-                    <label for="escrow-product-select">Select Product</label>
+                    <label>Select Product</label>
                     <select id="escrow-product-select" required>
                         <option value="" disabled selected>Loading your products...</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="escrow-amount">Total Amount (GH₵)</label>
+                    <label>Total Amount (GH₵)</label>
                     <input type="number" id="escrow-amount" placeholder="0.00" min="0" step="0.01" required style="color: #10B981; font-weight: bold; font-size: 1.2rem;">
                 </div>
 
                 <div class="form-group">
-                    <label for="buyer-email">Counterparty Email (Buyer) <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">(Optional)</span></label>
+                    <label>Counterparty Email (Buyer) <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">(Optional)</span></label>
                     <input type="email" id="buyer-email" placeholder="buyer@example.com">
                 </div>
 
                 <div class="form-group">
-                    <label for="buyer-phone">Buyer Phone Number (SMS)</label>
+                    <label>Buyer Phone Number (SMS)</label>
                     <input type="tel" id="buyer-phone" placeholder="+233 55 000 0000" required>
                 </div>
 
                 <div class="form-group">
-                    <span style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; color: #111827;">Expected Delivery Window</span>
+                    <label>Expected Delivery Window</label>
                     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 140px;">
-                            <label for="escrow-delivery-date-from" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; display: block; font-weight: 500;">Earliest Date</label>
+                            <label style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; display: block; font-weight: 500;">Earliest Date</label>
                             <input type="text" id="escrow-delivery-date-from" required placeholder="From date" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'" style="min-height: 48px; height: 48px; width: 100%;">
                         </div>
                         <span style="color: var(--text-muted); font-weight: 600; font-size: 1.1rem; margin-top: 18px;">—</span>
                         <div style="flex: 1; min-width: 140px;">
-                            <label for="escrow-delivery-date-to" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; display: block; font-weight: 500;">Latest Date</label>
+                            <label style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; display: block; font-weight: 500;">Latest Date</label>
                             <input type="text" id="escrow-delivery-date-to" required placeholder="To date" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'" style="min-height: 48px; height: 48px; width: 100%;">
                         </div>
                     </div>
@@ -1034,7 +1032,7 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="escrow-fee-allocation">Platform Fee Allocation</label>
+                        <label>Platform Fee Allocation</label>
                         <select id="escrow-fee-allocation" required>
                             <option value="split">Split 50/50</option>
                             <option value="buyer">Buyer Pays 100%</option>
@@ -1044,7 +1042,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="escrow-terms">Terms of Agreement</label>
+                    <label>Terms of Agreement</label>
                     <textarea id="escrow-terms" placeholder="Terms will be auto-filled based on your product..."
                         rows="4" required></textarea>
                 </div>
@@ -1068,21 +1066,21 @@
             </div>
             <form id="new-product-form" class="modal-form">
                 <div class="form-group">
-                    <label for="new-prod-image">Product Image (optional)</label>
+                    <label>Product Image (optional)</label>
                     <input type="file" id="new-prod-image" accept="image/*">
                     <img id="new-prod-preview" class="hidden" alt="Product preview"
                         style="margin-top: 10px; width: 100%; max-height: 180px; object-fit: cover; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
                 </div>
                 <div class="form-group">
-                    <label for="new-prod-name">Product Name</label>
+                    <label>Product Name</label>
                     <input type="text" id="new-prod-name" placeholder="e.g. Basic Website Design" required>
                 </div>
                 <div class="form-group">
-                    <label for="new-prod-price">Default Price (GH₵)</label>
+                    <label>Default Price (GH₵)</label>
                     <input type="number" id="new-prod-price" placeholder="0.00" min="0" step="0.01" required>
                 </div>
                 <div class="form-group">
-                    <label for="new-prod-desc">Description / Terms</label>
+                    <label>Description / Terms</label>
                     <textarea id="new-prod-desc" placeholder="Describe the item or service specs..." rows="3"
                         required></textarea>
                 </div>
@@ -1109,12 +1107,12 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 24px;">
-                    <label for="withdraw-amount" style="color: #475569; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">Amount (GH₵)</label>
+                    <label style="color: #475569; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">Amount (GH₵)</label>
                     <input type="number" id="withdraw-amount" placeholder="0.00" min="1" step="0.01" required style="font-size: 1.5rem; font-weight: 600; padding: 16px; border-radius: 12px; background: #FFFFFF; border: 1px solid #CBD5E1; color: #111827;">
                 </div>
 
                 <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="withdraw-network" style="color: #475569; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">Mobile Money Network</label>
+                    <label style="color: #475569; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">Mobile Money Network</label>
                     <select id="withdraw-network" required style="padding: 14px 16px; border-radius: 12px; background: #FFFFFF; border: 1px solid #CBD5E1; color: #111827; font-weight: 500; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\'none\' stroke=\'%2364748B\' viewBox=\'0 0 24 24\' xmlns=\'http://www.w3.org/2000/svg\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'></path></svg>'); background-repeat: no-repeat; background-position: right 16px center; background-size: 16px;">
                         <option value="13">MTN Mobile Money</option>
                         <option value="6">Telecel Cash</option>
@@ -1123,7 +1121,7 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 24px;">
-                    <label for="withdraw-phone" style="color: #475569; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">Mobile Money Number</label>
+                    <label style="color: #475569; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">Mobile Money Number</label>
                     <input type="tel" id="withdraw-phone" placeholder="e.g. 0551234567" pattern="[0-9]{10}" minlength="10" maxlength="10" title="Must be exactly 10 digits (e.g. 0551234567)" required style="padding: 14px 16px; border-radius: 12px; background: #FFFFFF; border: 1px solid #CBD5E1; color: #111827; font-weight: 500;">
                 </div>
 
@@ -1267,7 +1265,7 @@
         });
     </script>
 <!--Start of Tawk.to Script-->
-<script>
+<script type="text/javascript">
 var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
 Tawk_API.customStyle = {
     visibility: {
@@ -1299,9 +1297,6 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-</body>
-
-</html> of Tawk.to Script-->
 </body>
 
 </html>

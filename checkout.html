@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrustLink Escrow - Secure Checkout</title>
     <link rel="icon" href="img/logo.png">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth.css">
     <link rel="stylesheet" href="landing.css">
@@ -20,7 +17,7 @@
             margin: 0;
             padding: 0;
         }
-
+        
         .checkout-layout {
             display: grid;
             grid-template-columns: 1fr 450px;
@@ -34,7 +31,7 @@
         .checkout-main {
             padding-right: 0px;
         }
-
+        
         .checkout-stepper {
             display: flex;
             align-items: center;
@@ -46,15 +43,15 @@
             user-select: none;
             -webkit-user-select: none;
         }
-
         .checkout-stepper .step {
             display: flex;
             align-items: center;
             gap: 12px;
             font-weight: 500;
-            color: #4B5563;
+            color: #9CA3AF;
             white-space: nowrap;
             flex: 0 0 auto;
+            width: max-content;
             background: none !important;
             box-shadow: none !important;
             border-radius: 0;
@@ -62,13 +59,11 @@
             height: auto;
             position: static;
         }
-
         .checkout-stepper .step.active {
             color: #111827;
             background: none !important;
             box-shadow: none !important;
         }
-
         .checkout-stepper .step-icon {
             width: 28px;
             height: 28px;
@@ -78,13 +73,11 @@
             align-items: center;
             justify-content: center;
             font-size: 0.85rem;
-            color: #111827;
+            color: white;
             flex-shrink: 0;
         }
-
         .checkout-stepper .step.active .step-icon {
             background: #000;
-            color: #FFFFFF;
         }
 
         .section-title {
@@ -93,9 +86,8 @@
             margin-bottom: 8px;
             color: #111827;
         }
-
         .section-desc {
-            color: #4B5563;
+            color: #6B7280;
             font-size: 0.95rem;
             margin-bottom: 24px;
         }
@@ -107,36 +99,27 @@
             padding: 24px;
             margin-bottom: 16px;
             display: flex;
-            align-items: flex-start;
+            align-items: flex-start; 
             gap: 16px;
             cursor: pointer;
             transition: all 0.2s;
             background: #fff;
             flex-direction: column;
-            outline: none;
         }
-
-        .payment-method-card:focus-visible {
-            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
-        }
-
         .payment-method-card:hover {
             border-color: #D1D5DB;
         }
-
         .payment-method-card.active {
             border-color: #000;
             border-width: 2px;
-            padding: 23px;
+            padding: 23px; /* compensate for border width */
         }
-
         .payment-header {
             display: flex;
             align-items: center;
             gap: 16px;
             width: 100%;
         }
-
         .payment-radio {
             width: 22px;
             height: 22px;
@@ -147,11 +130,9 @@
             justify-content: center;
             flex-shrink: 0;
         }
-
         .payment-method-card.active .payment-radio {
             border-color: #000;
         }
-
         .payment-method-card.active .payment-radio::after {
             content: '';
             width: 12px;
@@ -170,7 +151,7 @@
             position: sticky;
             top: 20px;
         }
-
+        
         .order-summary h3 {
             font-family: 'Outfit', sans-serif;
             font-size: 1.35rem;
@@ -186,10 +167,10 @@
             padding: 20px;
             border-radius: 16px;
             margin-bottom: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
             border: 1px solid #F3F4F6;
         }
-
+        
         .summary-row {
             display: flex;
             justify-content: space-between;
@@ -197,7 +178,6 @@
             color: #4B5563;
             font-size: 1rem;
         }
-
         .summary-total {
             display: flex;
             justify-content: space-between;
@@ -222,13 +202,12 @@
             border: none;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-
         .btn-pay:hover {
             transform: translateY(-2px);
             background: #000;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
         }
 
         /* Status & Loaders */
@@ -241,17 +220,8 @@
             animation: spin 1s linear infinite;
             margin: 60px auto 20px;
         }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .status-badge {
             display: inline-block;
             padding: 8px 16px;
@@ -260,26 +230,10 @@
             font-weight: 600;
             margin-bottom: 24px;
         }
-
-        .status-pending {
-            background: #FEF3C7;
-            color: #92400E;
-        }
-
-        .status-funded {
-            background: #DBEAFE;
-            color: #1D4ED8;
-        }
-
-        .status-dispatched {
-            background: #D1FAE5;
-            color: #047857;
-        }
-
-        .status-completed {
-            background: #D1FAE5;
-            color: #047857;
-        }
+        .status-pending { background: #FEF3C7; color: #D97706; }
+        .status-funded { background: #DBEAFE; color: #2563EB; }
+        .status-dispatched { background: #D1FAE5; color: #059669; }
+        .status-completed { background: #D1FAE5; color: #059669; }
 
         @media (max-width: 992px) {
             .checkout-layout {
@@ -287,30 +241,31 @@
                 margin: 20px auto;
                 gap: 30px;
             }
-
+            .stepper {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
             .order-summary {
                 padding: 24px;
-                order: -1;
+                order: -1; /* Puts order summary at the top on mobile for better UX */
                 position: static;
             }
         }
     </style>
 </head>
-
 <body class="light-landing">
-
+    
     <nav class="navbar" style="position: static; background: #fff; border-bottom: 1px solid #E5E7EB; padding: 20px 0;">
         <div class="container nav-container" style="justify-content: center;">
-            <a href="index.html" class="logo" aria-label="TrustLink Home"
-                style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                <img src="img/logo.png" alt="TrustLink Logo"
-                    style="height: 80px; width: auto; max-width: 220px; object-fit: contain; transform: none !important; margin: 0 auto;">
+            <a href="index.html" class="logo" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                <img src="img/logo.png" alt="TrustLink Logo" style="height: 80px; width: auto; max-width: 220px; object-fit: contain; transform: none !important; margin: 0 auto;">
             </a>
         </div>
     </nav>
 
-    <main class="checkout-layout" id="checkout-container">
-
+    <div class="checkout-layout" id="checkout-container">
+        
         <!-- Loading State -->
         <div id="loader-section" style="grid-column: 1 / -1; text-align: center;">
             <div class="loader" id="loader"></div>
@@ -318,9 +273,8 @@
         </div>
 
         <!-- Main Content -->
-        <div id="escrow-content" class="hidden"
-            style="grid-column: 1 / -1; display: grid; grid-template-columns: inherit; gap: inherit;">
-
+        <div id="escrow-content" class="hidden" style="grid-column: 1 / -1; display: grid; grid-template-columns: inherit; gap: inherit;">
+            
             <!-- Left Side: Payment Selection -->
             <div class="checkout-main">
                 <div class="checkout-stepper">
@@ -334,46 +288,41 @@
                     </div>
                 </div>
 
-                <h1 class="section-title">Payment Method</h1>
-                <p class="section-desc">Select how you want to fund this escrow transaction securely.</p>
+                <div class="section-title">Payment Method</div>
+                <div class="section-desc">Select how you want to fund this escrow transaction securely.</div>
 
                 <!-- Moolre Web Option -->
-                <div class="payment-method-card active" id="card-moolre-web" role="button" tabindex="0" aria-pressed="true" aria-label="Online Payment (Credit/Debit Card or Mobile Money Web)" onclick="window.selectPaymentMethod('web')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.selectPaymentMethod('web');}">
+                <div class="payment-method-card active" id="card-moolre-web" onclick="selectPaymentMethod('web')">
                     <div class="payment-header">
-                        <div class="payment-radio" aria-hidden="true"></div>
+                        <div class="payment-radio"></div>
                         <div style="flex: 1;">
                             <div style="font-weight: 600; font-size: 1.1rem; color: #111827;">Online Payment</div>
-                            <div style="font-size: 0.9rem; color: #4B5563; margin-top: 4px;">Credit/Debit Card or Mobile Money Web</div>
+                            <div style="font-size: 0.9rem; color: #6B7280; margin-top: 4px;">Credit/Debit Card or Mobile Money Web</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- USSD Option -->
-                <div class="payment-method-card" id="card-moolre-ussd" role="button" tabindex="0" aria-pressed="false" aria-label="USSD Push (Receive a prompt on your phone directly)" onclick="window.selectPaymentMethod('ussd')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.selectPaymentMethod('ussd');}">
+                <div class="payment-method-card" id="card-moolre-ussd" onclick="selectPaymentMethod('ussd')">
                     <div class="payment-header">
-                        <div class="payment-radio" aria-hidden="true"></div>
+                        <div class="payment-radio"></div>
                         <div style="flex: 1;">
                             <div style="font-weight: 600; font-size: 1.1rem; color: #111827;">USSD Push</div>
-                            <div style="font-size: 0.9rem; color: #4B5563; margin-top: 4px;">Receive a prompt on your phone directly</div>
+                            <div style="font-size: 0.9rem; color: #6B7280; margin-top: 4px;">Receive a prompt on your phone directly</div>
                         </div>
                     </div>
-
+                    
                     <!-- USSD Inputs (Hidden by default) -->
-                    <div id="ussd-form-container"
-                        style="display: none; width: 100%; margin-top: 20px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
-                        <label for="ussd-network"
-                            style="display: block; margin-bottom: 8px; color: #374151; font-size: 0.95rem; font-weight: 500;">Select Network</label>
-                        <select id="ussd-network" name="network"
-                            style="width: 100%; margin-bottom: 20px; padding: 14px; border: 1px solid #D1D5DB; border-radius: 10px; font-family: inherit; font-size: 1rem; background: #FAFAFA; color: #111827;">
+                    <div id="ussd-form-container" style="display: none; width: 100%; margin-top: 20px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
+                        <label style="display: block; margin-bottom: 8px; color: #4B5563; font-size: 0.95rem; font-weight: 500;">Select Network</label>
+                        <select id="ussd-network" style="width: 100%; margin-bottom: 20px; padding: 14px; border: 1px solid #D1D5DB; border-radius: 10px; font-family: inherit; font-size: 1rem; background: #FAFAFA;">
                             <option value="13">MTN Mobile Money</option>
                             <option value="6">Telecel Cash</option>
                             <option value="7">AT Money</option>
                         </select>
-
-                        <label for="ussd-phone"
-                            style="display: block; margin-bottom: 8px; color: #374151; font-size: 0.95rem; font-weight: 500;">Phone Number</label>
-                        <input type="tel" id="ussd-phone" name="phone" placeholder="e.g. 0541234567" autocomplete="tel"
-                            style="width: 100%; padding: 14px; border: 1px solid #D1D5DB; border-radius: 10px; font-family: inherit; font-size: 1rem; background: #FAFAFA; color: #111827;">
+                        
+                        <label style="display: block; margin-bottom: 8px; color: #4B5563; font-size: 0.95rem; font-weight: 500;">Phone Number</label>
+                        <input type="tel" id="ussd-phone" placeholder="e.g. 0541234567" style="width: 100%; padding: 14px; border: 1px solid #D1D5DB; border-radius: 10px; font-family: inherit; font-size: 1rem; background: #FAFAFA;">
                     </div>
                 </div>
             </div>
@@ -385,25 +334,21 @@
 
                 <div class="order-item">
                     <div>
-                        <div id="escrow-desc"
-                            style="font-weight: 600; font-size: 1.1rem; color: #111827; margin-bottom: 6px;">Loading item...</div>
-                        <div style="font-size: 0.9rem; color: #4B5563;">Seller: <span id="seller-name"
-                                style="font-weight: 500; color: #111827;">Loading...</span></div>
+                        <div id="escrow-desc" style="font-weight: 600; font-size: 1.1rem; color: #111827; margin-bottom: 6px;">Loading item...</div>
+                        <div style="font-size: 0.9rem; color: #6B7280;">Seller: <span id="seller-name" style="font-weight: 500;">Loading...</span></div>
                     </div>
-                    <div id="item-subtotal-display"
-                        style="font-weight: 700; font-size: 1.1rem; font-family: 'Outfit', sans-serif;">GH₵ 0.00</div>
+                    <div id="item-subtotal-display" style="font-weight: 700; font-size: 1.1rem; font-family: 'Outfit', sans-serif;">GH₵ 0.00</div>
                 </div>
 
-                <p id="escrow-delivery-row"
-                    style="display: none; font-size: 0.9rem; color: #4B5563; margin-bottom: 24px;">Expected Delivery Window: <span id="escrow-delivery" style="color: #111827; font-weight: 600;"></span></p>
+                <p id="escrow-delivery-row" style="display: none; font-size: 0.9rem; color: #6B7280; margin-bottom: 24px;">Expected Delivery Window: <span id="escrow-delivery" style="color: #111827; font-weight: 600;"></span></p>
 
                 <div class="summary-row">
                     <span>Subtotal</span>
-                    <span id="summary-subtotal-display" style="font-weight: 600; color: #111827;">GH₵ 0.00</span>
+                    <span id="summary-subtotal-display" style="font-weight: 600;">GH₵ 0.00</span>
                 </div>
                 <div class="summary-row" id="fee-row" style="display: none;">
                     <span>Escrow Protection Fee</span>
-                    <span id="summary-fee-display" style="font-weight: 600; color: #111827;">GH₵ 0.00</span>
+                    <span id="summary-fee-display" style="font-weight: 600;">GH₵ 0.00</span>
                 </div>
 
                 <div class="summary-total">
@@ -415,66 +360,134 @@
                 <div id="action-buttons-container">
                     <!-- The dynamic Web button goes here -->
                     <div id="action-buttons"></div>
-
+                    
                     <!-- The hardcoded USSD button goes here (hidden by default) -->
-                    <button type="button" id="btn-pay-ussd" class="btn-pay" style="display: none;">Send USSD Prompt to Phone</button>
+                    <button id="btn-pay-ussd" class="btn-pay" style="display: none;">Send USSD Prompt to Phone</button>
                 </div>
 
-                <div
-                    style="margin-top: 32px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; color: #475569;">
-                    <img src="moolre.webp" alt="Moolre Logo" style="height: 18px; opacity: 0.7;">
+                <div style="margin-top: 32px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; color: #9CA3AF;">
+                    <img src="moolre.webp" alt="Moolre" style="height: 18px; opacity: 0.4; filter: grayscale(100%);">
                     <span>Payments secured by Moolre</span>
                 </div>
-
-                <div style="font-size: 0.8rem; color: #475569; text-align: center; margin-top: 16px;">
-                    Escrow ID: <span id="escrow-id-display" style="font-weight: 600; color: #111827;">Loading...</span>
+                
+                <div style="font-size: 0.8rem; color: #9CA3AF; text-align: center; margin-top: 16px;">
+                    Escrow ID: <span id="escrow-id-display">Loading...</span>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
+    <script>
+        // Simple UI interaction for selecting payment methods
+        window.selectPaymentMethod = function(method) {
+            document.getElementById('card-moolre-web').classList.remove('active');
+            document.getElementById('card-moolre-ussd').classList.remove('active');
+            
+            const btnPay = document.getElementById('btn-pay'); // Dynamic from JS
+            const btnPayUssd = document.getElementById('btn-pay-ussd');
+            
+            if (method === 'web') {
+                document.getElementById('card-moolre-web').classList.add('active');
+                document.getElementById('ussd-form-container').style.display = 'none';
+                if(btnPay) btnPay.style.display = 'block';
+                if(btnPayUssd) btnPayUssd.style.display = 'none';
+            } else {
+                document.getElementById('card-moolre-ussd').classList.add('active');
+                document.getElementById('ussd-form-container').style.display = 'block';
+                if(btnPay) btnPay.style.display = 'none';
+                if(btnPayUssd) btnPayUssd.style.display = 'block';
+            }
+        };
+
+        // MutationObserver to sync the dynamically set `#escrow-amount` text 
+        // to our summary fields since checkout.js injects the fee details dynamically.
+        document.addEventListener('DOMContentLoaded', () => {
+            // We'll let checkout.js do its thing, but we also want to display the subtotal
+            // properly. Since we can't change checkout.js logic via HTML, we'll patch it below:
+        });
+    </script>
+    
     <!-- Firebase & Custom Script -->
     <script type="module" src="checkout.js"></script>
+    
+    <!-- Small patch to update the new UI elements after checkout.js finishes -->
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { computeFeeSplit } from "./moolre-service.js";
 
-    <!--Start of Tawk.to Script-->
-    <script>
-        window.Tawk_API = window.Tawk_API || {};
-        window.Tawk_LoadStart = new Date();
-        window.Tawk_API.customStyle = {
-            visibility: {
-                desktop: {
-                    position: 'br',
-                    xOffset: '20px',
-                    yOffset: '20px'
-                },
-                mobile: {
-                    position: 'br',
-                    xOffset: '16px',
-                    yOffset: '85px'
+        setTimeout(async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const escrowId = urlParams.get('id');
+            if(!escrowId) return;
+
+            try {
+                const docSnap = await getDoc(doc(db, "escrows", escrowId));
+                if(docSnap.exists()) {
+                    const escrow = docSnap.data();
+                    const rawAmount = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
+                    const fees = computeFeeSplit(rawAmount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
+                    
+                    const formattedItemAmount = rawAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    const formattedTotal = Number(fees.buyerTotal || rawAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                    const itemSub = document.getElementById('item-subtotal-display');
+                    if (itemSub) itemSub.textContent = `GH₵ ${formattedItemAmount}`;
+                    
+                    const summarySub = document.getElementById('summary-subtotal-display');
+                    if (summarySub) summarySub.textContent = `GH₵ ${formattedItemAmount}`;
+                    
+                    const totalEl = document.getElementById('escrow-amount');
+                    if (totalEl) totalEl.textContent = `GH₵ ${formattedTotal}`;
+                    
+                    if (fees.buyerFee > 0) {
+                        const feeRow = document.getElementById('fee-row');
+                        if (feeRow) feeRow.style.display = 'flex';
+                        const feeDisp = document.getElementById('summary-fee-display');
+                        if (feeDisp) feeDisp.textContent = `GH₵ ${fees.buyerFee.toFixed(2)}`;
+                    }
+
+                    // Re-apply button styling to the dynamically generated button
+                    const btnPay = document.getElementById('btn-pay');
+                    if(btnPay) {
+                        btnPay.className = 'btn-pay';
+                    }
                 }
-            },
-            zIndex: 2147483647
-        };
-        window.Tawk_API.onLoad = function () {
-            if (typeof window.Tawk_API.showWidget === 'function') {
-                window.Tawk_API.showWidget();
-            }
-        };
-        (function () {
-            const s1 = document.createElement("script");
-            const s0 = document.getElementsByTagName("script")[0];
-            s1.async = true;
-            s1.src = 'https://embed.tawk.to/6a6a2f59a85cac1d445c358f/1junchu38';
-            s1.charset = 'UTF-8';
-            s1.setAttribute('crossorigin', '*');
-            if (s0 && s0.parentNode) {
-                s0.parentNode.insertBefore(s1, s0);
-            } else {
-                document.head.appendChild(s1);
-            }
-        })();
+            } catch(e) {}
+        }, 100);
     </script>
-    <!--End of Tawk.to Script-->
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+Tawk_API.customStyle = {
+    visibility: {
+        desktop: {
+            position: 'br',
+            xOffset: '20px',
+            yOffset: '20px'
+        },
+        mobile: {
+            position: 'br',
+            xOffset: '16px',
+            yOffset: '85px'
+        }
+    },
+    zIndex: 2147483647
+};
+Tawk_API.onLoad = function() {
+    if (typeof Tawk_API.showWidget === 'function') {
+        Tawk_API.showWidget();
+    }
+};
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/6a6a2f59a85cac1d445c358f/1junchu38';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
 </body>
-
 </html>

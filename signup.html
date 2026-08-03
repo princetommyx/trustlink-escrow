@@ -58,7 +58,7 @@
                             <label for="password">Password</label>
                             <div class="password-wrapper">
                                 <input type="password" id="password" placeholder="••••••••" required>
-                                <button type="button" class="toggle-password" aria-label="Toggle password visibility" onclick="togglePassword('password', this)">
+                                <button type="button" class="toggle-password" onclick="togglePassword('password', this)">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;">
                                       <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
                                     </svg>
@@ -67,8 +67,8 @@
                         </div>
 
                         <div class="form-options">
-                            <label class="remember-me" for="terms">
-                                <input type="checkbox" id="terms" required>
+                            <label class="remember-me">
+                                <input type="checkbox" required>
                                 <span>I agree to the Terms of Service</span>
                             </label>
                         </div>
@@ -81,7 +81,7 @@
                     
                     <div class="social-login-row">
                         <!-- Google -->
-                        <button type="button" class="social-btn" id="google-auth-btn" aria-label="Sign up with Google">
+                        <button type="button" class="social-btn" id="google-auth-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512" style="width: 22px; height: 22px;">
                                 <path fill="#4285F4" d="M486.76 240.67c0-16.14-1.39-31.78-4.08-47.01H248v89.28h134.46c-5.83 28.79-22.11 53.2-46.7 69.69v57.85h75.52c44.22-40.73 69.48-100.74 69.48-169.81z"/>
                                 <path fill="#34A853" d="M248 488c67.24 0 123.69-22.36 164.98-60.52l-75.52-57.85c-22.36 14.97-51.13 23.86-89.46 23.86-68.79 0-126.96-46.46-147.78-109.11H21.57v59.83C63.15 426.68 148.51 488 248 488z"/>
@@ -118,7 +118,7 @@
         }
     </script>
 <!--Start of Tawk.to Script-->
-<script>
+<script type="text/javascript">
 var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
 Tawk_API.customStyle = {
     visibility: {

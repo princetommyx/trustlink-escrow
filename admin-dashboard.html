@@ -156,7 +156,7 @@
                             <div class="chart-header">
                                 <h3 class="chart-title">Money Flow</h3>
                                 <div class="chart-actions">
-                                    <select class="chart-date-filter" id="dw-chart-range" aria-label="Money Flow chart date range" style="border: none; background: #F1F5F9; color: #334155; border-radius: 8px; padding: 6px 12px;">
+                                    <select class="chart-date-filter" id="dw-chart-range" aria-label="Money Flow chart date range" style="border: none; background: #F1F5F9; border-radius: 8px; padding: 6px 12px;">
                                         <option value="7">Weekly</option>
                                         <option value="14" selected>Bi-Weekly</option>
                                         <option value="30">Monthly</option>
@@ -173,7 +173,7 @@
                             <div class="chart-header">
                                 <h3 class="chart-title">Transaction Volume</h3>
                                 <div class="chart-actions">
-                                    <select class="chart-date-filter" id="tx-chart-range" aria-label="Transaction Volume chart date range" style="border: none; background: #F1F5F9; color: #334155; border-radius: 8px; padding: 6px 12px;">
+                                    <select class="chart-date-filter" id="tx-chart-range" aria-label="Transaction Volume chart date range" style="border: none; background: #F1F5F9; border-radius: 8px; padding: 6px 12px;">
                                         <option value="7">Weekly</option>
                                         <option value="14" selected>Bi-Weekly</option>
                                         <option value="30">Monthly</option>
@@ -217,14 +217,14 @@
                         <div class="system-status-widget" style="margin-top: 24px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                 <h3 style="margin: 0; font-size: 1.1rem; color: #111827;">System Health</h3>
-                                <span style="font-size: 0.8rem; color: #334155; cursor: pointer;">View all</span>
+                                <span style="font-size: 0.8rem; color: #64748b; cursor: pointer;">View all</span>
                             </div>
                             <div class="system-card light-cyan">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
                                     <span style="font-weight: 600; color: #111827;">Moolre API</span>
                                     <span style="font-weight: 700;">ONLINE</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #475569;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b;">
                                     <span>Response Time</span>
                                     <span>24ms</span>
                                 </div>
@@ -262,7 +262,7 @@
                                 <h3 class="stat-value" id="comm-stat-total" style="color: #059669;">GH₵ 0.00</h3>
                                 <span class="stat-sub" id="comm-stat-total-sub">Across all completed & active orders</span>
                             </div>
-                            <div class="stat-icon" style="background: #ecfdf5; color: #047857;">
+                            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.12); color: #10B981;">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
                         </div>
@@ -270,10 +270,10 @@
                         <div class="stat-card-modern">
                             <div class="stat-info">
                                 <span class="stat-label">Realized Revenue</span>
-                                <h3 class="stat-value" id="comm-stat-realized" style="color: #1d4ed8;">GH₵ 0.00</h3>
+                                <h3 class="stat-value" id="comm-stat-realized" style="color: #2563eb;">GH₵ 0.00</h3>
                                 <span class="stat-sub">From completed / released escrows</span>
                             </div>
-                            <div class="stat-icon" style="background: #eff6ff; color: #1d4ed8;">
+                            <div class="stat-icon" style="background: rgba(37, 99, 235, 0.12); color: #2563eb;">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
                         </div>
@@ -281,10 +281,10 @@
                         <div class="stat-card-modern">
                             <div class="stat-info">
                                 <span class="stat-label">Pending In Escrow</span>
-                                <h3 class="stat-value" id="comm-stat-pending" style="color: #b45309;">GH₵ 0.00</h3>
+                                <h3 class="stat-value" id="comm-stat-pending" style="color: #d97706;">GH₵ 0.00</h3>
                                 <span class="stat-sub">Locked in active transactions</span>
                             </div>
-                            <div class="stat-icon" style="background: #fef3c7; color: #92400e;">
+                            <div class="stat-icon" style="background: rgba(217, 119, 6, 0.12); color: #d97706;">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
                         </div>
@@ -292,10 +292,10 @@
                         <div class="stat-card-modern">
                             <div class="stat-info">
                                 <span class="stat-label">Gross Order Volume (GMV)</span>
-                                <h3 class="stat-value" id="comm-stat-gmv" style="color: #6d28d9;">GH₵ 0.00</h3>
+                                <h3 class="stat-value" id="comm-stat-gmv" style="color: #7c3aed;">GH₵ 0.00</h3>
                                 <span class="stat-sub" id="comm-stat-orders-count">0 orders total</span>
                             </div>
-                            <div class="stat-icon" style="background: #ede9fe; color: #5b21b6;">
+                            <div class="stat-icon" style="background: rgba(124, 58, 237, 0.12); color: #7c3aed;">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6H2.25m0 0v1.5a60.082 60.082 0 0015.797 2.101c.727.198 1.453-.342 1.453-1.096V7.5M3.75 4.5v15M3.75 4.5h16.5" /></svg>
                             </div>
                         </div>
@@ -331,7 +331,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.15 5.15a7.5 7.5 0 0011.5 11.5z" />
                                 </svg>
-                                <input type="text" id="commission-search" aria-label="Search orders by item, buyer, seller" placeholder="Search orders by item, buyer, seller..." class="modern-search-input">
+                                <input type="text" id="commission-search" placeholder="Search orders by item, buyer, seller..." class="modern-search-input">
                             </div>
                         </div>
 
@@ -368,7 +368,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.15 5.15a7.5 7.5 0 0011.5 11.5z" />
                             </svg>
-                            <input type="text" id="user-search" aria-label="Search users by name or email" placeholder="Search by name or email..." class="modern-search-input">
+                            <input type="text" id="user-search" placeholder="Search by name or email..." class="modern-search-input">
                         </div>
                     </div>
                     <div class="portal-card admin-table-white" style="padding: 0; overflow: hidden;">
@@ -422,7 +422,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.15 5.15a7.5 7.5 0 0011.5 11.5z" />
                             </svg>
-                            <input type="text" id="escrow-search" aria-label="Search escrows by item, buyer, or seller" placeholder="Search by item, buyer, or seller..." class="modern-search-input">
+                            <input type="text" id="escrow-search" placeholder="Search by item, buyer, or seller..." class="modern-search-input">
                         </div>
                     </div>
                     <div class="portal-card admin-table-white" style="padding: 0; overflow: hidden;">
@@ -577,7 +577,7 @@
 
                             <!-- Status Filter -->
                             <div class="filter-field">
-                                <label for="report-status-filter" id="report-status-label">Status Filter</label>
+                                <label id="report-status-label" for="report-status-filter">Status Filter</label>
                                 <select id="report-status-filter">
                                     <option value="all">All Statuses</option>
                                 </select>
@@ -625,24 +625,16 @@
                         <div class="report-table-header-box" style="padding: 16px 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: #ffffff;">
                             <div>
                                 <h3 id="report-table-title" style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Commission Revenue Ledger</h3>
-                                <span id="report-table-subtitle" style="font-size: 0.82rem; color: #475569;">Showing live filtered report results</span>
+                                <span id="report-table-subtitle" style="font-size: 0.82rem; color: #64748b;">Showing live filtered report results</span>
                             </div>
-                            <div style="font-size: 0.85rem; font-weight: 600; color: #334155; background: #f1f5f9; padding: 4px 12px; border-radius: 20px;" id="report-record-count-badge">
+                            <div style="font-size: 0.85rem; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 4px 12px; border-radius: 20px;" id="report-record-count-badge">
                                 0 Records
                             </div>
                         </div>
                         <div class="report-table-responsive-box" style="overflow-x: auto;">
                             <table class="table-modern report-data-table" style="width: 100%; border-collapse: collapse;">
                                 <thead id="report-table-head">
-                                    <tr>
-                                        <th scope="col">Reference ID</th>
-                                        <th scope="col">Date</th>
-                                        <th scope="col">Type</th>
-                                        <th scope="col">Gross Amount</th>
-                                        <th scope="col">Platform Fee</th>
-                                        <th scope="col">Net Amount</th>
-                                        <th scope="col">Status</th>
-                                    </tr>
+                                    <!-- Dynamic Headers based on report type -->
                                 </thead>
                                 <tbody id="report-table-body">
                                     <!-- Dynamic Rows -->
@@ -663,15 +655,15 @@
                     <h2 style="margin-bottom: 24px;">My Profile</h2>
                     <div class="settings-card" style="max-width: 560px;">
                         <div class="form-group">
-                            <label for="admin-profile-name">Full Name</label>
+                            <label>Full Name</label>
                             <input type="text" id="admin-profile-name" placeholder="Your name" style="padding: 10px; border-radius: 6px;">
                         </div>
                         <div class="form-group">
-                            <label for="admin-profile-email">Email</label>
+                            <label>Email</label>
                             <input type="email" id="admin-profile-email" disabled style="padding: 10px; border-radius: 6px; opacity: 0.7;">
                         </div>
                         <div class="form-group">
-                            <label for="admin-profile-phone">Phone Number</label>
+                            <label>Phone Number</label>
                             <input type="tel" id="admin-profile-phone" placeholder="e.g. 0551234567" style="padding: 10px; border-radius: 6px;">
                             <span style="font-size: 0.8rem; color: #64748b; margin-top: 6px; display: block;">Used for SMS alerts about your account.</span>
                         </div>
@@ -684,7 +676,7 @@
                         <p style="margin-bottom: 20px;">Set the percentage fee taken from escrow transactions.</p>
                         
                         <div class="form-group" style="max-width: 300px;">
-                            <label for="platform-fee">Platform Fee (%)</label>
+                            <label>Platform Fee (%)</label>
                             <input type="number" id="platform-fee" value="2.5" step="0.1" min="0" max="100" style="padding: 10px; border-radius: 6px;">
                         </div>
                         <button class="btn btn-primary" id="btn-save-fee" style="max-width: 150px;">Save Changes</button>
@@ -707,19 +699,19 @@
                             <h3>Add System Administrator</h3>
                             <p style="margin-bottom: 20px;">Invite a new admin or support staff.</p>
                             <div class="form-group">
-                                <label for="new-admin-name">Full Name</label>
+                                <label>Full Name</label>
                                 <input type="text" id="new-admin-name" placeholder="e.g. Jane Doe" style="padding: 10px; border-radius: 6px;">
                             </div>
                             <div class="form-group">
-                                <label for="new-admin-email">Email Address</label>
+                                <label>Email Address</label>
                                 <input type="email" id="new-admin-email" placeholder="admin@trustlink.com" style="padding: 10px; border-radius: 6px;">
                             </div>
                             <div class="form-group">
-                                <label for="new-admin-password">Temporary Password</label>
+                                <label>Temporary Password</label>
                                 <input type="password" id="new-admin-password" placeholder="Min. 8 characters" style="padding: 10px; border-radius: 6px;">
                             </div>
                             <div class="form-group">
-                                <label for="new-admin-role">Role</label>
+                                <label>Role</label>
                                 <select id="new-admin-role" style="padding: 10px; border-radius: 6px;">
                                     <option value="admin">Super Admin</option>
                                     <option value="support">Support Agent</option>
@@ -732,16 +724,16 @@
                             <h3>Change Password</h3>
                             <p style="margin-bottom: 20px;">Update your current administrative password.</p>
                             <div class="form-group">
-                                <label for="admin-current-pass">Current Password</label>
-                                <input type="password" id="admin-current-pass" placeholder="Enter current password" style="padding: 10px; border-radius: 6px;">
+                                <label>Current Password</label>
+                                <input type="password" placeholder="Enter current password" style="padding: 10px; border-radius: 6px;">
                             </div>
                             <div class="form-group">
-                                <label for="admin-new-pass">New Password</label>
-                                <input type="password" id="admin-new-pass" placeholder="Enter new password" style="padding: 10px; border-radius: 6px;">
+                                <label>New Password</label>
+                                <input type="password" placeholder="Enter new password" style="padding: 10px; border-radius: 6px;">
                             </div>
                             <div class="form-group">
-                                <label for="admin-confirm-pass">Confirm New Password</label>
-                                <input type="password" id="admin-confirm-pass" placeholder="Re-enter new password" style="padding: 10px; border-radius: 6px;">
+                                <label>Confirm New Password</label>
+                                <input type="password" placeholder="Re-enter new password" style="padding: 10px; border-radius: 6px;">
                             </div>
                             <button class="btn btn-primary" onclick="alert('Password updated successfully.')" style="margin-top: auto;">Update Password</button>
                         </div>
@@ -776,18 +768,18 @@
         <div class="modal" style="max-width: 400px; padding: 24px;">
             <div class="modal-header" style="margin-bottom: 20px;">
                 <h3 style="margin: 0; font-size: 1.2rem; color: #1e293b;">Edit User</h3>
-                <button id="close-user-modal" aria-label="Close edit user modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #475569;">&times;</button>
+                <button id="close-user-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
             </div>
             <div class="form-group" style="margin-bottom: 16px;">
-                <label for="edit-user-email" style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Email (Read-only)</label>
-                <input type="text" id="edit-user-email" disabled style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f1f5f9; color: #334155;">
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Email (Read-only)</label>
+                <input type="text" id="edit-user-email" disabled style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f1f5f9; color: #64748b;">
             </div>
             <div class="form-group" style="margin-bottom: 16px;">
-                <label for="edit-user-name" style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Full Name</label>
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Full Name</label>
                 <input type="text" id="edit-user-name" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
             </div>
             <div class="form-group" style="margin-bottom: 16px;">
-                <label for="edit-user-role" style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Role</label>
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #334155;">Role</label>
                 <select id="edit-user-role" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
                     <option value="user">User</option>
                     <option value="support">Support</option>
@@ -795,9 +787,9 @@
                 </select>
             </div>
             <div class="form-group" style="margin-bottom: 24px;">
-                <label for="edit-user-verified" style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; cursor: pointer;">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; cursor: pointer;">
                     <input type="checkbox" id="edit-user-verified" style="width: 18px; height: 18px;">
-                    <span>Email Verified</span>
+                    Email Verified
                 </label>
             </div>
             <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
