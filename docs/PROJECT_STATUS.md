@@ -1,6 +1,6 @@
 # 🚀 TrustLink Escrow — Comprehensive Project Status & Development Progress
 
-> **Production Canonical Domain:** [https://www.trustlinkgh.online/](https://www.trustlinkgh.online/)
+> **Production Canonical Domain:** [https://www.trustlinkgh.online/](https://www.trustlinkgh.online/)  
 > **Last Updated:** August 3, 2026
 
 ---
