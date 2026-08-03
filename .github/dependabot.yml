@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Monitor frontend dependencies (npm)
+  - package-ecosystem: "npm"
+    directory: "/" 
+    schedule:
+      interval: "weekly"
+
+  # Monitor backend dependencies (Composer)
+  - package-ecosystem: "composer"
+    directory: "/" 
+    schedule:
+      interval: "weekly"
