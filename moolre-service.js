@@ -1,20 +1,11 @@
 // moolre-service.js
-
-// WARNING: In a real production application, these keys MUST be hidden on a backend server.
-// They are exposed here strictly for MVP/Prototype demonstration purposes.
-export const MOOLRE_SECRET_KEY = "dcef1bbe-49aa-4416-8934-b9983a3c42a2";
-// These keys MUST all come from the same Moolre account as MOOLRE_API_USER,
-// or every call fails with AIN01. Verified working pair: sasulabs (user ID 107834).
-export const MOOLRE_PUBLIC_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOjEwNzgzNCwiZXhwIjoxOTU2NTQ1OTk5fQ.ZPgxaR7PP6FZH5msdXkWSQX6lbjp27mTywLgMhAeaPc";
-export const MOOLRE_PRIVATE_KEY = "tDA79UwhA1PLoCsBNXzcmk08qOXNvd25xKVjKPN93i2RVqa1VNoUWN7jXR91v39C";
-export const MOOLRE_API_URL = "https://api.moolre.com/v1/checkout"; // Standardized checkout endpoint
+// Safe pure-client utilities and secure backend proxy calls for TrustLink Escrow.
 
 /**
- * Normalizes a Ghanaian phone number to international format (233XXXXXXXXX),
- * which the SMS gateway requires for delivery. Accepts "055 123 4567",
- * "+233551234567", "0551234567" etc.
+ * Normalizes a Ghanaian phone number to international format (233XXXXXXXXX) or local 10-digit format.
+ * Accepts "055 123 4567", "+233551234567", "0551234567" etc.
  * @param {string} phone - The phone number in any common format.
- * @returns {string} The digits-only international number.
+ * @returns {string} Digits-only phone string.
  */
 export function normalizePhone(phone) {
     let p = String(phone || '').replace(/[^0-9]/g, '');
@@ -23,12 +14,34 @@ export function normalizePhone(phone) {
 }
 
 /**
+ * Standard 10-digit local format (e.g. 0551234567).
+ */
+export function formatGhanaPhoneNumber(phone) {
+    let digits = String(phone || '').replace(/[^\d]/g, '');
+    if (digits.startsWith('233') && digits.length === 12) {
+        return '0' + digits.slice(3);
+    }
+    if (!digits.startsWith('0') && digits.length === 9) {
+        return '0' + digits;
+    }
+    return digits;
+}
+
+/**
+ * Formats currency in Ghana Cedis (GH₵).
+ */
+export function formatCurrency(amount) {
+    const num = parseFloat(amount) || 0;
+    return `GH₵ ${num.toFixed(2)}`;
+}
+
+/**
  * Splits the platform fee between buyer and seller based on the escrow's
  * fee allocation ('buyer' | 'seller' | 'split').
  * Buyer pays: amount + buyerFee. Seller receives: amount - sellerFee.
- * @returns {{ totalFee, buyerFee, sellerFee, buyerTotal, sellerNet }}
+ * @returns {{ totalFee: number, buyerFee: number, sellerFee: number, buyerTotal: number, sellerNet: number }}
  */
-export function computeFeeSplit(amount, feePercent, allocation) {
+export function computeFeeSplit(amount, feePercent = 3, allocation = 'split') {
     const amt = parseFloat(amount) || 0;
     const pct = (parseFloat(feePercent) || 0) / 100;
     const totalFee = Math.round(amt * pct * 100) / 100;
@@ -59,8 +72,7 @@ export function generateSecureToken(bytes = 16) {
 }
 
 /**
- * SHA-256 hash of a string, returned as hex. Used so only the token HASH is
- * stored in Firestore — someone reading the database cannot reconstruct the link.
+ * SHA-256 hash of a string, returned as hex.
  */
 export async function sha256Hex(text) {
     const data = new TextEncoder().encode(text);
@@ -69,8 +81,7 @@ export async function sha256Hex(text) {
 }
 
 /**
- * Best-effort extraction of a user's phone number from their profile.
- * Phone signups store the number in originalIdentifier.
+ * Best-effort extraction of a user's phone number from profile data.
  */
 export function pickUserPhone(userData) {
     if (!userData) return "";
@@ -81,467 +92,21 @@ export function pickUserPhone(userData) {
 }
 
 /**
- * Sends a plain escrow status update SMS (payment received, delivery
- * confirmed, etc.) to any party.
+ * Secure Backend Proxy Call: Requests a phone verification OTP via server-side Cloud Function.
  */
-export async function sendEscrowStatusSMS(phone, message, ref = "") {
-    const cleanPhone = normalizePhone(phone);
-    const response = await fetch("https://api.moolre.com/open/sms/send", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-API-VASKEY': MOOLRE_VAS_KEY
-        },
-        body: JSON.stringify({
-            type: 1,
-            senderid: MOOLRE_SENDER_ID,
-            messages: [{
-                recipient: cleanPhone,
-                ref: (ref ? `${ref}-` : 'status-') + Date.now() + '-' + Math.floor(Math.random() * 10000),
-                message: message
-            }]
-        })
-    });
-    const data = await response.json();
-    if (!response.ok || data.status == 0) {
-        console.error("[MOOLRE API] Status SMS error:", data);
-        throw new Error(data.message || "Failed to send status SMS.");
-    }
-    return data;
-}
-
-/**
- * SMS the buyer their private one-time delivery confirmation link.
- * @param {string} phone - The buyer's phone number.
- * @param {string} confirmUrl - The single-use confirm.html link.
- * @param {string} escrowId - The escrow reference.
- */
-export async function sendDeliveryConfirmationSMS(phone, confirmUrl, escrowId, description = "") {
-    const cleanPhone = normalizePhone(phone);
-    const item = description ? `"${String(description).replace(/\s+/g, ' ').trim().substring(0, 60)}"` : `order #${escrowId.substring(0, 8)}`;
-    const message = `TrustLink: Your ${item} has been dispatched! Once it arrives, confirm receipt with your private link (valid 72h, one-time use): ${confirmUrl}`;
-
-    const response = await fetch("https://api.moolre.com/open/sms/send", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-API-VASKEY': MOOLRE_VAS_KEY
-        },
-        body: JSON.stringify({
-            type: 1,
-            senderid: MOOLRE_SENDER_ID,
-            messages: [{
-                recipient: cleanPhone,
-                ref: `${escrowId.substring(0, 8)}-confirm-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-                message: message
-            }]
-        })
-    });
-
-    const data = await response.json();
-    if (!response.ok || data.status == 0) {
-        console.error("[MOOLRE API] Confirmation SMS error:", data);
-        throw new Error(data.message || "Failed to send confirmation SMS.");
-    }
-    return data;
-}
-
-/**
- * Sends a One-Time Password (OTP) via Moolre SMS API.
- * @param {string} phone - The recipient's phone number.
- * @param {string} otp - The OTP code to send.
- */
-export async function sendMoolreOTP(phone, otp) {
+export async function sendMoolreOTP(phone) {
     try {
-        console.log(`[MOOLRE API] Sending OTP ${otp} to ${phone}`);
-        // Remove any '+' or spaces for the API if necessary
-        const cleanPhone = normalizePhone(phone);
-
-        const response = await fetch("https://api.moolre.com/open/sms/send", {
+        const response = await fetch("/api/v1/otp/request", {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-VASKEY': MOOLRE_VAS_KEY
-            },
-            body: JSON.stringify({
-                type: 1,
-                senderid: MOOLRE_SENDER_ID,
-                messages: [{
-                    recipient: cleanPhone,
-                    message: `Your TrustLink OTP is ${otp}`
-                }]
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone })
         });
-
+        const data = await response.json();
         if (!response.ok) {
-            console.warn(`[MOOLRE API] OTP endpoint returned ${response.status}. Simulating success.`);
-            return { status: 'mock_success', message: 'OTP message simulated.' };
+            return { status: 0, message: data.error || "Failed to dispatch OTP." };
         }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Moolre OTP integration error:", error);
-        return { status: 'mock_success', message: 'OTP message simulated on error.' };
-    }
-}
-export const MOOLRE_API_USER = "sasulabs";
-export const MOOLRE_ACCOUNT_NUMBER = "10783406072616"; // DreamersCode real account number
-
-// Fallback checkout used while the dynamic /embed/link API returns AIN01 (see HANDOFF.md).
-// NOTE: payments through this link cannot carry an externalref, so the webhook
-// cannot auto-match them to an escrow — it exists purely to keep the buyer flow testable.
-export const MOOLRE_STATIC_POS_LINK = "https://pos.moolre.com/vtin8o2P6bBcESNMkVylmTOx5dLfeD";
-export const MOOLRE_VAS_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2YXNpZCI6OTc5NywiZXhwIjoxOTU2NTI3OTk5fQ.rV4eU8maadNobhcBmr2GJMyb9BxsGK23InEL97pR3xg"; 
-export const MOOLRE_SENDER_ID = "Trustlink"; // Must be an approved Sender ID on Moolre
-
-/**
- * Initiates a Moolre payment gateway checkout session.
- * 
- * @param {number} amount - The total escrow amount to charge.
- * @param {string} description - The description of the escrow transaction.
- * @param {object} customer - The customer details { email, name }.
- * @param {string} externalRef - The unique escrow ID for tracking.
- * @param {string} callbackUrl - The URL to redirect to after successful payment.
- * @returns {Promise<object>} - The Moolre API response containing the checkout URL.
- */
-export async function initiateMoolreCheckout(amount, description, customer, externalRef, callbackUrl) {
-    try {
-        const response = await fetch("https://api.moolre.com/embed/link", {
-            method: 'POST',
-            headers: {
-                // Per docs.moolre.com, /embed/link authenticates with ONLY the
-                // username + public key. Do not add X-API-KEY (private) here.
-                'Content-Type': 'application/json',
-                'X-API-PUBKEY': MOOLRE_PUBLIC_KEY,
-                'X-API-USER': MOOLRE_API_USER
-            },
-            body: JSON.stringify({
-                type: 1,
-                amount: parseFloat(amount).toFixed(2),
-                email: customer.email,
-                externalref: externalRef || `ESC-${Date.now()}`,
-                reusable: "0",
-                currency: "GHS",
-                accountnumber: MOOLRE_ACCOUNT_NUMBER,
-                // Moolre's /embed/link fields (there is NO "callback_url" field):
-                // - redirect: where the buyer's browser goes after payment
-                // - callback: server webhook Moolre POSTs the payment result to
-                redirect: callbackUrl || "",
-                callback: "https://trustlinkbackend.onrender.com/webhook/moolre",
-                metadata: { description }
-            })
-        });
-
-        // Parse and return the real response
-        const data = await response.json();
-        
-        // If the API fails due to bad keys or missing account number, throw error
-        if (!response.ok || data.status == 0) {
-            console.error("Moolre Checkout API Error:", data);
-            throw new Error(data.message || "Failed to generate Moolre payment link.");
-        }
-
-        return data.data; // Should contain { authorization_url, reference }
-    } catch (error) {
-        console.error("Moolre integration error:", error);
-        throw error;
-    }
-}
-
-/**
- * Verifies a Moolre payment status using the Moolre transaction status API.
- * 
- * @param {string} escrowId - The escrow ID used as the externalref.
- * @returns {Promise<object>} - The verification result.
- */
-export async function verifyMoolrePayment(escrowId) {
-    try {
-        const response = await fetch(`https://api.moolre.com/open/transact/status`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-USER': MOOLRE_API_USER,
-                'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
-            },
-            body: JSON.stringify({
-                type: 1,
-                idtype: "1", // 1 = Unique externalref
-                id: escrowId,
-                accountnumber: MOOLRE_ACCOUNT_NUMBER
-            })
-        });
-
-        const data = await response.json();
-        
-        if (!response.ok || data.status == 0) {
-            console.error("Moolre Verification Error:", data);
-            throw new Error(data.message || "Failed to verify Moolre payment.");
-        }
-
-        // Return the inner data object
-        return data.data; 
-    } catch (error) {
-        console.error("Moolre verification integration error:", error);
-        throw error;
-    }
-}
-
-/**
- * Sends an SMS notification using the Moolre API.
- * 
- * @param {string} phone - The buyer's phone number.
- * @param {string} checkoutUrl - The secure POS checkout link.
- * @param {string} escrowId - The escrow ID for reference.
- * @param {string} paymentId - (Optional) The Moolre Payment ID for USSD pull.
- * @returns {Promise<object>}
- */
-export async function sendSMSNotification(phone, checkoutUrl, escrowId, paymentId = "", details = {}) {
-    try {
-        console.log(`[MOOLRE API] Sending SMS link for ${escrowId} to ${phone}`);
-
-        // Tell the buyer WHAT they're paying for, not just a reference
-        const item = details.description ? `"${String(details.description).replace(/\s+/g, ' ').trim().substring(0, 60)}"` : `order #${escrowId.substring(0, 8)}`;
-        const amountText = details.amount ? ` for GH₵ ${parseFloat(details.amount).toFixed(2)}` : "";
-        const sellerText = details.sellerName ? ` by ${String(details.sellerName).substring(0, 25)}` : "";
-        const ussdText = paymentId ? ` Or dial *203*${paymentId}# to pay via USSD.` : "";
-        const message = `TrustLink: A secure escrow${sellerText} was created for ${item}${amountText}. Your money stays protected until you confirm delivery. Pay securely: ${checkoutUrl}${ussdText}`;
-        
-        // Remove any '+' or spaces for the API if necessary
-        const cleanPhone = normalizePhone(phone);
-
-        const response = await fetch("https://api.moolre.com/open/sms/send", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-VASKEY': MOOLRE_VAS_KEY
-            },
-            body: JSON.stringify({
-                type: 1,
-                senderid: MOOLRE_SENDER_ID,
-                messages: [{
-                    recipient: cleanPhone,
-                    ref: `${escrowId.substring(0, 8)}-sms-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-                    message: message
-                }]
-            })
-        });
-
-        const data = await response.json();
-        
-        if (!response.ok || data.status == 0) {
-            console.error(`[MOOLRE API] SMS error:`, data);
-            throw new Error(data.message || "Failed to send SMS message.");
-        }
-
-        return data;
-    } catch (error) {
-        console.error("Moolre SMS integration error:", error);
-        throw error;
-    }
-}
-
-/**
- * Sends a WhatsApp notification using the Moolre API.
- * NOTE: The exact endpoint URL and payload structure must be confirmed with Moolre API documentation.
- * 
- * @param {string} phone - The buyer's phone number.
- * @param {string} checkoutUrl - The secure POS checkout link.
- * @param {string} escrowId - The escrow ID for reference.
- * @param {string} paymentId - (Optional) The Moolre Payment ID for USSD pull.
- * @returns {Promise<object>}
- */
-export async function sendWhatsAppNotification(phone, checkoutUrl, escrowId, paymentId = "", details = {}) {
-    try {
-        console.log(`[MOOLRE API] Sending WhatsApp link for ${escrowId} to ${phone}`);
-
-        const item = details.description ? `${String(details.description).replace(/\s+/g, ' ').trim().substring(0, 80)}` : `Order #${escrowId.substring(0, 8).toUpperCase()}`;
-        const amountText = details.amount ? `\nTotal Amount: GH₵ ${parseFloat(details.amount).toFixed(2)}` : "";
-        const sellerText = details.sellerName ? `\nSeller: ${String(details.sellerName).substring(0, 30)}` : "";
-        const ussdText = paymentId ? `\n\nAlternatively, dial *203*${paymentId}# to pay via USSD.` : "";
-        const message = `TRUSTLINK ESCROW PAYMENT INVOICE\n\nItem / Order: ${item}${amountText}${sellerText}\n\nYour payment remains securely protected in TrustLink Escrow until you receive and verify your order.\n\nPay securely here:\n${checkoutUrl}${ussdText}\n\nProtected by TrustLink Escrow Ghana`;
-
-        // Remove any '+' or spaces for the API if necessary
-        const cleanPhone = normalizePhone(phone);
-
-        // Assuming endpoint based on SMS endpoint structure. 
-        // User/Moolre must confirm the exact WhatsApp endpoint.
-        const response = await fetch("https://api.moolre.com/open/whatsapp/send", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-VASKEY': MOOLRE_VAS_KEY
-            },
-            body: JSON.stringify({
-                type: 1, 
-                senderid: MOOLRE_SENDER_ID,
-                messages: [{
-                    recipient: cleanPhone,
-                    ref: `${escrowId.substring(0, 8)}-wa-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-                    message: message
-                }]
-            })
-        });
-
-        const data = await response.json();
-        
-        if (!response.ok || data.status == 0) {
-            console.warn(`[MOOLRE API] WhatsApp error:`, data);
-            throw new Error(data.message || "Failed to send WhatsApp message.");
-        }
-
-        return data;
-    } catch (error) {
-        console.error("Moolre WhatsApp integration error:", error);
-        throw error;
-    }
-}
-
-/**
- * Generates a unique Moolre Payment ID for USSD dial payments (*203*paymentid#)
- * 
- * @param {string} phone - Buyer's phone number
- * @param {string} name - Buyer's name or a unique ID
- * @param {string} escrowId - The escrow ID used as externalref
- * @returns {Promise<string>} - The generated payment ID
- */
-export async function generateMoolrePaymentID(phone, name, escrowId) {
-    try {
-        const response = await fetch("https://api.moolre.com/open/account/create", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-USER': MOOLRE_API_USER,
-                'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
-            },
-            body: JSON.stringify({
-                type: 2,
-                phone: phone,
-                name: name,
-                currency: "GHS",
-                externalref: escrowId,
-                accountnumber: MOOLRE_ACCOUNT_NUMBER
-            })
-        });
-
-        const data = await response.json();
-        if (!response.ok || data.status == 0) {
-            console.error("Moolre Payment ID Error:", data);
-            throw new Error(data.message || "Failed to create Moolre Payment ID");
-        }
-        
-        return data.data.paymentid;
-    } catch (error) {
-        console.error("Error creating Moolre Payment ID:", error);
-        throw error;
-    }
-}
-
-/**
- * Initiates a Push USSD Payment prompt on the buyer's phone.
- * 
- * @param {string} phone - Buyer's phone number
- * @param {string} amount - Amount to collect
- * @param {string} channel - Network channel (13=MTN, 6=Telecel, 7=AT)
- * @param {string} escrowId - Escrow ID (externalref)
- * @returns {Promise<object>} - Response indicating prompt was sent
- */
-export async function initiateUSSDPushPayment(phone, amount, channel, escrowId) {
-    try {
-        const response = await fetch("https://api.moolre.com/open/transact/payment", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-USER': MOOLRE_API_USER,
-                'X-API-KEY': MOOLRE_PRIVATE_KEY,
-                'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
-            },
-            body: JSON.stringify({
-                type: 1,
-                channel: channel,
-                currency: "GHS",
-                payer: phone,
-                amount: amount.toString(),
-                externalref: escrowId,
-                accountnumber: MOOLRE_ACCOUNT_NUMBER
-            })
-        });
-
-        const data = await response.json();
-        // status 1 with code TR099 or TP14 usually indicates success/prompt sent
-        if (!response.ok || data.status == 0) {
-            console.error("Moolre USSD Push Error:", data);
-            throw new Error(data.message || "Failed to push USSD prompt");
-        }
-        
-        return data;
-    } catch (error) {
-        console.error("Error initiating USSD push:", error);
-        throw error;
-    }
-}
-
-/**
- * Automates the disbursement of funds via Moolre API for payouts/withdrawals.
- * WARNING: This is a client-side implementation for MVP purposes only.
- * 
- * @param {string} transactionId - The ID of the withdrawal transaction
- * @param {number|string} amount - The amount to disburse
- * @param {string} recipient - The recipient's mobile money number
- * @param {string} network - The recipient's network (e.g., '13' for MTN)
- * @returns {Promise<object>} - Response indicating the transfer status
- */
-export async function executeMoolrePayout(transactionId, amount, recipient, network) {
-    try {
-        console.log(`[MOOLRE API] Initiating automated payout for ${transactionId}`);
-        
-        // Strip any spaces or dashes from the user's input
-        let cleanRecipient = String(recipient || '').replace(/[^0-9]/g, '');
-        
-        // Moolre disburse API expects the standard 10-digit local format (e.g. 0551234567)
-        if (cleanRecipient.length === 12 && cleanRecipient.startsWith('233')) {
-            cleanRecipient = '0' + cleanRecipient.slice(3);
-        } else if (cleanRecipient.length === 9) {
-            cleanRecipient = '0' + cleanRecipient;
-        }
-        
-        if (cleanRecipient.length !== 10) {
-             throw new Error(`The recipient phone number '${recipient}' is incomplete or invalid. Moolre requires a standard 10-digit mobile number.`);
-        }
-
-        const response = await fetch("https://api.moolre.com/open/transact/payout", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-USER': MOOLRE_API_USER,
-                'X-API-KEY': MOOLRE_PRIVATE_KEY,
-                'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
-            },
-            body: JSON.stringify({
-                type: 1, 
-                accountnumber: MOOLRE_ACCOUNT_NUMBER,
-                amount: parseFloat(amount).toFixed(2), // Ensure exactly 2 decimal places as a string
-                recipient: cleanRecipient,
-                network: network,
-                currency: "GHS",
-                externalref: transactionId
-            })
-        });
-
-        let data;
-        try {
-            data = await response.json();
-        } catch (parseError) {
-            throw new Error(`Moolre API returned an invalid response (HTTP ${response.status}). The endpoint URL might be incorrect or blocked.`);
-        }
-        
-        if (!response.ok || data.status == 0) {
-            console.error("Moolre Payout Error:", data);
-            throw new Error(data.message || "Failed to execute automated Moolre payout");
-        }
-        
-        return data.data; 
-    } catch (error) {
-        console.error("Error executing Moolre payout:", error);
-        throw error;
+        return { status: 1, message: "Verification OTP dispatched successfully." };
+    } catch (err) {
+        return { status: 0, message: "Network error requesting verification code." };
     }
 }

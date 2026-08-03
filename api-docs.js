@@ -3,15 +3,14 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/f
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // --- Authentication (Optional for viewing docs) ---
+let currentApiKey = '';
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // User is logged in, fetch their data
         try {
             const userDoc = await getDoc(doc(db, "users", user.uid));
             if (userDoc.exists()) {
                 const data = userDoc.data();
                 
-                // Update Sidebar User Profile
                 document.getElementById('user-name').textContent = data.fullName || user.email.split('@')[0];
                 document.getElementById('user-email').textContent = user.email;
                 
@@ -20,8 +19,8 @@ onAuthStateChanged(auth, async (user) => {
                     avatar.style.backgroundImage = `url('${data.photoURL}')`;
                 }
 
-                // If user has generated an API key, update the headers mockup to show it
                 if (data.apiKey) {
+                    currentApiKey = data.apiKey;
                     const apiKeyInputs = document.querySelectorAll('input.param-value');
                     apiKeyInputs.forEach(input => {
                         if (input.value === 'tl_live_your_api_key_here' || input.value === 'tl_live_your_api_key') {
@@ -29,7 +28,6 @@ onAuthStateChanged(auth, async (user) => {
                         }
                     });
                     
-                    // Update code snippets too
                     const codeAreas = document.querySelectorAll('code');
                     codeAreas.forEach(code => {
                         code.innerHTML = code.innerHTML.replace('tl_live_your_api_key', data.apiKey);
@@ -40,7 +38,6 @@ onAuthStateChanged(auth, async (user) => {
             console.error("Error fetching user data:", error);
         }
     } else {
-        // User is not logged in
         document.getElementById('user-name').textContent = 'Guest User';
         document.getElementById('user-email').textContent = 'Login to view your API Key';
     }
@@ -48,23 +45,25 @@ onAuthStateChanged(auth, async (user) => {
 
 // --- UI Interactivity ---
 
-// Mobile Sidebar Toggle
 const sidebar = document.getElementById('api-sidebar');
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const mobileCloseBtn = document.getElementById('mobile-close');
 
-mobileMenuBtn.addEventListener('click', () => {
-    sidebar.classList.add('open');
-});
+if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', () => {
+        sidebar.classList.add('open');
+    });
+}
 
-mobileCloseBtn.addEventListener('click', () => {
-    sidebar.classList.remove('open');
-});
+if (mobileCloseBtn) {
+    mobileCloseBtn.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+    });
+}
 
-// Close sidebar on mobile when clicking outside
 document.addEventListener('click', (e) => {
     if (window.innerWidth <= 768) {
-        if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+        if (sidebar && mobileMenuBtn && !sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
             sidebar.classList.remove('open');
         }
     }
@@ -73,64 +72,55 @@ document.addEventListener('click', (e) => {
 // Navigation Logic
 const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
 const views = document.querySelectorAll('.view-section');
-const topbarTitle = document.querySelector('.breadcrumb strong') || { textContent: '' }; // Quick fallback
 
 navItems.forEach(item => {
     item.addEventListener('click', (e) => {
         const targetId = item.getAttribute('data-target');
-        
-        // If it doesn't have a data-target (like the Dashboard link), let it behave normally (navigate)
         if (!targetId) return;
         
         e.preventDefault();
         
-        // Remove active class from all nav items
         navItems.forEach(nav => nav.classList.remove('active'));
-        // Hide all views and remove flex styling that might interfere
         views.forEach(view => {
             view.classList.add('hidden');
             view.style.display = 'none';
             view.classList.remove('active');
         });
         
-        // Add active to clicked nav item
         item.classList.add('active');
         
-        // Show target view
         const targetView = document.getElementById(targetId);
         if (targetView) {
             targetView.classList.remove('hidden');
             targetView.classList.add('active');
             if (targetId === 'view-endpoints') {
-                targetView.style.display = 'flex'; // This specific view uses flex layout
+                targetView.style.display = 'flex';
             } else {
                 targetView.style.display = 'block';
             }
         }
         
-        // Close sidebar on mobile after clicking a link
-        if (window.innerWidth <= 768) {
+        if (window.innerWidth <= 768 && sidebar) {
             sidebar.classList.remove('open');
         }
     });
 });
 
-// Request Config Tabs (Body, Headers, Auth)
+// Request Config Tabs
 const configTabs = document.querySelectorAll('.tabs-header .tab-btn');
 const configContents = document.querySelectorAll('.request-card .tab-content');
 
 configTabs.forEach(tab => {
-    if(tab.closest('.code-tabs')) return; // skip code panel tabs
+    if(tab.closest('.code-tabs')) return;
     
     tab.addEventListener('click', () => {
-        // Remove active class from all
         configTabs.forEach(t => t.classList.remove('active'));
         configContents.forEach(c => c.classList.remove('active'));
         
-        // Add active class to clicked tab and corresponding content
         tab.classList.add('active');
         const targetId = `tab-${tab.dataset.tab}`;
-        document.getElementById(targetId).classList.add('active');
+        const targetContent = document.getElementById(targetId);
+        if (targetContent) targetContent.classList.add('active');
     });
 });
 
@@ -140,70 +130,88 @@ const codeAreas = document.querySelectorAll('.code-area');
 
 codeTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-        // Remove active class from all
         codeTabs.forEach(t => t.classList.remove('active'));
         codeAreas.forEach(c => c.classList.remove('active'));
         
-        // Add active class to clicked tab
         tab.classList.add('active');
         const targetId = `code-${tab.dataset.codeTab}`;
-        document.getElementById(targetId).classList.add('active');
+        const targetArea = document.getElementById(targetId);
+        if (targetArea) targetArea.classList.add('active');
     });
 });
 
-// Send Test Request Button Logic (Mock UI for now)
+// Real / Developer Preview Sandbox Execution
 const btnSend = document.getElementById('btn-send-test');
-btnSend.addEventListener('click', () => {
-    btnSend.innerHTML = `<svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="16"></circle></svg> Sending...`;
-    
-    setTimeout(() => {
-        btnSend.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Send Request`;
-        
-        // Switch to Response tab automatically
-        document.querySelector('.code-tabs .tab-btn[data-code-tab="response"]').click();
-        
-        // Show a little success toast
-        const toast = document.createElement('div');
-        toast.textContent = "Request successful! Check the response panel.";
-        toast.style.position = 'fixed';
-        toast.style.bottom = '20px';
-        toast.style.right = '20px';
-        toast.style.background = '#0F172A';
-        toast.style.color = '#FFF';
-        toast.style.padding = '12px 24px';
-        toast.style.borderRadius = '8px';
-        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-        toast.style.zIndex = '1000';
-        toast.style.animation = 'fadeUp 0.3s ease';
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transition = 'opacity 0.3s ease';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }, 800);
-});
+if (btnSend) {
+    btnSend.addEventListener('click', async () => {
+        btnSend.disabled = true;
+        const originalText = btnSend.innerHTML;
+        btnSend.innerHTML = `<svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="16"></circle></svg> Sending...`;
+
+        const responseCodeEl = document.querySelector('#code-response code');
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+            const apiKey = currentApiKey || 'tl_live_preview_key';
+            const res = await fetch('/api/v1/escrows', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey
+                },
+                body: JSON.stringify({
+                    amount: 450.00,
+                    description: "Jordan 4 Retro Sneakers",
+                    currency: "GHS"
+                }),
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            const status = res.status;
+            const resText = await res.text();
+            let parsedJson;
+            try { parsedJson = JSON.parse(resText); } catch(e) { parsedJson = resText; }
+
+            if (responseCodeEl) {
+                responseCodeEl.textContent = `// HTTP Status: ${status}\n` + JSON.stringify(parsedJson, null, 2);
+            }
+        } catch (err) {
+            if (responseCodeEl) {
+                responseCodeEl.textContent = `// Developer Preview / Beta Mode Notice\n{\n  "status": "DEVELOPER_PREVIEW",\n  "message": "Live sandbox requests will connect directly to /api/v1/escrows upon backend deployment.",\n  "error": ${JSON.stringify(err.message || "Endpoint not reachable")}\n}`;
+            }
+        } finally {
+            btnSend.disabled = false;
+            btnSend.innerHTML = originalText;
+            const responseTab = document.querySelector('.code-tabs .tab-btn[data-code-tab="response"]');
+            if (responseTab) responseTab.click();
+        }
+    });
+}
 
 // Copy Code Button
 const btnCopy = document.getElementById('btn-copy-code');
-btnCopy.addEventListener('click', () => {
-    const activeCodeArea = document.querySelector('.code-area.active code');
-    if (activeCodeArea) {
-        navigator.clipboard.writeText(activeCodeArea.innerText).then(() => {
-            const originalText = btnCopy.innerHTML;
-            btnCopy.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Copied!`;
-            btnCopy.style.color = '#22C55E';
-            
-            setTimeout(() => {
-                btnCopy.innerHTML = originalText;
-                btnCopy.style.color = '';
-            }, 2000);
-        });
-    }
-});
+if (btnCopy) {
+    btnCopy.addEventListener('click', () => {
+        const activeCodeArea = document.querySelector('.code-area.active code');
+        if (activeCodeArea) {
+            navigator.clipboard.writeText(activeCodeArea.innerText).then(() => {
+                const originalText = btnCopy.innerHTML;
+                btnCopy.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Copied!`;
+                btnCopy.style.color = '#22C55E';
 
-// CSS for animations
+                setTimeout(() => {
+                    btnCopy.innerHTML = originalText;
+                    btnCopy.style.color = '';
+                }, 2000);
+            });
+        }
+    });
+}
+
 const style = document.createElement('style');
 style.textContent = `
 @keyframes spin { 100% { transform: rotate(360deg); } }

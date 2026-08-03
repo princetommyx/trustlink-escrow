@@ -1,20 +1,19 @@
 <?php
 /**
  * Plugin Name: TrustLink Escrow for WooCommerce
- * Plugin URI: https://trustlink.co
- * Description: Accept secure escrow payments on your WooCommerce store via TrustLink.
- * Version: 1.0.0
- * Author: TrustLink
- * Author URI: https://trustlink.co
+ * Plugin URI: https://www.trustlinkgh.online
+ * Description: Accept secure escrow payments on your WooCommerce store via TrustLink Escrow.
+ * Version: 1.0.1
+ * Author: TrustLink Escrow
+ * Author URI: https://www.trustlinkgh.online
  * License: GPLv2 or later
  * Text Domain: trustlink-woocommerce
  */
 
 if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
+    exit;
 }
 
-// Make sure WooCommerce is active
 if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
     return;
 }
@@ -28,7 +27,6 @@ function trustlink_woocommerce_init() {
 
     require_once plugin_dir_path(__FILE__) . 'class-wc-gateway-trustlink.php';
 
-    // Add to WooCommerce
     add_filter('woocommerce_payment_gateways', 'add_trustlink_gateway');
     function add_trustlink_gateway($methods) {
         $methods[] = 'WC_Gateway_TrustLink';
@@ -36,7 +34,6 @@ function trustlink_woocommerce_init() {
     }
 }
 
-// Webhook endpoint registration
 add_action('rest_api_init', function () {
     register_rest_route('trustlink/v1', '/webhook', array(
         'methods' => 'POST',
@@ -49,7 +46,6 @@ function trustlink_webhook_handler(WP_REST_Request $request) {
     $payload = $request->get_json_params();
     $signature = $request->get_header('x_trustlink_signature');
 
-    // Retrieve settings to check signature
     $settings = get_option('woocommerce_trustlink_settings');
     $api_key = $settings['api_key'] ?? '';
 
@@ -72,9 +68,9 @@ function trustlink_webhook_handler(WP_REST_Request $request) {
     }
 
     if ($event === 'escrow.status_changed') {
-        if ($status === 'FUNDED') {
+        if ($status === 'FUNDS_ESCROWED' || $status === 'FUNDED') {
             $order->payment_complete($data['id']);
-            $order->add_order_note('TrustLink Escrow Funded. Please dispatch the item. Escrow ID: ' . $data['id']);
+            $order->add_order_note('TrustLink Escrow Secured. Please dispatch the item. Escrow ID: ' . $data['id']);
         } elseif ($status === 'COMPLETED') {
             $order->update_status('completed', 'TrustLink Escrow Completed and Funds Released.');
         } elseif ($status === 'DISPUTED') {

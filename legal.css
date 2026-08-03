@@ -232,10 +232,30 @@
     font-size: 0.9em;
 }
 
-/* Back-to-top Floating Button */
+/* Skip Navigation Link */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 20px;
+    background: #0F172A;
+    color: #FFFFFF;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    z-index: 9999;
+    text-decoration: none;
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+    top: 20px;
+    outline: 2px solid #2563EB;
+}
+
+/* Back-to-top Floating Button (Offset above Tawk.to live chat widget) */
 .legal-back-top {
     position: fixed;
-    bottom: 24px;
+    bottom: 90px;
     right: 24px;
     width: 44px;
     height: 44px;
@@ -252,6 +272,13 @@
     visibility: hidden;
     transition: all 0.25s ease;
     z-index: 99;
+}
+
+@media (max-width: 768px) {
+    .legal-back-top {
+        bottom: 145px;
+        right: 16px;
+    }
 }
 
 .legal-back-top.visible {

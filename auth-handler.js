@@ -1,5 +1,4 @@
-import { auth, db } from "./firebase-config.js";
-import { sendMoolreOTP } from "./moolre-service.js";
+import { auth, db, functionsApp, httpsCallable } from "./firebase-config.js";
 import { 
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
@@ -29,35 +28,26 @@ function showToast(message, isError = false) {
     `;
     
     container.appendChild(toast);
-    
-    // Trigger animation
     setTimeout(() => toast.classList.add("show"), 10);
-    
-    // Remove after 3 seconds
     setTimeout(() => {
         toast.classList.remove("show");
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
 
-// Check for pending toasts on load
 const pendingToast = sessionStorage.getItem("authToast");
 if (pendingToast) {
     showToast(pendingToast);
     sessionStorage.removeItem("authToast");
 }
 
-
 // Listen to auth state
 onAuthStateChanged(auth, async (user) => {
     const isAuthPage = window.location.pathname.includes("login.html") || window.location.pathname.includes("signup.html") || window.location.pathname.includes("verify.html");
     
     if (user) {
-        // If user visits login/signup while already logged in, redirect them
         if (isAuthPage && !sessionStorage.getItem("justAuth")) {
             let isAdmin = false;
-            
-            // Ensure user document exists (handles Google Auth redirect case safely)
             try {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (!userDoc.exists()) {
@@ -71,7 +61,7 @@ onAuthStateChanged(auth, async (user) => {
                     if (data.role === "admin" || data.role === "support") isAdmin = true;
                 }
             } catch(e) {
-                console.error("Error checking/creating user doc:", e);
+                console.error("Error checking user doc:", e);
             }
             
             if (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com") {
@@ -85,145 +75,61 @@ onAuthStateChanged(auth, async (user) => {
             }
         }
         
-        // If on a main page with navbar, update the navbar to show Profile
         const navLinks = document.querySelector(".nav-links");
         if (navLinks && !isAuthPage) {
-            // Default to email name or 'Profile'
             let displayName = user.email.split('@')[0];
-            
-            // Try to fetch full name from Firestore
             try {
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists() && docSnap.data().fullName) {
                     displayName = docSnap.data().fullName;
                 }
-            } catch(e) {
-                console.log("Could not fetch user profile", e);
-            }
+            } catch(e) {}
             
-            // Update UI
-            // Find existing auth buttons
-            const loginBtn = navLinks.querySelector(".btn-secondary, .btn-outline");
-            const signupBtn = navLinks.querySelector(".btn-primary");
+            navLinks.innerHTML = `
+                <a href="index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="#" id="nav-logout-btn" style="color: #ef4444;">Logout (${displayName})</a>
+            `;
             
-            if (loginBtn) loginBtn.style.display = "none";
-            if (signupBtn) signupBtn.style.display = "none";
-            
-            // Check if profile menu already exists to prevent duplicates
-            if (!navLinks.querySelector(".profile-menu")) {
-                const profileMenu = document.createElement("div");
-                profileMenu.className = "profile-menu";
-                const initialLetter = displayName.charAt(0).toUpperCase();
-                profileMenu.innerHTML = `
-                    <button class="profile-btn" id="profile-menu-toggle" type="button" aria-haspopup="true" aria-expanded="false">
-                        <div class="avatar">${initialLetter}</div>
-                        <span class="profile-name">${displayName}</span>
-                        <svg class="profile-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <div class="profile-dropdown" id="profile-dropdown-menu">
-                        <a href="dashboard.html" class="dropdown-item">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                            <span>Dashboard</span>
-                        </a>
-                        <a href="dashboard.html#view-profile" class="dropdown-item" id="nav-profile-link">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                            <span>Profile & Settings</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <button class="dropdown-item danger" id="sign-out-btn" type="button">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                            <span>Sign Out</span>
-                        </button>
-                    </div>
-                `;
-                navLinks.appendChild(profileMenu);
-                
-                // Toggle dropdown on click (especially for mobile tap support)
-                const toggleBtn = profileMenu.querySelector("#profile-menu-toggle");
-                if (toggleBtn) {
-                    toggleBtn.addEventListener("click", (e) => {
-                        e.stopPropagation();
-                        const isOpen = profileMenu.classList.toggle("open");
-                        toggleBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-                    });
-                    
-                    document.addEventListener("click", (e) => {
-                        if (!profileMenu.contains(e.target)) {
-                            profileMenu.classList.remove("open");
-                            toggleBtn.setAttribute("aria-expanded", "false");
-                        }
-                    });
-                }
-                
-                // Route Profile link cleanly to view-profile
-                const profileLink = profileMenu.querySelector("#nav-profile-link");
-                if (profileLink) {
-                    profileLink.addEventListener("click", () => {
-                        sessionStorage.setItem("activeDashboardTab", "view-profile");
-                    });
-                }
-
-                document.getElementById("sign-out-btn").addEventListener("click", async () => {
+            const logoutBtn = document.getElementById("nav-logout-btn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", async (e) => {
+                    e.preventDefault();
                     await signOut(auth);
-                    sessionStorage.setItem("authToast", "Successfully signed out.");
-                    window.location.reload();
+                    window.location.href = "index.html";
                 });
             }
-        }
-    } else {
-        // User is signed out, make sure buttons are visible if on main page
-        const navLinks = document.querySelector(".nav-links");
-        if (navLinks && !isAuthPage) {
-            const loginBtn = navLinks.querySelector(".btn-secondary");
-            const signupBtn = navLinks.querySelector(".btn-primary");
-            if (loginBtn) loginBtn.style.display = "inline-flex";
-            if (signupBtn) signupBtn.style.display = "inline-flex";
-            
-            const profileMenu = navLinks.querySelector(".profile-menu");
-            if (profileMenu) profileMenu.remove();
         }
     }
 });
 
-// Helper to show inline errors on forms
-function showError(message) {
-    let errorDiv = document.getElementById("auth-error");
-    if (!errorDiv) {
-        errorDiv = document.createElement("div");
-        errorDiv.id = "auth-error";
-        errorDiv.style.color = "#ef4444";
-        errorDiv.style.fontSize = "0.9rem";
-        errorDiv.style.marginBottom = "16px";
-        errorDiv.style.textAlign = "center";
-        
-        const formOptions = document.querySelector(".form-options");
-        if (formOptions) {
-            formOptions.parentElement.insertBefore(errorDiv, formOptions);
-        } else {
-            const btn = document.querySelector(".auth-btn");
-            if(btn) btn.parentElement.insertBefore(errorDiv, btn);
-        }
+// Utility to distinguish email from Ghanaian phone number
+function normalizeIdentifier(val) {
+    val = val.trim();
+    if (val.includes("@")) return val;
+    let digits = val.replace(/\D/g, '');
+    if (digits.startsWith("0")) {
+        digits = "233" + digits.substring(1);
     }
-    errorDiv.textContent = message;
+    return `${digits}@phone.trustlink.app`;
 }
 
-// Helper to normalize email or phone number input
-function normalizeIdentifier(input) {
-    input = input.trim();
-    if (input.includes('@')) {
-        return input;
+function showError(msg) {
+    let errDiv = document.querySelector(".auth-error-msg");
+    if (!errDiv) {
+        errDiv = document.createElement("div");
+        errDiv.className = "auth-error-msg";
+        errDiv.style.cssText = "color: #ef4444; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; text-align: center;";
+        const form = document.querySelector(".auth-form");
+        if (form) form.insertBefore(errDiv, form.children[2]);
     }
-    // If no @, treat as phone number, strip non-digits and append domain
-    const normalized = input.replace(/\D/g, '');
-    if (normalized.length > 0) {
-        return `${normalized}@phone.trustlink.app`;
-    }
-    return `${input}@phone.trustlink.app`;
+    errDiv.textContent = msg;
+    errDiv.style.display = "block";
 }
 
-// Handle Signup
-const signupForm = document.querySelector("form.auth-form");
-if (signupForm && window.location.pathname.includes("signup.html")) {
+// Handle Signup Form
+const signupForm = document.getElementById("signup-form");
+if (signupForm) {
     signupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         
@@ -239,19 +145,17 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
         try {
             if (email.endsWith("@phone.trustlink.app")) {
                 const phone = rawEmailOrPhone.replace(/\D/g, '');
-                const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
                 
-                await sendMoolreOTP(phone, generatedOtp);
+                const requestOtp = httpsCallable(functionsApp, 'requestPhoneVerificationOtp');
+                await requestOtp({ phone });
                 
-                // Store pending data and redirect
                 sessionStorage.setItem("pendingSignup", JSON.stringify({
                     type: "phone",
-                    name, email, rawEmailOrPhone, password, otp: generatedOtp
+                    name, email, rawEmailOrPhone, password
                 }));
                 window.location.href = "verify.html";
                 return;
             } else {
-                // Email signup
                 sessionStorage.setItem("justAuth", "true");
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
@@ -262,38 +166,33 @@ if (signupForm && window.location.pathname.includes("signup.html")) {
                     await sendEmailVerification(user);
                 }
                 
-                // Store additional user data in Firestore
                 await setDoc(doc(db, "users", user.uid), {
                     fullName: name,
                     email: email,
                     originalIdentifier: rawEmailOrPhone,
                     createdAt: new Date(),
-                    emailVerified: isAdmin ? true : false,
-                    role: isAdmin ? "admin" : "user"
+                    phoneVerified: false
                 });
 
+                sessionStorage.setItem("authToast", "Account created successfully!");
                 if (isAdmin) {
                     window.location.href = "admin-dashboard.html";
-                    return;
+                } else {
+                    window.location.href = "dashboard.html";
                 }
-
-                // Store pending state for redirect
-                sessionStorage.setItem("pendingSignup", JSON.stringify({ type: "email" }));
-                window.location.href = "verify.html";
-                return;
             }
         } catch (error) {
-            showError(error.message);
+            console.error("Signup error:", error);
+            showError(error.message || "Failed to create account.");
             btn.disabled = false;
-            btn.textContent = "SIGN UP";
-            sessionStorage.removeItem("justAuth");
+            btn.textContent = "Create account";
         }
     });
 }
 
-// Handle Login
-const loginForm = document.querySelector("form.auth-form");
-if (loginForm && window.location.pathname.includes("login.html")) {
+// Handle Login Form
+const loginForm = document.getElementById("login-form");
+if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         
@@ -305,118 +204,89 @@ if (loginForm && window.location.pathname.includes("login.html")) {
         btn.disabled = true;
         btn.textContent = "SIGNING IN...";
 
-        // Guard against a request that never resolves (slow network / Firestore
-        // stall) - don't leave the button stuck on "SIGNING IN..." forever.
-        const withTimeout = (promise, ms, label) => Promise.race([
-            promise,
-            new Promise((_, reject) => setTimeout(() => reject(new Error(label)), ms))
-        ]);
-
         try {
             sessionStorage.setItem("justAuth", "true");
-            const userCredential = await withTimeout(
-                signInWithEmailAndPassword(auth, email, password),
-                20000,
-                "Sign-in timed out. Please check your connection and try again."
-            );
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            sessionStorage.setItem("authToast", "Successfully signed in! Welcome back.");
+            let isAdmin = (email === "admin@trustlink.com" || email === "test@trustlink.com");
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    if (data.role === "admin" || data.role === "support") isAdmin = true;
+                }
+            } catch(e) {}
 
-            let isAdmin = false;
-            if (window.location.pathname.includes("admin-login")) {
-                // Skip the extra role lookup: go straight to the admin dashboard,
-                // which validates the role itself and kicks out non-admins.
-                isAdmin = true;
-            } else if (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com") {
-                isAdmin = true;
-            } else {
-                try {
-                    const userDoc = await withTimeout(getDoc(doc(db, "users", user.uid)), 5000, "role lookup timed out");
-                    if (userDoc.exists()) {
-                        const data = userDoc.data();
-                        if (data.role === "admin" || data.role === "support") isAdmin = true;
-                    }
-                } catch(e) { /* default to the regular dashboard */ }
-            }
-
-            sessionStorage.removeItem("justAuth");
+            sessionStorage.setItem("authToast", "Welcome back!");
             if (isAdmin) {
                 window.location.href = "admin-dashboard.html";
             } else {
                 window.location.href = "dashboard.html";
             }
         } catch (error) {
-            const message = (error && error.message && error.message.includes("timed out"))
-                ? error.message
-                : "Invalid email or password.";
-            showError(message);
+            console.error("Login error:", error);
+            showError("Invalid login credentials. Please check email/phone and password.");
             btn.disabled = false;
-            btn.textContent = "SIGN IN";
-            sessionStorage.removeItem("justAuth");
+            btn.textContent = "Sign in";
         }
     });
 }
 
-// Handle Google Auth
-const googleBtn = document.getElementById("google-auth-btn");
+// Handle Google Sign In
+const googleBtn = document.getElementById("google-signin-btn");
 if (googleBtn) {
     googleBtn.addEventListener("click", async () => {
+        const provider = new GoogleAuthProvider();
         try {
-            googleBtn.disabled = true;
-            googleBtn.innerHTML = "Please wait...";
-            
-            // Set justAuth before to prevent onAuthStateChanged from firing a redirect early
             sessionStorage.setItem("justAuth", "true");
-            
-            const provider = new GoogleAuthProvider();
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            let isAdmin = (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com");
+            if (!userSnap.exists()) {
+                await setDoc(userRef, {
+                    fullName: user.displayName,
+                    email: user.email,
+                    createdAt: new Date(),
+                    photoURL: user.photoURL
+                });
+            } else {
+                const data = userSnap.data();
+                if (data.role === "admin" || data.role === "support") isAdmin = true;
+            }
             
-            // Store or update user in Firestore
-            await setDoc(doc(db, "users", user.uid), {
-                fullName: user.displayName || user.email.split('@')[0],
-                email: user.email,
-                lastLoginAt: new Date()
-            }, { merge: true });
-            
-            sessionStorage.setItem("authToast", `Welcome back, ${user.displayName || 'there'}!`);
-            window.location.href = "dashboard.html";
+            sessionStorage.setItem("authToast", "Signed in with Google!");
+            if (isAdmin) {
+                window.location.href = "admin-dashboard.html";
+            } else {
+                window.location.href = "dashboard.html";
+            }
         } catch (error) {
-            console.error(error);
-            showError(error.message);
-            googleBtn.disabled = false;
-            sessionStorage.removeItem("justAuth");
-            // The text differs slightly between login/signup but this is fine as a generic reset
-            googleBtn.innerHTML = '<img src="img/google.svg" alt="Google" class="google-icon"> Continue with Google';
+            console.error("Google Auth error:", error);
+            showError("Google Sign-In failed. Please try again.");
         }
     });
 }
 
 // Handle Password Reset
-const resetForm = document.querySelector("form.reset-form");
-if (resetForm && window.location.pathname.includes("reset-password.html")) {
+const resetForm = document.getElementById("reset-form");
+if (resetForm) {
     resetForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        
-        const rawEmailOrPhone = document.getElementById("reset-email").value;
-        const email = normalizeIdentifier(rawEmailOrPhone);
+        const email = document.getElementById("email").value;
         const btn = document.querySelector(".auth-btn");
-
         btn.disabled = true;
         btn.textContent = "SENDING...";
 
         try {
             await sendPasswordResetEmail(auth, email);
-            sessionStorage.setItem("authToast", "Password reset email sent! Check your inbox.");
-            window.location.href = "login.html";
+            showToast("Password reset link sent to your email!");
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 2000);
         } catch (error) {
-            let msg = "Failed to send reset email. Please try again.";
-            if (error.code === 'auth/user-not-found') {
-                msg = "No account found with this email address or phone number.";
-            } else if (error.code === 'auth/invalid-email') {
-                msg = "Please enter a valid email address or phone number.";
-            }
-            showError(msg);
+            showError(error.message);
             btn.disabled = false;
             btn.textContent = "SEND RESET LINK";
         }
@@ -440,7 +310,7 @@ if (verifyForm && window.location.pathname.includes("verify.html")) {
         if (pendingData.type === "phone") {
             phoneSection.style.display = "block";
             title.textContent = "Verify Phone Number";
-            subtitle.textContent = `We sent a 4-digit code to ${pendingData.rawEmailOrPhone}.`;
+            subtitle.textContent = `We sent a 6-digit verification code via SMS to ${pendingData.rawEmailOrPhone}.`;
             
             const verifyBtn = document.getElementById("verify-otp-btn");
             const otpInput = document.getElementById("otp-input");
@@ -448,11 +318,18 @@ if (verifyForm && window.location.pathname.includes("verify.html")) {
 
             verifyBtn.addEventListener("click", async (e) => {
                 e.preventDefault();
-                if (otpInput.value === pendingData.otp) {
-                    verifyBtn.disabled = true;
-                    verifyBtn.textContent = "VERIFYING...";
-                    
-                    try {
+                verifyBtn.disabled = true;
+                verifyBtn.textContent = "VERIFYING...";
+                otpError.style.display = "none";
+
+                try {
+                    const verifyOtp = httpsCallable(functionsApp, 'verifyPhoneVerificationOtp');
+                    const res = await verifyOtp({
+                        phone: pendingData.rawEmailOrPhone,
+                        otpCode: otpInput.value.trim()
+                    });
+
+                    if (res.data && res.data.verified) {
                         sessionStorage.setItem("justAuth", "true");
                         const userCredential = await createUserWithEmailAndPassword(auth, pendingData.email, pendingData.password);
                         const user = userCredential.user;
@@ -468,41 +345,30 @@ if (verifyForm && window.location.pathname.includes("verify.html")) {
                         sessionStorage.removeItem("pendingSignup");
                         sessionStorage.setItem("authToast", "Phone verified! Account created successfully.");
                         window.location.href = "dashboard.html";
-                    } catch (error) {
-                        showError(error.message);
-                        verifyBtn.disabled = false;
-                        verifyBtn.textContent = "VERIFY CODE";
+                    } else {
+                        throw new Error("Verification failed.");
                     }
-                } else {
+                } catch (error) {
+                    console.error("OTP verification error:", error);
+                    otpError.textContent = error.message || "Invalid code. Please try again.";
                     otpError.style.display = "block";
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = "VERIFY CODE";
                 }
             });
 
-        } else if (pendingData.type === "email") {
+            document.getElementById("cancel-verify").addEventListener("click", () => {
+                sessionStorage.removeItem("pendingSignup");
+            });
+
+        } else {
             emailSection.style.display = "block";
-            title.textContent = "Verify Email Address";
-            subtitle.style.display = "none";
-            
-            const checkEmailBtn = document.getElementById("check-email-btn");
-            checkEmailBtn.addEventListener("click", async (e) => {
-                e.preventDefault();
-                checkEmailBtn.disabled = true;
-                checkEmailBtn.textContent = "CHECKING...";
-                
-                if (auth.currentUser) {
-                    await auth.currentUser.reload();
-                    if (auth.currentUser.emailVerified) {
-                        sessionStorage.removeItem("pendingSignup");
-                        sessionStorage.setItem("authToast", "Email verified! Account created successfully.");
-                        window.location.href = "dashboard.html";
-                    } else {
-                        showError("Email not verified yet. Please check your inbox and click the link.");
-                        checkEmailBtn.disabled = false;
-                        checkEmailBtn.textContent = "I'VE VERIFIED MY EMAIL";
-                    }
-                } else {
-                    window.location.href = "login.html";
-                }
+            title.textContent = "Verify Your Email";
+            subtitle.textContent = `Check your inbox for ${pendingData.email}.`;
+
+            document.getElementById("check-email-btn").addEventListener("click", () => {
+                sessionStorage.setItem("authToast", "Please login once you've clicked the email link.");
+                window.location.href = "login.html";
             });
         }
     }
