@@ -78,6 +78,18 @@ if (btnSettingsNav) {
     });
 }
 
+// Topbar gear icon → open Profile view
+const btnTopbarSettings = document.getElementById('btn-topbar-settings');
+if (btnTopbarSettings) {
+    btnTopbarSettings.addEventListener('click', () => {
+        const profileNavItem = document.querySelector('.nav-item[data-target="view-profile"]');
+        if (profileNavItem) {
+            profileNavItem.click();
+        }
+    });
+}
+
+
 // Auto-switch tab based on URL hash or sessionStorage
 const handleInitialTabRouting = () => {
     const hash = window.location.hash ? window.location.hash.replace('#', '') : null;
