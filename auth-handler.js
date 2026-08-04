@@ -6,6 +6,8 @@ import {
     signOut,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     sendPasswordResetEmail,
     sendEmailVerification,
     setPersistence,
@@ -253,46 +255,87 @@ if (loginForm) {
     });
 }
 
+// Helper to finalize Google user sign in
+async function processGoogleUser(user, rememberMe = true) {
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+    let isAdmin = (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com");
+    if (!userSnap.exists()) {
+        await setDoc(userRef, {
+            fullName: user.displayName || (user.email ? user.email.split('@')[0] : 'User'),
+            email: user.email,
+            createdAt: new Date(),
+            photoURL: user.photoURL || ''
+        });
+    } else {
+        const data = userSnap.data();
+        if (data.role === "admin" || data.role === "support") isAdmin = true;
+    }
+    
+    startUserSession({ rememberMe, userType: isAdmin ? 'admin' : 'user' });
+
+    sessionStorage.setItem("authToast", "Signed in with Google!");
+    if (isAdmin) {
+        window.location.href = "admin-dashboard.html";
+    } else {
+        window.location.href = "dashboard.html";
+    }
+}
+
 // Handle Google Sign In
 const googleBtn = document.getElementById("google-signin-btn") || document.getElementById("google-auth-btn");
 if (googleBtn) {
-    googleBtn.addEventListener("click", async () => {
+    googleBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
         const provider = new GoogleAuthProvider();
-        const rememberMe = document.getElementById("remember-me")?.checked === true;
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const rememberMe = document.getElementById("remember-me")?.checked !== false;
+        
+        sessionStorage.setItem("justAuth", "true");
+        
         try {
-            sessionStorage.setItem("justAuth", "true");
-            
-            // Set persistence explicitly based on Remember Me choice
-            await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
-
+            // Trigger popup IMMEDIATELY to avoid browser popup blockers
             const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-            let isAdmin = (user.email === "admin@trustlink.com" || user.email === "test@trustlink.com");
-            if (!userSnap.exists()) {
-                await setDoc(userRef, {
-                    fullName: user.displayName,
-                    email: user.email,
-                    createdAt: new Date(),
-                    photoURL: user.photoURL
-                });
-            } else {
-                const data = userSnap.data();
-                if (data.role === "admin" || data.role === "support") isAdmin = true;
-            }
             
-            startUserSession({ rememberMe, userType: isAdmin ? 'admin' : 'user' });
-
-            sessionStorage.setItem("authToast", "Signed in with Google!");
-            if (isAdmin) {
-                window.location.href = "admin-dashboard.html";
-            } else {
-                window.location.href = "dashboard.html";
+            // Set persistence in background
+            setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence).catch(() => {});
+            
+            if (result && result.user) {
+                await processGoogleUser(result.user, rememberMe);
             }
         } catch (error) {
-            console.error("Google Auth error:", error);
-            showError("Google Sign-In failed. Please try again.");
+            console.warn("Google Auth popup event:", error.code, error.message);
+            
+            // User manually closed the popup
+            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+                return;
+            }
+            
+            // If popup was blocked or unsupported, fallback to redirect
+            if (error.code === 'auth/popup-blocked' || error.code === 'auth/operation-not-supported-in-this-environment') {
+                try {
+                    await signInWithRedirect(auth, provider);
+                    return;
+                } catch (redirectErr) {
+                    console.error("Google Auth redirect error:", redirectErr);
+                }
+            }
+            
+            showError(error.message || "Google Sign-In failed. Please try again.");
+        }
+    });
+}
+
+// Check for redirect result on auth pages (handles mobile redirect sign-ins)
+if (window.location.pathname.includes("login.html") || window.location.pathname.includes("signup.html")) {
+    getRedirectResult(auth).then(async (result) => {
+        if (result && result.user) {
+            sessionStorage.setItem("justAuth", "true");
+            await processGoogleUser(result.user, true);
+        }
+    }).catch((err) => {
+        if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+            console.warn("Google redirect check:", err);
         }
     });
 }
