@@ -948,10 +948,13 @@ Protected by TrustLink Escrow Ghana`;
         // Background API trigger if available
         if (phone && phone.replace(/[^0-9]/g, '').length >= 9) {
             try {
-                sendWhatsAppNotification(phone, checkoutUrl, escrowId, "", {
+                sendWhatsAppNotification({
+                    to: phone,
                     description: item,
-                    amount: escrow.amount,
-                    sellerName: seller
+                    amount: escrow.amount || escrow.totalAmount || 0,
+                    sellerName: seller,
+                    checkoutUrl: checkoutUrl,
+                    escrowId: escrowId
                 }).catch(waErr => console.warn("Background WhatsApp API call notice:", waErr));
             } catch (e) {}
         }

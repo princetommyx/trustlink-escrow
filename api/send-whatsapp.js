@@ -30,6 +30,8 @@ export default async function handler(req, res) {
     let cleanNumber = String(to).replace(/[^\d]/g, '');
     if (cleanNumber.startsWith('0') && cleanNumber.length === 10) {
       cleanNumber = '233' + cleanNumber.slice(1);
+    } else if (cleanNumber.length === 9 && !cleanNumber.startsWith('233')) {
+      cleanNumber = '233' + cleanNumber;
     }
 
     const formattedAmount = Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -51,7 +53,10 @@ ${payLink}
 
 🛡️ _Your money remains safe in TrustLink Escrow and will only be released when you receive and approve your item._`;
 
-    const metaResponse = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+    const directWhatsAppUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(messageText)}`;
+
+    // Try sending rich text message first
+    let metaResponse = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -69,12 +74,66 @@ ${payLink}
       })
     });
 
-    const data = await metaResponse.json();
+    let data = await metaResponse.json();
+
+    // If text message fails due to 24-hr window (#131047), try sending template
+    if (!metaResponse.ok && (data.error?.code === 131047 || data.error?.code === 131030 || data.error?.code === 100)) {
+      console.log('Attempting template message fallback for:', cleanNumber);
+      
+      const templateResponse = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to: cleanNumber,
+          type: 'template',
+          template: {
+            name: 'trustlink_escrow_invoice',
+            language: { code: 'en_US' },
+            components: [
+              {
+                type: 'body',
+                parameters: [
+                  { type: 'text', text: creator },
+                  { type: 'text', text: orderTitle },
+                  { type: 'text', text: formattedAmount },
+                  { type: 'text', text: escrowId || 'N/A' }
+                ]
+              },
+              {
+                type: 'button',
+                sub_type: 'url',
+                index: '0',
+                parameters: [
+                  { type: 'text', text: escrowId || '' }
+                ]
+              }
+            ]
+          }
+        })
+      });
+
+      const templateData = await templateResponse.json();
+      if (templateResponse.ok) {
+        return res.status(200).json({
+          success: true,
+          messageId: templateData.messages?.[0]?.id,
+          type: 'template',
+          directWhatsAppUrl,
+          data: templateData
+        });
+      }
+    }
 
     if (!metaResponse.ok) {
       console.error('Meta WhatsApp API Error:', data);
       return res.status(metaResponse.status).json({ 
         error: data.error?.message || 'Failed to send WhatsApp message', 
+        errorCode: data.error?.code,
+        directWhatsAppUrl,
         details: data 
       });
     }
@@ -82,6 +141,8 @@ ${payLink}
     return res.status(200).json({ 
       success: true, 
       messageId: data.messages?.[0]?.id, 
+      type: 'text',
+      directWhatsAppUrl,
       data 
     });
   } catch (error) {
