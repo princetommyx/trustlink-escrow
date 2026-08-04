@@ -76,7 +76,39 @@ const authenticateApi = async (req, res, next) => {
         console.error('Auth Error in API middleware');
         res.status(500).json({ error: 'Internal Server Error' });
     }
-};
+// ------------------------------------------------------------------
+// Meta WhatsApp Cloud API Webhook Verification & Receiver
+// ------------------------------------------------------------------
+const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'trustlink_secret_token_2026';
+
+// Meta Webhook Challenge Verification (GET)
+app.get(['/webhook/whatsapp', '/api/webhook/whatsapp', '/webhook', '/api/webhook'], (req, res) => {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode === 'subscribe' && token === WHATSAPP_VERIFY_TOKEN) {
+        console.log('WhatsApp Webhook verified successfully by Meta');
+        return res.status(200).send(challenge);
+    } else {
+        console.warn('WhatsApp Webhook verification failed. Received token:', token);
+        return res.status(403).json({ error: 'Verification token mismatch' });
+    }
+});
+
+// Meta Webhook Event Notifications (POST)
+app.post(['/webhook/whatsapp', '/api/webhook/whatsapp', '/webhook', '/api/webhook'], async (req, res) => {
+    const body = req.body;
+    
+    // Check if this is a WhatsApp API event
+    if (body.object === 'whatsapp_business_account' || body.entry) {
+        console.log('Received WhatsApp Webhook Event:', JSON.stringify(body, null, 2));
+        // Return 200 OK fast to acknowledge receipt to Meta
+        return res.status(200).send('EVENT_RECEIVED');
+    }
+
+    return res.status(404).send('Not Found');
+});
 
 // Create a new Escrow via API
 app.post('/v1/escrows', authenticateApi, async (req, res) => {
