@@ -334,3 +334,14 @@ body.auth-page {
 .auth-switch a:hover {
     text-decoration: underline;
 }
+
+@keyframes socialBtnPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+    50% { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.social-btn.loading-pulse {
+    animation: socialBtnPulse 1.4s infinite ease-in-out;
+    border-color: var(--primary) !important;
+}

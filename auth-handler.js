@@ -17,28 +17,87 @@ import {
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { startUserSession, clearUserSession } from "./session-manager.js";
 
-// Global Toast Function
-function showToast(message, isError = false) {
-    let container = document.querySelector(".toast-container");
+// Helper for XSS safe text escaping
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Global Modern Toast Function for Auth Pages
+export function showModernToast(title, message = "", type = "success") {
+    if (message === "success" || message === "warning" || message === "error" || message === "info") {
+        type = message;
+        message = "";
+    }
+
+    let container = document.getElementById("modern-toast-container");
     if (!container) {
         container = document.createElement("div");
-        container.className = "toast-container";
+        container.id = "modern-toast-container";
         document.body.appendChild(container);
     }
-    
+
     const toast = document.createElement("div");
-    toast.className = `toast ${isError ? 'toast-error' : ''}`;
-    toast.innerHTML = `
-        <span style="font-size: 20px;">${isError ? '❌' : '✅'}</span>
-        <div>${message}</div>
-    `;
+    toast.className = `modern-toast modern-toast-${type}`;
     
+    let iconSvg = '';
+    if (type === "success") {
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px; color: #10B981;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+    } else if (type === "info") {
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px; color: #3B82F6;"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>`;
+    } else if (type === "warning") {
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px; color: #F59E0B;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+    } else if (type === "error") {
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px; color: #EF4444;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+    }
+
+    const messageHtml = message ? `<p>${escapeHtml(message)}</p>` : '';
+
+    toast.innerHTML = `
+        <div class="modern-toast-icon">${iconSvg}</div>
+        <div class="modern-toast-content">
+            <h4>${escapeHtml(title)}</h4>
+            ${messageHtml}
+        </div>
+        <button class="modern-toast-close" type="button" aria-label="Close notification">&times;</button>
+        <div class="modern-toast-progress"></div>
+    `;
+
+    const closeBtn = toast.querySelector(".modern-toast-close");
+    if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+            toast.classList.remove("show");
+            toast.classList.add("hide");
+            setTimeout(() => { if (toast.parentElement) toast.remove(); }, 400);
+        });
+    }
+
     container.appendChild(toast);
-    setTimeout(() => toast.classList.add("show"), 10);
+
+    requestAnimationFrame(() => {
+        toast.classList.add("show");
+    });
+
     setTimeout(() => {
-        toast.classList.remove("show");
-        setTimeout(() => toast.remove(), 300);
-    }, 3500);
+        if (toast.parentElement) {
+            toast.classList.remove("show");
+            toast.classList.add("hide");
+            setTimeout(() => {
+                if (toast.parentElement) toast.remove();
+            }, 400);
+        }
+    }, 4500);
+}
+window.showModernToast = showModernToast;
+
+// Global Toast Function (backwards compatibility)
+function showToast(message, isError = false) {
+    showModernToast(isError ? "Error" : "Notice", message, isError ? "error" : "success");
 }
 
 const pendingToast = sessionStorage.getItem("authToast");
@@ -287,6 +346,22 @@ const googleBtn = document.getElementById("google-signin-btn") || document.getEl
 if (googleBtn) {
     googleBtn.addEventListener("click", async (e) => {
         e.preventDefault();
+        
+        // Immediate user feedback: Toast + Button Loading state
+        showModernToast("Connecting to Google...", "Opening Google Sign-In popup. Please select your Google account.", "info");
+        
+        const origContent = googleBtn.innerHTML;
+        googleBtn.style.pointerEvents = "none";
+        googleBtn.style.opacity = "0.75";
+        googleBtn.classList.add("loading-pulse");
+
+        const resetBtn = () => {
+            googleBtn.style.pointerEvents = "auto";
+            googleBtn.style.opacity = "1";
+            googleBtn.classList.remove("loading-pulse");
+            googleBtn.innerHTML = origContent;
+        };
+
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         const rememberMe = document.getElementById("remember-me")?.checked !== false;
@@ -301,18 +376,24 @@ if (googleBtn) {
             setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence).catch(() => {});
             
             if (result && result.user) {
+                showModernToast("Signed in with Google! 🎉", "Welcome! Redirecting to your dashboard...", "success");
                 await processGoogleUser(result.user, rememberMe);
+            } else {
+                resetBtn();
             }
         } catch (error) {
             console.warn("Google Auth popup event:", error.code, error.message);
+            resetBtn();
             
             // User manually closed the popup
             if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+                showModernToast("Sign-In Cancelled", "Google Sign-In was closed. Tap Google icon again to retry.", "info");
                 return;
             }
             
             // If popup was blocked or unsupported, fallback to redirect
             if (error.code === 'auth/popup-blocked' || error.code === 'auth/operation-not-supported-in-this-environment') {
+                showModernToast("Redirecting to Google...", "Popup was blocked by your browser. Redirecting you to Google...", "info");
                 try {
                     await signInWithRedirect(auth, provider);
                     return;
@@ -321,6 +402,7 @@ if (googleBtn) {
                 }
             }
             
+            showModernToast("Sign-In Failed", error.message || "Google Sign-In failed. Please try again.", "error");
             showError(error.message || "Google Sign-In failed. Please try again.");
         }
     });
