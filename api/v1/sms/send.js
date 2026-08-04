@@ -49,8 +49,14 @@ export default async function handler(req, res) {
         })
       });
       const data = await moolreRes.json().catch(() => ({}));
-      if (moolreRes.ok) {
+      if (moolreRes.ok && (data.status === 1 || data.success || data.code === 200 || !data.error)) {
         return res.status(200).json({ success: true, provider: 'moolre', data });
+      } else {
+        return res.status(moolreRes.status || 400).json({ 
+          error: data.message || data.error || 'Moolre SMS delivery rejected', 
+          provider: 'moolre', 
+          details: data 
+        });
       }
     }
 
