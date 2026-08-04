@@ -862,24 +862,37 @@ window.notifyBuyerViaSMS = async (escrowId) => {
 
         if (cleanDigits.length >= 9) {
             const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
-            if (typeof showModernToast === 'function') {
-                showModernToast("Sending SMS... ⏳", `Dispatching payment link SMS to ${phone}`, "info");
-            }
+            const formattedAmount = Number(escrow.amount || escrow.totalAmount || 0).toFixed(2);
+            const orderTitle = escrow.description || escrow.productName || "Order #" + escrowId.substring(0, 8);
+            const seller = escrow.sellerName || (currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink Seller");
+            const smsMessage = `TrustLink: ${seller} created an escrow for ${orderTitle} (GH₵ ${formattedAmount}). Pay securely at: ${checkoutUrl}`;
+
+            const intlPhone = cleanDigits.startsWith('0') ? ('233' + cleanDigits.slice(1)) : cleanDigits;
+            const smsUri = `sms:${intlPhone}?&body=${encodeURIComponent(smsMessage)}`;
+
             const smsDetails = {
-                description: escrow.description || escrow.productName || "Order #" + escrowId.substring(0, 8),
+                description: orderTitle,
                 amount: escrow.amount || escrow.totalAmount || 0,
-                sellerName: escrow.sellerName || (currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink Seller")
+                sellerName: seller
             };
+
+            // Attempt cloud SMS API dispatch first
             try {
-                await sendSMSNotification(phone, checkoutUrl, escrowId, "", smsDetails);
-                if (typeof showModernToast === 'function') {
-                    showModernToast("SMS Sent! 📱", `Payment link successfully sent to ${phone}.`, "success");
+                const res = await sendSMSNotification(phone, checkoutUrl, escrowId, smsMessage, smsDetails);
+                if (res && res.success) {
+                    if (typeof showModernToast === 'function') {
+                        showModernToast("SMS Sent! 📱", `Payment link delivered to ${phone}.`, "success");
+                    }
+                    return;
                 }
             } catch (smsErr) {
-                console.error("SMS notification failed:", smsErr);
-                if (typeof showModernToast === 'function') {
-                    showModernToast("SMS Delivery Notice", smsErr.message || "Could not dispatch SMS. You can share via WhatsApp or Copy Link.", "warning");
-                }
+                console.warn("Cloud SMS dispatch notice:", smsErr);
+            }
+
+            // Direct native SMS trigger fallback for guaranteed immediate delivery on phones
+            window.location.href = smsUri;
+            if (typeof showModernToast === 'function') {
+                showModernToast("Opening Messages 📱", `SMS invoice ready to send to ${phone}.`, "info");
             }
         } else {
             window.openNotifyModal(escrow);
