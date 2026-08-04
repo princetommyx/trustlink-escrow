@@ -2,7 +2,7 @@ import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { generateSecureToken, sha256Hex, computeFeeSplit, pickUserPhone, normalizePhone } from "./moolre-service.js";
+import { generateSecureToken, sha256Hex, computeFeeSplit, pickUserPhone, normalizePhone, sendWhatsAppNotification } from "./moolre-service.js";
 import { initSessionTracker, clearUserSession } from "./session-manager.js";
 
 let currentUser = null;
@@ -1946,8 +1946,27 @@ if (formNewEscrow) {
                 showModernToast("Escrow Created! 📋", "Checkout link copied to clipboard.", "success");
             }
 
-            // 5. Send SMS Notification Asynchronously in Background (Non-Blocking)
+            // 5. Send WhatsApp & SMS Notifications Asynchronously in Background (Non-Blocking)
             if (buyerPhone) {
+                // Send Automated WhatsApp Payment Notification
+                sendWhatsAppNotification({
+                    to: buyerPhone,
+                    description: description,
+                    amount: totalAmount,
+                    sellerName: newEscrow.sellerName,
+                    checkoutUrl: checkoutUrl,
+                    escrowId: escrowId
+                }).then((res) => {
+                    if (res && res.success) {
+                        if (typeof showModernToast === 'function') {
+                            showModernToast("WhatsApp Sent! 💬", `Payment invoice sent to ${buyerPhone}.`, "info");
+                        }
+                    }
+                }).catch((waError) => {
+                    console.warn("Background WhatsApp notification notice:", waError);
+                });
+
+                // Send SMS Notification
                 const smsDetails = {
                     description: description,
                     amount: totalAmount,
@@ -2604,11 +2623,27 @@ if (btnNotifyWhatsAppModal) {
     btnNotifyWhatsAppModal.addEventListener('click', async () => {
         const escrowId = document.getElementById('notify-escrow-id').value;
         const phone = document.getElementById('notify-buyer-phone').value.trim();
+        let escrow = allLoadedSellerEscrows.find(e => e.id === escrowId);
+
         if (phone && phone.replace(/[^0-9]/g, '').length >= 9) {
             try {
                 await updateDoc(doc(db, "escrows", escrowId), { buyerPhone: phone });
-                let escrow = allLoadedSellerEscrows.find(e => e.id === escrowId);
                 if (escrow) escrow.buyerPhone = phone;
+
+                // Dispatch automated WhatsApp notification via API
+                const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
+                sendWhatsAppNotification({
+                    to: phone,
+                    description: escrow ? (escrow.description || escrow.productName) : "Order #" + escrowId.substring(0, 8),
+                    amount: escrow ? (escrow.amount || escrow.totalAmount) : 0,
+                    sellerName: escrow ? escrow.sellerName : (currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink Seller"),
+                    checkoutUrl: checkoutUrl,
+                    escrowId: escrowId
+                }).then(res => {
+                    if (res && res.success && typeof showModernToast === 'function') {
+                        showModernToast("WhatsApp Sent! 💬", `Payment invoice delivered to ${phone}.`, "success");
+                    }
+                }).catch(e => console.warn("WhatsApp modal notify notice:", e));
             } catch (e) {
                 console.warn("Could not save phone to escrow:", e);
             }

@@ -110,3 +110,26 @@ export async function sendMoolreOTP(phone) {
         return { status: 0, message: "Network error requesting verification code." };
     }
 }
+
+/**
+ * Dispatches an automated WhatsApp payment request & checkout link to a customer via Meta WhatsApp Cloud API.
+ */
+export async function sendWhatsAppNotification({ to, description, amount, sellerName, checkoutUrl, escrowId }) {
+    try {
+        const response = await fetch("/api/send-whatsapp", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, description, amount, sellerName, checkoutUrl, escrowId })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            console.warn("WhatsApp dispatch notice:", data.error || data);
+            return { success: false, error: data.error };
+        }
+        return { success: true, messageId: data.messageId };
+    } catch (err) {
+        console.warn("WhatsApp notification network error:", err);
+        return { success: false, error: err.message };
+    }
+}
+
