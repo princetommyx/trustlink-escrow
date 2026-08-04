@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { generateSecureToken, sha256Hex, computeFeeSplit, pickUserPhone, normalizePhone } from "./moolre-service.js";
+import { initSessionTracker, clearUserSession } from "./session-manager.js";
 
 let currentUser = null;
 let currentBalance = 0;
@@ -191,6 +192,9 @@ onAuthStateChanged(auth, async (user) => {
         window.location.href = "admin-dashboard.html";
         return;
     }
+
+    // Initialize session inactivity tracker
+    initSessionTracker({ auth, userType: 'user' });
     
     try {
         onSnapshot(doc(db, "users", user.uid), (docSnap) => {
@@ -1744,6 +1748,7 @@ if (withdrawForm) {
 
 document.getElementById('btn-signout').addEventListener('click', async () => {
     try {
+        clearUserSession();
         await signOut(auth);
         sessionStorage.setItem("authToast", "Logged out successfully");
         window.location.href = "login.html";
@@ -1756,6 +1761,7 @@ const topSignoutBtn = document.getElementById('btn-signout-top');
 if (topSignoutBtn) {
     topSignoutBtn.addEventListener('click', async () => {
         try {
+            clearUserSession();
             await signOut(auth);
             sessionStorage.setItem("authToast", "Logged out successfully");
             window.location.href = "login.html";

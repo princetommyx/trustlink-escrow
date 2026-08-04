@@ -1,11 +1,13 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initSessionTracker } from "./session-manager.js";
 
 // --- Authentication (Optional for viewing docs) ---
 let currentApiKey = '';
 onAuthStateChanged(auth, async (user) => {
     if (user) {
+        initSessionTracker({ auth, userType: 'user' });
         try {
             const userDoc = await getDoc(doc(db, "users", user.uid));
             if (userDoc.exists()) {

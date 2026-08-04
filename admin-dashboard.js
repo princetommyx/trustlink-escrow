@@ -3,6 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { onAuthStateChanged, signOut, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { pickUserPhone, computeFeeSplit } from "./moolre-service.js";
+import { initSessionTracker, clearUserSession } from "./session-manager.js";
 
 // Navigation Logic
 const navItems = document.querySelectorAll('.nav-item');
@@ -130,6 +131,9 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById('user-name').textContent = 'Admin (' + user.email.split('@')[0] + ')';
     }
 
+    // Initialize session inactivity tracker for admin (15m idle)
+    initSessionTracker({ auth, userType: 'admin' });
+
     // Now that we are verified as an admin, fetch the dashboard data
     fetchAdminStats();
     await loadUsersList();
@@ -170,6 +174,7 @@ document.getElementById('btn-save-admin-profile')?.addEventListener('click', asy
 
 document.getElementById('btn-signout').addEventListener('click', async () => {
     try {
+        clearUserSession();
         await signOut(auth);
         sessionStorage.setItem("authToast", "Logged out successfully");
         window.location.href = "admin-login.html";
@@ -182,6 +187,7 @@ const topSignoutBtn = document.getElementById('btn-signout-top');
 if (topSignoutBtn) {
     topSignoutBtn.addEventListener('click', async () => {
         try {
+            clearUserSession();
             await signOut(auth);
             sessionStorage.setItem("authToast", "Logged out successfully");
             window.location.href = "admin-login.html";

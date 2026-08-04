@@ -7,9 +7,13 @@ import {
     GoogleAuthProvider,
     signInWithPopup,
     sendPasswordResetEmail,
-    sendEmailVerification
+    sendEmailVerification,
+    setPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { startUserSession, clearUserSession } from "./session-manager.js";
 
 // Global Toast Function
 function showToast(message, isError = false) {
@@ -32,13 +36,15 @@ function showToast(message, isError = false) {
     setTimeout(() => {
         toast.classList.remove("show");
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 3500);
 }
 
 const pendingToast = sessionStorage.getItem("authToast");
+const pendingToastIsError = sessionStorage.getItem("authToastIsError") === "true";
 if (pendingToast) {
-    showToast(pendingToast);
+    showToast(pendingToast, pendingToastIsError);
     sessionStorage.removeItem("authToast");
+    sessionStorage.removeItem("authToastIsError");
 }
 
 // Listen to auth state
@@ -95,6 +101,7 @@ onAuthStateChanged(auth, async (user) => {
             if (logoutBtn) {
                 logoutBtn.addEventListener("click", async (e) => {
                     e.preventDefault();
+                    clearUserSession();
                     await signOut(auth);
                     window.location.href = "index.html";
                 });
@@ -157,6 +164,9 @@ if (signupForm) {
                 return;
             } else {
                 sessionStorage.setItem("justAuth", "true");
+                const rememberMe = document.getElementById("remember-me")?.checked === true;
+                await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 
@@ -173,6 +183,8 @@ if (signupForm) {
                     createdAt: new Date(),
                     phoneVerified: false
                 });
+
+                startUserSession({ rememberMe, userType: isAdmin ? 'admin' : 'user' });
 
                 sessionStorage.setItem("authToast", "Account created successfully!");
                 if (isAdmin) {
@@ -199,6 +211,7 @@ if (loginForm) {
         const rawEmailOrPhone = document.getElementById("email").value;
         const email = normalizeIdentifier(rawEmailOrPhone);
         const password = document.getElementById("password").value;
+        const rememberMe = document.getElementById("remember-me")?.checked === true;
         const btn = document.querySelector(".auth-btn");
 
         btn.disabled = true;
@@ -206,6 +219,10 @@ if (loginForm) {
 
         try {
             sessionStorage.setItem("justAuth", "true");
+            
+            // Set persistence explicitly based on Remember Me choice
+            await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             let isAdmin = (email === "admin@trustlink.com" || email === "test@trustlink.com");
@@ -216,6 +233,8 @@ if (loginForm) {
                     if (data.role === "admin" || data.role === "support") isAdmin = true;
                 }
             } catch(e) {}
+
+            startUserSession({ rememberMe, userType: isAdmin ? 'admin' : 'user' });
 
             sessionStorage.setItem("authToast", "Welcome back!");
             if (isAdmin) {
@@ -233,12 +252,17 @@ if (loginForm) {
 }
 
 // Handle Google Sign In
-const googleBtn = document.getElementById("google-signin-btn");
+const googleBtn = document.getElementById("google-signin-btn") || document.getElementById("google-auth-btn");
 if (googleBtn) {
     googleBtn.addEventListener("click", async () => {
         const provider = new GoogleAuthProvider();
+        const rememberMe = document.getElementById("remember-me")?.checked === true;
         try {
             sessionStorage.setItem("justAuth", "true");
+            
+            // Set persistence explicitly based on Remember Me choice
+            await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
             const userRef = doc(db, "users", user.uid);
@@ -256,6 +280,8 @@ if (googleBtn) {
                 if (data.role === "admin" || data.role === "support") isAdmin = true;
             }
             
+            startUserSession({ rememberMe, userType: isAdmin ? 'admin' : 'user' });
+
             sessionStorage.setItem("authToast", "Signed in with Google!");
             if (isAdmin) {
                 window.location.href = "admin-dashboard.html";
@@ -342,6 +368,7 @@ if (verifyForm && window.location.pathname.includes("verify.html")) {
                             phoneVerified: true
                         });
                         
+                        startUserSession({ rememberMe: false, userType: 'user' });
                         sessionStorage.removeItem("pendingSignup");
                         sessionStorage.setItem("authToast", "Phone verified! Account created successfully.");
                         window.location.href = "dashboard.html";

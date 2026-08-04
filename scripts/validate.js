@@ -34,6 +34,7 @@ const requiredFiles = [
     'legal.css',
     'legal.js',
     'moolre-service.js',
+    'session-manager.js',
     'vendor/gsap.min.js',
     'img/mail-icon.svg',
     'LICENSE',
@@ -77,7 +78,8 @@ const sensitiveJsFiles = [
     'test-moolre.mjs',
     'checkout.js',
     'dashboard.js',
-    'admin-dashboard.js'
+    'admin-dashboard.js',
+    'session-manager.js'
 ];
 
 const secretLiteralsToDisallow = [
