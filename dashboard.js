@@ -791,9 +791,9 @@ window.copyToClipboard = async (text) => {
 
     if (copied) {
         if (typeof showModernToast === 'function') {
-            showModernToast("Link Copied! 📋", "Payment link copied to clipboard. You can now paste and send it to the buyer.", "success");
+            showModernToast("Link Copied!", "Payment link copied to clipboard. You can now paste and send it to the buyer.", "success");
         } else if (typeof window.showModernToast === 'function') {
-            window.showModernToast("Link Copied! 📋", "Payment link copied to clipboard. You can now paste and send it to the buyer.", "success");
+            window.showModernToast("Link Copied!", "Payment link copied to clipboard. You can now paste and send it to the buyer.", "success");
         }
     } else {
         prompt("Copy the payment link below:", text);
@@ -881,7 +881,7 @@ window.notifyBuyerViaSMS = async (escrowId) => {
                 const res = await sendSMSNotification(phone, checkoutUrl, escrowId, smsMessage, smsDetails);
                 if (res && res.success) {
                     if (typeof showModernToast === 'function') {
-                        showModernToast("SMS Sent! 📱", `Payment link delivered to ${phone}.`, "success");
+                        showModernToast("SMS Sent!", `Payment link delivered to ${phone}.`, "success");
                     }
                     return;
                 }
@@ -892,7 +892,7 @@ window.notifyBuyerViaSMS = async (escrowId) => {
             // Direct native SMS trigger fallback for guaranteed immediate delivery on phones
             window.location.href = smsUri;
             if (typeof showModernToast === 'function') {
-                showModernToast("Opening Messages 📱", `SMS invoice ready to send to ${phone}.`, "info");
+                showModernToast("Opening Messages", `SMS invoice ready to send to ${phone}.`, "info");
             }
         } else {
             window.openNotifyModal(escrow);
@@ -990,7 +990,7 @@ window.dispatchItem = async (escrowId) => {
                 try {
                     await sendDeliveryConfirmationSMS(buyerPhone, confirmUrl, escrowId, itemDesc);
                     if (typeof showModernToast === 'function') {
-                        showModernToast("Item Dispatched! 🚚", "The buyer has been sent a private link to confirm delivery.", "success");
+                        showModernToast("Item Dispatched!", "The buyer has been sent a private link to confirm delivery.", "success");
                     }
                 } catch (smsErr) {
                     console.warn("Confirmation SMS failed:", smsErr);
@@ -1058,7 +1058,7 @@ window.releaseFunds = async (escrowId) => {
             });
 
             if (typeof showModernToast === 'function') {
-                showModernToast("Funds Released! 💰", "Thank you for using TrustLink. Funds credited to seller.", "success");
+                showModernToast("Funds Released!", "Thank you for using TrustLink. Funds credited to seller.", "success");
             }
         } catch (error) {
             console.error("Error releasing funds:", error);
@@ -1076,7 +1076,7 @@ window.raiseDispute = async (escrowId) => {
         try {
             await updateDoc(doc(db, "escrows", escrowId), { status: 'DISPUTED' });
             if (typeof showModernToast === 'function') {
-                showModernToast("Dispute Raised ⚠️", "Escrow locked. TrustLink support will review and reach out.", "warning");
+                showModernToast("Dispute Raised", "Escrow locked. TrustLink support will review and reach out.", "warning");
             }
         } catch (error) {
             console.error("Error raising dispute:", error);
@@ -1443,7 +1443,7 @@ async function verifySubmittedOtp(enteredOtp, submitBtn, errorElement, inputElem
         if (resendInterval) clearInterval(resendInterval);
         
         if (typeof showModernToast === 'function') {
-            showModernToast("Phone Verified! 🎉", "Your phone number has been verified successfully.", "success");
+            showModernToast("Phone Verified!", "Your phone number has been verified successfully.", "success");
         }
     } catch (error) {
         console.error("Error saving phone verification:", error);
@@ -1942,7 +1942,7 @@ if (formNewEscrow) {
 
             // 4. Show Instant Success Feedback
             if (typeof showModernToast === 'function') {
-                showModernToast("Escrow Created! 📋", "Checkout link copied to clipboard.", "success");
+                showModernToast("Escrow Created!", "Checkout link copied to clipboard.", "success");
             }
 
             // 5. Send SMS Notification Asynchronously in Background (Non-Blocking)
@@ -2197,12 +2197,25 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Helper to strip any emojis from toast text
+function stripEmojis(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/\p{Extended_Pictographic}/gu, '')
+        .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{2B50}\u{200D}\u{FE0F}]/gu, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 // Modern Toast Notification
 window.showModernToast = function(title, message, type = "success") {
     if (message === "success" || message === "warning" || message === "error" || message === "info") {
         type = message;
         message = "";
     }
+
+    title = stripEmojis(title);
+    message = stripEmojis(message);
 
     let container = document.getElementById("modern-toast-container");
     if (!container) {
@@ -2346,7 +2359,7 @@ if(formNewProd) {
             window.showProductSubView('list');
             
             if (typeof showModernToast === 'function') {
-                showModernToast("Product Added! 🛍️", `"${name}" was added successfully.`, "success");
+                showModernToast("Product Added!", `"${name}" was added successfully.`, "success");
             }
 
             // 4. Background re-sync
@@ -2577,7 +2590,7 @@ if (notifyBuyerForm) {
 
             await sendSMSNotification(phone, checkoutUrl, escrowId, "", smsDetails);
             if (typeof showModernToast === 'function') {
-                showModernToast("SMS Sent! 📱", `Payment link successfully sent to ${phone}.`, "success");
+                showModernToast("SMS Sent!", `Payment link successfully sent to ${phone}.`, "success");
             }
             window.closeNotifyModal();
         } catch (err) {

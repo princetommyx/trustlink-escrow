@@ -1600,7 +1600,18 @@ let currentReportPreset = 'week';
 let currentReportStatus = 'all';
 let currentReportSearch = '';
 
+// Helper to strip any emojis from toast text
+function stripEmojis(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/\p{Extended_Pictographic}/gu, '')
+        .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{2B50}\u{200D}\u{FE0F}]/gu, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 const showAdminToast = (message, type = 'success') => {
+    message = stripEmojis(message);
     let container = document.getElementById('admin-toast-container');
     if (!container) {
         container = document.createElement('div');
@@ -1627,8 +1638,8 @@ const showAdminToast = (message, type = 'success') => {
         transform: translateY(20px);
         opacity: 0;
     `;
-    const icon = type === 'error' ? '⚠️' : (type === 'info' ? 'ℹ️' : '✓');
-    toast.innerHTML = `<span>${icon}</span><span>${escapeHtml(message)}</span>`;
+    const icon = type === 'error' ? '✕' : (type === 'info' ? 'i' : '✓');
+    toast.innerHTML = `<span style="font-weight: 700;">${icon}</span><span>${escapeHtml(message)}</span>`;
     container.appendChild(toast);
 
     requestAnimationFrame(() => {
@@ -2366,7 +2377,7 @@ const exportReportCSV = () => {
     link.click();
     document.body.removeChild(link);
 
-    showAdminToast(`Report exported successfully as ${filename}! 📁`, 'success');
+    showAdminToast(`Report exported successfully as ${filename}!`, 'success');
 };
 
 // Copy Report TSV to Clipboard
@@ -2434,7 +2445,7 @@ const copyReportData = async () => {
     const tsvContent = tsvRows.join("\n");
     try {
         await navigator.clipboard.writeText(tsvContent);
-        showAdminToast("Report data copied to clipboard! Ready to paste in Excel or Sheets 📋", 'success');
+        showAdminToast("Report data copied to clipboard! Ready to paste in Excel or Sheets", 'success');
     } catch (err) {
         showAdminToast("Failed to copy to clipboard: " + err.message, 'error');
     }

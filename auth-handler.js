@@ -28,12 +28,25 @@ function escapeHtml(str) {
         .replace(/'/g, "&#039;");
 }
 
+// Helper to strip any emojis from toast text
+function stripEmojis(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/\p{Extended_Pictographic}/gu, '')
+        .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{2B50}\u{200D}\u{FE0F}]/gu, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 // Global Modern Toast Function for Auth Pages
 export function showModernToast(title, message = "", type = "success") {
     if (message === "success" || message === "warning" || message === "error" || message === "info") {
         type = message;
         message = "";
     }
+
+    title = stripEmojis(title);
+    message = stripEmojis(message);
 
     let container = document.getElementById("modern-toast-container");
     if (!container) {
@@ -376,7 +389,7 @@ if (googleBtn) {
             setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence).catch(() => {});
             
             if (result && result.user) {
-                showModernToast("Signed in with Google! 🎉", "Welcome! Redirecting to your dashboard...", "success");
+                showModernToast("Signed in with Google!", "Welcome! Redirecting to your dashboard...", "success");
                 await processGoogleUser(result.user, rememberMe);
             } else {
                 resetBtn();
