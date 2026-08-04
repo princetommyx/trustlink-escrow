@@ -29,6 +29,7 @@ export default async function handler(req, res) {
 
     const vasKey = process.env.MOOLRE_VAS_KEY;
     const arkeselKey = process.env.ARKESEL_API_KEY;
+    const senderId = process.env.MOOLRE_SENDER_ID || "TrustLink";
 
     // 1. Try Moolre SMS Gateway
     if (vasKey) {
@@ -40,7 +41,7 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           type: 1,
-          senderid: "TrustLink",
+          senderid: senderId,
           messages: [{
             recipient: cleanPhone,
             ref: referenceId || `sms-${Date.now()}`,
