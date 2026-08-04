@@ -112,6 +112,35 @@ export async function sendMoolreOTP(phone) {
 }
 
 /**
+ * Sends transactional SMS notifications to users via server-side SMS gateway.
+ */
+export async function sendEscrowStatusSMS(phone, message, referenceId = "") {
+    try {
+        const response = await fetch("/api/v1/sms/send", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, message, referenceId })
+        });
+        const data = await response.json().catch(() => ({}));
+        return { success: response.ok, data };
+    } catch (err) {
+        console.warn("SMS send network error:", err);
+        return { success: false, error: err.message };
+    }
+}
+
+/**
+ * High-level SMS notification dispatcher with fallback and details support.
+ */
+export async function sendSMSNotification(phone, checkoutUrl, escrowId, customMessage = "", smsDetails = {}) {
+    const formattedAmount = Number(smsDetails.amount || 0).toFixed(2);
+    const orderTitle = smsDetails.description || 'Order';
+    const seller = smsDetails.sellerName || 'TrustLink User';
+    const msg = customMessage || `TrustLink: ${seller} created an escrow for ${orderTitle} (GH₵ ${formattedAmount}). Pay securely at: ${checkoutUrl}`;
+    return sendEscrowStatusSMS(phone, msg, `${escrowId}-create`);
+}
+
+/**
  * Dispatches an automated WhatsApp payment request & checkout link to a customer via Meta WhatsApp Cloud API.
  */
 export async function sendWhatsAppNotification({ to, description, amount, sellerName, checkoutUrl, escrowId }) {
@@ -124,7 +153,7 @@ export async function sendWhatsAppNotification({ to, description, amount, seller
         const data = await response.json();
         if (!response.ok) {
             console.warn("WhatsApp dispatch notice:", data.error || data);
-            return { success: false, error: data.error };
+            return { success: false, error: data.error, details: data.details };
         }
         return { success: true, messageId: data.messageId };
     } catch (err) {
@@ -132,4 +161,5 @@ export async function sendWhatsAppNotification({ to, description, amount, seller
         return { success: false, error: err.message };
     }
 }
+
 
