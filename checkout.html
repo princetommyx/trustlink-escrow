@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth.css">
     <link rel="stylesheet" href="landing.css">
+    <link rel="stylesheet" href="ui-states.css">
     <style>
         body {
             background-color: #FAFAFA;
@@ -407,6 +408,8 @@
         });
     </script>
     
+    <!-- ui-states must load before checkout.js -->
+    <script src="ui-states.js"></script>
     <!-- Firebase & Custom Script -->
     <script type="module" src="checkout.js"></script>
     

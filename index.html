@@ -12,17 +12,42 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="landing.css">
+    <link rel="stylesheet" href="ui-states.css">
     
-    <meta name="description" content="TrustLink Escrow: Protected Mobile Money payment infrastructure for social media vendors and buyers in Ghana. Create secure payment links for DM sales.">
+    <meta name="description" content="TrustLink Escrow: Protected Mobile Money payment infrastructure for social media vendors and buyers in Ghana. Create secure payment links for DM sales on Instagram, WhatsApp, TikTok, and X.">
+    <meta name="keywords" content="TrustLink, TrustLink Escrow, Mobile Money Escrow Ghana, Escrow Service Ghana, MoMo Escrow, Social Media Payment Link Ghana, Vendor Buyer Protection Ghana, Secure DM Payments">
     <link rel="canonical" href="https://www.trustlinkgh.online/">
     <meta property="og:title" content="TrustLink Escrow - Protected Mobile Money Payments for Social Sales">
     <meta property="og:description" content="Create a secure payment link, share it in any DM, and receive your money after the buyer confirms delivery.">
     <meta property="og:url" content="https://www.trustlinkgh.online/">
     <meta property="og:type" content="website">
+    <script type="application/ld+json">
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "TrustLink Escrow",
+        "url": "https://www.trustlinkgh.online/",
+        "logo": "https://www.trustlinkgh.online/img/logo.png",
+        "sameAs": [
+            "https://www.linkedin.com/company/trustlinkescrow/",
+            "https://www.instagram.com/trustlinkescrow?igsh=bnpybzFlNHp3aGVt",
+            "https://www.tiktok.com/@trustlinkescrow?_r=1&_t=ZS-98bbA6OlrSn",
+            "https://www.facebook.com/share/19WoRaHJwp/"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "TrustLink Escrow",
+        "url": "https://www.trustlinkgh.online/"
+      }
+    ]
+    </script>
 </head>
 
 <body class="light-landing">
-    <div class="site-wrapper" style="overflow-x: hidden; width: 100%; position: relative; min-height: 100vh;">
+    <div class="site-wrapper">
     <div class="glow-blob blob-1"></div>
     <div class="glow-blob blob-2" style="bottom: 0; top: auto; right: 0;"></div>
     <div class="glow-blob blob-3" style="top: 40%; left: 10%;"></div>
@@ -236,6 +261,24 @@
                     <img src="img/logo.png" alt="TrustLink Logo" style="height: 56px; width: auto; max-width: 200px; object-fit: contain;">
                 </a>
                 <p>Protected payments for social commerce in Ghana.</p>
+                <nav class="footer-social" aria-label="Follow TrustLink on social media">
+                    <a class="footer-social-link" href="https://www.linkedin.com/company/trustlinkescrow/" target="_blank" rel="noopener noreferrer external" aria-label="TrustLink on LinkedIn">
+                        <img src="img/social/linkedin.svg" alt="" aria-hidden="true" width="19" height="19">
+                        <span class="sr-only">LinkedIn</span>
+                    </a>
+                    <a class="footer-social-link" href="https://www.instagram.com/trustlinkescrow?igsh=bnpybzFlNHp3aGVt" target="_blank" rel="noopener noreferrer external" aria-label="TrustLink on Instagram">
+                        <img src="img/social/instagram.svg" alt="" aria-hidden="true" width="19" height="19">
+                        <span class="sr-only">Instagram</span>
+                    </a>
+                    <a class="footer-social-link" href="https://www.tiktok.com/@trustlinkescrow?_r=1&amp;_t=ZS-98bbA6OlrSn" target="_blank" rel="noopener noreferrer external" aria-label="TrustLink on TikTok">
+                        <img src="img/social/tiktok.svg" alt="" aria-hidden="true" width="19" height="19">
+                        <span class="sr-only">TikTok</span>
+                    </a>
+                    <a class="footer-social-link" href="https://www.facebook.com/share/19WoRaHJwp/" target="_blank" rel="noopener noreferrer external" aria-label="TrustLink on Facebook">
+                        <img src="img/social/facebook.svg" alt="" aria-hidden="true" width="19" height="19">
+                        <span class="sr-only">Facebook</span>
+                    </a>
+                </nav>
             </div>
             <div class="footer-links">
                 <div class="link-group">
@@ -261,6 +304,7 @@
         </div>
     </footer>
 
+    <script src="ui-states.js"></script>
     <script src="script.js"></script>
     <script type="module" src="auth-handler.js"></script>
     </div>

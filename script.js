@@ -17,6 +17,7 @@ const closeMobileMenu = () => {
     if (!navLinks) return;
     navLinks.classList.remove('active');
     if (navBackdrop) navBackdrop.classList.remove('active');
+    document.body.style.overflow = '';
     if (mobileMenuBtn) {
         mobileMenuBtn.classList.remove('active');
         mobileMenuBtn.setAttribute('aria-expanded', 'false');
@@ -32,6 +33,7 @@ const openMobileMenu = () => {
     if (!navLinks) return;
     navLinks.classList.add('active');
     if (navBackdrop) navBackdrop.classList.add('active');
+    document.body.style.overflow = 'hidden';
     if (mobileMenuBtn) {
         mobileMenuBtn.classList.add('active');
         mobileMenuBtn.setAttribute('aria-expanded', 'true');

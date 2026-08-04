@@ -126,6 +126,8 @@ function showError(msg) {
     if (!errDiv) {
         errDiv = document.createElement("div");
         errDiv.className = "auth-error-msg";
+        errDiv.setAttribute("role", "alert");
+        errDiv.setAttribute("aria-live", "assertive");
         errDiv.style.cssText = "color: #ef4444; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; text-align: center;";
         const form = document.querySelector(".auth-form");
         if (form) form.insertBefore(errDiv, form.children[2]);

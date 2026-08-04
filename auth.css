@@ -178,6 +178,15 @@ body.auth-page {
     font-weight: 400;
 }
 
+/* Prevent iOS Safari auto-zoom on input focus (requires >= 16px) */
+@media (max-width: 767px) {
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 16px;
+    }
+}
+
 .password-wrapper {
     position: relative;
     display: flex;
@@ -190,13 +199,31 @@ body.auth-page {
 
 .toggle-password {
     position: absolute;
-    right: 20px;
+    right: 12px;
     background: none;
     border: none;
     color: #9CA3AF;
     font-size: 1rem;
     cursor: pointer;
+    /* WCAG 2.1 AA: minimum 44x44px touch target */
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0;
+    border-radius: 8px;
+    transition: color 0.16s ease;
+}
+
+.toggle-password:hover {
+    color: #374151;
+}
+
+.toggle-password:focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+    color: #374151;
 }
 
 .form-options {

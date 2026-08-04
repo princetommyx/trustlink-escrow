@@ -1,0 +1,792 @@
+/*
+ * ui-states.css — TrustLink Escrow Shared UI State System
+ * Prefix: tl-
+ * Author: TrustLink Engineering
+ * Rules: Never redefine .card, .error, .loading, .btn
+ */
+
+/* ==========================================================================
+   1. Screen-reader utility
+   ========================================================================== */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ==========================================================================
+   2. Social footer links
+   ========================================================================== */
+.footer-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    align-items: center;
+}
+
+.footer-social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    color: #64748B;
+    text-decoration: none;
+    transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.footer-social-link:hover,
+.footer-social-link:focus-visible {
+    color: #2563EB;
+    border-color: #2563EB;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    transform: translateY(-2px);
+    outline: none;
+}
+
+.footer-social-link:active {
+    transform: translateY(0);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+
+.footer-social-link:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.footer-social-link:focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+}
+
+.footer-social-link img {
+    width: 19px;
+    height: 19px;
+    display: block;
+    flex-shrink: 0;
+    /* color via currentColor doesn't work on img elements; icons are inherently colored via SVG fill */
+}
+
+/* Light-theme override for the landing page footer */
+.light-landing .footer-social-link {
+    background: #F8FAFC;
+    border-color: #E2E8F0;
+    color: #64748B;
+}
+
+/* ==========================================================================
+   3. Connectivity Banner
+   ========================================================================== */
+.tl-network-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99997;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    transform: translateY(-100%);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Safe-area support */
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+}
+
+.tl-network-banner.tl-visible {
+    transform: translateY(0);
+}
+
+.tl-network-banner.tl-offline {
+    background: #1E293B;
+    color: #F8FAFC;
+    border-bottom: 1px solid #334155;
+}
+
+.tl-network-banner.tl-reconnected {
+    background: #064E3B;
+    color: #D1FAE5;
+    border-bottom: 1px solid #065F46;
+}
+
+.tl-network-banner-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.tl-network-banner-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    padding: 4px;
+    margin-left: 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    min-height: 28px;
+}
+
+.tl-network-banner-close:hover {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   4. State Container (empty / error / no-results / payment-pending)
+   ========================================================================== */
+.tl-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 24px;
+    gap: 16px;
+    animation: tl-state-enter 0.22s ease-out both;
+}
+
+@keyframes tl-state-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tl-state-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+}
+
+.tl-state-icon svg {
+    width: 32px;
+    height: 32px;
+}
+
+/* Icon variants */
+.tl-state-icon.tl-icon-empty {
+    background: #F1F5F9;
+    color: #94A3B8;
+}
+
+.tl-state-icon.tl-icon-error {
+    background: #FEF2F2;
+    color: #DC2626;
+}
+
+.tl-state-icon.tl-icon-warning {
+    background: #FFFBEB;
+    color: #D97706;
+}
+
+.tl-state-icon.tl-icon-info {
+    background: #EFF6FF;
+    color: #2563EB;
+}
+
+.tl-state-icon.tl-icon-pending {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.tl-state-icon.tl-icon-search {
+    background: #F1F5F9;
+    color: #64748B;
+}
+
+.tl-state-icon.tl-icon-offline {
+    background: #F1F5F9;
+    color: #64748B;
+}
+
+.tl-state-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.tl-state-message {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.9rem;
+    color: #64748B;
+    max-width: 380px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.tl-state-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+/* Action buttons inside states — intentionally different class from .btn */
+.tl-state-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    min-height: 44px;
+}
+
+.tl-state-btn:hover {
+    transform: translateY(-1px);
+}
+
+.tl-state-btn-primary {
+    background: #0F172A;
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+}
+
+.tl-state-btn-primary:hover {
+    background: #1E293B;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.tl-state-btn-secondary {
+    background: transparent;
+    color: #475569;
+    border: 1px solid #E2E8F0;
+}
+
+.tl-state-btn-secondary:hover {
+    border-color: #94A3B8;
+    background: #F8FAFC;
+}
+
+.tl-state-btn-accent {
+    background: #2563EB;
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.tl-state-btn-accent:hover {
+    background: #1D4ED8;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Reference ID display */
+.tl-state-ref {
+    font-family: 'Inter', monospace;
+    font-size: 0.75rem;
+    color: #94A3B8;
+    background: #F1F5F9;
+    padding: 4px 10px;
+    border-radius: 6px;
+    word-break: break-all;
+    max-width: 320px;
+}
+
+/* ==========================================================================
+   5. Skeleton Loading
+   ========================================================================== */
+.tl-skeleton {
+    display: inline-block;
+    background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+    background-size: 400% 100%;
+    animation: tl-shimmer 1.8s ease-in-out infinite;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+@keyframes tl-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.tl-skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.tl-skeleton-row:last-child {
+    border-bottom: none;
+}
+
+.tl-skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.tl-skeleton-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tl-skeleton-line {
+    height: 12px;
+    border-radius: 6px;
+}
+
+.tl-skeleton-line-sm {
+    height: 10px;
+    width: 60%;
+    border-radius: 6px;
+}
+
+.tl-skeleton-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ==========================================================================
+   6. Button Loading State
+   ========================================================================== */
+.tl-btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+.tl-btn-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #FFFFFF;
+    border-radius: 50%;
+    animation: tl-spin 0.7s linear infinite;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.tl-btn-spinner-dark {
+    border-color: rgba(15, 23, 42, 0.2);
+    border-top-color: #0F172A;
+}
+
+@keyframes tl-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   7. Field Validation Errors
+   ========================================================================== */
+.tl-field-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 6px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.8rem;
+    color: #DC2626;
+    line-height: 1.4;
+}
+
+.tl-field-error-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.tl-field-error-text {
+    /* textContent used — never innerHTML */
+}
+
+/* Invalid input styling — applied via JS */
+.tl-input-invalid {
+    border-color: #DC2626 !important;
+    background-color: #FFF5F5 !important;
+}
+
+.tl-input-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+}
+
+/* Form-level error summary */
+.tl-form-error-summary {
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.875rem;
+    color: #991B1B;
+    animation: tl-state-enter 0.2s ease-out both;
+}
+
+.tl-form-error-summary svg {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+}
+
+/* ==========================================================================
+   8. Slow Network Feedback
+   ========================================================================== */
+.tl-slow-network-msg {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 8px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.8rem;
+    color: #92400E;
+    margin-top: 12px;
+    animation: tl-state-enter 0.2s ease-out both;
+}
+
+.tl-slow-network-msg svg {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    animation: tl-spin 1.5s linear infinite;
+}
+
+/* ==========================================================================
+   9. Session Expired Dialog
+   ========================================================================== */
+.tl-session-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    z-index: 99998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(2px);
+    animation: tl-overlay-in 0.22s ease-out both;
+}
+
+@keyframes tl-overlay-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.tl-session-dialog {
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 36px 32px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    animation: tl-dialog-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+    position: relative;
+}
+
+@keyframes tl-dialog-in {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.tl-session-dialog-icon {
+    width: 56px;
+    height: 56px;
+    background: #FEF3C7;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #D97706;
+    margin: 0 auto 20px;
+}
+
+.tl-session-dialog-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.tl-session-dialog h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 12px;
+    text-align: center;
+}
+
+.tl-session-dialog p {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.9rem;
+    color: #64748B;
+    text-align: center;
+    margin: 0 0 24px;
+    line-height: 1.6;
+}
+
+.tl-session-dialog-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: #0F172A;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.18s ease, transform 0.18s ease;
+    min-height: 48px;
+}
+
+.tl-session-dialog-btn:hover {
+    background: #1E293B;
+    transform: translateY(-1px);
+}
+
+.tl-session-dialog-btn:focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   10. Page-auth Loading Skeleton
+   ========================================================================== */
+.tl-page-loading {
+    position: fixed;
+    inset: 0;
+    background: #F8FAFC;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    transition: opacity 0.3s ease;
+}
+
+.tl-page-loading.tl-hiding {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tl-page-loading-logo {
+    width: 80px;
+    height: auto;
+    object-fit: contain;
+    animation: tl-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes tl-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+}
+
+.tl-page-loading-text {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.875rem;
+    color: #94A3B8;
+    letter-spacing: 0.01em;
+}
+
+/* ==========================================================================
+   11. Table scroll affordance
+   ========================================================================== */
+.tl-table-scroll-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+}
+
+.tl-table-scroll-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 32px;
+    height: 100%;
+    background: linear-gradient(to left, rgba(255,255,255,0.9), transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.tl-table-scroll-wrap.tl-has-scroll::after {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   12. Mobile improvements
+   ========================================================================== */
+
+/* Password toggle minimum touch target */
+.toggle-password {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Prevent iOS input zoom — 16px minimum on mobile */
+@media (max-width: 768px) {
+    .form-group input,
+    .form-group select,
+    .form-group textarea,
+    .auth-form input {
+        font-size: 16px !important;
+    }
+
+    /* Footer social icons should not shrink below 44px on mobile */
+    .footer-social {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .footer-social-link {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+
+    /* Legal back-to-top: move to left on mobile to avoid Tawk collision */
+    .legal-back-top {
+        right: auto;
+        left: 16px;
+        bottom: 90px;
+    }
+
+    /* Ensure dashboard main content has enough padding for bottom nav */
+    .dashboard-main {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom, 16px));
+    }
+}
+
+@media (max-width: 480px) {
+    /* Footer social row wraps cleanly */
+    .footer-social {
+        justify-content: flex-start;
+    }
+
+    /* Stack tl-state-actions on very small screens */
+    .tl-state-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tl-state-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ==========================================================================
+   13. Reduced Motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    .tl-skeleton,
+    .tl-page-loading-logo,
+    .tl-btn-spinner,
+    .tl-slow-network-msg svg {
+        animation: none !important;
+    }
+
+    .tl-state,
+    .tl-session-overlay,
+    .tl-session-dialog,
+    .tl-network-banner,
+    .tl-form-error-summary,
+    .tl-slow-network-msg {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .footer-social-link,
+    .tl-state-btn {
+        transition: none !important;
+        transform: none !important;
+    }
+
+    .footer-social-link:hover,
+    .footer-social-link:focus-visible,
+    .tl-state-btn:hover {
+        transform: none !important;
+    }
+
+    /* Keep skeleton visible without shimmer */
+    .tl-skeleton {
+        background: #E2E8F0 !important;
+        animation: none !important;
+    }
+}
+
+/* ==========================================================================
+   14. Focus indicators (global enhancement)
+   ========================================================================== */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+}
+
+/* Suppress default outline only when focus-visible is active */
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible) {
+    outline: none;
+}

@@ -15,6 +15,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="ui-states.css">
     <!-- SEO Metadata -->
     <meta name="description"
         content="TrustLink Escrow: Secure asynchronous escrow platform for social media vendors. Create secure payment links for safe commerce.">
@@ -1232,6 +1233,8 @@
 
     <!-- GSAP for animations -->
     <script src="vendor/gsap.min.js"></script>
+    <!-- ui-states must load before dashboard.js -->
+    <script src="ui-states.js"></script>
     <!-- Firebase SDKs -->
     <script type="module" src="dashboard.js"></script>
 
