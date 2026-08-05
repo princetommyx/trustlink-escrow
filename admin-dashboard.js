@@ -78,8 +78,6 @@ if (topbarMenuToggle) {
 
 // Initial GSAP Animations
 if (typeof gsap !== 'undefined') {
-    // Fade in sidebar items
-    gsap.from('.nav-item', { opacity: 0, x: -20, duration: 0.5, stagger: 0.05, ease: 'power2.out' });
     // Animate stats cards
     gsap.from('.stat-card-modern', { opacity: 0, y: 30, duration: 0.8, stagger: 0.1, ease: 'power3.out', delay: 0.2 });
     // Animate portals
@@ -172,7 +170,7 @@ document.getElementById('btn-save-admin-profile')?.addEventListener('click', asy
     }
 });
 
-document.getElementById('btn-signout').addEventListener('click', async () => {
+document.getElementById('btn-signout')?.addEventListener('click', async () => {
     try {
         clearUserSession();
         await signOut(auth);
@@ -182,20 +180,6 @@ document.getElementById('btn-signout').addEventListener('click', async () => {
         console.error("Sign out error", error);
     }
 });
-
-const topSignoutBtn = document.getElementById('btn-signout-top');
-if (topSignoutBtn) {
-    topSignoutBtn.addEventListener('click', async () => {
-        try {
-            clearUserSession();
-            await signOut(auth);
-            sessionStorage.setItem("authToast", "Logged out successfully");
-            window.location.href = "admin-login.html";
-        } catch (error) {
-            console.error("Sign out error", error);
-        }
-    });
-}
 
 // -------------------------------------------------------------
 // Shared helpers

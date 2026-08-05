@@ -29,11 +29,15 @@
     <div class="dashboard-layout admin-theme">
         <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <a href="index.html" class="logo" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
-                    <img src="img/logo.png" alt="TrustLink Logo" style="height: 80px; width: auto; max-width: 200px; object-fit: contain; margin-top: 4px;">
+            <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 16px; border-bottom: 1px solid #F1F5F9;">
+                <a href="index.html" class="logo" style="display: flex; align-items: center; text-decoration: none;">
+                    <img src="img/logo.png" alt="TrustLink Logo" style="height: 38px; width: auto; max-width: 140px; object-fit: contain;">
                 </a>
-                <button id="btn-collapse" class="btn-icon" style="padding: 4px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
+                <button id="btn-collapse" class="btn-icon" aria-label="Close Navigation" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: #F8FAFC; border: 1px solid #E2E8F0; color: #475569; cursor: pointer; transition: all 0.2s ease;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
             
             <div class="sidebar-user" style="display: none;">
@@ -42,41 +46,44 @@
                 <span class="user-role" style="color: #94a3b8; font-size: 0.85rem;">Platform Owner</span>
             </div>
 
-            <nav class="sidebar-nav" style="flex: 1;">
-                <div style="padding: 0 24px 8px; font-size: 0.8rem; font-weight: 600; color: #111827;">Overview</div>
+            <nav class="sidebar-nav" style="padding: 16px 12px; gap: 4px; display: flex; flex-direction: column; flex: 1;">
+                <div style="padding: 8px 12px 6px; font-size: 0.72rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px;">Overview</div>
                 <a href="#" class="nav-item active" data-target="view-overview">
-                    <span class="nav-text" data-short="Stats" style="color: #64748b;">Analytics</span>
+                    <span class="nav-text" data-short="Stats">Analytics</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-commissions">
-                    <span class="nav-text" data-short="Revenue" style="color: #64748b;">Commission Wallet</span>
+                    <span class="nav-text" data-short="Revenue">Commission Wallet</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-users">
-                    <span class="nav-text" data-short="Users" style="color: #64748b;">Users & KYC</span>
+                    <span class="nav-text" data-short="Users">Users & KYC</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-disputes">
-                    <span class="nav-text" data-short="Disputes" style="color: #64748b;">Disputes</span>
+                    <span class="nav-text" data-short="Disputes">Disputes</span>
                     <span class="badge" id="disputes-badge" style="background: var(--danger); display: none;">0</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-escrows-admin">
-                    <span class="nav-text" data-short="Escrows" style="color: #64748b;">Escrows</span>
+                    <span class="nav-text" data-short="Escrows">Escrows</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-approvals">
-                    <span class="nav-text" data-short="Payouts" style="color: #64748b;">Payouts</span>
+                    <span class="nav-text" data-short="Payouts">Payouts</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-reports" id="nav-item-reports">
-                    <span class="nav-text" data-short="Reports" style="color: #64748b;">Generate Reports 📊</span>
+                    <span class="nav-text" data-short="Reports">Generate Reports 📊</span>
                 </a>
             </nav>
             
-            <div class="sidebar-bottom-nav" style="padding: 16px 24px;">
-                <a href="#" class="nav-item" data-target="view-settings" style="padding-left: 0; padding-right: 0; margin-bottom: 8px;">
-                    <span class="nav-text" data-short="Settings" style="color: #64748b;">Settings</span>
+            <div class="sidebar-bottom-nav" style="padding: 16px 16px 20px; border-top: 1px solid #F1F5F9; display: flex; flex-direction: column; gap: 8px;">
+                <a href="#" class="nav-item" data-target="view-settings" style="padding: 10px 14px; border-radius: 10px;">
+                    <span class="nav-text" data-short="Settings">Settings</span>
                 </a>
-                <button class="nav-item" id="btn-signout" style="width: 100%; background: none; border: none; text-align: left; padding: 12px 0; color: #64748b; font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    Sign Out 
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                    </svg>
+                <button class="nav-item btn-signout-slide" id="btn-signout" style="width: 100%; border: 1.5px solid #FCA5A5; background: #FEF2F2; color: #DC2626; font-weight: 700; font-size: 0.9rem; border-radius: 10px; padding: 10px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease;">
+                    <span style="display: flex; align-items: center; gap: 8px; color: #DC2626;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                        </svg>
+                        Sign Out
+                    </span>
+                    <span style="font-size: 0.72rem; font-weight: 700; background: rgba(220, 38, 38, 0.12); color: #B91C1C; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">Admin</span>
                 </button>
             </div>
         </aside>
@@ -98,7 +105,6 @@
                             <div id="notif-list"><div class="notif-empty">All clear 🎉</div></div>
                         </div>
                     </div>
-                    <button id="btn-signout-top" class="btn btn-outline btn-sm">Sign Out</button>
                     <button class="btn btn-primary btn-sm" id="btn-topbar-generate-report">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                         <span>Generate Report</span>
@@ -822,6 +828,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const mobileMenuBtn = document.getElementById('topbar-menu-toggle');
+            const collapseBtn = document.getElementById('btn-collapse');
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('sidebar-backdrop');
 
@@ -833,7 +840,16 @@
             }
 
             mobileMenuBtn?.addEventListener('click', toggleMobileMenu);
-            backdrop?.addEventListener('click', toggleMobileMenu);
+            collapseBtn?.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                    backdrop.classList.remove('active');
+                }
+            });
+            backdrop?.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                backdrop.classList.remove('active');
+            });
 
             // Also close drawer if a sidebar nav item is clicked on mobile
             const sidebarNavItems = sidebar.querySelectorAll('.nav-item');

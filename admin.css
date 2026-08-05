@@ -1,12 +1,56 @@
 /* admin.css - Overrides and extensions for the Admin Dashboard */
 
-.admin-theme .sidebar .nav-item.active {
-    border-left-color: #9333ea;
-    background: linear-gradient(90deg, rgba(147, 51, 234, 0.15) 0%, transparent 100%);
+.admin-theme .sidebar {
+    background: #FFFFFF !important;
+    border-right: 1px solid #E2E8F0 !important;
+}
+
+.admin-theme .sidebar .nav-item {
+    color: #334155 !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.admin-theme .sidebar .nav-item .nav-text {
+    color: #334155 !important;
+    font-weight: 600 !important;
+    transition: color 0.2s ease !important;
 }
 
 .admin-theme .sidebar .nav-item:hover {
-    color: #c084fc;
+    background: #F8FAFC !important;
+    color: #9333EA !important;
+}
+
+.admin-theme .sidebar .nav-item:hover .nav-text {
+    color: #9333EA !important;
+}
+
+.admin-theme .sidebar .nav-item.active {
+    background: #FAF5FF !important;
+    border-left: 3.5px solid #9333EA !important;
+    color: #9333EA !important;
+}
+
+.admin-theme .sidebar .nav-item.active .nav-text {
+    color: #9333EA !important;
+    font-weight: 700 !important;
+}
+
+.admin-theme .sidebar .btn-signout-slide:hover {
+    background: #FEE2E2 !important;
+    border-color: #F87171 !important;
+    color: #B91C1C !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
 }
 
 .admin-theme .badge {
