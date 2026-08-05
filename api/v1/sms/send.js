@@ -27,41 +27,38 @@ export default async function handler(req, res) {
       cleanPhone = '233' + cleanPhone;
     }
 
-    const vasKey = process.env.MOOLRE_VAS_KEY;
+    const sasuSyncKey = process.env.SASUSYNC_API_KEY;
     const arkeselKey = process.env.ARKESEL_API_KEY;
-    const senderId = process.env.MOOLRE_SENDER_ID || "TrustLink";
+    const senderId = process.env.SASUSYNC_SENDER_ID || "TrustEscrow";
 
-    // 1. Try Moolre SMS Gateway
-    if (vasKey) {
-      const moolreRes = await fetch("https://api.moolre.com/open/sms/send", {
+    // 1. Try SasuSync SMS Gateway (primary)
+    if (sasuSyncKey) {
+      const sasuRes = await fetch("https://sms.sasulabs.me/api/v1/send", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-API-VASKEY': vasKey
+          'X-API-Key': sasuSyncKey
         },
         body: JSON.stringify({
-          type: 1,
-          senderid: senderId,
-          messages: [{
-            recipient: cleanPhone,
-            ref: referenceId || `sms-${Date.now()}`,
-            message: message
-          }]
+          sender: senderId,
+          recipients: [cleanPhone],
+          message: message,
+          metadata: { ref: referenceId || `sms-${Date.now()}` }
         })
       });
-      const data = await moolreRes.json().catch(() => ({}));
-      if (moolreRes.ok && (data.status === 1 || data.success || data.code === 200 || !data.error)) {
-        return res.status(200).json({ success: true, provider: 'moolre', data });
+      const data = await sasuRes.json().catch(() => ({}));
+      if (sasuRes.ok && data.success) {
+        return res.status(200).json({ success: true, provider: 'sasusync', data });
       } else {
-        return res.status(moolreRes.status || 400).json({ 
-          error: data.message || data.error || 'Moolre SMS delivery rejected', 
-          provider: 'moolre', 
+        return res.status(sasuRes.status || 400).json({ 
+          error: data.detail || data.message || 'SasuSync SMS delivery rejected', 
+          provider: 'sasusync', 
           details: data 
         });
       }
     }
 
-    // 2. Try Arkesel SMS Gateway
+    // 2. Try Arkesel SMS Gateway (fallback)
     if (arkeselKey) {
       const arkeselRes = await fetch(`https://sms.arkesel.com/api/v2/sms/send`, {
         method: 'POST',
@@ -70,7 +67,7 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          sender: "TrustLink",
+          sender: "TrustEscrow",
           message: message,
           recipients: [cleanPhone]
         })
@@ -83,7 +80,7 @@ export default async function handler(req, res) {
 
     // Fallback if no SMS provider environment variable is configured
     return res.status(503).json({
-      error: 'No active SMS Gateway credentials configured (MOOLRE_VAS_KEY / ARKESEL_API_KEY).',
+      error: 'No active SMS Gateway credentials configured (SASUSYNC_API_KEY / ARKESEL_API_KEY).',
       recipient: cleanPhone,
       nativeSmsLink: `sms:${cleanPhone}?&body=${encodeURIComponent(message)}`
     });

@@ -123,7 +123,8 @@ const secretLiteralsToDisallow = [
     /MOOLRE_SECRET_KEY\s*=\s*["'][^"']+["']/,
     /MOOLRE_PUBLIC_KEY\s*=\s*["']ey[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+["']/,
     /MOOLRE_PRIVATE_KEY\s*=\s*["'][A-Za-z0-9_]{20,}["']/,
-    /MOOLRE_VAS_KEY\s*=\s*["'][A-Za-z0-9_]{10,}["']/
+    /MOOLRE_VAS_KEY\s*=\s*["'][A-Za-z0-9_]{10,}["']/,
+    /SASUSYNC_API_KEY\s*=\s*["'][A-Za-z0-9_]{10,}["']/
 ];
 
 sensitiveJsFiles.forEach(file => {

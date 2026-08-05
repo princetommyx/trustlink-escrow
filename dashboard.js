@@ -2,7 +2,7 @@ import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { generateSecureToken, sha256Hex, computeFeeSplit, pickUserPhone, normalizePhone, sendWhatsAppNotification, sendEscrowStatusSMS, sendSMSNotification } from "./moolre-service.js";
+import { generateSecureToken, sha256Hex, computeFeeSplit, pickUserPhone, normalizePhone, sendWhatsAppNotification, sendEscrowStatusSMS, sendSMSNotification, sendVerificationOTP } from "./moolre-service.js";
 import { initSessionTracker, clearUserSession } from "./session-manager.js";
 
 let currentUser = null;
@@ -1362,7 +1362,7 @@ document.getElementById('btn-verify-phone-trigger')?.addEventListener('click', a
 
     try {
         console.log(`[PHONE VERIFICATION] Sending OTP ${generatedOtp} to ${phone}`);
-        await sendMoolreOTP(phone, generatedOtp);
+        await sendVerificationOTP(phone, generatedOtp);
         
         // Setup inline OTP box
         if (inlineOtpSection) {
@@ -1490,7 +1490,7 @@ btnInlineResendOtp?.addEventListener('click', async () => {
     pendingPhoneVerification.otp = newOtp;
 
     try {
-        await sendMoolreOTP(pendingPhoneVerification.phone, newOtp);
+        await sendVerificationOTP(pendingPhoneVerification.phone, newOtp);
         if (typeof showModernToast === 'function') {
             showModernToast("Code Resent", `A new 4-digit code was sent to ${pendingPhoneVerification.phone}`, "info");
         }
@@ -1520,7 +1520,7 @@ btnResendPhoneOtp?.addEventListener('click', async () => {
     pendingPhoneVerification.otp = newOtp;
 
     try {
-        await sendMoolreOTP(pendingPhoneVerification.phone, newOtp);
+        await sendVerificationOTP(pendingPhoneVerification.phone, newOtp);
         if (typeof showModernToast === 'function') {
             showModernToast("Code Resent", `A new 4-digit code was sent to ${pendingPhoneVerification.phone}`, "info");
         }

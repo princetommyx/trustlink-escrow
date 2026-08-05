@@ -14,26 +14,44 @@ const APP_BASE_URL = process.env.APP_BASE_URL || 'https://www.trustlinkgh.online
 // ------------------------------------------------------------------
 // Firebase Secret Manager Bindings (First-Generation Pattern)
 // ------------------------------------------------------------------
+// SasuSync SMS/OTP Gateway
+const SASUSYNC_API_KEY = defineSecret('SASUSYNC_API_KEY');
+
+// Moolre Payment Gateway (USSD, disbursement — NOT SMS)
 const MOOLRE_SECRET_KEY = defineSecret('MOOLRE_SECRET_KEY');
 const MOOLRE_PUBLIC_KEY = defineSecret('MOOLRE_PUBLIC_KEY');
 const MOOLRE_PRIVATE_KEY = defineSecret('MOOLRE_PRIVATE_KEY');
-const MOOLRE_VAS_KEY = defineSecret('MOOLRE_VAS_KEY');
 const MOOLRE_API_USER = defineSecret('MOOLRE_API_USER');
 const MOOLRE_ACCOUNT_NUMBER = defineSecret('MOOLRE_ACCOUNT_NUMBER');
 
-const allMoolreSecrets = [
+const allMoolrePaymentSecrets = [
     MOOLRE_SECRET_KEY,
     MOOLRE_PUBLIC_KEY,
     MOOLRE_PRIVATE_KEY,
-    MOOLRE_VAS_KEY,
     MOOLRE_API_USER,
     MOOLRE_ACCOUNT_NUMBER
+];
+
+const allSecrets = [
+    SASUSYNC_API_KEY,
+    ...allMoolrePaymentSecrets
 ];
 
 const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Helper: Get SasuSync API Key with fallback to process.env
+function getSasuSyncApiKey() {
+    try {
+        if (SASUSYNC_API_KEY && typeof SASUSYNC_API_KEY.value === 'function') {
+            const v = SASUSYNC_API_KEY.value();
+            if (v) return v;
+        }
+    } catch (_) {}
+    return process.env.SASUSYNC_API_KEY || '';
+}
 
 // Helper: SHA256 Hash
 function hashString(val) {
@@ -76,6 +94,7 @@ const authenticateApi = async (req, res, next) => {
         console.error('Auth Error in API middleware');
         res.status(500).json({ error: 'Internal Server Error' });
     }
+};
 // ------------------------------------------------------------------
 // Meta WhatsApp Cloud API Webhook Verification & Receiver
 // ------------------------------------------------------------------
@@ -197,29 +216,25 @@ async function getOrCreateVendorByPhone(phoneInfo, profileName = 'WhatsApp Selle
     return { vendorId: newVendorRef.id, vendorData: newSnap.data() };
 }
 
-// Helper: Send Buyer SMS Alert
+// Helper: Send Buyer SMS Alert via SasuSync
 async function sendBuyerSmsAlert(phone, message) {
     try {
-        const vasKey = MOOLRE_VAS_KEY.value();
-        if (!vasKey) return;
+        const apiKey = getSasuSyncApiKey();
+        if (!apiKey) return;
 
         const { local } = normalizeGhanaPhone(phone);
         if (!local) return;
 
-        await fetch("https://api.moolre.com/open/sms/send", {
+        await fetch("https://sms.sasulabs.me/api/v1/send", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-VASKEY': vasKey
+                'X-API-Key': apiKey
             },
             body: JSON.stringify({
-                type: 1,
-                senderid: "TrustLink",
-                messages: [{
-                    recipient: '233' + local.slice(1),
-                    ref: `sms-${Date.now()}`,
-                    message: message
-                }]
+                sender: "TrustEscrow",
+                recipients: ['233' + local.slice(1)],
+                message: message
             })
         });
     } catch (err) {
@@ -228,16 +243,16 @@ async function sendBuyerSmsAlert(phone, message) {
 }
 
 // Export Express API
-exports.api = functions.runWith({ secrets: allMoolreSecrets }).https.onRequest(app);
+exports.api = functions.runWith({ secrets: allSecrets }).https.onRequest(app);
 
 // ------------------------------------------------------------------
-// Authenticated & Transaction-Scoped Cloud Functions for Moolre
+// Authenticated & Transaction-Scoped Cloud Functions for Moolre Payments
 // ------------------------------------------------------------------
 
 /**
  * Server-Side Moolre USSD Payment Creation
  */
-exports.createMoolreCheckout = functions.runWith({ secrets: allMoolreSecrets }).https.onCall(async (data, context) => {
+exports.createMoolreCheckout = functions.runWith({ secrets: allMoolrePaymentSecrets }).https.onCall(async (data, context) => {
     const { escrowId, buyerPhone, channel } = data || {};
     if (!escrowId || !buyerPhone) {
         throw new functions.https.HttpsError('invalid-argument', 'Missing escrowId or buyerPhone.');
@@ -304,7 +319,7 @@ exports.createMoolreCheckout = functions.runWith({ secrets: allMoolreSecrets }).
 /**
  * Server-Side Moolre Payment Status Verification
  */
-exports.verifyMoolrePayment = functions.runWith({ secrets: allMoolreSecrets }).https.onCall(async (data, context) => {
+exports.verifyMoolrePayment = functions.runWith({ secrets: allMoolrePaymentSecrets }).https.onCall(async (data, context) => {
     const { escrowId } = data || {};
     if (!escrowId) {
         throw new functions.https.HttpsError('invalid-argument', 'Missing escrowId.');
@@ -365,125 +380,136 @@ exports.verifyMoolrePayment = functions.runWith({ secrets: allMoolreSecrets }).h
 });
 
 /**
- * Server-Side OTP Generation & Delivery
+ * Server-Side OTP Generation & Delivery via SasuSync
+ * SasuSync handles code generation, storage, expiry, and attempt limiting.
  */
-exports.requestPhoneVerificationOtp = functions.runWith({ secrets: allMoolreSecrets }).https.onCall(async (data, context) => {
+exports.requestPhoneVerificationOtp = functions.runWith({ secrets: [SASUSYNC_API_KEY] }).https.onCall(async (data, context) => {
     const { phone } = data || {};
     const { local } = normalizeGhanaPhone(phone);
     if (!local || local.length < 10) {
         throw new functions.https.HttpsError('invalid-argument', 'Valid 10-digit Ghanaian phone number required.');
     }
 
-    const otpDocRef = db.collection('phone_otps').doc(local);
-    const existingSnap = await otpDocRef.get();
-
-    if (existingSnap.exists) {
-        const existingData = existingSnap.data();
-        // Rate limit: 60 seconds between requests
-        if (Date.now() - (existingData.createdAt || 0) < 60000) {
-            throw new functions.https.HttpsError('resource-exhausted', 'Please wait 60 seconds before requesting another verification code.');
-        }
-    }
-
-    // Generate random 6-digit code
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpHash = hashString(otpCode);
-
-    await otpDocRef.set({
-        phone: local,
-        otpHash: otpHash,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes expiry
-        attempts: 0
-    });
-
-    const vasKey = MOOLRE_VAS_KEY.value();
-    if (!vasKey) {
+    const apiKey = getSasuSyncApiKey();
+    if (!apiKey) {
         throw new functions.https.HttpsError('internal', 'SMS gateway configuration error.');
     }
 
+    const intlPhone = '233' + local.slice(1);
+
     try {
-        const response = await fetch("https://api.moolre.com/open/sms/send", {
+        const response = await fetch("https://sms.sasulabs.me/otp/generate", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-VASKEY': vasKey
+                'X-API-Key': apiKey
             },
             body: JSON.stringify({
-                type: 1,
-                senderid: "TrustLink",
-                messages: [{
-                    recipient: '233' + local.slice(1),
-                    ref: `otp-${Date.now()}`,
-                    message: `Your TrustLink verification code is: ${otpCode}. Valid for 5 minutes.`
-                }]
+                number: intlPhone,
+                sender_id: "TrustEscrow",
+                message: "Your TrustLink verification code is %otp_code%. Valid for 5 minutes.",
+                medium: "sms",
+                otp_type: "numeric",
+                expiry: 5,
+                length: 6
             })
         });
 
         const resData = await response.json();
-        if (!response.ok || resData.status == 0) {
-            throw new functions.https.HttpsError('unavailable', 'SMS delivery failed. Please try again.');
+        if (!response.ok || !resData.success) {
+            // 429 means a code is already pending for this number
+            if (response.status === 429) {
+                throw new functions.https.HttpsError('resource-exhausted', 'Please wait before requesting another verification code.');
+            }
+            throw new functions.https.HttpsError('unavailable', resData.detail || 'SMS delivery failed. Please try again.');
+        }
+
+        // Store the otp_id for potential status checks (optional)
+        if (resData.otp_id) {
+            await db.collection('phone_otps').doc(local).set({
+                phone: local,
+                otpId: resData.otp_id,
+                createdAt: Date.now(),
+                provider: 'sasusync'
+            });
         }
 
         return { success: true, message: 'Verification OTP sent via SMS.' };
     } catch (err) {
+        if (err instanceof functions.https.HttpsError) throw err;
         console.error("OTP delivery error");
         throw new functions.https.HttpsError('internal', 'SMS gateway delivery error.');
     }
 });
 
 /**
- * Server-Side OTP Verification
+ * Server-Side OTP Verification via SasuSync
+ * SasuSync handles code comparison, attempt limiting, and expiry.
  */
-exports.verifyPhoneVerificationOtp = functions.runWith({ secrets: allMoolreSecrets }).https.onCall(async (data, context) => {
+exports.verifyPhoneVerificationOtp = functions.runWith({ secrets: [SASUSYNC_API_KEY] }).https.onCall(async (data, context) => {
     const { phone, otpCode } = data || {};
     const { local } = normalizeGhanaPhone(phone);
     if (!local || !otpCode) {
         throw new functions.https.HttpsError('invalid-argument', 'Phone number and verification code are required.');
     }
 
-    const otpDocRef = db.collection('phone_otps').doc(local);
-    const otpSnap = await otpDocRef.get();
-
-    if (!otpSnap.exists) {
-        throw new functions.https.HttpsError('not-found', 'No active verification code found. Please request a new code.');
+    const apiKey = getSasuSyncApiKey();
+    if (!apiKey) {
+        throw new functions.https.HttpsError('internal', 'SMS gateway configuration error.');
     }
 
-    const otpData = otpSnap.data();
-    if (Date.now() > otpData.expiresAt) {
-        await otpDocRef.delete();
-        throw new functions.https.HttpsError('deadline-exceeded', 'Verification code expired. Please request a new code.');
-    }
+    const intlPhone = '233' + local.slice(1);
 
-    if ((otpData.attempts || 0) >= 3) {
-        await otpDocRef.delete();
-        throw new functions.https.HttpsError('permission-denied', 'Too many failed attempts. Please request a new code.');
-    }
-
-    await otpDocRef.update({ attempts: admin.firestore.FieldValue.increment(1) });
-
-    const inputHash = hashString(otpCode);
-    if (inputHash !== otpData.otpHash) {
-        throw new functions.https.HttpsError('invalid-argument', 'Invalid verification code.');
-    }
-
-    await otpDocRef.delete();
-
-    if (context.auth && context.auth.uid) {
-        await db.collection('users').doc(context.auth.uid).update({
-            phone: local,
-            phoneVerified: true,
-            phoneVerifiedAt: admin.firestore.FieldValue.serverTimestamp()
+    try {
+        const response = await fetch("https://sms.sasulabs.me/otp/verify", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey
+            },
+            body: JSON.stringify({
+                number: intlPhone,
+                code: otpCode
+            })
         });
-    }
 
-    return { success: true, verified: true };
+        const resData = await response.json();
+
+        if (!response.ok || !resData.success || !resData.verified) {
+            if (response.status === 429) {
+                throw new functions.https.HttpsError('permission-denied', 'Too many failed attempts. Please request a new code.');
+            }
+            if (response.status === 410 || (resData.detail && resData.detail.includes('expired'))) {
+                throw new functions.https.HttpsError('deadline-exceeded', 'Verification code expired. Please request a new code.');
+            }
+            throw new functions.https.HttpsError('invalid-argument', resData.detail || 'Invalid verification code.');
+        }
+
+        // Clean up local OTP tracking doc
+        const otpDocRef = db.collection('phone_otps').doc(local);
+        await otpDocRef.delete().catch(() => {});
+
+        // Mark user's phone as verified
+        if (context.auth && context.auth.uid) {
+            await db.collection('users').doc(context.auth.uid).update({
+                phone: local,
+                phoneVerified: true,
+                phoneVerifiedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        return { success: true, verified: true };
+    } catch (err) {
+        if (err instanceof functions.https.HttpsError) throw err;
+        console.error("OTP verification error");
+        throw new functions.https.HttpsError('internal', 'Verification service error.');
+    }
 });
 
 /**
  * Admin Payout Disbursement
  */
-exports.processPayout = functions.runWith({ secrets: allMoolreSecrets }).https.onCall(async (data, context) => {
+exports.processPayout = functions.runWith({ secrets: allMoolrePaymentSecrets }).https.onCall(async (data, context) => {
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
     }

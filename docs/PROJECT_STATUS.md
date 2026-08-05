@@ -13,24 +13,18 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 
 ## 🆕 Recent GitHub Updates
 
-- [x] **Four Dedicated Solutions Pages**: Designed, built, and deployed four dedicated solutions pages (`individuals.html`, `online-vendors.html`, `ecommerce.html`, `marketplaces.html`) mapping cleanly to URLs `/individuals`, `/online-vendors`, `/ecommerce`, and `/marketplaces`.
-- [x] **Light Platform Theme & High-Contrast Button System**: Harmonized all solution pages into the clean light platform theme (`#FFFFFF`, `#F8FAFC`, `#0F172A` text), eliminating sudden dark mode transitions. Introduced 100% legible CTA buttons (`.btn-solution-primary` with Slate dark navy, `.btn-solution-secondary` with white background, `#0F172A` text, and `#CBD5E1` border).
-- [x] **Platform-Wide Uniform Compact 4-Column Footer**: Standardized the 4-column footer layout (`Solutions` | `Platform` | `Resources` | `Legal`) across all site pages (`index.html`, `contact.html`, `terms.html`, `privacy.html`, and all solution pages). Reduced bulky vertical whitespace and unified rounded social media icon buttons (`.footer-social-link` with `img/social/*.svg`).
-- [x] **Static Section Navigation & Single Floating Header**: Transformed section navigation into a static, centered pill container below the hero, eliminating secondary sticky header clutter on scroll so the top floating `.navbar` remains the single fixed header.
-- [x] **Accessible FAQ Accordion & Cross-Solution Switcher**: Integrated single-panel accessible FAQ accordions with `aria-expanded` and `aria-controls` attributes, alongside a 4-card cross-solution navigation switcher.
-- [x] **Homepage Showcase & Navigation Integration**: Updated Solutions navbar dropdown items, homepage showcase "Learn More" links, keyboard tab navigation (Arrow keys, Home, End), and `sitemap.xml` clean URLs.
-- [x] **Static Test Suite Expansion (`npm test`)**: Extended `scripts/validate.js` to assert file presence, canonical URLs, landmark tags, terms/privacy links, and zero-localhost rules for all solution pages (100% passing).
-- [x] **User & Admin Dashboard Navbar Alignment & Logo Sizing**: Unified top navigation bar structure, typography, and branding across `index.html`, `dashboard.html`, and `admin-dashboard.html`. Scaled TrustLink logo dimensions across all desktop/mobile breakpoints, eliminated conflicting grey backgrounds for clean white surfaces, and added safe area support for mobile devices.
-- [x] **Full Account Deactivation & Deletion Lifecycle**: Implemented functional account deactivation (reversible status change + instant session sign-out) and permanent deletion (with password/Google re-authentication, typing confirmation `DELETE`, ongoing order warnings, and complete Firestore data purging).
-- [x] **Profile Status & Verification Badge Center**: Added live account status badges (`Active`, `Deactivated`, `Suspended`) and verification indicators (`Email Verified`, `Phone Verified`) to the user profile dashboard view.
-- [x] **Admin User Management & Status Moderation**: Enhanced `admin-dashboard.html` / `admin-dashboard.js` with admin controls to inspect registered users, toggle account status (`Active`, `Suspended`, `Deactivated`), and manually manage phone verification.
-- [x] **Authentication Suspension Guard**: Updated `auth-handler.js` to inspect user account status during sign-in, automatically blocking suspended accounts and notifying deactivated accounts.
-- [x] **Mobile Dropdown & Menu UX Polish**: Improved mobile topbar menu layout, dropdown interaction handling, safe-area padding, and modal responsiveness.
-- [x] **Dedicated Contact Page**: Added a polished `contact.html` page for support, partnerships, and general enquiries, with the page linked into site navigation and footer.
-- [x] **Google Sign-In UX & Reliability**: Added immediate toast feedback and visual loading states during sign-in, eliminated first-tap popup failures, and added redirect fallbacks.
+- [x] **SMS Gateway Migration to SasuSync**: Transitioned SMS dispatch and phone verification OTP infrastructure to SasuSync (`https://sms.sasulabs.me`) with approved sender ID `TrustEscrow`. Updated `/api/v1/sms/send.js` serverless endpoint, Firebase Cloud Functions (`requestPhoneVerificationOtp` and `verifyPhoneVerificationOtp`), and client-side modules.
+- [x] **Dedicated Solutions Pages (Individuals)**: Built dedicated `individuals.html` solution page with modern typography, interactive feature showcases, localized Ghana Cedis examples, and updated site-wide navigation links.
+- [x] **Account Controls in Dashboard Settings**: Added account deactivation and deletion flows for users who want to close their TrustLink account.
+- [x] **Google Sign-In UX Improvements**: Added immediate toast feedback and visual loading states during sign-in.
+- [x] **Google Sign-In Reliability Fix**: Removed the first-tap popup failure by eliminating the async delay and adding a redirect fallback.
 - [x] **MoMo Sender ID Support**: Added configurable `MOOLRE_SENDER_ID` support for MTN Ghana whitelisted sender IDs.
+- [x] **Deployment Activation Update**: Triggered deployment to activate the `MOOLRE_VAS_KEY` environment variable.
 - [x] **Toast Copy Cleanup**: Stripped emojis from toast notification titles and messages across dashboard modules.
+- [x] **Landing Page Refinements**: Improved the landing page with a new `How it Works` section, logo/image scaling updates, cleaner profile button behavior, and site-wide footer/social integration.
 - [x] **Landing Page Performance & Polish**: Reduced blur-heavy rendering, added a lighter landing theme variant, standardized SEO and social metadata, and tightened site wrapper overflow/layout handling.
+- [x] **Navbar Unification**: Refined the landing-page navbar styling for a more consistent experience.
+- [x] **Dedicated Contact Page**: Added a polished `contact.html` page for support, partnerships, and general enquiries, with the page linked into the site navigation and footer.
 
 ---
 
@@ -55,7 +49,7 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 - [x] **Qualified Marketing Claims**: Replaced unverified guarantees with accurate terms (*Payment Protection*, *Buyer Confirmation*, *Dispute Protection*, *Clear release and dispute rules*, *Built for Ghana's social vendors*).
 - [x] **Truthful 72-Hour Release Copy**: Replaced auto-release claims with clear buyer confirmation copy (*"Payment release begins after delivery is confirmed, subject to any active dispute and payment-provider processing"*).
 - [x] **Production Domain Routing**: Canonical URLs (`https://www.trustlinkgh.online/`) and Open Graph tags integrated.
-- [x] **Footer Legal Links**: Preserved 4-column footer layout with direct working links to `terms.html`, `privacy.html`, and `contact.html`.
+- [x] **Footer Legal Links**: Preserved 4-column footer layout with direct working links to `terms.html` and `privacy.html`.
 
 ### 2. Terms of Use & Privacy Policy (`terms.html`, `privacy.html`, `legal.css`, `legal.js`)
 - [x] **Production-Quality Terms of Use (`terms.html`)**: 24 plain-English sections covering eligibility, account security, platform scope, fee allocation, buyer/seller responsibilities, delivery confirmation, dispute holds, disclaimers, and Ghanaian law governance.
@@ -64,15 +58,12 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 
 ### 3. Authentication & User Management (`login.html`, `signup.html`, `reset-password.html`, `auth-handler.js`)
 - [x] **Email & Password Authentication**: Registration, sign-in, and password reset via Firebase Auth.
-- [x] **Google OAuth 1-Click Login**: Google Sign-In with automatic Firestore profile creation and redirect fallback.
-- [x] **Account Deactivation & Deletion Security**: Self-service deactivation and deletion flows with mandatory re-authentication and confirmation safeguards.
-- [x] **Suspension & Status Auth Guards**: `auth-handler.js` checks Firestore `accountStatus` upon sign-in to enforce account suspensions and manage deactivated accounts.
+- [x] **Google OAuth 1-Click Login**: Google Sign-In with automatic Firestore profile creation.
 - [x] **Legal Agreement Checkboxes**: Signup agreement updated to *"I agree to the Terms of Use and acknowledge the Privacy Policy"* with active links, plus Google OAuth legal notice.
 - [x] **Role-Based Routing & Session Persistence**: Automatic redirection to vendor dashboard (`dashboard.html`) or admin panel (`admin-dashboard.html`) with auth state guards.
 
-### 4. Vendor / Seller Dashboard (`dashboard.html`, `dashboard.js`, `dashboard.mjs`, `dashboard.css`, `styles.css`)
-- [x] **Unified Responsive Navbar**: Standardized topbar design matching the landing page with enlarged TrustLink logo, clean white container surfaces, and mobile-friendly drawer menu.
-- [x] **Profile Status & Verification Badge Display**: Live account status pills (`Active`, `Deactivated`, `Suspended`) and verification indicators for Email and Phone numbers.
+### 4. Vendor / Seller Dashboard (`dashboard.html`, `dashboard.js`, `dashboard.css`, `styles.css`)
+- [x] **Modern Light UI**: Frosted-glass aesthetic, clean typography, responsive navigation sidebar.
 - [x] **Real-Time Financial Overview**: Live balance cards for Available Balance, Escrowed Funds, and Total Completed Volume.
 - [x] **Dynamic Escrow Link Generator**: Custom order description, amount in GH₵, buyer phone, delivery timeline, and flexible fee split rules (50/50, buyer 100%, seller 100%).
 - [x] **Dynamic Checkout Link Utility**: Generates shareable checkout URLs safely derived from `window.location.origin` or canonical domain with 1-click WhatsApp sharing and clipboard copy.
@@ -94,8 +85,6 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 - [x] **Dispute Lock Mechanism**: One-click "Raise Dispute" freezing funds in state `DISPUTED` for admin review.
 
 ### 7. Admin Control Center (`admin-dashboard.html`, `admin-dashboard.js`, `admin-login.html`, `admin.css`)
-- [x] **Unified Navbar & Visual Styling**: Realigned navigation header and logo sizing to match dashboard and landing page design.
-- [x] **User Moderation & Account Status Control**: Admin tools to view registered users, change status (`Active`, `Suspended`, `Deactivated`), and verify user phone numbers.
 - [x] **Platform Metrics**: Overview of total volume, escrow fees earned, active contracts, and registered users.
 - [x] **Escrow Moderation Panel**: Filter, inspect, and moderate active, disputed, and completed contracts.
 - [x] **Arbitration Tools**: One-click "Forced Payout to Seller" and "Manual Refund to Buyer".
@@ -109,18 +98,11 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 
 ### 9. Developer REST API & Sandbox (`api-docs.html`, `api-docs.js`, `functions/index.js`)
 - [x] **Developer Preview Labeling**: Labeled sandbox endpoints and responses as `Developer Preview` / `Example Response`.
-- [x] **Canonical Endpoint URLs**: Base URL set to `https://www.trustlinkgh.online/api/v1/escrows`.
+- [x] ** canonical Endpoint URLs**: Base URL set to `https://www.trustlinkgh.online/api/v1/escrows`.
 - [x] **Multi-Language Snippets**: Python, Node.js, cURL, and PHP code examples.
 
 ### 10. WooCommerce Plugin (`trustlink-woocommerce-plugin/`)
 - [x] **WooCommerce Escrow Payment Gateway**: WordPress PHP plugin file enabling TrustLink Escrow checkout on WooCommerce online stores.
-
-### 11. Dedicated Solutions Pages & Platform Navigation (`individuals.html`, `online-vendors.html`, `ecommerce.html`, `marketplaces.html`, `solutions.css`, `solution-page.js`)
-- [x] **Four Tailored Product Solutions Pages**: Built dedicated landing experiences for P2P transactions (`/individuals`), social sellers (`/online-vendors`), store developers (`/ecommerce`), and marketplace platforms (`/marketplaces`).
-- [x] **Light Platform Theme Alignment**: Enforced consistent light surface styling (`#FFFFFF`, `#F8FAFC`, `#0F172A` text), eliminating dark mode block transitions.
-- [x] **High-Contrast Legible Button System**: Implemented `.btn-solution-primary` (Slate Navy background with white text) and `.btn-solution-secondary` (White background with dark text `#0F172A` and `#CBD5E1` border), ensuring instant readability.
-- [x] **Compact 4-Column Uniform Footer**: Standardized the 4-column link layout (`Solutions` | `Platform` | `Resources` | `Legal`) with uniform rounded social buttons (`.footer-social-link` with `img/social/*.svg`) and non-bulky padding (`48px 0 32px`) across all site pages.
-- [x] **Static Section Navigation**: Replaced secondary sticky navbars with a static, centered pill container to keep the top floating `.navbar` as the single fixed navigation bar on scroll.
 
 ---
 
