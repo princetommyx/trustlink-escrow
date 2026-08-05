@@ -8,3 +8,4 @@ service-account*.json
 firebase-debug.log
 firebase-debug.*.log
 .DS_Store
+sasusync*.json
