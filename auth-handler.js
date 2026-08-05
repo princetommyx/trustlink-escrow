@@ -14,7 +14,7 @@ import {
     browserLocalPersistence,
     browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { startUserSession, clearUserSession } from "./session-manager.js";
 
 // Helper for XSS safe text escaping
@@ -121,6 +121,14 @@ if (pendingToast) {
     sessionStorage.removeItem("authToastIsError");
 }
 
+// Handle URL query parameters for deactivation or deletion confirmation
+const authUrlParams = new URLSearchParams(window.location.search);
+if (authUrlParams.get("deactivated") === "true") {
+    showModernToast("Account Deactivated", "Your account has been deactivated. Sign back in anytime to reactivate.", "info");
+} else if (authUrlParams.get("deleted") === "true") {
+    showModernToast("Account Deleted", "Your account and all associated data have been permanently removed.", "success");
+}
+
 // Listen to auth state
 onAuthStateChanged(auth, async (user) => {
     const isAuthPage = window.location.pathname.includes("login.html") || window.location.pathname.includes("signup.html") || window.location.pathname.includes("verify.html");
@@ -139,6 +147,17 @@ onAuthStateChanged(auth, async (user) => {
                 } else {
                     const data = userDoc.data();
                     if (data.role === "admin" || data.role === "support") isAdmin = true;
+
+                    // Automatically reactivate deactivated account upon successful login
+                    if (data.accountStatus === "deactivated" || data.isDeactivated) {
+                        await updateDoc(doc(db, "users", user.uid), {
+                            accountStatus: "active",
+                            isDeactivated: false,
+                            reactivatedAt: new Date()
+                        });
+                        sessionStorage.setItem("authToast", "Welcome back! Your account has been reactivated.");
+                        sessionStorage.setItem("authToastIsError", "false");
+                    }
                 }
             } catch(e) {
                 console.error("Error checking user doc:", e);

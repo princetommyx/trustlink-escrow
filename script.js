@@ -67,8 +67,18 @@ if (mobileMenuBtn && navLinks) {
         }
     });
 
-    // Close when clicking any link inside the navigation menu
+    // Close when clicking links, or toggle mobile dropdowns
     navLinks.addEventListener('click', (e) => {
+        const dropdownToggle = e.target.closest('.nav-link-dropdown-toggle');
+        if (dropdownToggle) {
+            e.preventDefault();
+            const parentDropdown = dropdownToggle.closest('.nav-dropdown');
+            if (parentDropdown) {
+                parentDropdown.classList.toggle('open');
+            }
+            return;
+        }
+
         const targetLink = e.target.closest('a');
         if (targetLink) {
             closeMobileMenu();
@@ -82,6 +92,74 @@ if (mobileMenuBtn && navLinks) {
         }
     });
 }
+
+// -------------------------------------------------------------
+// Desktop Dropdown Hover Manager (with grace delay)
+// Fixes the "gap between trigger and panel" problem and the
+// position:fixed mega-menu that CSS :hover can't track.
+// -------------------------------------------------------------
+(function initDropdowns() {
+    const CLOSE_DELAY = 180; // ms grace period before closing
+
+    document.querySelectorAll('.nav-dropdown').forEach(dropdown => {
+        let closeTimer = null;
+
+        const open = () => {
+            // Close any other open dropdowns first
+            document.querySelectorAll('.nav-dropdown.active').forEach(other => {
+                if (other !== dropdown) other.classList.remove('active');
+            });
+            clearTimeout(closeTimer);
+            dropdown.classList.add('active');
+        };
+
+        const scheduleClose = () => {
+            clearTimeout(closeTimer);
+            closeTimer = setTimeout(() => {
+                dropdown.classList.remove('active');
+            }, CLOSE_DELAY);
+        };
+
+        const cancelClose = () => {
+            clearTimeout(closeTimer);
+        };
+
+        // Trigger: hovering the toggle button
+        const toggle = dropdown.querySelector('.nav-link-dropdown-toggle');
+        if (toggle) {
+            toggle.addEventListener('mouseenter', open);
+            toggle.addEventListener('mouseleave', scheduleClose);
+        }
+
+        // Panel: hovering the dropdown menu keeps it open
+        const menu = dropdown.querySelector('.dropdown-menu');
+        if (menu) {
+            menu.addEventListener('mouseenter', cancelClose);
+            menu.addEventListener('mouseleave', scheduleClose);
+        }
+
+        // Close when clicking a link inside
+        dropdown.addEventListener('click', (e) => {
+            if (e.target.closest('a[href]')) {
+                dropdown.classList.remove('active');
+            }
+        });
+    });
+
+    // Close all dropdowns on outside click
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav-dropdown')) {
+            document.querySelectorAll('.nav-dropdown.active').forEach(d => d.classList.remove('active'));
+        }
+    });
+
+    // Close all on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.nav-dropdown.active').forEach(d => d.classList.remove('active'));
+        }
+    });
+})();
 
     // Navbar Scroll Effect
     const navbar = document.querySelector('.navbar');
@@ -151,4 +229,36 @@ if (mobileMenuBtn && navLinks) {
             }
             
         }, 3000);
+    }
+
+    // -------------------------------------------------------------
+    // Showcase Category Tabs Controller
+    // -------------------------------------------------------------
+    const showcaseTabs = document.querySelectorAll('.showcase-tab');
+    const showcasePanes = document.querySelectorAll('.showcase-pane');
+
+    if (showcaseTabs.length > 0 && showcasePanes.length > 0) {
+        showcaseTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                if (!targetTab) return;
+
+                // Update active tab states
+                showcaseTabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+
+                // Switch visible pane
+                showcasePanes.forEach(pane => {
+                    if (pane.id === `pane-${targetTab}`) {
+                        pane.classList.add('active');
+                    } else {
+                        pane.classList.remove('active');
+                    }
+                });
+            });
+        });
     }

@@ -55,14 +55,70 @@
     <nav class="navbar">
         <div class="container nav-container">
             <a href="index.html" class="logo">
-                <img src="img/logo.png" alt="TrustLink Logo" style="height: 75px; width: auto; max-width: 220px; object-fit: contain; margin-top: 2px;">
+                <img src="img/logo.png" alt="TrustLink Logo" style="height: 68px; width: auto; max-width: 280px; object-fit: contain;">
             </a>
             <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#how-it-works">How it Works</a>
-                <a href="api-docs.html">API Docs</a>
-                <a href="login.html" class="btn btn-outline" style="border:none; box-shadow:none; background:transparent;">Log in</a>
-                <a href="signup.html" class="btn btn-primary" style="background:#0F172A; color:#fff;">Get Started Free</a>
+                <div class="nav-dropdown">
+                    <a href="#showcase" class="nav-link-dropdown-toggle">
+                        Solutions
+                        <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="#individuals" class="dropdown-menu-item">
+                            <span class="item-title">Individuals</span>
+                            <span class="item-desc">Secure peer-to-peer payments</span>
+                        </a>
+                        <a href="#online-vendors" class="dropdown-menu-item">
+                            <span class="item-title">Online Vendors</span>
+                            <span class="item-desc">Social media DM commerce</span>
+                        </a>
+                        <a href="#ecommerce" class="dropdown-menu-item">
+                            <span class="item-title">E-Commerce & Stores</span>
+                            <span class="item-desc">API & direct checkout links</span>
+                        </a>
+                        <a href="#marketplaces" class="dropdown-menu-item">
+                            <span class="item-title">Marketplaces</span>
+                            <span class="item-desc">Multi-party escrow solutions</span>
+                        </a>
+                    </div>
+                </div>
+
+                <a href="api-docs.html" class="nav-link-item">Docs</a>
+                <a href="#how-it-works" class="nav-link-item">How it works</a>
+
+                <div class="nav-dropdown">
+                    <a href="#" class="nav-link-dropdown-toggle" onclick="return false;">
+                        Company
+                        <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="terms.html" class="dropdown-menu-item">
+                            <span class="item-title">Terms of Use</span>
+                            <span class="item-desc">Platform rules &amp; legal agreement</span>
+                        </a>
+                        <a href="privacy.html" class="dropdown-menu-item">
+                            <span class="item-title">Privacy Policy</span>
+                            <span class="item-desc">Data protection &amp; security</span>
+                        </a>
+                        <a href="contact.html" class="dropdown-menu-item">
+                            <span class="item-title">Contact Us</span>
+                            <span class="item-desc">Get in touch with our team</span>
+                        </a>
+                        <a href="login.html" class="dropdown-menu-item">
+                            <span class="item-title">Log in</span>
+                            <span class="item-desc">Access your seller account</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="nav-cta-group">
+                    <a href="contact.html" class="btn-nav-contact">
+                        Contact us <span class="btn-arrow">&rarr;</span>
+                    </a>
+                    <a href="signup.html" class="btn-nav-transact">
+                        Transact now <span class="btn-arrow">&rarr;</span>
+                    </a>
+                </div>
             </div>
             <button class="mobile-menu-btn" aria-label="Toggle menu">
                 <span></span><span></span><span></span>
@@ -72,7 +128,7 @@
 
     <main>
         <!-- Hero Section -->
-        <section class="hero" style="padding-top: 140px; text-align: center; min-height: auto;">
+        <section class="hero" style="padding-top: 165px; text-align: center; min-height: auto;">
             <div class="container">
                 <div class="hero-content fade-up" style="max-width: 800px; margin: 0 auto;">
                     <div class="badge">Powered by Moolre <img src="moolre.webp" alt="Moolre Logo" class="badge-logo" style="display:inline-block; vertical-align:middle; margin-left: 6px;"></div>
@@ -108,93 +164,435 @@
             </div>
         </section>
 
-        <!-- Bento Features Section -->
-        <section id="features" class="features" style="padding-top: 120px;">
+        <!-- Built for Online Transactions Showcase Section -->
+        <section id="features" class="showcase-section" style="padding-top: 100px; padding-bottom: 60px;">
             <div class="container">
-                <div class="section-header fade-up" style="max-width: 700px;">
-                    <h2 style="font-size: clamp(2rem, 4vw, 3rem);">Sell Safely.<br> Build Buyer Trust.</h2>
-                    <p>Designed for Ghana's social commerce sellers. Receive funds after confirmation and successful processing.</p>
+                <div class="section-header fade-up" style="max-width: 760px; text-align: left; margin-bottom: 36px;">
+                    <h2 class="showcase-main-title">Built for online transactions.</h2>
+                    <p class="showcase-main-subtitle">Whether you transact as an individual, sell on social media, run an ecommerce store, or operate a multi-vendor marketplace — TrustLink adapts to your model.</p>
                 </div>
                 
-                <div class="bento-grid fade-up">
+                <!-- Category Tabs (Individuals first, Online Vendors, Ecommerce, Marketplaces) -->
+                <div class="showcase-tabs-wrapper fade-up">
+                    <div class="showcase-tabs" role="tablist" aria-label="Transaction Categories">
+                        <button class="showcase-tab active" data-tab="individuals" role="tab" aria-selected="true" aria-controls="pane-individuals" id="tab-individuals">
+                            <span class="tab-icon-box">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </span>
+                            <span class="tab-label">INDIVIDUALS</span>
+                        </button>
+
+                        <button class="showcase-tab" data-tab="online-vendors" role="tab" aria-selected="false" aria-controls="pane-online-vendors" id="tab-online-vendors">
+                            <span class="tab-icon-box">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                            </span>
+                            <span class="tab-label">ONLINE VENDORS</span>
+                        </button>
+                        
+                        <button class="showcase-tab" data-tab="ecommerce" role="tab" aria-selected="false" aria-controls="pane-ecommerce" id="tab-ecommerce">
+                            <span class="tab-icon-box">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                            </span>
+                            <span class="tab-label">ECOMMERCE</span>
+                        </button>
+
+                        <button class="showcase-tab" data-tab="marketplaces" role="tab" aria-selected="false" aria-controls="pane-marketplaces" id="tab-marketplaces">
+                            <span class="tab-icon-box">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                            </span>
+                            <span class="tab-label">MARKETPLACES</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Showcase Main Card Container (Dark UI) -->
+                <div class="showcase-card-container fade-up">
                     
-                    <!-- Large Box: Product Focus -->
-                    <div class="bento-card bento-large showcase-card" style="background: linear-gradient(to bottom right, #fff, #FFF7ED);">
-                        <div class="text-content">
-                            <span class="badge" style="font-size:0.8rem; padding: 4px 12px; margin-bottom: 16px;">Social Checkout</span>
-                            <h3 style="font-size: 2.2rem; max-width: 300px; margin-bottom: 16px;">Showcase Products Securely</h3>
-                            <p style="color: #64748B; max-width: 350px;">Generate a secure TrustLink checkout link for your items and share it in any DM.</p>
+                    <!-- 1. Individuals Pane (Active Default) -->
+                    <div class="showcase-pane active" id="pane-individuals" role="tabpanel" aria-labelledby="tab-individuals">
+                        <div class="showcase-left-col">
+                            <div class="showcase-badge-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </div>
+                            <h3 class="showcase-pane-title">Individuals</h3>
+                            <p class="showcase-pane-desc">Transact with strangers safely. Funds held in secure escrow until the deal is done, for everything from electronics and digital assets to high-value goods.</p>
+                            <a href="signup.html" class="showcase-learn-link">Learn More <span class="arrow">&rarr;</span></a>
                         </div>
-                        <div class="image-content">
-                            <img src="img/hero-product.png" alt="Premium Sneakers" loading="lazy">
-                            
-                            <div class="floating-ui" style="bottom: 15px; right: -10px; background: rgba(255,255,255,0.95);">
-                                <div style="text-align: left;">
-                                    <p style="margin:0; font-weight:700; color:#0F172A;">Nike Shoes Jordan</p>
-                                    <p style="margin:0; font-weight:800; font-size:1.2rem;">GH₵849.99</p>
+                        
+                        <div class="showcase-right-col">
+                            <div class="diagram-canvas">
+                                <!-- Phone Mockup Frame -->
+                                <div class="phone-frame">
+                                    <div class="phone-status-bar">
+                                        <span class="phone-time">9:41</span>
+                                        <div class="phone-notch"></div>
+                                        <span class="phone-icons">
+                                            <svg width="14" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+                                        </span>
+                                    </div>
+                                    <div class="phone-header">
+                                        <span class="phone-back">&lsaquo;</span>
+                                        <span class="phone-title-text">Check out Securely</span>
+                                        <span class="phone-plus">+</span>
+                                    </div>
+                                    <div class="phone-body-placeholder"></div>
+                                    <div class="phone-bottom-card">
+                                        <p class="phone-powered-label">Powered by <strong>trustlink</strong></p>
+                                        <p class="phone-powered-sub">Trust at every transaction</p>
+                                        <button class="phone-action-btn" type="button">Payment released</button>
+                                    </div>
+                                </div>
+
+                                <!-- Floating Card 1: Total Payment -->
+                                <div class="float-card float-top-left">
+                                    <div class="float-thumb-wrapper">
+                                        <img src="img/laptop-thumb.jpg" alt="Laptop" class="float-thumb-img">
+                                    </div>
+                                    <div class="float-details">
+                                        <div class="float-title">Total Payment</div>
+                                        <div class="float-amount">GH₵2,000</div>
+                                    </div>
+                                </div>
+
+                                <!-- Connector Lines SVG -->
+                                <svg class="diagram-connectors" viewBox="0 0 460 300" preserveAspectRatio="none">
+                                    <path d="M 175 68 L 270 68" stroke="#CBD5E1" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+                                    <path d="M 395 140 L 395 195 L 340 195" stroke="#CBD5E1" stroke-width="1.5" fill="none"/>
+                                    <path d="M 230 232 L 185 232" stroke="#CBD5E1" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+                                    <defs>
+                                        <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                            <polygon points="0 0, 6 3, 0 6" fill="#94A3B8" />
+                                        </marker>
+                                    </defs>
+                                </svg>
+
+                                <!-- Floating Card 2: Card / MoMo Form -->
+                                <div class="float-card float-top-right card-payment-details">
+                                    <div class="card-header-row">
+                                        <span class="card-field-title">Card / MoMo</span>
+                                        <span class="card-brand-badge visa-badge">VISA</span>
+                                    </div>
+                                    <div class="card-number-input">1256 7899 4599 1***</div>
+                                    <div class="card-meta-row">
+                                        <div class="card-meta-item">
+                                            <span class="card-meta-label">Expire Date</span>
+                                            <span class="card-meta-val">12/28</span>
+                                        </div>
+                                        <div class="card-meta-item">
+                                            <span class="card-meta-label">Secure code</span>
+                                            <span class="card-meta-val">489</span>
+                                        </div>
+                                    </div>
+                                    <button class="card-apple-btn" type="button">
+                                        <span>Pay with <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:-2px; margin-left:2px;"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.66-.82 1.11-1.96.99-3.1-.96.04-2.12.64-2.8 1.44-.6.69-1.12 1.83-.98 2.95 1.07.08 2.15-.55 2.79-1.29z"/></svg> Pay</span>
+                                    </button>
+                                </div>
+
+                                <!-- Status Badge 1: Deposit Secured -->
+                                <div class="status-pill status-pill-secured" style="top: 172px; right: 28px;">
+                                    <span>Deposit<br>Secured</span>
+                                    <span class="status-icon-blue">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </span>
+                                </div>
+
+                                <!-- Status Badge 2: Deal Completed -->
+                                <div class="status-pill status-pill-completed" style="top: 215px; right: 90px;">
+                                    <span>Deal completed</span>
+                                    <span class="status-icon-green">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tall Box: Stats -->
-                    <div class="bento-card bento-tall" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background: linear-gradient(135deg, #DCFCE7, #ECFDF5);">
-                        <div class="stat-card">
-                            <h3 style="color:#064E3B; font-size: 1.5rem;">Payment Protection</h3>
-                            <p style="color:#047857; font-weight:500;">Ring-fenced MoMo holding</p>
+                    <!-- 2. Online Vendors Pane -->
+                    <div class="showcase-pane" id="pane-online-vendors" role="tabpanel" aria-labelledby="tab-online-vendors">
+                        <div class="showcase-left-col">
+                            <div class="showcase-badge-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                            </div>
+                            <h3 class="showcase-pane-title">Online Vendors</h3>
+                            <p class="showcase-pane-desc">Protect your social sales across Instagram, WhatsApp, and TikTok. Generate secure escrow links in one tap and receive instant Mobile Money payouts upon delivery.</p>
+                            <a href="signup.html" class="showcase-learn-link">Create a TrustLink <span class="arrow">&rarr;</span></a>
                         </div>
-                        <div class="stat-card" style="margin-top: 24px;">
-                            <h3 style="color:#064E3B; font-size: 1.5rem;">Buyer Confirmation</h3>
-                            <p style="color:#047857; font-weight:500;">Payment release begins after delivery is confirmed</p>
-                        </div>
-                        <div class="stat-card" style="margin-top: 24px;">
-                            <h3 style="color:#064E3B; font-size: 1.5rem;">Dispute Protection</h3>
-                            <p style="color:#047857; font-weight:500;">Admin review for flagged orders</p>
-                        </div>
-                    </div>
+                        
+                        <div class="showcase-right-col">
+                            <div class="diagram-canvas">
+                                <!-- Phone Mockup Frame -->
+                                <div class="phone-frame">
+                                    <div class="phone-status-bar">
+                                        <span class="phone-time">9:41</span>
+                                        <div class="phone-notch"></div>
+                                        <span class="phone-icons">
+                                            <svg width="14" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+                                        </span>
+                                    </div>
+                                    <div class="phone-header">
+                                        <span class="phone-back">&lsaquo;</span>
+                                        <span class="phone-title-text">Social Checkout Secure</span>
+                                        <span class="phone-plus">+</span>
+                                    </div>
+                                    <div class="phone-body-placeholder"></div>
+                                    <div class="phone-bottom-card">
+                                        <p class="phone-powered-label">Powered by <strong>trustlink</strong></p>
+                                        <p class="phone-powered-sub">Trust at every transaction</p>
+                                        <button class="phone-action-btn" type="button">Funds Released to Seller</button>
+                                    </div>
+                                </div>
 
-                    <!-- Square Box 1 -->
-                    <div class="bento-card bento-square" style="background:#EFF6FF;">
-                        <h4 style="font-size:1.5rem; margin-bottom:12px; color:#1E3A8A;">Cross-Channel Alerts</h4>
-                        <p style="color:#3B82F6; font-size:0.95rem;">Real-time WhatsApp & SMS updates for both parties when payments are escrowed or shipped.</p>
-                    </div>
+                                <!-- Floating Card 1: Social Order Deposit -->
+                                <div class="float-card float-top-left">
+                                    <div class="float-thumb-wrapper">
+                                        <div class="float-thumb-placeholder" style="background:#EFF6FF; color:#2563EB;">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                        </div>
+                                    </div>
+                                    <div class="float-details">
+                                        <div class="float-title">Sneaker Order #1042</div>
+                                        <div class="float-amount">GH₵450.00</div>
+                                    </div>
+                                    <button class="float-btn" type="button">Pay with MoMo</button>
+                                </div>
 
-                    <!-- Wide Box 2 -->
-                    <div class="bento-card bento-wide" style="display:flex; align-items:center; flex-wrap: wrap; gap:32px;">
-                        <div style="flex:1; min-width:250px;">
-                            <h4 style="font-size:1.8rem; margin-bottom:12px;">Dispute Lock</h4>
-                            <p style="color:#64748B;">A dedicated button to freeze automated payouts pending admin review, keeping everyone safe.</p>
-                        </div>
-                        <div style="flex:1; text-align:center; min-width:200px;">
-                            <button class="btn btn-primary" style="background:#EF4444; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);">LOCK FUNDS</button>
-                        </div>
-                    </div>
+                                <!-- Connector Lines SVG -->
+                                <svg class="diagram-connectors" viewBox="0 0 460 300" preserveAspectRatio="none">
+                                    <path d="M 195 68 L 270 68" stroke="#CBD5E1" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+                                    <path d="M 390 125 L 390 170 L 320 170" stroke="#CBD5E1" stroke-width="1.5" fill="none"/>
+                                    <path d="M 220 232 L 185 232" stroke="#CBD5E1" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+                                </svg>
 
-                    <!-- Wide Box 3: API -->
-                    <div class="bento-card bento-wide" style="display:flex; align-items:center; flex-wrap: wrap; gap:32px; background: linear-gradient(to right, #1E1B4B, #312E81); color: white;">
-                        <div style="flex:1; min-width:250px;">
-                            <span class="badge" style="font-size:0.8rem; padding: 4px 12px; margin-bottom: 16px; background: #4F46E5; color: white; border: none;">Developer API</span>
-                            <h4 style="font-size:1.8rem; margin-bottom:12px; color: white;">Integrate TrustLink Anywhere</h4>
-                            <p style="color:#A5B4FC;">Automate your escrow flows natively in your own app or e-commerce platform with our robust REST API and webhooks.</p>
-                        </div>
-                        <div style="flex:1; text-align:center; min-width:200px;">
-                            <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; font-family: monospace; text-align: left; color: #818CF8; font-size: 0.9rem;">
-                                POST /api/v1/escrows<br>
-                                {<br>
-                                &nbsp;&nbsp;"amount": 450,<br>
-                                &nbsp;&nbsp;"currency": "GHS"<br>
-                                }
+                                <!-- Floating Card 2: MoMo Payout Details -->
+                                <div class="float-card float-top-right card-payment-details">
+                                    <div class="card-header-row">
+                                        <span class="card-field-title">Instant MoMo Payout</span>
+                                        <span class="card-brand-badge" style="background:#FEF3C7; color:#D97706;">MOMO</span>
+                                    </div>
+                                    <div class="split-info-row">
+                                        <div class="split-item">
+                                            <span class="split-label">Protected Deposit</span>
+                                            <span class="split-val">GH₵450.00</span>
+                                        </div>
+                                        <div class="split-item">
+                                            <span class="split-label">Vendor Payout</span>
+                                            <span class="split-val" style="color:#059669;">GH₵443.25</span>
+                                        </div>
+                                    </div>
+                                    <button class="card-apple-btn" type="button">
+                                        <span>Ship to Buyer</span>
+                                    </button>
+                                </div>
+
+                                <!-- Status Badge 1: Deposit Secured -->
+                                <div class="status-pill status-pill-secured" style="top: 155px; right: 30px;">
+                                    <span>Deposit Secured</span>
+                                    <span class="status-icon-blue">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </span>
+                                </div>
+
+                                <!-- Status Badge 2: Item Delivered -->
+                                <div class="status-pill status-pill-completed" style="top: 215px; right: 80px;">
+                                    <span>Item Delivered</span>
+                                    <span class="status-icon-green">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Square Box 2: Plugins -->
-                    <div class="bento-card bento-square" style="background:#FDF4FF; display: flex; flex-direction: column; justify-content: center;">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #F0ABFC; color: #86198F; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                    <!-- 3. Ecommerce Pane -->
+                    <div class="showcase-pane" id="pane-ecommerce" role="tabpanel" aria-labelledby="tab-ecommerce">
+                        <div class="showcase-left-col">
+                            <div class="showcase-badge-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                            </div>
+                            <h3 class="showcase-pane-title">Ecommerce</h3>
+                            <p class="showcase-pane-desc">Lower your actual transaction cost with an all-in-one escrow checkout built for Shopify, WooCommerce, and custom web stores.</p>
+                            <a href="signup.html" class="showcase-learn-link">Learn More <span class="arrow">&rarr;</span></a>
                         </div>
-                        <h4 style="font-size:1.5rem; margin-bottom:12px; color:#701A75;">Ready Plugins</h4>
-                        <p style="color:#A21CAF; font-size:0.95rem;">No coding needed. Install our official WooCommerce plugin and offer escrow checkout instantly.</p>
+                        
+                        <div class="showcase-right-col">
+                            <div class="diagram-canvas">
+                                <!-- Phone Mockup Frame -->
+                                <div class="phone-frame">
+                                    <div class="phone-status-bar">
+                                        <span class="phone-time">9:41</span>
+                                        <div class="phone-notch"></div>
+                                        <span class="phone-icons">
+                                            <svg width="14" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+                                        </span>
+                                    </div>
+                                    <div class="phone-header">
+                                        <span class="phone-back">&lsaquo;</span>
+                                        <span class="phone-title-text">Store Checkout</span>
+                                        <span class="phone-plus">+</span>
+                                    </div>
+                                    <div class="phone-body-placeholder"></div>
+                                    <div class="phone-bottom-card">
+                                        <p class="phone-powered-label">Powered by <strong>trustlink</strong></p>
+                                        <p class="phone-powered-sub">Trust at every transaction</p>
+                                        <button class="phone-action-btn" type="button">Payment released</button>
+                                    </div>
+                                </div>
+
+                                <!-- Floating Card 1: Total Payment -->
+                                <div class="float-card float-top-left">
+                                    <div class="float-thumb-wrapper">
+                                        <img src="img/laptop-thumb.jpg" alt="Laptop Product" class="float-thumb-img">
+                                    </div>
+                                    <div class="float-details">
+                                        <div class="float-title">Total Payment</div>
+                                        <div class="float-amount">GH₵2,000</div>
+                                    </div>
+                                </div>
+
+                                <!-- Connector Lines SVG -->
+                                <svg class="diagram-connectors" viewBox="0 0 460 300" preserveAspectRatio="none">
+                                    <path d="M 175 68 L 270 68" stroke="#CBD5E1" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+                                    <path d="M 395 140 L 395 195 L 340 195" stroke="#CBD5E1" stroke-width="1.5" fill="none"/>
+                                    <path d="M 230 232 L 185 232" stroke="#CBD5E1" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+                                </svg>
+
+                                <!-- Floating Card 2: Card / MoMo Form -->
+                                <div class="float-card float-top-right card-payment-details">
+                                    <div class="card-header-row">
+                                        <span class="card-field-title">Card</span>
+                                        <span class="card-brand-badge visa-badge">VISA</span>
+                                    </div>
+                                    <div class="card-number-input">1256 7899 4599 1***</div>
+                                    <div class="card-meta-row">
+                                        <div class="card-meta-item">
+                                            <span class="card-meta-label">Expire Date</span>
+                                            <span class="card-meta-val">12/28</span>
+                                        </div>
+                                        <div class="card-meta-item">
+                                            <span class="card-meta-label">Secure code</span>
+                                            <span class="card-meta-val">489</span>
+                                        </div>
+                                    </div>
+                                    <button class="card-apple-btn" type="button">
+                                        <span>Pay with <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:-2px; margin-left:2px;"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.66-.82 1.11-1.96.99-3.1-.96.04-2.12.64-2.8 1.44-.6.69-1.12 1.83-.98 2.95 1.07.08 2.15-.55 2.79-1.29z"/></svg> Pay</span>
+                                    </button>
+                                </div>
+
+                                <!-- Status Badge 1: Deposit Secured -->
+                                <div class="status-pill status-pill-secured" style="top: 172px; right: 28px;">
+                                    <span>Deposit<br>Secured</span>
+                                    <span class="status-icon-blue">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </span>
+                                </div>
+
+                                <!-- Status Badge 2: Order Delivered -->
+                                <div class="status-pill status-pill-completed" style="top: 215px; right: 90px;">
+                                    <span>Order delivered</span>
+                                    <span class="status-icon-green">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Marketplaces Pane -->
+                    <div class="showcase-pane" id="pane-marketplaces" role="tabpanel" aria-labelledby="tab-marketplaces">
+                        <div class="showcase-left-col">
+                            <div class="showcase-badge-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                            </div>
+                            <h3 class="showcase-pane-title">Marketplaces</h3>
+                            <p class="showcase-pane-desc">Integrate escrow workflows directly into your multi-vendor marketplace or platform with turnkey APIs & webhooks.</p>
+                            <a href="api-docs.html" class="showcase-learn-link">Learn More <span class="arrow">&rarr;</span></a>
+                        </div>
+                        
+                        <div class="showcase-right-col">
+                            <div class="diagram-canvas">
+                                <!-- Phone Mockup Frame -->
+                                <div class="phone-frame">
+                                    <div class="phone-status-bar">
+                                        <span class="phone-time">9:41</span>
+                                        <div class="phone-notch"></div>
+                                        <span class="phone-icons">
+                                            <svg width="14" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+                                        </span>
+                                    </div>
+                                    <div class="phone-header">
+                                        <span class="phone-back">&lsaquo;</span>
+                                        <span class="phone-title-text">Marketplace Checkout</span>
+                                        <span class="phone-plus">+</span>
+                                    </div>
+                                    <div class="phone-body-placeholder"></div>
+                                    <div class="phone-bottom-card">
+                                        <p class="phone-powered-label">Powered by <strong>trustlink</strong></p>
+                                        <p class="phone-powered-sub">Trust at every transaction</p>
+                                        <button class="phone-action-btn" type="button">Vendor payout released</button>
+                                    </div>
+                                </div>
+
+                                <!-- Floating Card 1: Order Deposit -->
+                                <div class="float-card float-top-left">
+                                    <div class="float-thumb-wrapper">
+                                        <div class="float-thumb-placeholder" style="background:#EFF6FF; color:#2563EB;">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                        </div>
+                                    </div>
+                                    <div class="float-details">
+                                        <div class="float-title">Vendor Order #4092</div>
+                                        <div class="float-amount">GH₵1,450.00</div>
+                                    </div>
+                                    <button class="float-btn" type="button">Pay now</button>
+                                </div>
+
+                                <!-- Connector Lines SVG -->
+                                <svg class="diagram-connectors" viewBox="0 0 460 300" preserveAspectRatio="none">
+                                    <!-- Path from Top-Left to Top-Right -->
+                                    <path d="M 180 68 L 270 68" stroke="#CBD5E1" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+                                    <!-- Path from Top-Right down to badges and phone -->
+                                    <path d="M 390 120 L 390 170 L 320 170" stroke="#CBD5E1" stroke-width="1.5" fill="none"/>
+                                    <path d="M 220 232 L 185 232" stroke="#CBD5E1" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+                                </svg>
+
+                                <!-- Floating Card 2: Split Payout -->
+                                <div class="float-card float-top-right card-payment-details">
+                                    <div class="card-header-row">
+                                        <span class="card-field-title">Instant Escrow Split</span>
+                                        <span class="card-brand-badge">ESCROW</span>
+                                    </div>
+                                    <div class="split-info-row">
+                                        <div class="split-item">
+                                            <span class="split-label">Platform Fee</span>
+                                            <span class="split-val">GH₵21.75</span>
+                                        </div>
+                                        <div class="split-item">
+                                            <span class="split-label">Vendor Payout</span>
+                                            <span class="split-val" style="color:#059669;">GH₵1,428.25</span>
+                                        </div>
+                                    </div>
+                                    <button class="card-apple-btn" type="button">
+                                        <span>Approve Split</span>
+                                    </button>
+                                </div>
+
+                                <!-- Status Badge 1: Escrow Secured -->
+                                <div class="status-pill status-pill-secured" style="top: 155px; right: 30px;">
+                                    <span>Escrow Locked</span>
+                                    <span class="status-icon-blue">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </span>
+                                </div>
+
+                                <!-- Status Badge 2: Buyer Confirmed -->
+                                <div class="status-pill status-pill-completed" style="top: 215px; right: 80px;">
+                                    <span>Buyer confirmed</span>
+                                    <span class="status-icon-green">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
