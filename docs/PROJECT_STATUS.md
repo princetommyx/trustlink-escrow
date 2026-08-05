@@ -13,18 +13,19 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 
 ## 🆕 Recent GitHub Updates
 
-- [x] **SMS Gateway Migration to SasuSync**: Transitioned SMS dispatch and phone verification OTP infrastructure to SasuSync (`https://sms.sasulabs.me`) with approved sender ID `TrustEscrow`. Updated `/api/v1/sms/send.js` serverless endpoint, Firebase Cloud Functions (`requestPhoneVerificationOtp` and `verifyPhoneVerificationOtp`), and client-side modules.
-- [x] **Dedicated Solutions Pages (Individuals)**: Built dedicated `individuals.html` solution page with modern typography, interactive feature showcases, localized Ghana Cedis examples, and updated site-wide navigation links.
-- [x] **Account Controls in Dashboard Settings**: Added account deactivation and deletion flows for users who want to close their TrustLink account.
-- [x] **Google Sign-In UX Improvements**: Added immediate toast feedback and visual loading states during sign-in.
-- [x] **Google Sign-In Reliability Fix**: Removed the first-tap popup failure by eliminating the async delay and adding a redirect fallback.
-- [x] **MoMo Sender ID Support**: Added configurable `MOOLRE_SENDER_ID` support for MTN Ghana whitelisted sender IDs.
-- [x] **Deployment Activation Update**: Triggered deployment to activate the `MOOLRE_VAS_KEY` environment variable.
-- [x] **Toast Copy Cleanup**: Stripped emojis from toast notification titles and messages across dashboard modules.
-- [x] **Landing Page Refinements**: Improved the landing page with a new `How it Works` section, logo/image scaling updates, cleaner profile button behavior, and site-wide footer/social integration.
-- [x] **Landing Page Performance & Polish**: Reduced blur-heavy rendering, added a lighter landing theme variant, standardized SEO and social metadata, and tightened site wrapper overflow/layout handling.
-- [x] **Navbar Unification**: Refined the landing-page navbar styling for a more consistent experience.
-- [x] **Dedicated Contact Page**: Added a polished `contact.html` page for support, partnerships, and general enquiries, with the page linked into the site navigation and footer.
+- [x] **Optimized Mobile Topbar & Header De-cluttering**: Standardized the mobile topbar into a clean, single-row `60px` layout across all dashboards (`dashboard.html`, `admin-dashboard.html`, `users-dashboard.html`). Removed redundant view titles on mobile, balanced left-aligned logo/menu controls, and converted the "Generate Report" action to a compact, accessible icon button matching the notification bell.
+- [x] **Admin Navigation & Sign-Out Redesign**: Moved the Sign-Out action from the admin topbar directly into the slide-out navigation menu for improved ergonomics and visual consistency.
+- [x] **Full Dedicated Solution Pages Suite**: Restored and linked all 4 dedicated solution pages:
+  - `individuals.html`: Peer-to-peer social sales and secondhand purchases.
+  - `online-vendors.html`: Instagram/TikTok/WhatsApp vendors with instant payment links.
+  - `ecommerce.html`: Direct store integrations and plugins.
+  - `marketplaces.html`: Classified platforms and multi-party escrow workflows.
+- [x] **Site-Wide Navigation & Showcase Link Restoration**: Updated the main navigation dropdown, showcase section feature cards, and footer links in `index.html` to route directly to the dedicated solution pages.
+- [x] **Repository Data Hygiene & Gitignore Updates**: Added SasuSync customer data exports (`sasusync-data-*.json`) to `.gitignore` to prevent sensitive operational logs from being tracked in source control.
+- [x] **Standardized OTP Phone Verification Service**: Replaced legacy OTP routines with unified `sendVerificationOTP` across all dashboard modules and serverless functions via SasuSync SMS gateway.
+- [x] **Account Management Lifecycle & Security Controls**: Added user-facing account deactivation and deletion modals, refined modal architecture, and enhanced route guards.
+- [x] **Google Sign-In UX & Reliability**: Eliminated popup block failures with immediate visual loading states and redirect fallback.
+- [x] **Ghana Cedis Pricing & Terms Transparency**: Ensured 100% Cedi formatting across all marketing calculators and qualified 72-hour auto-release terminology.
 
 ---
 
@@ -64,11 +65,13 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 
 ### 4. Vendor / Seller Dashboard (`dashboard.html`, `dashboard.js`, `dashboard.css`, `styles.css`)
 - [x] **Modern Light UI**: Frosted-glass aesthetic, clean typography, responsive navigation sidebar.
+- [x] **Optimized Mobile Topbar**: Single-row 60px height bar with crisp logo alignment, hamburger toggle, and balanced notification/action buttons.
 - [x] **Real-Time Financial Overview**: Live balance cards for Available Balance, Escrowed Funds, and Total Completed Volume.
 - [x] **Dynamic Escrow Link Generator**: Custom order description, amount in GH₵, buyer phone, delivery timeline, and flexible fee split rules (50/50, buyer 100%, seller 100%).
 - [x] **Dynamic Checkout Link Utility**: Generates shareable checkout URLs safely derived from `window.location.origin` or canonical domain with 1-click WhatsApp sharing and clipboard copy.
 - [x] **Product Catalogue & Quick Escrow**: Inventory modal enabling link creation directly from saved products.
 - [x] **Mobile Money Withdrawal Pipeline**: Disbursement validation for MTN, Telecel, and AT numbers with safety refund credit back to wallet on gateway failure.
+- [x] **Account Controls in Settings**: User self-service account deactivation and deletion workflows.
 - [x] **Live Firestore Ledger**: Real-time snapshot listeners categorizing escrows, deposits, and payouts.
 
 ### 5. Buyer Checkout & Payment Room (`checkout.html`, `checkout.js`)
@@ -85,23 +88,32 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 - [x] **Dispute Lock Mechanism**: One-click "Raise Dispute" freezing funds in state `DISPUTED` for admin review.
 
 ### 7. Admin Control Center (`admin-dashboard.html`, `admin-dashboard.js`, `admin-login.html`, `admin.css`)
-- [x] **Platform Metrics**: Overview of total volume, escrow fees earned, active contracts, and registered users.
+- [x] **Platform Metrics & Commission Wallet**: Real-time tracking of transaction volume, small transaction charges, fee splits, and platform revenue.
+- [x] **Slide-Out Sign-Out Menu**: Relocated admin Sign-Out action to the dedicated slide menu for streamlined header ergonomics.
+- [x] **De-Cluttered Mobile Topbar**: Single-row layout with compact icon-only report generation button and notifications.
 - [x] **Escrow Moderation Panel**: Filter, inspect, and moderate active, disputed, and completed contracts.
 - [x] **Arbitration Tools**: One-click "Forced Payout to Seller" and "Manual Refund to Buyer".
 
-### 8. Interactive WhatsApp Chatbot Engine (`functions/index.js`, `test-whatsapp-bot.js`)
+### 8. Dedicated Solutions Pages Suite (`individuals.html`, `online-vendors.html`, `ecommerce.html`, `marketplaces.html`, `solutions.css`, `solution-page.js`)
+- [x] **Individuals (`individuals.html`)**: P2P social buying/selling, secondhand deals, and delivery milestone protection.
+- [x] **Online Vendors (`online-vendors.html`)**: Instagram/TikTok/WhatsApp social commerce vendors with instant dynamic links.
+- [x] **E-Commerce (`ecommerce.html`)**: Online store integrations, WooCommerce plugins, and REST APIs.
+- [x] **Marketplaces (`marketplaces.html`)**: Classified platforms, multi-vendor marketplaces, and platform escrow APIs.
+- [x] **Interactive Components**: Real-time interactive fee split calculators, workflow tabs, localized examples, and responsive CTA banners.
+
+### 9. Interactive WhatsApp Chatbot Engine (`functions/index.js`, `test-whatsapp-bot.js`)
 - [x] **Dual Gateway (Meta Cloud API & Twilio)**: Dual support for official Meta Graph API and Twilio WhatsApp.
 - [x] **Meta Webhook Handshake**: Verification endpoint (`GET /api/whatsapp/webhook`).
 - [x] **Instant 1-Line Escrow Creation**: Command parser (`CREATE <Amount> <Item> <Buyer Phone>`).
 - [x] **Stateful Session Manager**: Firestore-backed session state machine (`whatsapp_sessions`) tracking multi-step order creation.
 - [x] **Live Orders & Balance**: Commands `STATUS`, `SHIP <EscrowID>`, and `BALANCE` executable directly from chat.
 
-### 9. Developer REST API & Sandbox (`api-docs.html`, `api-docs.js`, `functions/index.js`)
+### 10. Developer REST API & Sandbox (`api-docs.html`, `api-docs.js`, `functions/index.js`)
 - [x] **Developer Preview Labeling**: Labeled sandbox endpoints and responses as `Developer Preview` / `Example Response`.
-- [x] ** canonical Endpoint URLs**: Base URL set to `https://www.trustlinkgh.online/api/v1/escrows`.
+- [x] **Canonical Endpoint URLs**: Base URL set to `https://www.trustlinkgh.online/api/v1/escrows`.
 - [x] **Multi-Language Snippets**: Python, Node.js, cURL, and PHP code examples.
 
-### 10. WooCommerce Plugin (`trustlink-woocommerce-plugin/`)
+### 11. WooCommerce Plugin (`trustlink-woocommerce-plugin/`)
 - [x] **WooCommerce Escrow Payment Gateway**: WordPress PHP plugin file enabling TrustLink Escrow checkout on WooCommerce online stores.
 
 ---
