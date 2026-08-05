@@ -1338,11 +1338,17 @@ const modalDeactivate = document.getElementById('modal-deactivate-account');
 const modalDelete = document.getElementById('modal-delete-account');
 
 const closeDeactivateModal = () => {
-    if (modalDeactivate) modalDeactivate.classList.add('hidden');
+    if (modalDeactivate) {
+        modalDeactivate.classList.remove('active');
+        modalDeactivate.classList.add('hidden');
+    }
 };
 
 const closeDeleteModal = () => {
-    if (modalDelete) modalDelete.classList.add('hidden');
+    if (modalDelete) {
+        modalDelete.classList.remove('active');
+        modalDelete.classList.add('hidden');
+    }
     const deleteInput = document.getElementById('delete-confirmation-input');
     const deleteCheck = document.getElementById('delete-confirm-checkbox');
     const deleteBtn = document.getElementById('btn-confirm-delete');
@@ -1353,18 +1359,20 @@ const closeDeleteModal = () => {
     if (deleteBtn) {
         deleteBtn.disabled = true;
         deleteBtn.style.opacity = '0.5';
+        deleteBtn.style.cursor = 'not-allowed';
     }
 };
 
 // Check if user has active escrows
 async function checkActiveEscrows() {
-    if (!currentUser) return { hasActive: false, count: 0 };
+    const user = currentUser || auth.currentUser;
+    if (!user) return { hasActive: false, count: 0 };
     let count = 0;
     try {
         const terminalStatuses = ['completed', 'released', 'cancelled', 'canceled', 'refunded', 'rejected'];
         
         // Check seller escrows
-        const sellerQ = query(collection(db, "escrows"), where("sellerId", "==", currentUser.uid));
+        const sellerQ = query(collection(db, "escrows"), where("sellerId", "==", user.uid));
         const sellerSnap = await getDocs(sellerQ);
         sellerSnap.forEach(d => {
             const st = (d.data().status || '').toLowerCase().trim();
@@ -1372,8 +1380,8 @@ async function checkActiveEscrows() {
         });
 
         // Check buyer escrows
-        if (currentUser.email) {
-            const buyerQ = query(collection(db, "escrows"), where("buyerEmail", "==", currentUser.email));
+        if (user.email) {
+            const buyerQ = query(collection(db, "escrows"), where("buyerEmail", "==", user.email));
             const buyerSnap = await getDocs(buyerQ);
             buyerSnap.forEach(d => {
                 const st = (d.data().status || '').toLowerCase().trim();
@@ -1387,12 +1395,31 @@ async function checkActiveEscrows() {
 }
 
 // Open Deactivate Modal
-document.querySelectorAll('.btn-trigger-deactivate').forEach(btn => {
-    btn.addEventListener('click', async () => {
-        if (!currentUser) return;
+const openDeactivateModal = () => {
+    const user = currentUser || auth.currentUser;
+    if (!user) {
+        if (typeof showModernToast === 'function') {
+            showModernToast("Authentication Required", "Please sign in to manage account settings.", "warning");
+        } else {
+            alert("Please sign in to manage account settings.");
+        }
+        return;
+    }
+
+    if (modalDeactivate) {
+        modalDeactivate.classList.remove('hidden');
+        modalDeactivate.classList.add('active');
+        if (typeof gsap !== 'undefined') {
+            gsap.fromTo('#modal-deactivate-account .modal-content', 
+                { scale: 0.95, y: 20, opacity: 0 }, 
+                { scale: 1, y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' }
+            );
+        }
+    }
+
+    checkActiveEscrows().then(({ hasActive, count }) => {
         const warningBox = document.getElementById('deactivate-escrow-warning');
         if (warningBox) {
-            const { hasActive, count } = await checkActiveEscrows();
             if (hasActive) {
                 warningBox.innerHTML = `<strong>Active Orders (${count}):</strong> You have active or in-progress transactions. Please ensure all ongoing escrows are settled before deactivating.`;
                 warningBox.style.display = 'block';
@@ -1400,66 +1427,54 @@ document.querySelectorAll('.btn-trigger-deactivate').forEach(btn => {
                 warningBox.style.display = 'none';
             }
         }
-        if (modalDeactivate) {
-            modalDeactivate.classList.remove('hidden');
-            if (typeof gsap !== 'undefined') {
-                gsap.fromTo('#modal-deactivate-account .modal-content', 
-                    { scale: 0.95, y: 20, opacity: 0 }, 
-                    { scale: 1, y: 0, opacity: 1, duration: 0.35, ease: 'back.out(1.5)' }
-                );
-            }
-        }
-    });
-});
-
-document.getElementById('close-deactivate-modal')?.addEventListener('click', closeDeactivateModal);
-document.getElementById('btn-cancel-deactivate')?.addEventListener('click', closeDeactivateModal);
-modalDeactivate?.addEventListener('click', (e) => {
-    if (e.target === modalDeactivate) closeDeactivateModal();
-});
-
-// Confirm Deactivate
-document.getElementById('btn-confirm-deactivate')?.addEventListener('click', async () => {
-    if (!currentUser) return;
-    const btn = document.getElementById('btn-confirm-deactivate');
-    const reasonSelect = document.getElementById('deactivate-reason');
-    const reason = reasonSelect ? reasonSelect.value : '';
-
-    btn.disabled = true;
-    btn.textContent = 'Deactivating...';
-
-    try {
-        await updateDoc(doc(db, "users", currentUser.uid), {
-            accountStatus: "deactivated",
-            isDeactivated: true,
-            deactivatedAt: serverTimestamp(),
-            deactivationReason: reason || "User opted to deactivate"
-        });
-
-        showModernToast("Account Deactivated", "Your account has been deactivated. You can sign back in anytime to reactivate.", "info");
-        closeDeactivateModal();
-
-        setTimeout(async () => {
-            await signOut(auth);
-            window.location.href = "login.html?deactivated=true";
-        }, 1200);
-    } catch (err) {
-        console.error("Deactivation error:", err);
-        showModernToast("Deactivation Failed", err.message || "Failed to deactivate account.", "error");
-        btn.disabled = false;
-        btn.textContent = 'Confirm Deactivation';
-    }
-});
+    }).catch(err => console.warn("Active escrows check failed:", err));
+};
 
 // Open Delete Modal
-document.querySelectorAll('.btn-trigger-delete').forEach(btn => {
-    btn.addEventListener('click', async () => {
-        if (!currentUser) return;
-        
-        // Check active escrows / balance
+const openDeleteModal = () => {
+    const user = currentUser || auth.currentUser;
+    if (!user) {
+        if (typeof showModernToast === 'function') {
+            showModernToast("Authentication Required", "Please sign in to manage account settings.", "warning");
+        } else {
+            alert("Please sign in to manage account settings.");
+        }
+        return;
+    }
+
+    const passwordGroup = document.getElementById('delete-password-group');
+    const isPasswordUser = user.providerData && user.providerData.some(p => p.providerId === 'password');
+    if (passwordGroup) {
+        passwordGroup.style.display = isPasswordUser ? 'block' : 'none';
+    }
+
+    const deleteInput = document.getElementById('delete-confirmation-input');
+    const deleteCheck = document.getElementById('delete-confirm-checkbox');
+    const deleteBtn = document.getElementById('btn-confirm-delete');
+    const deletePass = document.getElementById('delete-account-password');
+    if (deleteInput) deleteInput.value = '';
+    if (deleteCheck) deleteCheck.checked = false;
+    if (deletePass) deletePass.value = '';
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.style.opacity = '0.5';
+        deleteBtn.style.cursor = 'not-allowed';
+    }
+
+    if (modalDelete) {
+        modalDelete.classList.remove('hidden');
+        modalDelete.classList.add('active');
+        if (typeof gsap !== 'undefined') {
+            gsap.fromTo('#modal-delete-account .modal-content', 
+                { scale: 0.95, y: 20, opacity: 0 }, 
+                { scale: 1, y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' }
+            );
+        }
+    }
+
+    checkActiveEscrows().then(({ hasActive, count }) => {
         const activeAlert = document.getElementById('delete-active-orders-alert');
         if (activeAlert) {
-            const { hasActive, count } = await checkActiveEscrows();
             if (hasActive || currentBalance > 0) {
                 let msg = '<strong>Active Records Detected:</strong> ';
                 if (hasActive && currentBalance > 0) {
@@ -1475,41 +1490,56 @@ document.querySelectorAll('.btn-trigger-delete').forEach(btn => {
                 activeAlert.style.display = 'none';
             }
         }
+    }).catch(err => console.warn("Active escrows check failed:", err));
+};
 
-        // Check if user has password provider (show password input)
-        const passwordGroup = document.getElementById('delete-password-group');
-        const isPasswordUser = currentUser.providerData && currentUser.providerData.some(p => p.providerId === 'password');
-        if (passwordGroup) {
-            passwordGroup.style.display = isPasswordUser ? 'block' : 'none';
-        }
-
-        // Reset delete inputs
-        const deleteInput = document.getElementById('delete-confirmation-input');
-        const deleteCheck = document.getElementById('delete-confirm-checkbox');
-        const deleteBtn = document.getElementById('btn-confirm-delete');
-        if (deleteInput) deleteInput.value = '';
-        if (deleteCheck) deleteCheck.checked = false;
-        if (deleteBtn) {
-            deleteBtn.disabled = true;
-            deleteBtn.style.opacity = '0.5';
-        }
-
-        if (modalDelete) {
-            modalDelete.classList.remove('hidden');
-            if (typeof gsap !== 'undefined') {
-                gsap.fromTo('#modal-delete-account .modal-content', 
-                    { scale: 0.95, y: 20, opacity: 0 }, 
-                    { scale: 1, y: 0, opacity: 1, duration: 0.35, ease: 'back.out(1.5)' }
-                );
-            }
-        }
+// Bind direct clicks & document delegation
+document.querySelectorAll('.btn-trigger-deactivate').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openDeactivateModal();
     });
+});
+
+document.querySelectorAll('.btn-trigger-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openDeleteModal();
+    });
+});
+
+document.addEventListener('click', (e) => {
+    const deactTrigger = e.target.closest('.btn-trigger-deactivate');
+    if (deactTrigger) {
+        e.preventDefault();
+        openDeactivateModal();
+        return;
+    }
+    const delTrigger = e.target.closest('.btn-trigger-delete');
+    if (delTrigger) {
+        e.preventDefault();
+        openDeleteModal();
+        return;
+    }
+});
+
+document.getElementById('close-deactivate-modal')?.addEventListener('click', closeDeactivateModal);
+document.getElementById('btn-cancel-deactivate')?.addEventListener('click', closeDeactivateModal);
+modalDeactivate?.addEventListener('click', (e) => {
+    if (e.target === modalDeactivate) closeDeactivateModal();
 });
 
 document.getElementById('close-delete-modal')?.addEventListener('click', closeDeleteModal);
 document.getElementById('btn-cancel-delete')?.addEventListener('click', closeDeleteModal);
 modalDelete?.addEventListener('click', (e) => {
     if (e.target === modalDelete) closeDeleteModal();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (modalDeactivate && modalDeactivate.classList.contains('active')) closeDeactivateModal();
+        if (modalDelete && modalDelete.classList.contains('active')) closeDeleteModal();
+    }
 });
 
 // Delete confirmation input & checkbox validation
@@ -1525,84 +1555,171 @@ function validateDeleteForm() {
     if (isMatch && isChecked) {
         deleteBtn.disabled = false;
         deleteBtn.style.opacity = '1';
+        deleteBtn.style.cursor = 'pointer';
     } else {
         deleteBtn.disabled = true;
         deleteBtn.style.opacity = '0.5';
+        deleteBtn.style.cursor = 'not-allowed';
     }
 }
 
 document.getElementById('delete-confirmation-input')?.addEventListener('input', validateDeleteForm);
 document.getElementById('delete-confirm-checkbox')?.addEventListener('change', validateDeleteForm);
 
-// Confirm Permanent Deletion
+// Confirm Deactivate Action
+document.getElementById('btn-confirm-deactivate')?.addEventListener('click', async () => {
+    const user = currentUser || auth.currentUser;
+    if (!user) {
+        alert("Please sign in.");
+        return;
+    }
+    const btn = document.getElementById('btn-confirm-deactivate');
+    const reasonSelect = document.getElementById('deactivate-reason');
+    const reason = reasonSelect ? reasonSelect.value : '';
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Deactivating...';
+    }
+
+    try {
+        await updateDoc(doc(db, "users", user.uid), {
+            accountStatus: "deactivated",
+            isDeactivated: true,
+            deactivatedAt: serverTimestamp(),
+            deactivationReason: reason || "User opted to deactivate"
+        });
+
+        if (typeof showModernToast === 'function') {
+            showModernToast("Account Deactivated", "Your account has been deactivated. You can sign back in anytime to reactivate.", "info");
+        }
+        closeDeactivateModal();
+
+        setTimeout(async () => {
+            if (typeof clearUserSession === 'function') clearUserSession();
+            try { await signOut(auth); } catch (_) {}
+            window.location.href = "login.html?deactivated=true";
+        }, 1200);
+    } catch (err) {
+        console.error("Deactivation error:", err);
+        if (typeof showModernToast === 'function') {
+            showModernToast("Deactivation Failed", err.message || "Failed to deactivate account.", "error");
+        } else {
+            alert("Deactivation Failed: " + err.message);
+        }
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Confirm Deactivation';
+        }
+    }
+});
+
+// Confirm Permanent Deletion Action
 document.getElementById('btn-confirm-delete')?.addEventListener('click', async () => {
-    if (!currentUser) return;
+    const user = currentUser || auth.currentUser;
+    if (!user) {
+        alert("Please sign in.");
+        return;
+    }
     const btn = document.getElementById('btn-confirm-delete');
     const passwordInput = document.getElementById('delete-account-password');
     const passwordGroup = document.getElementById('delete-password-group');
-    const isPasswordUser = currentUser.providerData && currentUser.providerData.some(p => p.providerId === 'password');
+    const isPasswordUser = user.providerData && user.providerData.some(p => p.providerId === 'password');
 
-    btn.disabled = true;
-    btn.textContent = 'Deleting Account...';
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Deleting Account...';
+    }
 
     try {
-        // Re-authenticate if password user and password entered
         if (isPasswordUser && passwordGroup && passwordGroup.style.display !== 'none') {
             const pwd = passwordInput ? passwordInput.value.trim() : '';
-            if (pwd) {
-                const cred = EmailAuthProvider.credential(currentUser.email, pwd);
-                await reauthenticateWithCredential(currentUser, cred);
+            if (pwd && user.email) {
+                const cred = EmailAuthProvider.credential(user.email, pwd);
+                await reauthenticateWithCredential(user, cred);
             }
         }
 
-        const userUid = currentUser.uid;
+        const userUid = user.uid;
 
-        // Clean up / mark user data in Firestore
         try {
-            // Delete user products
             const productsQ = query(collection(db, "products"), where("sellerId", "==", userUid));
             const productsSnap = await getDocs(productsQ);
-            const batch = writeBatch(db);
-            productsSnap.forEach(pDoc => {
-                batch.delete(doc(db, "products", pDoc.id));
-            });
-            await batch.commit();
+            if (!productsSnap.empty) {
+                const batch = writeBatch(db);
+                productsSnap.forEach(pDoc => {
+                    batch.delete(doc(db, "products", pDoc.id));
+                });
+                await batch.commit();
+            }
         } catch (prodErr) {
             console.warn("Could not batch delete user products:", prodErr);
         }
 
-        // Delete user document in Firestore
         try {
             await deleteDoc(doc(db, "users", userUid));
         } catch (uDocErr) {
             console.warn("Could not delete user doc, marking deleted:", uDocErr);
-            await updateDoc(doc(db, "users", userUid), {
-                accountStatus: "deleted",
-                isDeleted: true,
-                deletedAt: serverTimestamp()
-            });
+            try {
+                await updateDoc(doc(db, "users", userUid), {
+                    accountStatus: "deleted",
+                    isDeleted: true,
+                    deletedAt: serverTimestamp()
+                });
+            } catch (updErr) {
+                console.warn("Could not update user doc:", updErr);
+            }
         }
 
-        // Delete Firebase Auth User
-        await deleteUser(currentUser);
+        try {
+            await deleteUser(user);
+        } catch (authErr) {
+            if (authErr.code === 'auth/requires-recent-login') {
+                if (isPasswordUser && (!passwordInput || !passwordInput.value.trim())) {
+                    if (passwordGroup) passwordGroup.style.display = 'block';
+                    passwordInput?.focus();
+                    throw new Error("Please enter your current password above to re-authenticate and confirm account deletion.");
+                }
+                throw authErr;
+            }
+            console.warn("deleteUser warning:", authErr);
+        }
 
-        showModernToast("Account Deleted", "Your account has been permanently removed.", "success");
+        if (typeof showModernToast === 'function') {
+            showModernToast("Account Deleted", "Your account has been permanently removed.", "success");
+        }
         closeDeleteModal();
 
-        setTimeout(() => {
+        setTimeout(async () => {
+            if (typeof clearUserSession === 'function') clearUserSession();
+            try { await signOut(auth); } catch (_) {}
             window.location.href = "login.html?deleted=true";
         }, 1200);
     } catch (err) {
         console.error("Account deletion error:", err);
-        btn.disabled = false;
-        btn.textContent = 'Permanently Delete Account';
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Permanently Delete Account';
+        }
 
         if (err.code === 'auth/requires-recent-login') {
-            showModernToast("Security Verification Required", "For security reasons, please sign out, log back in, and try deleting your account again.", "warning");
+            if (typeof showModernToast === 'function') {
+                showModernToast("Security Verification Required", "For security reasons, please sign out, log back in, and try deleting your account again.", "warning");
+            } else {
+                alert("For security reasons, please sign out, log back in, and try deleting your account again.");
+            }
         } else if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-            showModernToast("Invalid Password", "The password you entered is incorrect. Please verify and try again.", "error");
+            if (typeof showModernToast === 'function') {
+                showModernToast("Invalid Password", "The password you entered is incorrect. Please verify and try again.", "error");
+            } else {
+                alert("The password you entered is incorrect. Please verify and try again.");
+            }
         } else {
-            showModernToast("Deletion Failed", err.message || "Failed to delete account.", "error");
+            if (typeof showModernToast === 'function') {
+                showModernToast("Deletion Failed", err.message || "Failed to delete account.", "error");
+            } else {
+                alert("Deletion Failed: " + err.message);
+            }
         }
     }
 });
