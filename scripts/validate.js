@@ -20,7 +20,7 @@ function assert(condition, message) {
     }
 }
 
-// 1. Required Legal & Core HTML Files Exist
+// 1. Required Legal & Core HTML/CSS/JS Files Exist
 const requiredFiles = [
     'terms.html',
     'privacy.html',
@@ -31,6 +31,12 @@ const requiredFiles = [
     'api-docs.html',
     'dashboard.html',
     'admin-dashboard.html',
+    'individuals.html',
+    'online-vendors.html',
+    'ecommerce.html',
+    'marketplaces.html',
+    'solutions.css',
+    'solution-page.js',
     'legal.css',
     'legal.js',
     'moolre-service.js',
@@ -47,7 +53,7 @@ requiredFiles.forEach(relPath => {
     assert(fs.existsSync(fullPath), `Required asset exists: ${relPath}`);
 });
 
-// 2. Check HTML files for obsolete node_modules references
+// 2. Check HTML files for obsolete node_modules & domain references
 const htmlFiles = [
     'index.html',
     'signup.html',
@@ -58,7 +64,11 @@ const htmlFiles = [
     'api-docs.html',
     'dashboard.html',
     'admin-dashboard.html',
-    'users-dashboard.html'
+    'users-dashboard.html',
+    'individuals.html',
+    'online-vendors.html',
+    'ecommerce.html',
+    'marketplaces.html'
 ];
 
 htmlFiles.forEach(file => {
@@ -70,7 +80,33 @@ htmlFiles.forEach(file => {
     }
 });
 
-// 3. Verify No Exposed Moolre Secret String Literals in JS source files
+// 3. Solution Page Specific Validations
+const solutionPages = [
+    { file: 'individuals.html', route: '/individuals' },
+    { file: 'online-vendors.html', route: '/online-vendors' },
+    { file: 'ecommerce.html', route: '/ecommerce' },
+    { file: 'marketplaces.html', route: '/marketplaces' }
+];
+
+solutionPages.forEach(({ file, route }) => {
+    const fullPath = path.join(ROOT_DIR, file);
+    if (fs.existsSync(fullPath)) {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        assert(content.includes('solutions.css'), `${file} includes solutions.css`);
+        assert(content.includes('solution-page.js'), `${file} includes solution-page.js`);
+        assert((content.match(/<main/g) || []).length === 1, `${file} includes exactly one <main> landmark`);
+        assert(content.includes(`rel="canonical" href="https://www.trustlinkgh.online${route}"`), `${file} includes correct canonical URL`);
+        assert(content.includes('individuals.html'), `${file} links to individuals.html`);
+        assert(content.includes('online-vendors.html'), `${file} links to online-vendors.html`);
+        assert(content.includes('ecommerce.html'), `${file} links to ecommerce.html`);
+        assert(content.includes('marketplaces.html'), `${file} links to marketplaces.html`);
+        assert(content.includes('terms.html'), `${file} links to terms.html`);
+        assert(content.includes('privacy.html'), `${file} links to privacy.html`);
+        assert(!content.includes('localhost'), `${file} contains no development localhost URLs`);
+    }
+});
+
+// 4. Verify No Exposed Moolre Secret String Literals in JS source files
 const sensitiveJsFiles = [
     'moolre-service.js',
     'functions/index.js',
@@ -79,7 +115,8 @@ const sensitiveJsFiles = [
     'checkout.js',
     'dashboard.js',
     'admin-dashboard.js',
-    'session-manager.js'
+    'session-manager.js',
+    'solution-page.js'
 ];
 
 const secretLiteralsToDisallow = [
@@ -99,7 +136,7 @@ sensitiveJsFiles.forEach(file => {
     }
 });
 
-// 4. Verify WooCommerce Plugin Source
+// 5. Verify WooCommerce Plugin Source
 const wcGatewayFile = path.join(ROOT_DIR, 'trustlink-woocommerce-plugin', 'class-wc-gateway-trustlink.php');
 if (fs.existsSync(wcGatewayFile)) {
     const content = fs.readFileSync(wcGatewayFile, 'utf8');
@@ -107,7 +144,7 @@ if (fs.existsSync(wcGatewayFile)) {
     assert(content.includes('api_url'), 'WooCommerce plugin gateway features configurable api_url setting');
 }
 
-// 5. Verify api-docs.js fake timer removal
+// 6. Verify api-docs.js fake timer removal
 const apiDocsJsFile = path.join(ROOT_DIR, 'api-docs.js');
 if (fs.existsSync(apiDocsJsFile)) {
     const content = fs.readFileSync(apiDocsJsFile, 'utf8');

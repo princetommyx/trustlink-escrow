@@ -242,33 +242,83 @@ if (mobileMenuBtn && navLinks) {
     }
 
     // -------------------------------------------------------------
-    // Showcase Category Tabs Controller
+    // Showcase Category Tabs Controller with Hash & Keyboard Support
     // -------------------------------------------------------------
-    const showcaseTabs = document.querySelectorAll('.showcase-tab');
-    const showcasePanes = document.querySelectorAll('.showcase-pane');
+    const showcaseTabs = Array.from(document.querySelectorAll('.showcase-tab'));
+    const showcasePanes = Array.from(document.querySelectorAll('.showcase-pane'));
+    const VALID_SHOWCASE_TABS = ['individuals', 'online-vendors', 'ecommerce', 'marketplaces'];
 
     if (showcaseTabs.length > 0 && showcasePanes.length > 0) {
-        showcaseTabs.forEach(tab => {
+        const switchShowcaseTab = (targetTab, shouldScroll = false) => {
+            if (!VALID_SHOWCASE_TABS.includes(targetTab)) return;
+
+            showcaseTabs.forEach((tab) => {
+                const isMatch = tab.getAttribute('data-tab') === targetTab;
+                tab.classList.toggle('active', isMatch);
+                tab.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+                tab.setAttribute('tabindex', isMatch ? '0' : '-1');
+            });
+
+            showcasePanes.forEach((pane) => {
+                const isMatch = pane.id === `pane-${targetTab}`;
+                pane.classList.toggle('active', isMatch);
+                if (isMatch) {
+                    pane.removeAttribute('aria-hidden');
+                } else {
+                    pane.setAttribute('aria-hidden', 'true');
+                }
+            });
+
+            if (shouldScroll) {
+                const section = document.querySelector('.showcase-section');
+                if (section) {
+                    section.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        };
+
+        // Click listeners
+        showcaseTabs.forEach((tab, index) => {
             tab.addEventListener('click', () => {
                 const targetTab = tab.getAttribute('data-tab');
-                if (!targetTab) return;
+                switchShowcaseTab(targetTab, false);
+            });
 
-                // Update active tab states
-                showcaseTabs.forEach(t => {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
-                });
-                tab.classList.add('active');
-                tab.setAttribute('aria-selected', 'true');
+            // Keyboard Navigation (ArrowLeft, ArrowRight, Home, End)
+            tab.addEventListener('keydown', (e) => {
+                let nextIndex = index;
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    nextIndex = (index + 1) % showcaseTabs.length;
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    nextIndex = (index - 1 + showcaseTabs.length) % showcaseTabs.length;
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    nextIndex = 0;
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    nextIndex = showcaseTabs.length - 1;
+                }
 
-                // Switch visible pane
-                showcasePanes.forEach(pane => {
-                    if (pane.id === `pane-${targetTab}`) {
-                        pane.classList.add('active');
-                    } else {
-                        pane.classList.remove('active');
-                    }
-                });
+                if (nextIndex !== index) {
+                    const nextTab = showcaseTabs[nextIndex];
+                    nextTab.focus();
+                    const targetTabName = nextTab.getAttribute('data-tab');
+                    switchShowcaseTab(targetTabName, false);
+                }
             });
         });
+
+        // Hash change controller
+        const handleHashTab = (shouldScroll = false) => {
+            const hash = window.location.hash.replace('#', '');
+            if (VALID_SHOWCASE_TABS.includes(hash)) {
+                switchShowcaseTab(hash, shouldScroll);
+            }
+        };
+
+        // Initialize on load and listen to hashchange
+        handleHashTab(false);
+        window.addEventListener('hashchange', () => handleHashTab(true));
     }
