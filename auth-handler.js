@@ -184,11 +184,28 @@ onAuthStateChanged(auth, async (user) => {
                 }
             } catch(e) {}
             
-            navLinks.innerHTML = `
-                <a href="index.html">Home</a>
-                <a href="dashboard.html">Dashboard</a>
-                <a href="#" id="nav-logout-btn" style="color: #ef4444;">Logout (${displayName})</a>
-            `;
+            // Seamlessly update CTA group without destroying Solutions/Company dropdowns
+            const navCtaGroup = document.querySelector(".nav-cta-group");
+            if (navCtaGroup) {
+                navCtaGroup.innerHTML = `
+                    <a href="dashboard.html" class="btn-nav-transact">
+                        Dashboard <span class="btn-arrow">&rarr;</span>
+                    </a>
+                    <a href="#" id="nav-logout-btn" class="btn-nav-contact" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                        Logout (${displayName})
+                    </a>
+                `;
+            }
+
+            // Update login link in dropdown menu if present
+            const dropdownLoginLink = document.querySelector('.dropdown-menu a[href="login.html"]');
+            if (dropdownLoginLink) {
+                dropdownLoginLink.href = "dashboard.html";
+                const title = dropdownLoginLink.querySelector(".item-title");
+                const desc = dropdownLoginLink.querySelector(".item-desc");
+                if (title) title.textContent = "Dashboard";
+                if (desc) desc.textContent = `Signed in as ${displayName}`;
+            }
             
             const logoutBtn = document.getElementById("nav-logout-btn");
             if (logoutBtn) {

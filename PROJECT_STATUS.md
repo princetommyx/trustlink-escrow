@@ -1,7 +1,7 @@
 # 🚀 TrustLink Escrow — Comprehensive Project Status & Development Progress
 
 > **Production Canonical Domain:** [https://www.trustlinkgh.online/](https://www.trustlinkgh.online/)  
-> **Last Updated:** August 3, 2026
+> **Last Updated:** August 5, 2026
 
 ---
 
@@ -10,6 +10,19 @@
 **TrustLink Escrow** is a Mobile Money–first protected payment infrastructure designed for social commerce vendors (Instagram DMs, TikTok, X, and WhatsApp Status) and e-commerce merchants across Ghana and West Africa.
 
 The platform enables sellers to mint instant dynamic checkout & tracking links, collects payments via **Moolre Mobile Money (MTN MoMo, Telecel Cash, AT Money)**, ring-fences funds safely in logical escrow state records, dispatches milestone SMS/WhatsApp alerts, and releases funds automatically to vendor wallets upon buyer delivery confirmation or admin arbitration.
+
+## 🆕 Recent GitHub Updates
+
+- [x] **Account Controls in Dashboard Settings**: Added account deactivation and deletion flows for users who want to close their TrustLink account.
+- [x] **Google Sign-In UX Improvements**: Added immediate toast feedback and visual loading states during sign-in.
+- [x] **Google Sign-In Reliability Fix**: Removed the first-tap popup failure by eliminating the async delay and adding a redirect fallback.
+- [x] **MoMo Sender ID Support**: Added configurable `MOOLRE_SENDER_ID` support for MTN Ghana whitelisted sender IDs.
+- [x] **Deployment Activation Update**: Triggered deployment to activate the `MOOLRE_VAS_KEY` environment variable.
+- [x] **Toast Copy Cleanup**: Stripped emojis from toast notification titles and messages across dashboard modules.
+- [x] **Landing Page Refinements**: Improved the landing page with a new `How it Works` section, logo/image scaling updates, cleaner profile button behavior, and site-wide footer/social integration.
+- [x] **Landing Page Performance & Polish**: Reduced blur-heavy rendering, added a lighter landing theme variant, standardized SEO and social metadata, and tightened site wrapper overflow/layout handling.
+- [x] **Navbar Unification**: Refined the landing-page navbar styling for a more consistent experience.
+- [x] **Dedicated Contact Page**: Added a polished `contact.html` page for support, partnerships, and general enquiries, with the page linked into the site navigation and footer.
 
 ---
 

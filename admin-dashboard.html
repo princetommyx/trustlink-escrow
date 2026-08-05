@@ -81,20 +81,26 @@
 
         <main class="dashboard-main">
             <header class="dashboard-topbar">
-                <div style="display: flex; align-items: center;">
-                    <button id="topbar-menu-toggle" class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
+                <div class="topbar-left">
+                    <a href="index.html" class="logo">
+                        <img src="img/logo.png" alt="TrustLink Logo">
+                    </a>
+                    <button id="topbar-menu-toggle" class="btn-icon" aria-label="Toggle Navigation"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
                     <h1 class="topbar-title" id="current-view-title">Overview</h1>
                 </div>
                 <div class="topbar-actions">
                     <div class="notif-wrapper">
-                        <button class="btn-icon" id="btn-notifications" aria-label="Notifications"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg><span id="notif-dot" class="notif-dot hidden"></span></button>
+                        <button class="btn-icon" id="btn-notifications" aria-label="Notifications"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg><span id="notif-dot" class="notif-dot hidden"></span></button>
                         <div id="notif-dropdown" class="notif-dropdown hidden">
                             <div class="notif-header">Needs your attention</div>
                             <div id="notif-list"><div class="notif-empty">All clear 🎉</div></div>
                         </div>
                     </div>
-                    <button id="btn-signout-top" class="btn btn-outline btn-sm" style="margin-left: 8px; border-color: var(--danger); color: var(--danger);">Sign Out</button>
-                    <button class="btn btn-primary btn-sm" id="btn-topbar-generate-report" style="background: #9333ea; border-color: #9333ea; font-weight: 600; box-shadow: 0 2px 6px rgba(147, 51, 234, 0.25);">Generate Report</button>
+                    <button id="btn-signout-top" class="btn btn-outline btn-sm">Sign Out</button>
+                    <button class="btn btn-primary btn-sm" id="btn-topbar-generate-report">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        <span>Generate Report</span>
+                    </button>
                 </div>
             </header>
             
