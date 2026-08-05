@@ -1,7 +1,7 @@
 # 🚀 TrustLink Escrow — Comprehensive Project Status & Development Progress
 
 > **Production Canonical Domain:** [https://www.trustlinkgh.online/](https://www.trustlinkgh.online/)  
-> **Last Updated:** August 4, 2026
+> **Last Updated:** August 5, 2026
 
 ---
 
@@ -10,6 +10,20 @@
 **TrustLink Escrow** is a Mobile Money–first protected payment infrastructure designed for social commerce vendors (Instagram DMs, TikTok, X, and WhatsApp Status) and e-commerce merchants across Ghana and West Africa.
 
 The platform enables sellers to mint instant dynamic checkout & tracking links, collects payments via **Moolre Mobile Money (MTN MoMo, Telecel Cash, AT Money)**, ring-fences funds safely in logical escrow state records, dispatches milestone SMS/WhatsApp alerts, and releases funds automatically to vendor wallets upon buyer delivery confirmation or admin arbitration.
+
+## 🆕 Recent GitHub Updates
+
+- [x] **User & Admin Dashboard Navbar Alignment & Logo Sizing**: Unified top navigation bar structure, typography, and branding across `index.html`, `dashboard.html`, and `admin-dashboard.html`. Scaled TrustLink logo dimensions across all desktop/mobile breakpoints, eliminated conflicting grey backgrounds for clean white surfaces, and added safe area support for mobile devices.
+- [x] **Full Account Deactivation & Deletion Lifecycle**: Implemented functional account deactivation (reversible status change + instant session sign-out) and permanent deletion (with password/Google re-authentication, typing confirmation `DELETE`, ongoing order warnings, and complete Firestore data purging).
+- [x] **Profile Status & Verification Badge Center**: Added live account status badges (`Active`, `Deactivated`, `Suspended`) and verification indicators (`Email Verified`, `Phone Verified`) to the user profile dashboard view.
+- [x] **Admin User Management & Status Moderation**: Enhanced `admin-dashboard.html` / `admin-dashboard.js` with admin controls to inspect registered users, toggle account status (`Active`, `Suspended`, `Deactivated`), and manually manage phone verification.
+- [x] **Authentication Suspension Guard**: Updated `auth-handler.js` to inspect user account status during sign-in, automatically blocking suspended accounts and notifying deactivated accounts.
+- [x] **Mobile Dropdown & Menu UX Polish**: Improved mobile topbar menu layout, dropdown interaction handling, safe-area padding, and modal responsiveness.
+- [x] **Dedicated Contact Page**: Added a polished `contact.html` page for support, partnerships, and general enquiries, with the page linked into site navigation and footer.
+- [x] **Google Sign-In UX & Reliability**: Added immediate toast feedback and visual loading states during sign-in, eliminated first-tap popup failures, and added redirect fallbacks.
+- [x] **MoMo Sender ID Support**: Added configurable `MOOLRE_SENDER_ID` support for MTN Ghana whitelisted sender IDs.
+- [x] **Toast Copy Cleanup**: Stripped emojis from toast notification titles and messages across dashboard modules.
+- [x] **Landing Page Performance & Polish**: Reduced blur-heavy rendering, added a lighter landing theme variant, standardized SEO and social metadata, and tightened site wrapper overflow/layout handling.
 
 ---
 
@@ -34,7 +48,7 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 - [x] **Qualified Marketing Claims**: Replaced unverified guarantees with accurate terms (*Payment Protection*, *Buyer Confirmation*, *Dispute Protection*, *Clear release and dispute rules*, *Built for Ghana's social vendors*).
 - [x] **Truthful 72-Hour Release Copy**: Replaced auto-release claims with clear buyer confirmation copy (*"Payment release begins after delivery is confirmed, subject to any active dispute and payment-provider processing"*).
 - [x] **Production Domain Routing**: Canonical URLs (`https://www.trustlinkgh.online/`) and Open Graph tags integrated.
-- [x] **Footer Legal Links**: Preserved 4-column footer layout with direct working links to `terms.html` and `privacy.html`.
+- [x] **Footer Legal Links**: Preserved 4-column footer layout with direct working links to `terms.html`, `privacy.html`, and `contact.html`.
 
 ### 2. Terms of Use & Privacy Policy (`terms.html`, `privacy.html`, `legal.css`, `legal.js`)
 - [x] **Production-Quality Terms of Use (`terms.html`)**: 24 plain-English sections covering eligibility, account security, platform scope, fee allocation, buyer/seller responsibilities, delivery confirmation, dispute holds, disclaimers, and Ghanaian law governance.
@@ -43,12 +57,15 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 
 ### 3. Authentication & User Management (`login.html`, `signup.html`, `reset-password.html`, `auth-handler.js`)
 - [x] **Email & Password Authentication**: Registration, sign-in, and password reset via Firebase Auth.
-- [x] **Google OAuth 1-Click Login**: Google Sign-In with automatic Firestore profile creation.
+- [x] **Google OAuth 1-Click Login**: Google Sign-In with automatic Firestore profile creation and redirect fallback.
+- [x] **Account Deactivation & Deletion Security**: Self-service deactivation and deletion flows with mandatory re-authentication and confirmation safeguards.
+- [x] **Suspension & Status Auth Guards**: `auth-handler.js` checks Firestore `accountStatus` upon sign-in to enforce account suspensions and manage deactivated accounts.
 - [x] **Legal Agreement Checkboxes**: Signup agreement updated to *"I agree to the Terms of Use and acknowledge the Privacy Policy"* with active links, plus Google OAuth legal notice.
 - [x] **Role-Based Routing & Session Persistence**: Automatic redirection to vendor dashboard (`dashboard.html`) or admin panel (`admin-dashboard.html`) with auth state guards.
 
-### 4. Vendor / Seller Dashboard (`dashboard.html`, `dashboard.js`, `dashboard.css`, `styles.css`)
-- [x] **Modern Light UI**: Frosted-glass aesthetic, clean typography, responsive navigation sidebar.
+### 4. Vendor / Seller Dashboard (`dashboard.html`, `dashboard.js`, `dashboard.mjs`, `dashboard.css`, `styles.css`)
+- [x] **Unified Responsive Navbar**: Standardized topbar design matching the landing page with enlarged TrustLink logo, clean white container surfaces, and mobile-friendly drawer menu.
+- [x] **Profile Status & Verification Badge Display**: Live account status pills (`Active`, `Deactivated`, `Suspended`) and verification indicators for Email and Phone numbers.
 - [x] **Real-Time Financial Overview**: Live balance cards for Available Balance, Escrowed Funds, and Total Completed Volume.
 - [x] **Dynamic Escrow Link Generator**: Custom order description, amount in GH₵, buyer phone, delivery timeline, and flexible fee split rules (50/50, buyer 100%, seller 100%).
 - [x] **Dynamic Checkout Link Utility**: Generates shareable checkout URLs safely derived from `window.location.origin` or canonical domain with 1-click WhatsApp sharing and clipboard copy.
@@ -70,6 +87,8 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 - [x] **Dispute Lock Mechanism**: One-click "Raise Dispute" freezing funds in state `DISPUTED` for admin review.
 
 ### 7. Admin Control Center (`admin-dashboard.html`, `admin-dashboard.js`, `admin-login.html`, `admin.css`)
+- [x] **Unified Navbar & Visual Styling**: Realigned navigation header and logo sizing to match dashboard and landing page design.
+- [x] **User Moderation & Account Status Control**: Admin tools to view registered users, change status (`Active`, `Suspended`, `Deactivated`), and verify user phone numbers.
 - [x] **Platform Metrics**: Overview of total volume, escrow fees earned, active contracts, and registered users.
 - [x] **Escrow Moderation Panel**: Filter, inspect, and moderate active, disputed, and completed contracts.
 - [x] **Arbitration Tools**: One-click "Forced Payout to Seller" and "Manual Refund to Buyer".
@@ -83,18 +102,11 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 
 ### 9. Developer REST API & Sandbox (`api-docs.html`, `api-docs.js`, `functions/index.js`)
 - [x] **Developer Preview Labeling**: Labeled sandbox endpoints and responses as `Developer Preview` / `Example Response`.
-- [x] ** canonical Endpoint URLs**: Base URL set to `https://www.trustlinkgh.online/api/v1/escrows`.
+- [x] **Canonical Endpoint URLs**: Base URL set to `https://www.trustlinkgh.online/api/v1/escrows`.
 - [x] **Multi-Language Snippets**: Python, Node.js, cURL, and PHP code examples.
 
 ### 10. WooCommerce Plugin (`trustlink-woocommerce-plugin/`)
 - [x] **WooCommerce Escrow Payment Gateway**: WordPress PHP plugin file enabling TrustLink Escrow checkout on WooCommerce online stores.
-
-### 11. Contextual Social Links, UI States & Mobile Optimization (`ui-states.css`, `ui-states.js`, `img/social/`)
-- [x] **Official Social Links & Local SVGs**: Added locally stored, themed, accessible SVG icons (`linkedin.svg`, `instagram.svg`, `tiktok.svg`, `facebook.svg`) to footers on `index.html`, `terms.html`, and `privacy.html`.
-- [x] **Google Search Console & SEO Optimization**: Added `Organization` JSON-LD structured data with `sameAs` array referencing official social handles on `index.html`, canonical tags, Open Graph, meta descriptions, and sitemap/robots optimization.
-- [x] **Reusable UI State System (`window.TrustLinkUI`)**: Global state handlers for Empty Data, Skeleton Loading shimmers, Form Validation errors, Slow Network feedback (4s threshold), Connectivity notifications (Offline/Reconnected banner), and Session Expiration modal dialogs.
-- [x] **Mobile UX & Accessibility Enhancements**: Fixed touch targets to WCAG 2.1 AA minimum (44×44px), added 16px minimum font size on mobile inputs to eliminate iOS Safari focus zoom, removed global body overflow constraints in favor of contained `.site-wrapper { overflow-x: clip; }`, and added body scroll locking when mobile navigation is active.
-- [x] **100% Validation Pass**: All 56/56 automated static security and reliability checks passing (`npm test`).
 
 ---
 
