@@ -74,13 +74,21 @@ if (mobileMenuBtn && navLinks) {
             e.preventDefault();
             const parentDropdown = dropdownToggle.closest('.nav-dropdown');
             if (parentDropdown) {
-                parentDropdown.classList.toggle('open');
+                const isOpen = parentDropdown.classList.contains('open');
+                // Close other dropdowns
+                document.querySelectorAll('.nav-dropdown').forEach(d => {
+                    d.classList.remove('open');
+                    d.classList.remove('active');
+                });
+                if (!isOpen) {
+                    parentDropdown.classList.add('open');
+                }
             }
             return;
         }
 
         const targetLink = e.target.closest('a');
-        if (targetLink) {
+        if (targetLink && !targetLink.classList.contains('nav-link-dropdown-toggle')) {
             closeMobileMenu();
         }
     });
@@ -105,6 +113,7 @@ if (mobileMenuBtn && navLinks) {
         let closeTimer = null;
 
         const open = () => {
+            if (window.innerWidth <= 991) return;
             // Close any other open dropdowns first
             document.querySelectorAll('.nav-dropdown.active').forEach(other => {
                 if (other !== dropdown) other.classList.remove('active');
@@ -114,6 +123,7 @@ if (mobileMenuBtn && navLinks) {
         };
 
         const scheduleClose = () => {
+            if (window.innerWidth <= 991) return;
             clearTimeout(closeTimer);
             closeTimer = setTimeout(() => {
                 dropdown.classList.remove('active');
