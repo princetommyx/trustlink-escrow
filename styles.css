@@ -747,53 +747,59 @@ h1, h2, h3, h4 {
 
 /* Footer */
 .footer {
-    border-top: 1px solid var(--surface-border);
-    padding: 80px 0 40px;
-    background: rgba(0,0,0,0.3);
+    border-top: 1px solid #E2E8F0;
+    padding: 48px 0 32px;
+    background: #FFFFFF;
 }
 
 .footer-container {
     display: grid;
-    grid-template-columns: 2fr 3fr;
-    gap: 60px;
-    margin-bottom: 60px;
+    grid-template-columns: 1fr 2.5fr;
+    gap: 48px;
+    margin-bottom: 36px;
 }
 
 .footer-brand p {
     color: var(--text-muted);
-    margin-top: 20px;
-    max-width: 300px;
+    margin-top: 14px;
+    max-width: 280px;
+    font-size: 0.92rem;
+    line-height: 1.5;
 }
 
 .footer-links {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
 }
 
 .link-group h4 {
-    margin-bottom: 24px;
-    font-size: 1.1rem;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    color: #0F172A;
 }
 
 .link-group a {
     display: block;
-    color: var(--text-muted);
+    color: #64748B;
     text-decoration: none;
-    margin-bottom: 12px;
-    transition: color 0.3s;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    transition: color 0.15s ease;
 }
 
 .link-group a:hover {
-    color: var(--primary);
+    color: #2563EB;
 }
 
 .copyright {
     text-align: center;
-    color: var(--text-muted);
-    padding-top: 40px;
-    border-top: 1px solid var(--surface-border);
-    font-size: 0.9rem;
+    color: #94A3B8;
+    padding-top: 24px;
+    border-top: 1px solid #F1F5F9;
+    font-size: 0.85rem;
 }
 
 /* Animations */
@@ -844,14 +850,15 @@ h1, h2, h3, h4 {
     .cta-box h2 { font-size: 2rem; }
     .cta-box { padding: 40px 20px; }
     
-    .footer-container { grid-template-columns: 1fr; }
-    .footer-links { grid-template-columns: 1fr 1fr; }
+    .footer-container { grid-template-columns: 1fr; gap: 32px; }
+    .footer-links { grid-template-columns: repeat(4, 1fr); gap: 24px; }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .hero-cta { flex-direction: column; }
     .btn-large { width: 100%; }
-    .footer-links { grid-template-columns: 1fr; }
+    .footer-links { grid-template-columns: repeat(2, 1fr); gap: 24px 16px; }
+}
 }
 
 /* Toast Notification */
