@@ -55,6 +55,14 @@ body {
 
 .mobile-bottom-nav {
     display: none;
+    text-decoration: none !important;
+}
+
+.mobile-bottom-nav a,
+.mobile-bottom-nav .nav-item,
+.mobile-bottom-nav .nav-text {
+    text-decoration: none !important;
+    -webkit-text-decoration: none !important;
 }
 
 .sidebar-header {
@@ -1301,6 +1309,14 @@ input[type=number] {
         z-index: 1000;
         padding-top: 6px;
         padding-bottom: env(safe-area-inset-bottom);
+        text-decoration: none !important;
+        -webkit-text-decoration: none !important;
+    }
+    .mobile-bottom-nav a,
+    .mobile-bottom-nav .nav-item,
+    .mobile-bottom-nav .nav-text {
+        text-decoration: none !important;
+        -webkit-text-decoration: none !important;
     }
     .mobile-bottom-nav .nav-item {
         flex-direction: column; padding: 4px 2px; border-radius: 8px;
@@ -1309,10 +1325,30 @@ input[type=number] {
         background: transparent;
         box-shadow: none;
         gap: 2px;
+        text-decoration: none !important;
+        -webkit-text-decoration: none !important;
         transition: color 0.15s ease;
+    }
+    .mobile-bottom-nav a:hover,
+    .mobile-bottom-nav a:focus,
+    .mobile-bottom-nav a:active,
+    .mobile-bottom-nav a:visited,
+    .mobile-bottom-nav .nav-item:hover,
+    .mobile-bottom-nav .nav-item:focus,
+    .mobile-bottom-nav .nav-item:active,
+    .mobile-bottom-nav .nav-item:visited {
+        text-decoration: none !important;
+        -webkit-text-decoration: none !important;
+        transform: none;
+    }
+    .mobile-bottom-nav .nav-text {
+        text-decoration: none !important;
+        -webkit-text-decoration: none !important;
+        line-height: 1.2;
     }
     [data-theme="light"] .mobile-bottom-nav .nav-item {
         color: #475569;
+        text-decoration: none !important;
     }
     .mobile-bottom-nav .nav-icon { 
         margin-right: 0; 
@@ -1320,6 +1356,7 @@ input[type=number] {
         display: flex; 
         align-items: center; 
         justify-content: center;
+        text-decoration: none !important;
     }
     .mobile-bottom-nav .nav-icon svg {
         width: 23px;
@@ -1329,11 +1366,11 @@ input[type=number] {
     .mobile-bottom-nav .nav-item.active { 
         color: #0F172A; 
         font-weight: 700; 
+        text-decoration: none !important;
     }
     .mobile-bottom-nav .nav-item.active .nav-icon svg { 
         stroke-width: 2.1; 
     }
-    .mobile-bottom-nav .nav-item:hover { transform: none; }
     
     /* Grids & Cards */
     .stats-grid { grid-template-columns: 1fr; gap: 16px; }
