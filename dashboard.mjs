@@ -2568,6 +2568,40 @@ if (webhookForm) {
     });
 }
 
+// Telegram Command Builder Interactive Helpers
+window.updateTgPreviewCommand = function() {
+    const priceInput = document.getElementById('tg-gen-price');
+    const itemInput = document.getElementById('tg-gen-item');
+    const phoneInput = document.getElementById('tg-gen-phone');
+    const previewEl = document.getElementById('tg-command-preview');
+    const directBtn = document.getElementById('tg-direct-send-btn');
+    
+    if (!previewEl) return;
+    
+    const price = priceInput && priceInput.value.trim() ? priceInput.value.trim() : '450';
+    const item = itemInput && itemInput.value.trim() ? itemInput.value.trim() : 'Nike Air Max';
+    const phone = phoneInput && phoneInput.value.trim() ? phoneInput.value.trim() : '0244123456';
+    
+    const cmd = `/create ${price} ${item} ${phone}`;
+    previewEl.textContent = cmd;
+    
+    if (directBtn) {
+        directBtn.href = `https://t.me/TrustlinkghBot`;
+    }
+};
+
+window.copyTgCommand = function() {
+    const previewEl = document.getElementById('tg-command-preview');
+    if (!previewEl) return;
+    navigator.clipboard.writeText(previewEl.textContent.trim()).then(() => {
+        if (typeof showModernToast === 'function') {
+            showModernToast('Telegram command copied to clipboard!', 'success');
+        } else {
+            alert('Copied to clipboard!');
+        }
+    });
+};
+
 // WhatsApp Command Builder Interactive Helpers
 window.updateWaPreviewCommand = function() {
     const priceInput = document.getElementById('wa-gen-price');

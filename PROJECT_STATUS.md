@@ -13,6 +13,9 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 
 ## 🆕 Recent GitHub Updates
 
+- [x] **Telegram Seller Bot Launch (@TrustlinkghBot)**: Built and deployed the official TrustLink Telegram Seller Bot (`api/webhook/telegram.js` & `api/_utils/telegram.js`) enabling social commerce vendors to create instant escrow contracts, manage dispatches, check wallet balances, and track orders directly from Telegram. Clean, professional emoji-free message formatting.
+- [x] **Seller Dashboard Bot Hub Integration**: Integrated direct Telegram bot access in `dashboard.html`, `dashboard.js`, and `dashboard.mjs`. Added quick action links to `@TrustlinkghBot`, interactive 1-click `/create` order command generator, command cheatsheet, and seamless mobile navigation.
+- [x] **Comprehensive Security Hardening**: Implemented strict payload validation, SQL/NoSQL injection prevention, environment variable secret management, rate limiting, and structured logging.
 - [x] **SMS Gateway Migration to SasuSync**: Transitioned SMS dispatch and phone verification OTP infrastructure to SasuSync (`https://sms.sasulabs.me`) with approved sender ID `TrustEscrow`. Updated `/api/v1/sms/send.js` serverless endpoint, Firebase Cloud Functions (`requestPhoneVerificationOtp` and `verifyPhoneVerificationOtp`), and client-side modules.
 - [x] **Dedicated Solutions Pages (Individuals)**: Built dedicated `individuals.html` solution page with modern typography, interactive feature showcases, localized Ghana Cedis examples, and updated site-wide navigation links.
 - [x] **Account Controls in Dashboard Settings**: Added account deactivation and deletion flows for users who want to close their TrustLink account.

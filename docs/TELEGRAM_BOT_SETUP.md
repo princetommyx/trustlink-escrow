@@ -1,10 +1,10 @@
-# ✈️ TrustLink Escrow - Telegram Seller Bot Setup Guide
+# TrustLink Escrow - Telegram Seller Bot Setup Guide
 
 > **Why Telegram for Sellers?** Telegram is 100% free, requires zero Meta verification or paid message templates, supports instant push notifications, and offers interactive inline action buttons and step-by-step guided wizards.
 
 ---
 
-## 🤖 1. Create the Bot with @BotFather (2 Minutes)
+## 1. Create the Bot with @BotFather (2 Minutes)
 
 1. Open Telegram and search for [**@BotFather**](https://t.me/botfather).
 2. Start the chat and send the command:
@@ -20,7 +20,7 @@
 
 ---
 
-## ⚙️ 2. Configure Commands in @BotFather
+## 2. Configure Commands in @BotFather
 
 To enable auto-complete commands in the Telegram chat UI:
 
@@ -41,7 +41,7 @@ help - How TrustLink Escrow works
 
 ---
 
-## 🌐 3. Set the Webhook URL
+## 3. Set the Webhook URL
 
 Telegram delivers updates to your server via HTTPS webhook. Run this single `curl` command in your terminal:
 
@@ -58,18 +58,18 @@ You will receive the confirmation:
 
 ---
 
-## 🔐 4. Set Environment Variables in Vercel
+## 4. Set Environment Variables in Vercel
 
-In your **Vercel Dashboard** (`Project Settings` ➔ `Environment Variables`), configure:
+In your **Vercel Dashboard** (`Project Settings` -> `Environment Variables`), configure:
 
 | Key | Value | Description |
 | :--- | :--- | :--- |
-| `TELEGRAM_BOT_TOKEN` | `7123456789:AAFn_XXXXXXX` | The Bot API Token from @BotFather |
+| `TELEGRAM_BOT_TOKEN` | `8708346113:AAH09D5L2DgZb1qhTpkZLZqeRKlwBKripv8` | The Bot API Token from @BotFather |
 | `TELEGRAM_WEBHOOK_SECRET` | *(Optional random secret)* | Optional secret for `X-Telegram-Bot-Api-Secret-Token` |
 
 ---
 
-## 🚀 5. How Sellers Use the Bot
+## 5. How Sellers Use the Bot
 
 ### A. Fast 1-Line Creation
 Sellers can create an escrow link in 5 seconds by typing:
@@ -82,9 +82,9 @@ Type `/new` and the bot will prompt:
 1. **Item Name:** `iPhone 13 Pro Max`
 2. **Price in GH₵:** `6500`
 3. **Buyer Phone:** `0555987654`
-4. **Fee Split:** Taps `[ 🤝 50/50 Split ]` inline button.
+4. **Fee Split:** Taps `[ 50/50 Split ]` inline button.
 
 ### C. 1-Tap Actions & Push Notifications
-- The bot replies with a formatted summary and `[ 📲 Share on WhatsApp ]` link.
+- The bot replies with a formatted summary and `[ Share on WhatsApp ]` link.
 - When the buyer completes Mobile Money payment, the seller receives a Telegram notification.
-- When shipped, the seller taps `[ 🚚 Mark as Shipped ]` directly inside Telegram.
+- When shipped, the seller taps `[ Mark as Shipped ]` directly inside Telegram.

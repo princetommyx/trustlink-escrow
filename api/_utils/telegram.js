@@ -1,6 +1,6 @@
 /**
  * Telegram Bot API Dispatcher & Formatting Utility
- * Provides helpers for sending rich Markdown messages, inline keyboards,
+ * Provides helpers for sending clean, professional HTML messages, inline keyboards,
  * answering callback queries, and sending transactional escrow push notifications.
  */
 
@@ -16,7 +16,7 @@ export function getTelegramBotToken() {
 /**
  * Send a message via Telegram Bot API
  * @param {string|number} chatId - Telegram chat ID
- * @param {string} text - Message text (Markdown formatted)
+ * @param {string} text - Message text (HTML formatted)
  * @param {object} [options] - Additional Telegram options (reply_markup, parse_mode, etc.)
  */
 export async function sendTelegramMessage(chatId, text, options = {}) {
@@ -82,15 +82,15 @@ export function getMainMenuKeyboard() {
   return {
     inline_keyboard: [
       [
-        { text: '✨ Create New Escrow', callback_data: 'btn_new' },
-        { text: '💼 My Balance', callback_data: 'btn_balance' }
+        { text: 'Create New Escrow', callback_data: 'btn_new' },
+        { text: 'My Balance', callback_data: 'btn_balance' }
       ],
       [
-        { text: '📋 Recent Orders', callback_data: 'btn_orders' },
-        { text: '❓ How It Works', callback_data: 'btn_help' }
+        { text: 'Recent Orders', callback_data: 'btn_orders' },
+        { text: 'How It Works', callback_data: 'btn_help' }
       ],
       [
-        { text: '🌐 Open TrustLink Dashboard', url: 'https://www.trustlinkgh.online/dashboard.html' }
+        { text: 'Open TrustLink Dashboard', url: 'https://www.trustlinkgh.online/dashboard.html' }
       ]
     ]
   };
@@ -103,43 +103,43 @@ export function getFeeSplitKeyboard() {
   return {
     inline_keyboard: [
       [
-        { text: '🤝 50/50 Split (1.5% each)', callback_data: 'btn_fee_split:50/50' }
+        { text: '50/50 Split (1.5% each)', callback_data: 'btn_fee_split:50/50' }
       ],
       [
-        { text: '🛒 Buyer Pays (3%)', callback_data: 'btn_fee_split:buyer' }
+        { text: 'Buyer Pays (3%)', callback_data: 'btn_fee_split:buyer' }
       ],
       [
-        { text: '🏪 Seller Pays (3%)', callback_data: 'btn_fee_split:seller' }
+        { text: 'Seller Pays (3%)', callback_data: 'btn_fee_split:seller' }
       ],
       [
-        { text: '❌ Cancel', callback_data: 'btn_cancel' }
+        { text: 'Cancel', callback_data: 'btn_cancel' }
       ]
     ]
   };
 }
 
 /**
- * Returns the action buttons for an created or active Escrow
+ * Returns the action buttons for a created or active Escrow
  */
 export function getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount) {
   const whatsappShareText = encodeURIComponent(
-    `Hello! Here is your TrustLink Escrow protected payment link for ${itemName} (GH₵ ${amount.toFixed(2)}):\n\n${checkoutUrl}\n\nYour payment is protected until you inspect and confirm delivery!`
+    `Hello! Here is your TrustLink Escrow protected payment link for ${itemName} (GH₵ ${amount.toFixed(2)}):\n\n${checkoutUrl}\n\nYour payment is protected until you inspect and confirm delivery.`
   );
 
   return {
     inline_keyboard: [
       [
         {
-          text: '📲 Share on WhatsApp',
+          text: 'Share on WhatsApp',
           url: `https://api.whatsapp.com/send?text=${whatsappShareText}`
         }
       ],
       [
-        { text: '🚚 Mark as Shipped', callback_data: `btn_ship:${escrowId}` },
-        { text: '🔄 Check Status', callback_data: `btn_status:${escrowId}` }
+        { text: 'Mark as Shipped', callback_data: `btn_ship:${escrowId}` },
+        { text: 'Check Status', callback_data: `btn_status:${escrowId}` }
       ],
       [
-        { text: '➕ Create Another Link', callback_data: 'btn_new' }
+        { text: 'Create Another Link', callback_data: 'btn_new' }
       ]
     ]
   };
@@ -155,23 +155,23 @@ export async function sendOrderPaymentNotification(chatId, escrow) {
   const buyerPhone = escrow.buyerPhone || 'Buyer';
 
   const message = `
-🔔 <b>PAYMENT RECEIVED IN ESCROW!</b>
+<b>PAYMENT RECEIVED IN ESCROW</b>
 
-💰 <b>Amount:</b> GH₵ ${amount}
-📦 <b>Item:</b> ${itemName}
-📱 <b>Buyer:</b> ${buyerPhone}
-🆔 <b>Escrow ID:</b> <code>${escrowId}</code>
+<b>Amount:</b> GH₵ ${amount}
+<b>Item:</b> ${itemName}
+<b>Buyer:</b> ${buyerPhone}
+<b>Escrow ID:</b> <code>${escrowId}</code>
 
-🛡️ <i>Funds are now securely locked in TrustLink Escrow. You can now ship the package safely to the buyer!</i>
+<i>Funds are now securely locked in TrustLink Escrow. You can now ship the package safely to the buyer.</i>
 `.trim();
 
   const keyboard = {
     inline_keyboard: [
       [
-        { text: '🚚 Mark as Shipped', callback_data: `btn_ship:${escrowId}` }
+        { text: 'Mark as Shipped', callback_data: `btn_ship:${escrowId}` }
       ],
       [
-        { text: '🌐 View on Dashboard', url: `https://www.trustlinkgh.online/dashboard.html` }
+        { text: 'View on Dashboard', url: `https://www.trustlinkgh.online/dashboard.html` }
       ]
     ]
   };
