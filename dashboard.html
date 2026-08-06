@@ -36,62 +36,87 @@
     <div class="dashboard-layout">
         <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header"
-                style="flex-direction: column; align-items: center; padding: 32px 24px 16px 24px;">
-                <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
-                    <img src="img/logo.png" alt="TrustLink Logo"
-                        style="height: 60px; width: auto; max-width: 150px; object-fit: contain;">
+            <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 16px; border-bottom: 1px solid #F1F5F9;">
+                <a href="index.html" class="logo" style="display: flex; align-items: center; text-decoration: none;">
+                    <img src="img/logo.png" alt="TrustLink Logo" style="height: 38px; width: auto; max-width: 140px; object-fit: contain;">
                 </a>
+                <button id="btn-collapse" class="btn-icon" aria-label="Close Navigation" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: #F8FAFC; border: 1px solid #E2E8F0; color: #475569; cursor: pointer; transition: all 0.2s ease;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <nav class="sidebar-nav" style="padding: 0;">
+            <nav class="sidebar-nav" style="padding: 16px 12px; gap: 4px; display: flex; flex-direction: column; flex: 1;">
+                <div style="padding: 8px 12px 6px; font-size: 0.72rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px;">Main Menu</div>
+                
                 <a href="#" class="nav-item active" data-target="view-overview">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 19px; height: 19px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg></span>
                     <span class="nav-text" data-short="Overview">Overview</span>
                 </a>
+
                 <a href="#" class="nav-item" data-target="view-whatsapp">
-                    <span class="nav-text" data-short="Bots" style="display: flex; align-items: center; gap: 6px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#0284C7" style="flex-shrink: 0;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.05-.2-.06-.06-.16-.04-.23-.02-.1.02-1.74 1.11-4.91 3.25-.46.32-.88.47-1.26.46-.42-.01-1.22-.24-1.82-.43-.73-.24-1.31-.37-1.26-.78.03-.21.32-.43.89-.66 3.5-1.52 5.84-2.53 7.02-3.01 3.34-1.39 4.04-1.63 4.49-1.64.1 0 .32.02.46.14.12.1.15.24.17.34.02.13.02.26.01.37z"/></svg>
-                        Bot Hub <span
-                            style="background: #0284C7; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; font-weight: 700; margin-left: 4px;">TELEGRAM & WA</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 19px; height: 19px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-.974-.94 4.092 4.092 0 00.413-1.782C3.123 16.637 2.25 14.437 2.25 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg></span>
+                    <span class="nav-text" data-short="Bots" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        Bot Hub
+                        <span style="background: linear-gradient(135deg, #0284C7, #2563EB); color: white; font-size: 0.65rem; padding: 2px 7px; border-radius: 6px; font-weight: 700; letter-spacing: 0.3px;">TG &amp; WA</span>
                     </span>
                 </a>
+
                 <a href="#" class="nav-item" data-target="view-escrows">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 19px; height: 19px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg></span>
                     <span class="nav-text" data-short="Orders">Orders</span>
                 </a>
+
                 <a href="#" class="nav-item" data-target="view-products">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 19px; height: 19px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg></span>
                     <span class="nav-text" data-short="Products">My Products</span>
                 </a>
+
                 <a href="#" class="nav-item" data-target="view-wallet">
-                    <span class="nav-text" data-short="Wallet">Wallet</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 19px; height: 19px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" /></svg></span>
+                    <span class="nav-text" data-short="Wallet">Wallet &amp; MoMo</span>
                 </a>
+
                 <a href="#" class="nav-item" data-target="view-messages">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 19px; height: 19px;"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg></span>
                     <span class="nav-text" data-short="Chat">Messages</span>
                 </a>
+
                 <a href="#" class="nav-item" data-target="view-transactions">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 19px; height: 19px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg></span>
                     <span class="nav-text" data-short="Logs">Transaction Logs</span>
                 </a>
+
+                <div style="padding: 14px 12px 6px; font-size: 0.72rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px;">Settings &amp; Tools</div>
+
                 <a href="#" class="nav-item" data-target="view-profile">
-                    <span class="nav-text" data-short="Profile">Profile</span>
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 19px; height: 19px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg></span>
+                    <span class="nav-text" data-short="Profile">Profile &amp; KYC</span>
                 </a>
+
                 <a href="#" class="nav-item" data-target="view-api">
+                    <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 19px; height: 19px;"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg></span>
                     <span class="nav-text" data-short="API">Developer Settings</span>
                 </a>
             </nav>
 
-            <div class="sidebar-footer" style="padding: 24px;">
-                <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px;">
-                    <a href="#"
-                        style="color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 500;">Support</a>
-                    <a href="#" id="btn-settings-nav"
-                        style="color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 500;">Setting</a>
-                </div>
-                <button id="btn-signout"
-                    style="background: transparent; border: none; color: #111827; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 0;">
-                    Sign out <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                        stroke="currentColor" style="width: 16px; height: 16px;">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            <div class="sidebar-bottom-nav" style="padding: 16px 16px 20px; border-top: 1px solid #F1F5F9; display: flex; flex-direction: column; gap: 8px;">
+                <a href="#" class="nav-item" id="btn-settings-nav" data-target="view-settings" style="padding: 10px 14px; border-radius: 10px; display: flex; align-items: center; gap: 10px; color: #475569; text-decoration: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width: 18px; height: 18px; color: #64748B;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
+                    <span class="nav-text">Settings</span>
+                </a>
+                <button class="nav-item btn-signout-slide" id="btn-signout" style="width: 100%; border: 1.5px solid #FCA5A5; background: #FEF2F2; color: #DC2626; font-weight: 700; font-size: 0.9rem; border-radius: 10px; padding: 10px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease;">
+                    <span style="display: flex; align-items: center; gap: 8px; color: #DC2626;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                        </svg>
+                        Sign Out
+                    </span>
+                    <span style="font-size: 0.72rem; font-weight: 700; background: rgba(220, 38, 38, 0.12); color: #B91C1C; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">Seller</span>
                 </button>
             </div>
         </aside>
@@ -1982,6 +2007,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const mobileMenuBtn = document.getElementById('topbar-menu-toggle');
+            const collapseBtn = document.getElementById('btn-collapse');
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('sidebar-backdrop');
 
@@ -1992,8 +2018,21 @@
                 }
             }
 
+            function closeMobileMenu() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                    backdrop.classList.remove('active');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                }
+            }
+
             mobileMenuBtn?.addEventListener('click', toggleMobileMenu);
-            backdrop?.addEventListener('click', toggleMobileMenu);
+            backdrop?.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                backdrop.classList.remove('active');
+            });
+            collapseBtn?.addEventListener('click', closeMobileMenu);
 
             // Also close drawer if a sidebar nav item is clicked on mobile
             const sidebarNavItems = sidebar.querySelectorAll('.nav-item');
