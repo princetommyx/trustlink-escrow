@@ -17,9 +17,13 @@ import {
   getFeeSplitKeyboard,
   getEscrowActionKeyboard
 } from '../_utils/telegram.js';
+import { dispatchTransactionalSMS, buildEscrowOrderSMS } from '../_utils/sms-dispatcher.js';
 
 // In-memory session store for multi-step guided wizards (phone/chatId -> session)
 const telegramSessions = new Map();
+
+// In-memory cache of recently created escrows (escrowId -> order details)
+const recentEscrows = new Map();
 
 // Helper to get or initialize a seller session
 function getSession(chatId) {
@@ -174,6 +178,7 @@ Create instant Mobile Money protected escrow links for your social media sales (
 <b>Quick Commands:</b>
 <code>/new</code> — Guided step-by-step escrow creator
 <code>/create &lt;amount&gt; &lt;item&gt; &lt;buyer phone&gt;</code> — 1-line fast link creation
+<code>/sms &lt;escrowId&gt;</code> — Send SMS checkout notification to buyer
 <code>/balance</code> — Check your wallet and escrow balances
 <code>/orders</code> — View recent sales and active contracts
 <code>/ship &lt;escrowId&gt;</code> — Mark an order as shipped
@@ -222,6 +227,19 @@ Create instant Mobile Money protected escrow links for your social media sales (
     const amount = amountValidation.value || amountValidation.amount;
     const fee = parseFloat((amount * 0.03).toFixed(2));
     const checkoutUrl = `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`;
+    const sellerName = from?.first_name || (from?.username ? `@${from.username}` : 'TrustLink Seller');
+
+    // Store in recent escrows cache for instant SMS dispatching
+    recentEscrows.set(escrowId, {
+      escrowId,
+      itemName,
+      amount,
+      fee,
+      buyerPhone: phoneValidation.formattedLocal || buyerPhoneRaw,
+      sellerName,
+      checkoutUrl,
+      createdAt: Date.now()
+    });
 
     const successMsg = `
 <b>Escrow Payment Link Created</b>
@@ -235,12 +253,93 @@ Create instant Mobile Money protected escrow links for your social media sales (
 <b>Protected Checkout Link:</b>
 ${checkoutUrl}
 
-<i>Send this link to the buyer. Once they pay via Mobile Money, you will receive an instant notification here to ship.</i>
+<i>Send this link or tap "Send SMS to Buyer" below. Once they pay via Mobile Money, you will receive an instant notification here to ship.</i>
 `.trim();
 
     return await sendTelegramMessage(chatId, successMsg, {
       reply_markup: getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount)
     });
+  }
+
+  // D2. Send SMS to Buyer Command: /sms <escrowId> [optional phone]
+  if (upperText.startsWith('/SMS')) {
+    clearSession(chatId);
+    const parts = text.split(/\s+/);
+    if (parts.length < 2) {
+      return await sendTelegramMessage(
+        chatId,
+        '<b>Usage:</b> <code>/sms &lt;escrowId&gt;</code>\n<i>Example:</i> <code>/sms TL-89241</code>'
+      );
+    }
+
+    const escrowId = sanitizeString(parts[1]).toUpperCase();
+    const order = recentEscrows.get(escrowId);
+    const buyerPhoneRaw = parts[2] || order?.buyerPhone;
+
+    if (!buyerPhoneRaw) {
+      return await sendTelegramMessage(
+        chatId,
+        `<b>Buyer phone for #${escrowId} not found in recent session.</b>\nPlease specify phone number:\n<code>/sms ${escrowId} 0244112233</code>`
+      );
+    }
+
+    const phoneValidation = validateGhanaPhone(buyerPhoneRaw);
+    if (!phoneValidation.valid) {
+      return await sendTelegramMessage(chatId, `<b>Invalid Buyer Phone:</b> ${phoneValidation.error || 'Please enter a valid Ghana phone number.'}`);
+    }
+
+    const sellerName = order?.sellerName || from?.first_name || 'TrustLink Seller';
+    const itemName = order?.itemName || 'Order';
+    const amount = order?.amount || 0;
+    const checkoutUrl = order?.checkoutUrl || `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`;
+
+    const smsMessage = buildEscrowOrderSMS({
+      sellerName,
+      itemName,
+      amount,
+      checkoutUrl
+    });
+
+    const smsResult = await dispatchTransactionalSMS({
+      phone: phoneValidation.formattedLocal,
+      message: smsMessage,
+      referenceId: `${escrowId}-tg-cmd-sms`
+    });
+
+    if (smsResult.success) {
+      const replyMsg = `
+<b>SMS Notification Dispatched to Buyer</b>
+
+<b>Recipient:</b> ${smsResult.recipient}
+<b>Escrow ID:</b> <code>${escrowId}</code>
+
+<b>Message Sent:</b>
+<i>"${smsMessage}"</i>
+
+<b>Status:</b> Delivered via SMS Gateway
+`.trim();
+
+      return await sendTelegramMessage(chatId, replyMsg, {
+        reply_markup: getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, { smsSent: true })
+      });
+    } else {
+      const fallbackMsg = `
+<b>SMS Notification Prepared for Buyer</b>
+
+<b>Recipient:</b> ${phoneValidation.formattedLocal}
+<b>Escrow ID:</b> <code>${escrowId}</code>
+
+<b>Message Content:</b>
+<i>"${smsMessage}"</i>
+
+<b>Status:</b> ${smsResult.error || 'SMS Gateway pending configuration.'}
+${smsResult.nativeSmsLink ? `\n<a href="${smsResult.nativeSmsLink}">Tap here to open SMS app and send</a>` : ''}
+`.trim();
+
+      return await sendTelegramMessage(chatId, fallbackMsg, {
+        reply_markup: getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, { smsSent: false })
+      });
+    }
   }
 
   // E. Balance Check Command: /balance
@@ -601,6 +700,19 @@ async function handleCallbackQuery(callbackQuery, logger) {
     const fee = parseFloat((amount * 0.03).toFixed(2));
     const escrowId = generateEscrowId();
     const checkoutUrl = `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`;
+    const sellerName = callbackQuery.from?.first_name || (callbackQuery.from?.username ? `@${callbackQuery.from.username}` : 'TrustLink Seller');
+
+    // Save in recent escrows cache for 1-click SMS dispatch
+    recentEscrows.set(escrowId, {
+      escrowId,
+      itemName,
+      amount,
+      fee,
+      buyerPhone,
+      sellerName,
+      checkoutUrl,
+      createdAt: Date.now()
+    });
 
     clearSession(chatId);
     await answerCallbackQuery(queryId, 'Escrow Created');
@@ -617,12 +729,79 @@ async function handleCallbackQuery(callbackQuery, logger) {
 <b>Shareable Checkout Link:</b>
 ${checkoutUrl}
 
-<i>Send this link to the buyer. You will receive an instant notification here once payment is locked in escrow.</i>
+<i>Send this link or tap "Send SMS to Buyer" below. You will receive an instant notification here once payment is locked in escrow.</i>
 `.trim();
 
     return await sendTelegramMessage(chatId, successMsg, {
       reply_markup: getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount)
     });
+  }
+
+  // Button: Send SMS to Buyer
+  if (data.startsWith('btn_sms:')) {
+    const escrowId = data.split(':')[1];
+    let order = recentEscrows.get(escrowId);
+
+    if (!order) {
+      order = {
+        escrowId,
+        itemName: session.draft?.itemName || 'Order Item',
+        amount: session.draft?.amount || 0,
+        buyerPhone: session.draft?.buyerPhone || '0244112233',
+        sellerName: callbackQuery.from?.first_name || 'TrustLink Seller',
+        checkoutUrl: `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`
+      };
+    }
+
+    const smsMessage = buildEscrowOrderSMS({
+      sellerName: order.sellerName,
+      itemName: order.itemName,
+      amount: order.amount,
+      checkoutUrl: order.checkoutUrl
+    });
+
+    await answerCallbackQuery(queryId, 'Dispatching SMS to buyer...');
+
+    const smsResult = await dispatchTransactionalSMS({
+      phone: order.buyerPhone,
+      message: smsMessage,
+      referenceId: `${escrowId}-tg-sms`
+    });
+
+    if (smsResult.success) {
+      const sentMsg = `
+<b>SMS Notification Dispatched to Buyer</b>
+
+<b>Recipient:</b> ${smsResult.recipient}
+<b>Escrow ID:</b> <code>${escrowId}</code>
+
+<b>Message Sent:</b>
+<i>"${smsMessage}"</i>
+
+<b>Status:</b> Delivered via SMS Gateway
+`.trim();
+
+      return await sendTelegramMessage(chatId, sentMsg, {
+        reply_markup: getEscrowActionKeyboard(escrowId, order.checkoutUrl, order.itemName, order.amount, { smsSent: true })
+      });
+    } else {
+      const fallbackMsg = `
+<b>SMS Notification Prepared for Buyer</b>
+
+<b>Recipient:</b> ${order.buyerPhone || 'Buyer'}
+<b>Escrow ID:</b> <code>${escrowId}</code>
+
+<b>Message Content:</b>
+<i>"${smsMessage}"</i>
+
+<b>Status:</b> ${smsResult.error || 'SMS Gateway pending configuration.'}
+${smsResult.nativeSmsLink ? `\n<a href="${smsResult.nativeSmsLink}">Tap here to open SMS app and send</a>` : ''}
+`.trim();
+
+      return await sendTelegramMessage(chatId, fallbackMsg, {
+        reply_markup: getEscrowActionKeyboard(escrowId, order.checkoutUrl, order.itemName, order.amount, { smsSent: false })
+      });
+    }
   }
 
   // Button: Quick Ship

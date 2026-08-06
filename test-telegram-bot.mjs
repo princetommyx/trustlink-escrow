@@ -5,6 +5,8 @@
  */
 
 import handler from './api/webhook/telegram.js';
+import { getEscrowActionKeyboard } from './api/_utils/telegram.js';
+import { buildEscrowOrderSMS } from './api/_utils/sms-dispatcher.js';
 
 // Mock Response Object for Vercel Serverless Function testing
 function createMockRes() {
@@ -257,14 +259,67 @@ async function runTests() {
   await handler(reqLink, createMockRes());
   assert(true, "/link command processed");
 
-  // 8. Cancel Command
-  console.log("\n[Test 8: /cancel Command]");
-  const reqCancel = {
+  // 8. SMS to Buyer Feature Tests
+  console.log("\n[Test 8: SMS to Buyer Integration Tests]");
+  
+  // 8a: Verify Action Keyboard has 'Send SMS to Buyer' button
+  const actionKb = getEscrowActionKeyboard('TL-89241', 'https://www.trustlinkgh.online/checkout.html?id=TL-89241', 'Nike Jordan', 450);
+  const flatButtons = actionKb.inline_keyboard.flat();
+  const smsBtn = flatButtons.find(b => b.callback_data === 'btn_sms:TL-89241');
+  assert(!!smsBtn, "Escrow action keyboard contains 'Send SMS to Buyer' inline button");
+  assert(smsBtn?.text === 'Send SMS to Buyer', "SMS button has proper label");
+
+  // 8b: Verify SMS message format matches site
+  const expectedSms = buildEscrowOrderSMS({
+    sellerName: 'Kwame',
+    itemName: 'Nike Jordan',
+    amount: 450,
+    checkoutUrl: 'https://www.trustlinkgh.online/checkout.html?id=TL-89241'
+  });
+  assert(
+    expectedSms === 'TrustLink: Kwame created an escrow for Nike Jordan (GH₵ 450.00). Pay securely at: https://www.trustlinkgh.online/checkout.html?id=TL-89241',
+    "SMS message matches exact site-standard escrow text format"
+  );
+
+  // 8c: Callback Query btn_sms:TL-89241
+  const reqSmsBtn = {
     method: 'POST',
     headers: { 'x-forwarded-for': '127.0.0.1' },
     body: {
       update_id: 1013,
-      message: { message_id: 12, chat: { id: 987654321 }, text: '/cancel' }
+      callback_query: {
+        id: 'cq_sms_1',
+        message: { chat: { id: 987654321 }, message_id: 25 },
+        from: { first_name: 'Kwame' },
+        data: 'btn_sms:TL-89241'
+      }
+    }
+  };
+  const resSmsBtn = createMockRes();
+  await handler(reqSmsBtn, resSmsBtn);
+  assert(resSmsBtn.statusCode === 200, "btn_sms callback query handled gracefully with HTTP 200");
+
+  // 8d: Direct /sms TL-89241 slash command
+  const reqSmsCmd = {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '127.0.0.1' },
+    body: {
+      update_id: 1014,
+      message: { message_id: 26, chat: { id: 987654321 }, from: { first_name: 'Kwame' }, text: '/sms TL-89241 0244112233' }
+    }
+  };
+  const resSmsCmd = createMockRes();
+  await handler(reqSmsCmd, resSmsCmd);
+  assert(resSmsCmd.statusCode === 200, "/sms command with phone handled gracefully with HTTP 200");
+
+  // 9. Cancel Command
+  console.log("\n[Test 9: /cancel Command]");
+  const reqCancel = {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '127.0.0.1' },
+    body: {
+      update_id: 1015,
+      message: { message_id: 27, chat: { id: 987654321 }, text: '/cancel' }
     }
   };
   await handler(reqCancel, createMockRes());

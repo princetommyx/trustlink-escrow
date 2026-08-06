@@ -85,6 +85,8 @@ Type `/new` and the bot will prompt:
 4. **Fee Split:** Taps `[ 50/50 Split ]` inline button.
 
 ### C. 1-Tap Actions & Push Notifications
-- The bot replies with a formatted summary and `[ Share on WhatsApp ]` link.
-- When the buyer completes Mobile Money payment, the seller receives a Telegram notification.
-- When shipped, the seller taps `[ Mark as Shipped ]` directly inside Telegram.
+- **`[ Send SMS to Buyer ]`**: Dispatches the exact site-standard SMS payment invitation to the buyer's phone with the direct payment link.
+- **`[ Share on WhatsApp ]`**: Opens WhatsApp with pre-filled escrow protection text and checkout URL.
+- **Push Alerts**: When the buyer completes Mobile Money payment, the seller receives a real-time Telegram notification.
+- **Order Fulfillment**: When shipped, the seller taps `[ Mark as Shipped ]` directly inside Telegram.
+- **Commands**: `/create`, `/new`, `/sms <escrowId>`, `/balance`, `/orders`, `/ship <escrowId>`, `/link <phone>`, `/cancel`.

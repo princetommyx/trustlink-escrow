@@ -121,13 +121,18 @@ export function getFeeSplitKeyboard() {
 /**
  * Returns the action buttons for a created or active Escrow
  */
-export function getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount) {
+export function getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, options = {}) {
   const whatsappShareText = encodeURIComponent(
-    `Hello! Here is your TrustLink Escrow protected payment link for ${itemName} (GH₵ ${amount.toFixed(2)}):\n\n${checkoutUrl}\n\nYour payment is protected until you inspect and confirm delivery.`
+    `Hello! Here is your TrustLink Escrow protected payment link for ${itemName} (GH₵ ${Number(amount).toFixed(2)}):\n\n${checkoutUrl}\n\nYour payment is protected until you inspect and confirm delivery.`
   );
+
+  const smsButtonText = options.smsSent ? 'Resend SMS to Buyer' : 'Send SMS to Buyer';
 
   return {
     inline_keyboard: [
+      [
+        { text: smsButtonText, callback_data: `btn_sms:${escrowId}` }
+      ],
       [
         {
           text: 'Share on WhatsApp',

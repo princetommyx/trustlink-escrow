@@ -50,6 +50,7 @@ const requiredFiles = [
     'api/_utils/rate-limiter.js',
     'api/_utils/logger.js',
     'api/_utils/telegram.js',
+    'api/_utils/sms-dispatcher.js',
     'api/webhook/telegram.js',
     'test-telegram-bot.mjs',
     'scripts/backup-firestore.js',
@@ -135,6 +136,7 @@ const sensitiveJsFiles = [
     'api/webhook/whatsapp.js',
     'api/webhook/telegram.js',
     'api/_utils/telegram.js',
+    'api/_utils/sms-dispatcher.js',
     'api/v1/sms/send.js'
 ];
 
