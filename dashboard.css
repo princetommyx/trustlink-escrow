@@ -1294,25 +1294,45 @@ input[type=number] {
     .mobile-bottom-nav {
         display: flex; justify-content: space-around; align-items: center;
         position: fixed; bottom: 0; left: 0; width: 100%; 
-        height: calc(70px + env(safe-area-inset-bottom));
+        height: calc(64px + env(safe-area-inset-bottom));
         background: #FFFFFF;
-        border-top: 1px solid #E2E8F0;
+        border-top: 1px solid #F1F5F9;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
         z-index: 1000;
-        padding-top: 8px;
+        padding-top: 6px;
         padding-bottom: env(safe-area-inset-bottom);
     }
     .mobile-bottom-nav .nav-item {
-        flex-direction: column; padding: 8px 4px; border-radius: 8px;
-        font-size: 0.7rem; flex: 1; text-align: center; justify-content: center;
-        color: #64748B;
+        flex-direction: column; padding: 4px 2px; border-radius: 8px;
+        font-size: 0.78rem; font-weight: 500; flex: 1; text-align: center; justify-content: center;
+        color: #475569;
         background: transparent;
         box-shadow: none;
+        gap: 2px;
+        transition: color 0.15s ease;
     }
     [data-theme="light"] .mobile-bottom-nav .nav-item {
-        color: #64748B;
+        color: #475569;
     }
-    .mobile-bottom-nav .nav-icon { margin-right: 0; margin-bottom: 4px; font-size: 1.1rem; }
-    .mobile-bottom-nav .nav-item.active { color: #111827; font-weight: 700; }
+    .mobile-bottom-nav .nav-icon { 
+        margin-right: 0; 
+        margin-bottom: 2px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+    }
+    .mobile-bottom-nav .nav-icon svg {
+        width: 23px;
+        height: 23px;
+        stroke: currentColor;
+    }
+    .mobile-bottom-nav .nav-item.active { 
+        color: #0F172A; 
+        font-weight: 700; 
+    }
+    .mobile-bottom-nav .nav-item.active .nav-icon svg { 
+        stroke-width: 2.1; 
+    }
     .mobile-bottom-nav .nav-item:hover { transform: none; }
     
     /* Grids & Cards */
