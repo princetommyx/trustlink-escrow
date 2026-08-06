@@ -163,7 +163,7 @@ async function handleMessage(message, logger) {
     clearSession(chatId);
     return await sendTelegramMessage(
       chatId,
-      '<b>Action Cancelled.</b> Your active session has been reset to the main menu.',
+      '<b>Action Stopped.</b> We have returned to the main menu. Tap an option below to continue.',
       { reply_markup: getMainMenuKeyboard() }
     );
   }
@@ -173,19 +173,16 @@ async function handleMessage(message, logger) {
     clearSession(chatId);
     const welcomeName = from.first_name || 'Vendor';
     const welcomeMsg = `
-<b>Welcome to TrustLink Escrow, ${sanitizeString(welcomeName)}!</b>
+<b>Welcome to TrustLink, ${sanitizeString(welcomeName)}!</b>
 
-Create instant Mobile Money protected escrow links for your social media sales (Instagram, TikTok, WhatsApp).
+Sell safely on WhatsApp, Instagram, and TikTok with Mobile Money protection. We hold the buyer's payment safely until they receive their package.
 
-<b>Quick Commands:</b>
-<code>/new</code> — Guided step-by-step escrow creator
-<code>/create &lt;amount&gt; &lt;item&gt; &lt;buyer phone&gt;</code> — 1-line fast link creation
-<code>/sms &lt;escrowId&gt;</code> — Send SMS checkout notification to buyer
-<code>/balance</code> — Check your wallet and escrow balances
-<code>/orders</code> — View recent sales and active contracts
-<code>/ship &lt;escrowId&gt;</code> — Mark an order as shipped
-<code>/link &lt;phone&gt;</code> — Connect your web dashboard account
-<code>/cancel</code> — Cancel current step and return to main menu
+<b>How would you like to start?</b>
+Tap <b>Create Payment Link</b> below, or type:
+- <code>/new</code> : Create a payment link step-by-step
+- <code>/balance</code> : Check your money / wallet
+- <code>/orders</code> : View your recent sales
+- <code>/help</code> : See how TrustLink works
 `.trim();
 
     return await sendTelegramMessage(chatId, welcomeMsg, {
@@ -198,7 +195,7 @@ Create instant Mobile Money protected escrow links for your social media sales (
     updateSession(chatId, { step: 'AWAITING_ITEM_NAME', draft: {} });
     return await sendTelegramMessage(
       chatId,
-      '<b>Create New Escrow (Step 1/4)</b>\n\nWhat item or service are you selling?\n<i>(e.g., iPhone 13 Pro 128GB, Jordan 4 Retro, Handbag)</i>\n\nType <code>/cancel</code> anytime to abort.'
+      '<b>Step 1 of 4: What are you selling?</b>\n\nType the name of the item or service.\n<i>(For example: iPhone 13, Nike Sneakers, Handbag, Wig)</i>\n\nType <code>/cancel</code> anytime to stop.'
     );
   }
 
@@ -209,19 +206,19 @@ Create instant Mobile Money protected escrow links for your social media sales (
     if (parts.length < 4) {
       return await sendTelegramMessage(
         chatId,
-        '<b>Invalid Format.</b> Please use:\n<code>/create &lt;amount&gt; &lt;item description&gt; &lt;buyer phone&gt;</code>\n\n<i>Example:</i>\n<code>/create 450 Nike Air Jordan 0244112233</code>'
+        '<b>Quick Link Format:</b>\nType: <code>/create &lt;price&gt; &lt;item name&gt; &lt;buyer phone&gt;</code>\n\n<i>Example:</i>\n<code>/create 450 Nike Air Jordan 0244112233</code>'
       );
     }
 
     const amountValidation = validateAmount(parts[1]);
     if (!amountValidation.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Amount:</b> ${amountValidation.error || 'Please enter a valid numeric price.'}`);
+      return await sendTelegramMessage(chatId, `<b>Invalid Price:</b> ${amountValidation.error || 'Please enter a valid numeric price (e.g. 450).'}`);
     }
 
     const buyerPhoneRaw = parts[parts.length - 1];
     const phoneValidation = validateGhanaPhone(buyerPhoneRaw);
     if (!phoneValidation.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Buyer Phone:</b> ${phoneValidation.error || 'Please enter a valid 10-digit Ghana number.'}`);
+      return await sendTelegramMessage(chatId, `<b>Invalid Phone:</b> ${phoneValidation.error || 'Please enter a valid 10-digit Ghana number (e.g. 0244112233).'}`);
     }
 
     const itemName = sanitizeString(parts.slice(2, parts.length - 1).join(' '));
@@ -253,18 +250,21 @@ Create instant Mobile Money protected escrow links for your social media sales (
     persistEscrowToFirestore(escrowObj).catch(err => console.warn('[FIRESTORE] Async save note:', err));
 
     const successMsg = `
-<b>Escrow Payment Link Created</b>
+<b>Your Payment Link is Ready!</b>
 
-<b>Escrow ID:</b> <code>${escrowId}</code>
 <b>Item:</b> ${itemName}
-<b>Amount:</b> GH₵ ${amount.toFixed(2)}
+<b>Price:</b> GH₵ ${amount.toFixed(2)}
 <b>Protection Fee (3%):</b> GH₵ ${fee.toFixed(2)}
-<b>Buyer Phone:</b> ${phoneValidation.formattedLocal} (${phoneValidation.network})
+<b>Buyer's Phone:</b> ${phoneValidation.formattedLocal} (${phoneValidation.network})
+<b>Order ID:</b> <code>${escrowId}</code>
 
-<b>Protected Checkout Link:</b>
+<b>Payment Link:</b>
 ${checkoutUrl}
 
-<i>Send this link or tap "Send SMS to Buyer" below. Once they pay via Mobile Money, you will receive an instant notification here to ship.</i>
+<b>What to do next:</b>
+1. Tap <b>Send SMS to Buyer</b> or <b>Send on WhatsApp</b> below.
+2. The buyer opens the link and pays with Mobile Money (MTN, Telecel, AT).
+3. We will immediately message you here once their money is safely locked so you can send the item.
 `.trim();
 
     return await sendTelegramMessage(chatId, successMsg, {
@@ -279,7 +279,7 @@ ${checkoutUrl}
     if (parts.length < 2) {
       return await sendTelegramMessage(
         chatId,
-        '<b>Usage:</b> <code>/sms &lt;escrowId&gt;</code>\n<i>Example:</i> <code>/sms TL-89241</code>'
+        '<b>How to send SMS:</b>\nType: <code>/sms &lt;orderId&gt;</code>\n<i>Example: /sms TL-89241</i>'
       );
     }
 
@@ -290,13 +290,13 @@ ${checkoutUrl}
     if (!buyerPhoneRaw) {
       return await sendTelegramMessage(
         chatId,
-        `<b>Buyer phone for #${escrowId} not found in recent session.</b>\nPlease specify phone number:\n<code>/sms ${escrowId} 0244112233</code>`
+        `<b>Buyer's phone number not found for #${escrowId}.</b>\nPlease specify their number:\n<code>/sms ${escrowId} 0244112233</code>`
       );
     }
 
     const phoneValidation = validateGhanaPhone(buyerPhoneRaw);
     if (!phoneValidation.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Buyer Phone:</b> ${phoneValidation.error || 'Please enter a valid Ghana phone number.'}`);
+      return await sendTelegramMessage(chatId, `<b>Invalid Phone:</b> ${phoneValidation.error || 'Please enter a valid 10-digit Ghana number.'}`);
     }
 
     const sellerName = order?.sellerName || from?.first_name || 'TrustLink Seller';
@@ -319,15 +319,15 @@ ${checkoutUrl}
 
     if (smsResult.success) {
       const replyMsg = `
-<b>SMS Notification Dispatched to Buyer</b>
+<b>SMS Sent to Buyer!</b>
 
 <b>Recipient:</b> ${smsResult.recipient}
-<b>Escrow ID:</b> <code>${escrowId}</code>
+<b>Order ID:</b> <code>${escrowId}</code>
 
-<b>Message Sent:</b>
+<b>Message:</b>
 <i>"${smsMessage}"</i>
 
-<b>Status:</b> Delivered via SMS Gateway
+The buyer has received the payment link on their phone.
 `.trim();
 
       return await sendTelegramMessage(chatId, replyMsg, {
@@ -335,15 +335,14 @@ ${checkoutUrl}
       });
     } else {
       const fallbackMsg = `
-<b>SMS Notification Prepared for Buyer</b>
+<b>SMS Prepared for Buyer</b>
 
 <b>Recipient:</b> ${phoneValidation.formattedLocal}
-<b>Escrow ID:</b> <code>${escrowId}</code>
+<b>Order ID:</b> <code>${escrowId}</code>
 
 <b>Message Content:</b>
 <i>"${smsMessage}"</i>
 
-<b>Status:</b> ${smsResult.error || 'SMS Gateway pending configuration.'}
 ${smsResult.nativeSmsLink ? `\n<a href="${smsResult.nativeSmsLink}">Tap here to open SMS app and send</a>` : ''}
 `.trim();
 
@@ -357,13 +356,13 @@ ${smsResult.nativeSmsLink ? `\n<a href="${smsResult.nativeSmsLink}">Tap here to 
   if (['/BALANCE', 'BALANCE', '/WALLET', 'WALLET'].includes(upperText)) {
     clearSession(chatId);
     const balanceMsg = `
-<b>TrustLink Seller Wallet</b>
+<b>Your TrustLink Wallet</b>
 
-<b>Available for Withdrawal:</b> GH₵ 0.00
-<b>Funds in Active Escrows:</b> GH₵ 0.00
-<b>Total Completed Volume:</b> GH₵ 0.00
+<b>Ready for Withdrawal:</b> GH₵ 0.00
+<b>Money in Active Orders:</b> GH₵ 0.00
+<b>Total Completed Sales:</b> GH₵ 0.00
 
-<i>To disburse funds directly to your MTN MoMo or Telecel Cash wallet, visit the web dashboard:</i>
+To send money directly to your MTN MoMo or Telecel Cash, open your dashboard below:
 https://www.trustlinkgh.online/dashboard.html
 `.trim();
 
@@ -379,14 +378,14 @@ https://www.trustlinkgh.online/dashboard.html
     if (parts.length > 1 && parts[1]) {
       const escrowId = sanitizeString(parts[1]);
       const statusMsg = `
-<b>Escrow Status: #${escrowId}</b>
+<b>Order Status: #${escrowId}</b>
 
-<b>Current State:</b> <code>FUNDS_ESCROWED</code>
+<b>Status:</b> <code>Buyer Paid (Money Protected)</code>
 <b>Amount:</b> GH₵ 450.00
 <b>Item:</b> Order Package
-<b>Status Note:</b> Buyer has paid. Awaiting delivery and confirmation.
+<b>Note:</b> Buyer has paid. Deliver the item to the buyer.
 
-<b>Checkout/Tracking Link:</b>
+<b>Track / Confirm Link:</b>
 https://www.trustlinkgh.online/confirm.html?id=${escrowId}
 `.trim();
 
@@ -396,10 +395,10 @@ https://www.trustlinkgh.online/confirm.html?id=${escrowId}
     }
 
     const ordersMsg = `
-<b>Your Recent Escrow Orders</b>
+<b>Your Orders</b>
 
-No active pending shipments at the moment.
-Create a new link to get started with <code>/new</code>.
+You currently have no pending orders.
+Tap <b>Create Payment Link</b> below to create a new link.
 `.trim();
 
     return await sendTelegramMessage(chatId, ordersMsg, {
@@ -412,16 +411,16 @@ Create a new link to get started with <code>/new</code>.
     clearSession(chatId);
     const parts = text.split(/\s+/);
     if (parts.length < 2) {
-      return await sendTelegramMessage(chatId, '<b>Usage:</b> <code>/ship &lt;escrowId&gt;</code>\n<i>Example: /ship TL-89241</i>');
+      return await sendTelegramMessage(chatId, '<b>Usage:</b> <code>/ship &lt;orderId&gt;</code>\n<i>Example: /ship TL-89241</i>');
     }
 
     const escrowId = sanitizeString(parts[1]);
     const shippedMsg = `
-<b>Order Marked as Shipped</b>
+<b>Item Marked as Sent / Delivered!</b>
 
-<b>Escrow ID:</b> <code>${escrowId}</code>
-Buyer has been notified via SMS to inspect and confirm receipt upon arrival.
-Once confirmed, funds will be credited to your available balance immediately.
+<b>Order ID:</b> <code>${escrowId}</code>
+
+We have sent an SMS to the buyer to check the item and confirm delivery. Once they confirm, the money will immediately be added to your balance.
 `.trim();
 
     return await sendTelegramMessage(chatId, shippedMsg, {
@@ -434,7 +433,7 @@ Once confirmed, funds will be credited to your available balance immediately.
     clearSession(chatId);
     const parts = text.split(/\s+/);
     if (parts.length < 2) {
-      return await sendTelegramMessage(chatId, '<b>Usage:</b> <code>/link &lt;your_registered_phone&gt;</code>\n<i>Example: /link 0244112233</i>');
+      return await sendTelegramMessage(chatId, '<b>Usage:</b> <code>/link &lt;your_phone_number&gt;</code>\n<i>Example: /link 0244112233</i>');
     }
 
     const phoneVal = validateGhanaPhone(parts[1]);
@@ -443,13 +442,12 @@ Once confirmed, funds will be credited to your available balance immediately.
     }
 
     const linkedMsg = `
-<b>Telegram Account Linked Successfully</b>
+<b>Account Connected Successfully!</b>
 
-<b>Connected Phone:</b> ${phoneVal.formattedLocal}
+<b>Phone Number:</b> ${phoneVal.formattedLocal}
 <b>Telegram Chat ID:</b> <code>${chatId}</code>
-<b>Status:</b> Active
 
-<i>You will now receive live Telegram push notifications whenever buyers complete escrow payments!</i>
+You will now receive instant push alerts whenever a buyer pays for any of your items!
 `.trim();
 
     return await sendTelegramMessage(chatId, linkedMsg, {
@@ -465,7 +463,7 @@ Once confirmed, funds will be credited to your available balance immediately.
   if (isSlashCommand) {
     return await sendTelegramMessage(
       chatId,
-      `<b>Unrecognized Command:</b> <code>${sanitizeString(text)}</code>\n\nType <code>/help</code> for available commands or <code>/cancel</code> to reset.`,
+      `<b>Command Not Recognized:</b> <code>${sanitizeString(text)}</code>\n\nType <code>/help</code> for available options or <code>/cancel</code> to reset.`,
       { reply_markup: getMainMenuKeyboard() }
     );
   }
@@ -474,7 +472,7 @@ Once confirmed, funds will be credited to your available balance immediately.
   if (session.step === 'AWAITING_ITEM_NAME') {
     const cleanItem = sanitizeString(text);
     if (cleanItem.length < 2) {
-      return await sendTelegramMessage(chatId, 'Please provide a valid item name (minimum 2 characters).');
+      return await sendTelegramMessage(chatId, 'Please type the item name (at least 2 characters):');
     }
 
     updateSession(chatId, {
@@ -484,7 +482,7 @@ Once confirmed, funds will be credited to your available balance immediately.
 
     return await sendTelegramMessage(
       chatId,
-      `<b>Item:</b> ${cleanItem}\n\n<b>Step 2/4:</b> What is the selling price in Ghana Cedis (GH₵)?\n<i>(e.g. 450, 450gh, or 1200.50)</i>`
+      `<b>Item:</b> ${cleanItem}\n\n<b>Step 2 of 4: How much is it?</b>\nType the selling price in Ghana Cedis.\n<i>(For example: 450 or 1200)</i>`
     );
   }
 
@@ -492,7 +490,7 @@ Once confirmed, funds will be credited to your available balance immediately.
   if (session.step === 'AWAITING_AMOUNT') {
     const amountVal = validateAmount(text);
     if (!amountVal.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Price:</b> ${amountVal.error || 'Amount must be a numeric value.'}\n\nPlease enter a valid amount (e.g. 450 or 450gh):`);
+      return await sendTelegramMessage(chatId, `<b>Invalid Price:</b> ${amountVal.error || 'Please enter numbers only.'}\n\nPlease type the amount (e.g. 450 or 1200):`);
     }
 
     const parsedPrice = amountVal.value || amountVal.amount;
@@ -503,7 +501,7 @@ Once confirmed, funds will be credited to your available balance immediately.
 
     return await sendTelegramMessage(
       chatId,
-      `<b>Price:</b> GH₵ ${parsedPrice.toFixed(2)}\n\n<b>Step 3/4:</b> What is the buyer's Ghana phone number?\n<i>(e.g. 0244112233, 0555987654)</i>`
+      `<b>Price:</b> GH₵ ${parsedPrice.toFixed(2)}\n\n<b>Step 3 of 4: What is the buyer's phone number?</b>\nType their 10-digit Ghana number so we can notify them.\n<i>(For example: 0244112233 or 0551234567)</i>`
     );
   }
 
@@ -511,7 +509,7 @@ Once confirmed, funds will be credited to your available balance immediately.
   if (session.step === 'AWAITING_BUYER_PHONE') {
     const phoneVal = validateGhanaPhone(text);
     if (!phoneVal.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Phone Number:</b> ${phoneVal.error || 'Please enter a valid 10-digit Ghana number.'}\n\nPlease enter a valid 10-digit Ghana number (e.g. 0244123456):`);
+      return await sendTelegramMessage(chatId, `<b>Invalid Phone Number:</b> ${phoneVal.error || 'Please enter a valid 10-digit Ghana phone number.'}\n\nPlease type the number (e.g. 0244123456):`);
     }
 
     updateSession(chatId, {
@@ -524,114 +522,15 @@ Once confirmed, funds will be credited to your available balance immediately.
 
     return await sendTelegramMessage(
       chatId,
-      `<b>Buyer:</b> ${phoneVal.formattedLocal} (${phoneVal.network})\n\n<b>Step 4/4:</b> Who will pay the 3% (GH₵ ${fee.toFixed(2)}) escrow protection fee?\n\nSelect an option below:`,
+      `<b>Buyer:</b> ${phoneVal.formattedLocal} (${phoneVal.network})\n\n<b>Step 4 of 4: Who pays the 3% (GH₵ ${fee.toFixed(2)}) protection fee?</b>\n\nChoose an option below:`,
       { reply_markup: getFeeSplitKeyboard() }
     );
-  }
-
-  // 8. Balance Check Command: /balance
-  if (['/BALANCE', 'BALANCE', '/WALLET'].includes(upperText)) {
-    const balanceMsg = `
-<b>TrustLink Seller Wallet</b>
-
-<b>Available for Withdrawal:</b> GH₵ 0.00
-<b>Funds in Active Escrows:</b> GH₵ 0.00
-<b>Total Completed Volume:</b> GH₵ 0.00
-
-<i>To disburse funds directly to your MTN MoMo or Telecel Cash wallet, visit the web dashboard:</i>
-https://www.trustlinkgh.online/dashboard.html
-`.trim();
-
-    return await sendTelegramMessage(chatId, balanceMsg, {
-      reply_markup: getMainMenuKeyboard()
-    });
-  }
-
-  // 9. Orders & Status Command: /orders or /status [id]
-  if (upperText.startsWith('/ORDERS') || upperText.startsWith('/STATUS')) {
-    const parts = text.split(/\s+/);
-    if (parts.length > 1) {
-      const escrowId = sanitizeString(parts[1]);
-      const statusMsg = `
-<b>Escrow Status: #${escrowId}</b>
-
-<b>Current State:</b> <code>FUNDS_ESCROWED</code>
-<b>Amount:</b> GH₵ 450.00
-<b>Item:</b> Order Package
-<b>Status Note:</b> Buyer has paid. Awaiting delivery and confirmation.
-
-<b>Checkout/Tracking Link:</b>
-https://www.trustlinkgh.online/confirm.html?id=${escrowId}
-`.trim();
-
-      return await sendTelegramMessage(chatId, statusMsg, {
-        reply_markup: getEscrowActionKeyboard(escrowId, `https://www.trustlinkgh.online/confirm.html?id=${escrowId}`, 'Order', 450)
-      });
-    }
-
-    const ordersMsg = `
-<b>Your Recent Escrow Orders</b>
-
-No active pending shipments at the moment.
-Create a new link to get started.
-`.trim();
-
-    return await sendTelegramMessage(chatId, ordersMsg, {
-      reply_markup: getMainMenuKeyboard()
-    });
-  }
-
-  // 10. Mark Shipped Command: /ship <escrowId>
-  if (upperText.startsWith('/SHIP')) {
-    const parts = text.split(/\s+/);
-    if (parts.length < 2) {
-      return await sendTelegramMessage(chatId, '<b>Usage:</b> <code>/ship &lt;escrowId&gt;</code>\n<i>Example: /ship TL-89241</i>');
-    }
-
-    const escrowId = sanitizeString(parts[1]);
-    const shippedMsg = `
-<b>Order Marked as Shipped</b>
-
-<b>Escrow ID:</b> <code>${escrowId}</code>
-Buyer has been notified via SMS to inspect and confirm receipt upon arrival.
-Once confirmed, funds will be credited to your available balance immediately.
-`.trim();
-
-    return await sendTelegramMessage(chatId, shippedMsg, {
-      reply_markup: getMainMenuKeyboard()
-    });
-  }
-
-  // 11. Link Account: /link <phone>
-  if (upperText.startsWith('/LINK')) {
-    const parts = text.split(/\s+/);
-    if (parts.length < 2) {
-      return await sendTelegramMessage(chatId, '<b>Usage:</b> <code>/link &lt;your_registered_phone&gt;</code>\n<i>Example: /link 0244112233</i>');
-    }
-
-    const phoneVal = validateGhanaPhone(parts[1]);
-    if (!phoneVal.valid) {
-      return await sendTelegramMessage(chatId, `${phoneVal.error}`);
-    }
-
-    const linkedMsg = `
-<b>Telegram Account Linked Successfully</b>
-
-<b>Connected Phone:</b> ${phoneVal.formattedLocal}
-<b>Telegram Chat ID:</b> <code>${chatId}</code>
-
-You will now receive instant push alerts whenever a buyer pays for any of your TrustLink escrow orders.
-`.trim();
-
-    return await sendTelegramMessage(chatId, linkedMsg, {
-      reply_markup: getMainMenuKeyboard()
-    });
   }
 
   // Default Fallback
   return await sendTelegramMessage(
     chatId,
-    '<i>I did not recognize that command.</i>\n\nTap <b>Create New Escrow</b> below or type <code>/menu</code> for available options.',
+    '<i>I didn\'t quite catch that.</i>\n\nTap <b>Create Payment Link</b> below or type <code>/menu</code> for options.',
     { reply_markup: getMainMenuKeyboard() }
   );
 }
@@ -650,13 +549,13 @@ async function handleCallbackQuery(callbackQuery, logger) {
 
   const session = getSession(chatId);
 
-  // Button: Create New Escrow
+  // Button: Create New Payment Link
   if (data === 'btn_new') {
     updateSession(chatId, { step: 'AWAITING_ITEM_NAME', draft: {} });
-    await answerCallbackQuery(queryId, 'Starting Escrow Wizard...');
+    await answerCallbackQuery(queryId, 'Creating new payment link...');
     return await sendTelegramMessage(
       chatId,
-      '<b>Create New Escrow (Step 1/4)</b>\n\nWhat item or service are you selling?\n<i>(e.g., Nike Air Jordan, iPhone 14, Sneakers)</i>\n\nType <code>/cancel</code> anytime to abort.'
+      '<b>Step 1 of 4: What are you selling?</b>\n\nType the name of the item or service.\n<i>(For example: iPhone 13, Nike Sneakers, Handbag, Wig)</i>\n\nType <code>/cancel</code> anytime to stop.'
     );
   }
 
@@ -665,7 +564,7 @@ async function handleCallbackQuery(callbackQuery, logger) {
     await answerCallbackQuery(queryId);
     return await sendTelegramMessage(
       chatId,
-      '<b>TrustLink Seller Wallet</b>\n\n<b>Available for Withdrawal:</b> GH₵ 0.00\n<b>Funds in Active Escrows:</b> GH₵ 0.00\n\nVisit your dashboard to disburse to MoMo:\nhttps://www.trustlinkgh.online/dashboard.html',
+      '<b>Your TrustLink Wallet</b>\n\n<b>Ready for Withdrawal:</b> GH₵ 0.00\n<b>Money in Active Orders:</b> GH₵ 0.00\n\nTo send money directly to your MoMo or Telecel Cash, tap your dashboard below:\nhttps://www.trustlinkgh.online/dashboard.html',
       { reply_markup: getMainMenuKeyboard() }
     );
   }
@@ -675,7 +574,7 @@ async function handleCallbackQuery(callbackQuery, logger) {
     await answerCallbackQuery(queryId);
     return await sendTelegramMessage(
       chatId,
-      '<b>Recent Escrow Orders</b>\n\nUse <code>/status &lt;escrowId&gt;</code> to track any specific order.',
+      '<b>Your Orders</b>\n\nUse <code>/status &lt;orderId&gt;</code> to track any specific order.',
       { reply_markup: getMainMenuKeyboard() }
     );
   }
@@ -685,7 +584,7 @@ async function handleCallbackQuery(callbackQuery, logger) {
     await answerCallbackQuery(queryId);
     return await sendTelegramMessage(
       chatId,
-      '<b>How TrustLink Works for Sellers:</b>\n\n1. Create a payment link in 10 seconds.\n2. Share link with your buyer.\n3. Buyer pays via MTN MoMo / Telecel Cash.\n4. You get notified here that funds are locked.\n5. Ship the item.\n6. Buyer confirms delivery -> Funds credited to your wallet.',
+      '<b>How TrustLink Works:</b>\n\n1. <b>Create Link:</b> Enter your item price and buyer\'s phone number.\n2. <b>Send to Buyer:</b> Share the link with your buyer on WhatsApp or SMS.\n3. <b>Buyer Pays:</b> Buyer pays using Mobile Money (MTN, Telecel, AT).\n4. <b>You Deliver:</b> We message you immediately that money is safely held. You then send the item.\n5. <b>Get Paid:</b> Buyer confirms they received the item, and the money is released to your wallet immediately!',
       { reply_markup: getMainMenuKeyboard() }
     );
   }
@@ -696,7 +595,7 @@ async function handleCallbackQuery(callbackQuery, logger) {
     await answerCallbackQuery(queryId, 'Cancelled');
     return await sendTelegramMessage(
       chatId,
-      '<b>Wizard Cancelled.</b>',
+      '<b>Action Stopped.</b> We have returned to the main menu.',
       { reply_markup: getMainMenuKeyboard() }
     );
   }
@@ -734,21 +633,24 @@ async function handleCallbackQuery(callbackQuery, logger) {
     persistEscrowToFirestore(escrowObj).catch(err => console.warn('[FIRESTORE] Async save note:', err));
 
     clearSession(chatId);
-    await answerCallbackQuery(queryId, 'Escrow Created');
+    await answerCallbackQuery(queryId, 'Link Created!');
 
     const successMsg = `
-<b>Escrow Order Successfully Created</b>
+<b>Your Payment Link is Ready!</b>
 
-<b>Escrow ID:</b> <code>${escrowId}</code>
 <b>Item:</b> ${itemName}
 <b>Price:</b> GH₵ ${amount.toFixed(2)}
-<b>Escrow Fee (3%):</b> GH₵ ${fee.toFixed(2)} (Split: <i>${feeChoice}</i>)
-<b>Buyer Phone:</b> ${buyerPhone}
+<b>Protection Fee (3%):</b> GH₵ ${fee.toFixed(2)}
+<b>Buyer's Phone:</b> ${buyerPhone}
+<b>Order ID:</b> <code>${escrowId}</code>
 
-<b>Shareable Checkout Link:</b>
+<b>Payment Link:</b>
 ${checkoutUrl}
 
-<i>Send this link or tap "Send SMS to Buyer" below. You will receive an instant notification here once payment is locked in escrow.</i>
+<b>What to do next:</b>
+1. Tap <b>Send SMS to Buyer</b> or <b>Send on WhatsApp</b> below.
+2. The buyer opens the link and pays with Mobile Money (MTN, Telecel, AT).
+3. We will immediately message you here once their money is safely locked so you can send the item.
 `.trim();
 
     return await sendTelegramMessage(chatId, successMsg, {
@@ -779,7 +681,7 @@ ${checkoutUrl}
       checkoutUrl: order.checkoutUrl
     });
 
-    await answerCallbackQuery(queryId, 'Dispatching SMS to buyer...');
+    await answerCallbackQuery(queryId, 'Sending SMS to buyer...');
 
     const smsResult = await dispatchTransactionalSMS({
       phone: order.buyerPhone,
@@ -789,15 +691,15 @@ ${checkoutUrl}
 
     if (smsResult.success) {
       const sentMsg = `
-<b>SMS Notification Dispatched to Buyer</b>
+<b>SMS Sent to Buyer!</b>
 
 <b>Recipient:</b> ${smsResult.recipient}
-<b>Escrow ID:</b> <code>${escrowId}</code>
+<b>Order ID:</b> <code>${escrowId}</code>
 
-<b>Message Sent:</b>
+<b>Message:</b>
 <i>"${smsMessage}"</i>
 
-<b>Status:</b> Delivered via SMS Gateway
+The buyer has received the payment link on their phone.
 `.trim();
 
       return await sendTelegramMessage(chatId, sentMsg, {
@@ -805,15 +707,14 @@ ${checkoutUrl}
       });
     } else {
       const fallbackMsg = `
-<b>SMS Notification Prepared for Buyer</b>
+<b>SMS Prepared for Buyer</b>
 
 <b>Recipient:</b> ${order.buyerPhone || 'Buyer'}
-<b>Escrow ID:</b> <code>${escrowId}</code>
+<b>Order ID:</b> <code>${escrowId}</code>
 
 <b>Message Content:</b>
 <i>"${smsMessage}"</i>
 
-<b>Status:</b> ${smsResult.error || 'SMS Gateway pending configuration.'}
 ${smsResult.nativeSmsLink ? `\n<a href="${smsResult.nativeSmsLink}">Tap here to open SMS app and send</a>` : ''}
 `.trim();
 
@@ -826,10 +727,10 @@ ${smsResult.nativeSmsLink ? `\n<a href="${smsResult.nativeSmsLink}">Tap here to 
   // Button: Quick Ship
   if (data.startsWith('btn_ship:')) {
     const escrowId = data.split(':')[1];
-    await answerCallbackQuery(queryId, `Order #${escrowId} Marked as Shipped`, true);
+    await answerCallbackQuery(queryId, `Order #${escrowId} Marked as Sent!`, true);
     return await sendTelegramMessage(
       chatId,
-      `<b>Order #${escrowId} Marked as Shipped</b>\n\nBuyer has been alerted via SMS to confirm delivery upon inspection.`,
+      `<b>Order #${escrowId} Marked as Sent!</b>\n\nBuyer has been notified via SMS to inspect the item and confirm delivery.`,
       { reply_markup: getMainMenuKeyboard() }
     );
   }
@@ -840,7 +741,7 @@ ${smsResult.nativeSmsLink ? `\n<a href="${smsResult.nativeSmsLink}">Tap here to 
     await answerCallbackQuery(queryId, 'Status Refreshed');
     return await sendTelegramMessage(
       chatId,
-      `<b>Status for #${escrowId}:</b> <code>FUNDS_ESCROWED</code>\nPayment is locked safely. Ready to ship.`,
+      `<b>Status for #${escrowId}:</b> <code>Payment Protected</code>\nMoney is safely locked. You can deliver the item.`,
       { reply_markup: getEscrowActionKeyboard(escrowId, `https://www.trustlinkgh.online/confirm.html?id=${escrowId}`, 'Item', 100) }
     );
   }

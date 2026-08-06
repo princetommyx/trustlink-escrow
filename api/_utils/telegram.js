@@ -82,15 +82,15 @@ export function getMainMenuKeyboard() {
   return {
     inline_keyboard: [
       [
-        { text: 'Create New Escrow', callback_data: 'btn_new' },
-        { text: 'My Balance', callback_data: 'btn_balance' }
+        { text: 'Create Payment Link', callback_data: 'btn_new' },
+        { text: 'My Money / Balance', callback_data: 'btn_balance' }
       ],
       [
-        { text: 'Recent Orders', callback_data: 'btn_orders' },
+        { text: 'My Orders', callback_data: 'btn_orders' },
         { text: 'How It Works', callback_data: 'btn_help' }
       ],
       [
-        { text: 'Open TrustLink Dashboard', url: 'https://www.trustlinkgh.online/dashboard.html' }
+        { text: 'Open Web Dashboard', url: 'https://www.trustlinkgh.online/dashboard.html' }
       ]
     ]
   };
@@ -103,13 +103,13 @@ export function getFeeSplitKeyboard() {
   return {
     inline_keyboard: [
       [
-        { text: '50/50 Split (1.5% each)', callback_data: 'btn_fee_split:50/50' }
+        { text: 'Split 50/50 (Both pay half)', callback_data: 'btn_fee_split:50/50' }
       ],
       [
-        { text: 'Buyer Pays (3%)', callback_data: 'btn_fee_split:buyer' }
+        { text: 'Buyer pays the fee (3%)', callback_data: 'btn_fee_split:buyer' }
       ],
       [
-        { text: 'Seller Pays (3%)', callback_data: 'btn_fee_split:seller' }
+        { text: 'I will pay the fee (3%)', callback_data: 'btn_fee_split:seller' }
       ],
       [
         { text: 'Cancel', callback_data: 'btn_cancel' }
@@ -180,7 +180,7 @@ export async function persistEscrowToFirestore(escrow) {
  */
 export function getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, options = {}) {
   const whatsappShareText = encodeURIComponent(
-    `Hello! Here is your TrustLink Escrow protected payment link for ${itemName} (GH₵ ${Number(amount).toFixed(2)}):\n\n${checkoutUrl}\n\nYour payment is protected until you inspect and confirm delivery.`
+    `Hello! Here is your TrustLink protected payment link for ${itemName} (GH₵ ${Number(amount).toFixed(2)}):\n\n${checkoutUrl}\n\nYour money is held safely until you receive and check your package.`
   );
 
   const smsButtonText = options.smsSent ? 'Resend SMS to Buyer' : 'Send SMS to Buyer';
@@ -192,13 +192,13 @@ export function getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount,
       ],
       [
         {
-          text: 'Share on WhatsApp',
+          text: 'Send on WhatsApp',
           url: `https://api.whatsapp.com/send?text=${whatsappShareText}`
         }
       ],
       [
-        { text: 'Mark as Shipped', callback_data: `btn_ship:${escrowId}` },
-        { text: 'Check Status', callback_data: `btn_status:${escrowId}` }
+        { text: 'I Have Sent the Item', callback_data: `btn_ship:${escrowId}` },
+        { text: 'Check Payment Status', callback_data: `btn_status:${escrowId}` }
       ],
       [
         { text: 'Create Another Link', callback_data: 'btn_new' }
@@ -217,23 +217,23 @@ export async function sendOrderPaymentNotification(chatId, escrow) {
   const buyerPhone = escrow.buyerPhone || 'Buyer';
 
   const message = `
-<b>PAYMENT RECEIVED IN ESCROW</b>
+<b>Good news! Your Buyer Has Paid!</b>
 
-<b>Amount:</b> GH₵ ${amount}
 <b>Item:</b> ${itemName}
+<b>Amount:</b> GH₵ ${amount}
 <b>Buyer:</b> ${buyerPhone}
-<b>Escrow ID:</b> <code>${escrowId}</code>
+<b>Order ID:</b> <code>${escrowId}</code>
 
-<i>Funds are now securely locked in TrustLink Escrow. You can now ship the package safely to the buyer.</i>
+The money is now held safely in TrustLink. You can now deliver or send the item to the buyer!
 `.trim();
 
   const keyboard = {
     inline_keyboard: [
       [
-        { text: 'Mark as Shipped', callback_data: `btn_ship:${escrowId}` }
+        { text: 'I Have Sent the Item', callback_data: `btn_ship:${escrowId}` }
       ],
       [
-        { text: 'View on Dashboard', url: `https://www.trustlinkgh.online/dashboard.html` }
+        { text: 'View on Web Dashboard', url: `https://www.trustlinkgh.online/dashboard.html` }
       ]
     ]
   };
