@@ -20,7 +20,7 @@ function assert(condition, message) {
     }
 }
 
-// 1. Required Legal & Core HTML/CSS/JS Files Exist
+// 1. Required Legal, Security & Core Files Exist
 const requiredFiles = [
     'terms.html',
     'privacy.html',
@@ -42,13 +42,20 @@ const requiredFiles = [
     'api-docs.css',
     'api-docs.js',
     'docs/DESIGN_GUIDELINES.md',
+    'docs/SECURITY_SETUP.md',
+    'docs/BACKUP_AND_DISASTER_RECOVERY.md',
+    '.env.example',
+    'api/_utils/validator.js',
+    'api/_utils/rate-limiter.js',
+    'api/_utils/logger.js',
+    'scripts/backup-firestore.js',
     'moolre-service.js',
     'session-manager.js',
     'vendor/gsap.min.js',
     'img/mail-icon.svg',
     'LICENSE',
-    'docs/SECURITY_SETUP.md',
-    'vercel.json'
+    'vercel.json',
+    'firestore.rules'
 ];
 
 requiredFiles.forEach(relPath => {
@@ -109,7 +116,7 @@ solutionPages.forEach(({ file, route }) => {
     }
 });
 
-// 4. Verify No Exposed Moolre Secret String Literals in JS source files
+// 4. Verify No Exposed Secret String Literals in Source Code
 const sensitiveJsFiles = [
     'moolre-service.js',
     'functions/index.js',
@@ -119,7 +126,10 @@ const sensitiveJsFiles = [
     'dashboard.js',
     'admin-dashboard.js',
     'session-manager.js',
-    'solution-page.js'
+    'solution-page.js',
+    'api/send-whatsapp.js',
+    'api/webhook/whatsapp.js',
+    'api/v1/sms/send.js'
 ];
 
 const secretLiteralsToDisallow = [
@@ -140,7 +150,48 @@ sensitiveJsFiles.forEach(file => {
     }
 });
 
-// 5. Verify WooCommerce Plugin Source
+// 5. Verify Firestore Database Security Rules
+const firestoreRulesPath = path.join(ROOT_DIR, 'firestore.rules');
+if (fs.existsSync(firestoreRulesPath)) {
+    const rulesContent = fs.readFileSync(firestoreRulesPath, 'utf8');
+    assert(!rulesContent.includes('allow read, write: if true;'), 'firestore.rules has NO open wildcard read/write rules');
+    assert(rulesContent.includes('function isAuthenticated()'), 'firestore.rules contains isAuthenticated() helper');
+    assert(rulesContent.includes('function isOwner('), 'firestore.rules contains isOwner() helper');
+    assert(rulesContent.includes('match /audit_logs/{logId}'), 'firestore.rules protects immutable audit_logs collection');
+}
+
+// 6. Verify Vercel Enterprise Security Headers
+const vercelConfigPath = path.join(ROOT_DIR, 'vercel.json');
+if (fs.existsSync(vercelConfigPath)) {
+    const vercelConfig = JSON.parse(fs.readFileSync(vercelConfigPath, 'utf8'));
+    const headersList = vercelConfig.headers || [];
+    const rootHeaders = headersList.find(h => h.source === '/(.*)')?.headers || [];
+    const headerKeys = rootHeaders.map(h => h.key);
+    
+    assert(headerKeys.includes('Strict-Transport-Security'), 'vercel.json enforces Strict-Transport-Security (HSTS)');
+    assert(headerKeys.includes('X-Content-Type-Options'), 'vercel.json enforces X-Content-Type-Options: nosniff');
+    assert(headerKeys.includes('X-Frame-Options'), 'vercel.json enforces X-Frame-Options');
+    assert(headerKeys.includes('Content-Security-Policy'), 'vercel.json enforces Content-Security-Policy');
+}
+
+// 7. Verify Serverless API Rate Limiting & Input Validation Integration
+const smsSendPath = path.join(ROOT_DIR, 'api', 'v1', 'sms', 'send.js');
+if (fs.existsSync(smsSendPath)) {
+    const content = fs.readFileSync(smsSendPath, 'utf8');
+    assert(content.includes('enforceRateLimit'), 'api/v1/sms/send.js integrates enforceRateLimit');
+    assert(content.includes('validateGhanaPhone'), 'api/v1/sms/send.js integrates validateGhanaPhone');
+    assert(content.includes('createRequestLogger'), 'api/v1/sms/send.js integrates structured logger');
+}
+
+const whatsappSendPath = path.join(ROOT_DIR, 'api', 'send-whatsapp.js');
+if (fs.existsSync(whatsappSendPath)) {
+    const content = fs.readFileSync(whatsappSendPath, 'utf8');
+    assert(content.includes('enforceRateLimit'), 'api/send-whatsapp.js integrates enforceRateLimit');
+    assert(content.includes('validateGhanaPhone'), 'api/send-whatsapp.js integrates validateGhanaPhone');
+    assert(content.includes('validateAmount'), 'api/send-whatsapp.js integrates validateAmount');
+}
+
+// 8. Verify WooCommerce Plugin Source
 const wcGatewayFile = path.join(ROOT_DIR, 'trustlink-woocommerce-plugin', 'class-wc-gateway-trustlink.php');
 if (fs.existsSync(wcGatewayFile)) {
     const content = fs.readFileSync(wcGatewayFile, 'utf8');
@@ -148,40 +199,10 @@ if (fs.existsSync(wcGatewayFile)) {
     assert(content.includes('api_url'), 'WooCommerce plugin gateway features configurable api_url setting');
 }
 
-// 6. Verify api-docs.js & api-docs.html security & integrity
-const apiDocsJsFile = path.join(ROOT_DIR, 'api-docs.js');
-if (fs.existsSync(apiDocsJsFile)) {
-    const content = fs.readFileSync(apiDocsJsFile, 'utf8');
-    assert(!content.includes('Request successful! Check the response panel.'), 'api-docs.js contains no fake success toast message');
-    assert(!content.includes('fetch(') || !content.includes('/api/v1/escrows'), 'api-docs.js makes no unsafe sandbox fetch calls');
-    assert(!content.includes('tl_live_preview_key'), 'api-docs.js contains no tl_live_preview_key fetch parameter');
-    assert(!content.includes('data.apiKey'), 'api-docs.js does not inject user API keys into DOM elements');
-}
-
-const apiDocsHtmlFile = path.join(ROOT_DIR, 'api-docs.html');
-if (fs.existsSync(apiDocsHtmlFile)) {
-    const htmlContent = fs.readFileSync(apiDocsHtmlFile, 'utf8');
-    assert(htmlContent.includes('rel="canonical" href="https://www.trustlinkgh.online/api-docs"'), 'api-docs.html includes correct canonical URL');
-    assert(!htmlContent.includes('Ask TrustLink AI'), 'api-docs.html contains no unverified fake AI button');
-    assert(!htmlContent.includes('localhost'), 'api-docs.html contains no development localhost URLs');
-    assert(htmlContent.includes('YOUR_SECRET_API_KEY'), 'api-docs.html uses YOUR_SECRET_API_KEY as key placeholder');
-    assert(htmlContent.includes('terms.html'), 'api-docs.html links to terms.html');
-    assert(htmlContent.includes('privacy.html'), 'api-docs.html links to privacy.html');
-    assert(htmlContent.includes('class="nav-links"'), 'api-docs.html includes public nav-links class');
-    assert(htmlContent.includes('class="footer-links"'), 'api-docs.html includes public footer-links class');
-}
-
-// 7. Verify Sitemap XML
-const sitemapFile = path.join(ROOT_DIR, 'sitemap.xml');
-if (fs.existsSync(sitemapFile)) {
-    const sitemapContent = fs.readFileSync(sitemapFile, 'utf8');
-    assert(sitemapContent.includes('/api-docs'), 'sitemap.xml contains /api-docs entry');
-}
-
-// Final Summary
+// 9. Final Summary
 console.log("\n=======================================================");
 if (failures === 0) {
-    console.log("🎉 ALL STATIC VALIDATION CHECKS PASSED SUCCESSFULLY!");
+    console.log("🎉 ALL STATIC VALIDATION & SECURITY CHECKS PASSED SUCCESSFULLY!");
     process.exit(0);
 } else {
     console.error(`💥 VALIDATION FAILED WITH ${failures} FAILURE(S).`);

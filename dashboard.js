@@ -2301,6 +2301,22 @@ if (formNewEscrow) {
             
             const docRef = await addDoc(collection(db, "escrows"), newEscrow);
             const escrowId = docRef.id;
+
+            // Record immutable financial audit trail
+            try {
+                await addDoc(collection(db, "audit_logs"), {
+                    event: 'ESCROW_CREATED',
+                    escrowId: escrowId,
+                    sellerId: currentUser ? currentUser.uid : "GUEST",
+                    amount: totalAmount,
+                    status: 'PENDING_PAYMENT',
+                    actor: 'seller',
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent
+                });
+            } catch (auditErr) {
+                console.warn("Audit logging notice:", auditErr);
+            }
             
             // 2. Prepare checkout URL & Copy Link Immediately
             const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;

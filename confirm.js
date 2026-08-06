@@ -129,6 +129,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
+            // Record immutable financial audit trail
+            try {
+                await addDoc(collection(db, "audit_logs"), {
+                    event: 'ESCROW_DELIVERY_CONFIRMED',
+                    escrowId: escrowId,
+                    sellerId: escrow.sellerId || '',
+                    amount: Number(escrow.amount || 0),
+                    status: 'COMPLETED',
+                    timestamp: serverTimestamp(),
+                    actor: 'buyer',
+                    userAgent: navigator.userAgent
+                });
+            } catch (auditErr) {
+                console.warn("Audit log record error:", auditErr);
+            }
+
             show('state-success');
         } catch (err) {
             console.error("Error confirming delivery:", err);
@@ -148,6 +164,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 confirmTokenUsed: true,
                 disputedAt: serverTimestamp()
             });
+
+            // Record immutable financial audit trail for dispute
+            try {
+                await addDoc(collection(db, "audit_logs"), {
+                    event: 'ESCROW_DISPUTE_RAISED',
+                    escrowId: escrowId,
+                    sellerId: escrow.sellerId || '',
+                    amount: Number(escrow.amount || 0),
+                    status: 'DISPUTED',
+                    timestamp: serverTimestamp(),
+                    actor: 'buyer',
+                    userAgent: navigator.userAgent
+                });
+            } catch (auditErr) {
+                console.warn("Audit log record error:", auditErr);
+            }
+
             show('state-disputed');
         } catch (err) {
             console.error("Error raising dispute:", err);

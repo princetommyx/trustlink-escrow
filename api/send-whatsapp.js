@@ -1,43 +1,68 @@
+import { validateGhanaPhone, sanitizeString, validateAmount, isValidId } from './_utils/validator.js';
+import { enforceRateLimit } from './_utils/rate-limiter.js';
+import { createRequestLogger } from './_utils/logger.js';
+
 export default async function handler(req, res) {
-  // Set CORS headers
+  const logger = createRequestLogger(req, 'whatsapp-dispatch');
+
+  // Set Security & CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
+    logger.warn('INVALID_METHOD', `Method ${req.method} not allowed`);
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  try {
-    const { to, description, amount, sellerName, checkoutUrl, escrowId } = req.body;
+  // 1. Enforce Rate Limiting (max 15 WhatsApp requests per 10 minutes per IP)
+  const allowed = enforceRateLimit(req, res, {
+    maxRequests: 15,
+    windowSeconds: 600,
+    keyPrefix: 'whatsapp-send'
+  });
+  if (!allowed) {
+    logger.warn('RATE_LIMITED', 'Rate limit exceeded for WhatsApp dispatch');
+    return;
+  }
 
-    if (!to) {
-      return res.status(400).json({ error: 'Recipient phone number is required' });
+  try {
+    const { to, description, amount, sellerName, checkoutUrl, escrowId } = req.body || {};
+
+    // 2. Validate Recipient Phone Number
+    const phoneValidation = validateGhanaPhone(to);
+    if (!phoneValidation.isValid) {
+      logger.warn('INVALID_PHONE', 'Invalid recipient phone number', { to, error: phoneValidation.error });
+      return res.status(400).json({ error: phoneValidation.error || 'Recipient phone number is invalid' });
     }
+
+    // 3. Validate Amount
+    const amountValidation = validateAmount(amount);
+    if (!amountValidation.isValid) {
+      logger.warn('INVALID_AMOUNT', 'Invalid transaction amount', { amount, error: amountValidation.error });
+      return res.status(400).json({ error: amountValidation.error || 'Invalid transaction amount' });
+    }
+
+    // 4. Sanitize Strings
+    const orderTitle = sanitizeString(description || 'Escrow Transaction', 120);
+    const creator = sanitizeString(sellerName || 'TrustLink User', 60);
+    const cleanEscrowId = sanitizeString(escrowId || '', 64);
+    const payLink = sanitizeString(checkoutUrl || `https://www.trustlinkgh.online/checkout.html?id=${cleanEscrowId}`, 300);
+    const formattedAmount = amountValidation.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const cleanNumber = phoneValidation.intl;
 
     const token = process.env.WHATSAPP_ACCESS_TOKEN;
     const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID || '1211218685412737';
 
     if (!token) {
+      logger.error('SECRET_MISSING', 'WHATSAPP_ACCESS_TOKEN is not configured on server');
       return res.status(500).json({ error: 'WHATSAPP_ACCESS_TOKEN is not configured on the server' });
     }
-
-    // Normalize phone number to international format (e.g. 233241234567)
-    let cleanNumber = String(to).replace(/[^\d]/g, '');
-    if (cleanNumber.startsWith('0') && cleanNumber.length === 10) {
-      cleanNumber = '233' + cleanNumber.slice(1);
-    } else if (cleanNumber.length === 9 && !cleanNumber.startsWith('233')) {
-      cleanNumber = '233' + cleanNumber;
-    }
-
-    const formattedAmount = Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const orderTitle = description || 'Escrow Transaction';
-    const creator = sellerName || 'TrustLink User';
-    const payLink = checkoutUrl || `https://www.trustlinkgh.online/checkout.html?id=${escrowId || ''}`;
 
     const messageText = 
 `🔒 *TrustLink Escrow Payment Notification*
@@ -46,7 +71,7 @@ Hello! An escrow payment request has been generated for you by *${creator}*.
 
 📦 *Order:* ${orderTitle}
 💰 *Amount Due:* GH₵ ${formattedAmount}
-🆔 *Escrow ID:* #${escrowId || 'N/A'}
+🆔 *Escrow ID:* #${cleanEscrowId || 'N/A'}
 
 🔗 *Pay Securely via Mobile Money / Card:*
 ${payLink}
@@ -54,6 +79,12 @@ ${payLink}
 🛡️ _Your money remains safe in TrustLink Escrow and will only be released when you receive and approve your item._`;
 
     const directWhatsAppUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(messageText)}`;
+
+    logger.info('WHATSAPP_DISPATCH_ATTEMPT', 'Sending WhatsApp message to buyer', {
+      recipient: cleanNumber,
+      escrowId: cleanEscrowId,
+      amount: formattedAmount
+    });
 
     // Try sending rich text message first
     let metaResponse = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
@@ -74,11 +105,11 @@ ${payLink}
       })
     });
 
-    let data = await metaResponse.json();
+    let data = await metaResponse.json().catch(() => ({}));
 
-    // If text message fails due to 24-hr window (#131047), try sending template
+    // If text message fails due to 24-hr customer care window (#131047 / #131030), try template fallback
     if (!metaResponse.ok && (data.error?.code === 131047 || data.error?.code === 131030 || data.error?.code === 100)) {
-      console.log('Attempting template message fallback for:', cleanNumber);
+      logger.info('WHATSAPP_TEMPLATE_FALLBACK', 'Falling back to approved Meta utility template', { recipient: cleanNumber });
       
       const templateResponse = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
         method: 'POST',
@@ -100,7 +131,7 @@ ${payLink}
                   { type: 'text', text: creator },
                   { type: 'text', text: orderTitle },
                   { type: 'text', text: formattedAmount },
-                  { type: 'text', text: escrowId || 'N/A' }
+                  { type: 'text', text: cleanEscrowId || 'N/A' }
                 ]
               },
               {
@@ -108,7 +139,7 @@ ${payLink}
                 sub_type: 'url',
                 index: '0',
                 parameters: [
-                  { type: 'text', text: escrowId || '' }
+                  { type: 'text', text: cleanEscrowId || '' }
                 ]
               }
             ]
@@ -116,8 +147,9 @@ ${payLink}
         })
       });
 
-      const templateData = await templateResponse.json();
+      const templateData = await templateResponse.json().catch(() => ({}));
       if (templateResponse.ok) {
+        logger.audit('WHATSAPP_SENT_TEMPLATE', 'WhatsApp template sent successfully', { messageId: templateData.messages?.[0]?.id, recipient: cleanNumber });
         return res.status(200).json({
           success: true,
           messageId: templateData.messages?.[0]?.id,
@@ -129,8 +161,8 @@ ${payLink}
     }
 
     if (!metaResponse.ok) {
-      console.error('Meta WhatsApp API Error:', data);
-      return res.status(metaResponse.status).json({ 
+      logger.error('WHATSAPP_API_ERROR', 'Meta WhatsApp API returned error', { error: data.error });
+      return res.status(metaResponse.status || 500).json({ 
         error: data.error?.message || 'Failed to send WhatsApp message', 
         errorCode: data.error?.code,
         directWhatsAppUrl,
@@ -138,6 +170,7 @@ ${payLink}
       });
     }
 
+    logger.audit('WHATSAPP_SENT_TEXT', 'WhatsApp message sent successfully', { messageId: data.messages?.[0]?.id, recipient: cleanNumber });
     return res.status(200).json({ 
       success: true, 
       messageId: data.messages?.[0]?.id, 
@@ -145,8 +178,9 @@ ${payLink}
       directWhatsAppUrl,
       data 
     });
+
   } catch (error) {
-    console.error('Error in send-whatsapp handler:', error);
+    logger.error('WHATSAPP_HANDLER_EXCEPTION', 'Exception in WhatsApp dispatch handler', { error: error.message });
     return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 }

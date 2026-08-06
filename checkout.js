@@ -1,5 +1,5 @@
 import { db, functionsApp, httpsCallable } from "./firebase-config.js";
-import { doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { computeFeeSplit, pickUserPhone } from "./moolre-service.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -225,13 +225,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                             const sellerId = escrow.sellerId;
                             const amount = parseFloat(escrow.amount);
                             
-                            await updateDoc(docRef, { status: 'COMPLETED' });
+                            await updateDoc(docRef, { 
+                                status: 'COMPLETED',
+                                completedAt: serverTimestamp()
+                            });
                             
                             const sellerRef = doc(db, "users", sellerId);
                             const sellerSnap = await getDoc(sellerRef);
                             if (sellerSnap.exists()) {
                                 const currentBalance = parseFloat(sellerSnap.data().walletBalance || 0);
                                 await updateDoc(sellerRef, { walletBalance: currentBalance + amount });
+                            }
+
+                            // Record audit log for financial settlement
+                            try {
+                                await addDoc(collection(db, "audit_logs"), {
+                                    event: 'ESCROW_RELEASE_CONFIRMED',
+                                    escrowId: escrowId,
+                                    sellerId: sellerId,
+                                    amount: amount,
+                                    status: 'COMPLETED',
+                                    actor: 'buyer',
+                                    timestamp: serverTimestamp(),
+                                    userAgent: navigator.userAgent
+                                });
+                            } catch (auditErr) {
+                                console.warn("Audit logging error:", auditErr);
                             }
                             
                             alert("Funds Released! Thank you for using TrustLink Escrow.");
@@ -244,9 +263,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 document.getElementById('btn-dispute').addEventListener('click', async () => {
                     if(confirm("Are you sure you want to raise a dispute? Escrow funds will remain locked while an admin reviews the case.")) {
-                        await updateDoc(docRef, { status: 'DISPUTED' });
-                        alert("Dispute Raised. Support will contact you shortly.");
-                        window.location.reload();
+                        try {
+                            await updateDoc(docRef, { 
+                                status: 'DISPUTED',
+                                disputedAt: serverTimestamp()
+                            });
+
+                            // Record audit log for dispute
+                            try {
+                                await addDoc(collection(db, "audit_logs"), {
+                                    event: 'ESCROW_DISPUTE_RAISED',
+                                    escrowId: escrowId,
+                                    sellerId: escrow.sellerId || '',
+                                    amount: parseFloat(escrow.amount || 0),
+                                    status: 'DISPUTED',
+                                    actor: 'buyer',
+                                    timestamp: serverTimestamp(),
+                                    userAgent: navigator.userAgent
+                                });
+                            } catch (auditErr) {
+                                console.warn("Audit logging error:", auditErr);
+                            }
+
+                            alert("Dispute Raised. Support will contact you shortly.");
+                            window.location.reload();
+                        } catch (err) {
+                            alert("Error raising dispute: " + err.message);
+                        }
                     }
                 });
 

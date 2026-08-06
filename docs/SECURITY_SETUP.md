@@ -1,48 +1,72 @@
-# 🔐 Security Setup & Secret Management Guide
+# 🔐 Security Architecture & Secret Management Guide
 
-> **Important:** This guide documents the secret names and command-line instructions required to configure Firebase Secret Manager for production deployment. Never commit secret values or private keys to source code or version control.
-
----
-
-## 🔑 Required Firebase Secrets
-
-The following secret keys must be set in Firebase Secret Manager for your project before deploying Cloud Functions:
-
-| Secret Name | Purpose | Function Access |
-| :--- | :--- | :--- |
-| `MOOLRE_SECRET_KEY` | Moolre API Secret Key | `api`, `moolre` backend functions |
-| `MOOLRE_PUBLIC_KEY` | Moolre JWT Public Key | `api`, `moolre` backend functions |
-| `MOOLRE_PRIVATE_KEY` | Moolre API Private Key | `api`, `moolre` backend functions |
-| `MOOLRE_VAS_KEY` | Moolre VAS Key (SMS & Notifications) | `api`, `moolre` backend functions |
-| `MOOLRE_API_USER` | Moolre API User Account Identifier | `api`, `moolre` backend functions |
-| `MOOLRE_ACCOUNT_NUMBER` | Moolre Merchant Account Number | `api`, `moolre` backend functions |
+> **Security Mandate:** TrustLink Escrow adheres to zero-trust design principles. No API secrets, private keys, database admin tokens, or payment credentials may be committed to version control or exposed in browser client-side code.
 
 ---
 
-## 🚀 Setting Secrets via Firebase CLI
+## 🏛️ Secret Classification & Distribution
 
-Run the following commands in your terminal (replacing placeholders with your real rotated production credentials when prompted):
+| Classification | Category | Storage Location | Example Variables |
+| :--- | :--- | :--- | :--- |
+| **High Security (Restricted)** | Payment Gateway Secrets | Firebase Secret Manager (GCP Cloud KMS) | `MOOLRE_SECRET_KEY`, `MOOLRE_PRIVATE_KEY`, `MOOLRE_VAS_KEY`, `MOOLRE_ACCOUNT_NUMBER` |
+| **High Security (Restricted)** | Messaging & SMS Gateways | Vercel Environment Variables (Server-side) | `SASUSYNC_API_KEY`, `ARKESEL_API_KEY`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN` |
+| **Medium Security** | Service Identifiers | Vercel / Cloud Functions Env | `WHATSAPP_PHONE_NUMBER_ID`, `SASUSYNC_SENDER_ID` |
+| **Public** | Client-Side SDK Keys | `firebase-config.js` | Firebase Client Web API Key, Project ID, App ID |
+
+---
+
+## 🚀 Setting Up Secrets in Production
+
+### 1. Firebase Secret Manager (Cloud Functions)
+To configure secrets for Firebase Cloud Functions without exposing them in codebase configs, run:
 
 ```bash
-# Set Moolre Secrets
+# Set Moolre Payment Gateway Credentials
 firebase functions:secrets:set MOOLRE_SECRET_KEY
 firebase functions:secrets:set MOOLRE_PUBLIC_KEY
 firebase functions:secrets:set MOOLRE_PRIVATE_KEY
 firebase functions:secrets:set MOOLRE_VAS_KEY
 firebase functions:secrets:set MOOLRE_API_USER
 firebase functions:secrets:set MOOLRE_ACCOUNT_NUMBER
+
+# Set SMS Gateway Key for Cloud Functions
+firebase functions:secrets:set SASUSYNC_API_KEY
 ```
+
+### 2. Vercel Dashboard (Serverless Functions)
+In your Vercel Project Settings (`Settings` ➔ `Environment Variables`), configure the following keys for `Production` and `Preview` environments:
+
+- `SASUSYNC_API_KEY`
+- `SASUSYNC_SENDER_ID` (e.g. `TrustEscrow`)
+- `ARKESEL_API_KEY`
+- `WHATSAPP_ACCESS_TOKEN`
+- `WHATSAPP_PHONE_NUMBER_ID`
+- `WHATSAPP_VERIFY_TOKEN`
 
 ---
 
-## 📋 Recommended Deployment Sequence
+## 🔄 Secret Rotation Runbook
 
-1. **Rotate Credentials:** Revoke all previously exposed Moolre API keys and generate new credentials in your Moolre Merchant Dashboard.
-2. **Set Firebase Secrets:** Execute the `firebase functions:secrets:set` commands above for the `trustlink-escrow` Firebase project.
-3. **Deploy Backend Functions:** Deploy updated Cloud Functions:
+In the event of a suspected leak or scheduled 90-day rotation:
+
+1. **Generate New Credentials** in the respective provider portal (Moolre Merchant Portal, Meta Business Manager, or SasuSync Dashboard).
+2. **Update Secret Stores** using the Firebase CLI commands above and updating Vercel environment variables.
+3. **Deploy Backend**:
    ```bash
    firebase deploy --only functions
+   vercel --prod
    ```
-4. **Deploy Frontend & Vercel Rewrites:** Deploy static frontend assets and Vercel routing rewrites (`vercel.json`).
-5. **Verify API Endpoints:** Test endpoint routing to `https://www.trustlinkgh.online/api/v1/escrows` using authorized sandbox API keys.
-6. **Git History Sanitation:** Coordinated history cleanup after credential revocation.
+4. **Revoke Old Keys** in the provider dashboard immediately after confirming successful operation with the new keys.
+5. **Run Security Scanner**:
+   ```bash
+   npm test
+   ```
+
+---
+
+## 🛡️ Database & Rule Validation
+
+All Firestore database access is governed by [firestore.rules](file:///Users/wm/Desktop/trustlink-escrow/firestore.rules).
+- Client applications can never directly alter user wallet balances or platform fee allocations.
+- Escrow records enforce strict status lifecycle state machines.
+- All financial state changes record immutable events in the `audit_logs` collection.
