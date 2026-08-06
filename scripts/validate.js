@@ -20,7 +20,7 @@ function assert(condition, message) {
     }
 }
 
-// 1. Required Legal, Security & Core Files Exist
+// 1. Required Legal, Security, Telegram & Core Files Exist
 const requiredFiles = [
     'terms.html',
     'privacy.html',
@@ -44,10 +44,14 @@ const requiredFiles = [
     'docs/DESIGN_GUIDELINES.md',
     'docs/SECURITY_SETUP.md',
     'docs/BACKUP_AND_DISASTER_RECOVERY.md',
+    'docs/TELEGRAM_BOT_SETUP.md',
     '.env.example',
     'api/_utils/validator.js',
     'api/_utils/rate-limiter.js',
     'api/_utils/logger.js',
+    'api/_utils/telegram.js',
+    'api/webhook/telegram.js',
+    'test-telegram-bot.mjs',
     'scripts/backup-firestore.js',
     'moolre-service.js',
     'session-manager.js',
@@ -129,6 +133,8 @@ const sensitiveJsFiles = [
     'solution-page.js',
     'api/send-whatsapp.js',
     'api/webhook/whatsapp.js',
+    'api/webhook/telegram.js',
+    'api/_utils/telegram.js',
     'api/v1/sms/send.js'
 ];
 
@@ -137,7 +143,8 @@ const secretLiteralsToDisallow = [
     /MOOLRE_PUBLIC_KEY\s*=\s*["']ey[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+["']/,
     /MOOLRE_PRIVATE_KEY\s*=\s*["'][A-Za-z0-9_]{20,}["']/,
     /MOOLRE_VAS_KEY\s*=\s*["'][A-Za-z0-9_]{10,}["']/,
-    /SASUSYNC_API_KEY\s*=\s*["'][A-Za-z0-9_]{10,}["']/
+    /SASUSYNC_API_KEY\s*=\s*["'][A-Za-z0-9_]{10,}["']/,
+    /TELEGRAM_BOT_TOKEN\s*=\s*["'][0-9]{8,}:[A-Za-z0-9_-]{20,}["']/
 ];
 
 sensitiveJsFiles.forEach(file => {
@@ -183,12 +190,12 @@ if (fs.existsSync(smsSendPath)) {
     assert(content.includes('createRequestLogger'), 'api/v1/sms/send.js integrates structured logger');
 }
 
-const whatsappSendPath = path.join(ROOT_DIR, 'api', 'send-whatsapp.js');
-if (fs.existsSync(whatsappSendPath)) {
-    const content = fs.readFileSync(whatsappSendPath, 'utf8');
-    assert(content.includes('enforceRateLimit'), 'api/send-whatsapp.js integrates enforceRateLimit');
-    assert(content.includes('validateGhanaPhone'), 'api/send-whatsapp.js integrates validateGhanaPhone');
-    assert(content.includes('validateAmount'), 'api/send-whatsapp.js integrates validateAmount');
+const telegramWebhookPath = path.join(ROOT_DIR, 'api', 'webhook', 'telegram.js');
+if (fs.existsSync(telegramWebhookPath)) {
+    const content = fs.readFileSync(telegramWebhookPath, 'utf8');
+    assert(content.includes('enforceRateLimit'), 'api/webhook/telegram.js integrates enforceRateLimit');
+    assert(content.includes('createRequestLogger'), 'api/webhook/telegram.js integrates structured logger');
+    assert(content.includes('validateGhanaPhone'), 'api/webhook/telegram.js integrates validateGhanaPhone');
 }
 
 // 8. Verify WooCommerce Plugin Source

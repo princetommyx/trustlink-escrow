@@ -8,7 +8,7 @@
   "name": "trustlink-escrow",
   "version": "1.0.0",
   "scripts": {
-    "test": "node scripts/validate.js"
+    "test": "node scripts/validate.js && node test-telegram-bot.mjs"
   },
   "repository": {
     "type": "git",
