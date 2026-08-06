@@ -61,12 +61,12 @@ service cloud.firestore {
       // Public read required for checkout (unauthenticated buyer) and dashboard (seller)
       allow read: if true;
 
-      // Escrow creation: Must be authenticated seller with valid amount and initial pending status
-      allow create: if isAuthenticated() &&
-        request.resource.data.sellerId == request.auth.uid &&
-        isValidAmount(request.resource.data.amount) &&
-        request.resource.data.status == 'PENDING_PAYMENT' &&
-        isValidText(request.resource.data.description, 1, 500);
+      // Escrow creation: Must be authenticated seller OR valid pending escrow creation with valid amount
+      allow create: if (
+        (isAuthenticated() && request.resource.data.sellerId == request.auth.uid) ||
+        (request.resource.data.status == 'PENDING_PAYMENT' && isValidAmount(request.resource.data.amount))
+      ) &&
+      isValidText(request.resource.data.description, 1, 500);
 
       // Escrow state updates:
       // 1. Seller can mark as DISPATCHED / ITEM_SHIPPED

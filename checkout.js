@@ -1,11 +1,16 @@
 import { db, functionsApp, httpsCallable } from "./firebase-config.js";
-import { doc, getDoc, updateDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { computeFeeSplit, pickUserPhone } from "./moolre-service.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Extract ID from URL
+    // Extract ID and fallback attributes from URL
     const urlParams = new URLSearchParams(window.location.search);
     const escrowId = urlParams.get('id');
+    const qAmount = urlParams.get('amount') || urlParams.get('price');
+    const qItem = urlParams.get('item') || urlParams.get('desc') || urlParams.get('name') || urlParams.get('title');
+    const qSeller = urlParams.get('seller') || urlParams.get('vendor');
+    const qBuyer = urlParams.get('buyer') || urlParams.get('phone');
+    const qSplit = urlParams.get('split') || urlParams.get('feeAllocation');
     
     if (!escrowId) {
         document.getElementById('loading-text').textContent = "Error: Invalid Checkout Link";
@@ -15,15 +20,49 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         const docRef = doc(db, "escrows", escrowId);
-        const docSnap = await getDoc(docRef);
+        let escrow = null;
 
-        if (!docSnap.exists()) {
+        try {
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                escrow = docSnap.data();
+            }
+        } catch (fetchErr) {
+            console.warn("Firestore direct read notice:", fetchErr);
+        }
+
+        // If doc wasn't found in Firestore but query params provide escrow details
+        if (!escrow && qAmount && !isNaN(parseFloat(qAmount)) && parseFloat(qAmount) > 0) {
+            const parsedAmt = parseFloat(qAmount);
+            escrow = {
+                amount: parsedAmt,
+                totalAmount: parsedAmt,
+                description: qItem ? decodeURIComponent(qItem) : "Escrow Transaction",
+                sellerName: qSeller ? decodeURIComponent(qSeller) : "Verified Vendor",
+                sellerId: "TELEGRAM_BOT",
+                buyerPhone: qBuyer ? decodeURIComponent(qBuyer) : "",
+                feeAllocation: qSplit ? decodeURIComponent(qSplit) : "split",
+                feePercent: 3.0,
+                status: 'PENDING_PAYMENT',
+                source: 'TELEGRAM_BOT'
+            };
+
+            // Auto-persist to Firestore in background so future reads & listeners sync
+            try {
+                await setDoc(docRef, {
+                    ...escrow,
+                    createdAt: serverTimestamp()
+                }, { merge: true });
+            } catch (persistErr) {
+                console.warn("Auto-persist escrow error:", persistErr);
+            }
+        }
+
+        if (!escrow) {
             document.getElementById('loading-text').textContent = "Error: Escrow not found";
             document.getElementById('loader').style.display = 'none';
             return;
         }
-
-        const escrow = docSnap.data();
 
         // Handle Moolre Callback / Redirect Verification
         const paymentStatus = urlParams.get('payment');
@@ -68,10 +107,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const summarySubtotalEl = document.getElementById('summary-subtotal-display');
         if (summarySubtotalEl) summarySubtotalEl.textContent = `GH₵ ${formattedRawAmount}`;
 
+        const feeRow = document.getElementById('fee-row');
+        const summaryFeeEl = document.getElementById('summary-fee-display');
         if (fees.buyerFee > 0) {
-            document.getElementById('escrow-amount').insertAdjacentHTML('afterend',
-                `<p style="color: var(--text-muted); font-size: 0.85rem; margin: -12px 0 16px;">Item: GH₵ ${formattedRawAmount} + GH₵ ${Number(fees.buyerFee).toFixed(2)} platform fee</p>`);
+            if (feeRow) feeRow.style.display = 'flex';
+            if (summaryFeeEl) summaryFeeEl.textContent = `GH₵ ${Number(fees.buyerFee).toFixed(2)}`;
+        } else {
+            if (feeRow) feeRow.style.display = 'none';
         }
+
         document.getElementById('seller-name').textContent = escrow.sellerName || 'Verified Vendor';
         document.getElementById('escrow-desc').textContent = escrow.description || 'Secure Transaction';
         document.getElementById('escrow-id-display').textContent = escrowId;

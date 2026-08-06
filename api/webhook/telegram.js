@@ -15,7 +15,9 @@ import {
   answerCallbackQuery,
   getMainMenuKeyboard,
   getFeeSplitKeyboard,
-  getEscrowActionKeyboard
+  getEscrowActionKeyboard,
+  buildEscrowCheckoutUrl,
+  persistEscrowToFirestore
 } from '../_utils/telegram.js';
 import { dispatchTransactionalSMS, buildEscrowOrderSMS } from '../_utils/sms-dispatcher.js';
 
@@ -226,20 +228,29 @@ Create instant Mobile Money protected escrow links for your social media sales (
     const escrowId = generateEscrowId();
     const amount = amountValidation.value || amountValidation.amount;
     const fee = parseFloat((amount * 0.03).toFixed(2));
-    const checkoutUrl = `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`;
     const sellerName = from?.first_name || (from?.username ? `@${from.username}` : 'TrustLink Seller');
+    const buyerPhone = phoneValidation.formattedLocal || buyerPhoneRaw;
 
-    // Store in recent escrows cache for instant SMS dispatching
-    recentEscrows.set(escrowId, {
+    const escrowObj = {
       escrowId,
       itemName,
       amount,
       fee,
-      buyerPhone: phoneValidation.formattedLocal || buyerPhoneRaw,
+      buyerPhone,
       sellerName,
-      checkoutUrl,
+      sellerId: `TELEGRAM_${chatId}`,
+      feeChoice: 'split',
       createdAt: Date.now()
-    });
+    };
+
+    const checkoutUrl = buildEscrowCheckoutUrl(escrowObj);
+    escrowObj.checkoutUrl = checkoutUrl;
+
+    // Store in recent escrows cache for instant SMS dispatching
+    recentEscrows.set(escrowId, escrowObj);
+
+    // Persist directly to Firestore REST API in background
+    persistEscrowToFirestore(escrowObj).catch(err => console.warn('[FIRESTORE] Async save note:', err));
 
     const successMsg = `
 <b>Escrow Payment Link Created</b>
@@ -699,20 +710,28 @@ async function handleCallbackQuery(callbackQuery, logger) {
     const buyerPhone = draft.buyerPhone || '0244112233';
     const fee = parseFloat((amount * 0.03).toFixed(2));
     const escrowId = generateEscrowId();
-    const checkoutUrl = `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`;
     const sellerName = callbackQuery.from?.first_name || (callbackQuery.from?.username ? `@${callbackQuery.from.username}` : 'TrustLink Seller');
 
-    // Save in recent escrows cache for 1-click SMS dispatch
-    recentEscrows.set(escrowId, {
+    const escrowObj = {
       escrowId,
       itemName,
       amount,
       fee,
       buyerPhone,
       sellerName,
-      checkoutUrl,
+      sellerId: `TELEGRAM_${chatId}`,
+      feeChoice,
       createdAt: Date.now()
-    });
+    };
+
+    const checkoutUrl = buildEscrowCheckoutUrl(escrowObj);
+    escrowObj.checkoutUrl = checkoutUrl;
+
+    // Save in recent escrows cache for 1-click SMS dispatch
+    recentEscrows.set(escrowId, escrowObj);
+
+    // Persist directly to Firestore REST API in background
+    persistEscrowToFirestore(escrowObj).catch(err => console.warn('[FIRESTORE] Async save note:', err));
 
     clearSession(chatId);
     await answerCallbackQuery(queryId, 'Escrow Created');

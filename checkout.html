@@ -422,12 +422,23 @@
         setTimeout(async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const escrowId = urlParams.get('id');
+            const qAmount = urlParams.get('amount') || urlParams.get('price');
             if(!escrowId) return;
 
             try {
+                let escrow = null;
                 const docSnap = await getDoc(doc(db, "escrows", escrowId));
                 if(docSnap.exists()) {
-                    const escrow = docSnap.data();
+                    escrow = docSnap.data();
+                } else if (qAmount && !isNaN(parseFloat(qAmount))) {
+                    escrow = {
+                        amount: parseFloat(qAmount),
+                        feePercent: 3.0,
+                        feeAllocation: urlParams.get('split') || 'split'
+                    };
+                }
+
+                if(escrow) {
                     const rawAmount = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
                     const fees = computeFeeSplit(rawAmount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
                     

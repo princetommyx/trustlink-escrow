@@ -119,6 +119,63 @@ export function getFeeSplitKeyboard() {
 }
 
 /**
+ * Constructs a rich checkout URL that includes order parameters for instant fallback loading
+ */
+export function buildEscrowCheckoutUrl(escrow) {
+  const base = 'https://www.trustlinkgh.online/checkout.html';
+  const escrowId = escrow.escrowId || escrow.id || '';
+  const params = new URLSearchParams();
+  params.set('id', escrowId);
+  if (escrow.amount) params.set('amount', Number(escrow.amount).toFixed(2));
+  if (escrow.itemName || escrow.description) params.set('item', escrow.itemName || escrow.description);
+  if (escrow.sellerName) params.set('seller', escrow.sellerName);
+  if (escrow.buyerPhone) params.set('buyer', escrow.buyerPhone);
+  if (escrow.feeChoice || escrow.feeAllocation) params.set('split', escrow.feeChoice || escrow.feeAllocation || 'split');
+  return `${base}?${params.toString()}`;
+}
+
+/**
+ * Persists an escrow directly to Firestore REST API in the background
+ */
+export async function persistEscrowToFirestore(escrow) {
+  try {
+    const escrowId = escrow.escrowId || escrow.id;
+    if (!escrowId) return { ok: false };
+    const apiKey = 'AIzaSyA2kBaKsu5WtboFBmOWJTLzESkbh776ij0';
+    const projectId = 'trustlink-escrow';
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/escrows/${escrowId}?key=${apiKey}`;
+    
+    const amount = Number(escrow.amount || 0);
+    const body = {
+      fields: {
+        amount: { doubleValue: amount },
+        totalAmount: { doubleValue: amount },
+        description: { stringValue: String(escrow.itemName || escrow.description || 'Escrow Order') },
+        sellerName: { stringValue: String(escrow.sellerName || 'TrustLink Seller') },
+        sellerId: { stringValue: String(escrow.sellerId || 'TELEGRAM_BOT') },
+        buyerPhone: { stringValue: String(escrow.buyerPhone || '') },
+        feeAllocation: { stringValue: String(escrow.feeChoice || escrow.feeAllocation || 'split') },
+        feePercent: { doubleValue: 3.0 },
+        status: { stringValue: 'PENDING_PAYMENT' },
+        source: { stringValue: 'TELEGRAM_BOT' },
+        createdAt: { timestampValue: new Date().toISOString() }
+      }
+    };
+
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, data };
+  } catch (err) {
+    console.warn('[FIRESTORE] Background escrow save warning:', err.message);
+    return { ok: false, error: err.message };
+  }
+}
+
+/**
  * Returns the action buttons for a created or active Escrow
  */
 export function getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, options = {}) {

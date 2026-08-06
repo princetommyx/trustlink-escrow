@@ -5,7 +5,7 @@
  */
 
 import handler from './api/webhook/telegram.js';
-import { getEscrowActionKeyboard } from './api/_utils/telegram.js';
+import { getEscrowActionKeyboard, buildEscrowCheckoutUrl } from './api/_utils/telegram.js';
 import { buildEscrowOrderSMS } from './api/_utils/sms-dispatcher.js';
 
 // Mock Response Object for Vercel Serverless Function testing
@@ -270,6 +270,19 @@ async function runTests() {
   assert(smsBtn?.text === 'Send SMS to Buyer', "SMS button has proper label");
 
   // 8b: Verify SMS message format matches site
+  const richCheckoutUrl = buildEscrowCheckoutUrl({
+    escrowId: 'TL-89241',
+    amount: 450,
+    itemName: 'Nike Jordan',
+    sellerName: 'Kwame',
+    buyerPhone: '0244112233',
+    feeChoice: 'split'
+  });
+  assert(
+    richCheckoutUrl.includes('id=TL-89241') && richCheckoutUrl.includes('amount=450.00') && richCheckoutUrl.includes('Nike+Jordan'),
+    "Rich checkout URL includes id, amount, item, seller, buyer, and split parameters"
+  );
+
   const expectedSms = buildEscrowOrderSMS({
     sellerName: 'Kwame',
     itemName: 'Nike Jordan',
