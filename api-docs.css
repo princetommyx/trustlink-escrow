@@ -1,12 +1,20 @@
 /* ==========================================================================
    TrustLink Escrow — Public API Documentation Stylesheet (api-docs.css)
    Strictly scoped under .api-docs-page to prevent style leaks.
-   Adheres to docs/DESIGN_GUIDELINES.md design tokens & responsive rules.
+   Adheres to docs/DESIGN_GUIDELINES.md design tokens & mobile-first rules.
    ========================================================================== */
 
 /* Hidden Attribute Protection */
 .api-docs-page [hidden] {
     display: none !important;
+}
+
+/* Universal Media Containment */
+.api-docs-page img,
+.api-docs-page svg,
+.api-docs-page video,
+.api-docs-page canvas {
+    max-width: 100%;
 }
 
 /* --- Accessible Skip Link --- */
@@ -46,6 +54,7 @@
     gap: 8px;
     text-align: center;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    box-sizing: border-box;
 }
 
 /* --- Base Body & Typography --- */
@@ -56,6 +65,7 @@
     line-height: 1.7;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
 }
 
 .api-docs-page h1,
@@ -66,6 +76,7 @@
     color: #0F172A;
     margin-top: 0;
     letter-spacing: -0.02em;
+    overflow-wrap: break-word;
 }
 
 .api-docs-eyebrow {
@@ -83,6 +94,7 @@
     padding: 140px 0 60px;
     background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
     border-bottom: 1px solid #E2E8F0;
+    width: 100%;
 }
 
 .api-docs-page .api-docs-hero-grid {
@@ -90,10 +102,14 @@
     grid-template-columns: 1fr 1fr;
     gap: 40px;
     align-items: center;
+    width: 100%;
+    min-width: 0;
 }
 
 .api-docs-page .hero-left-col {
     max-width: 580px;
+    width: 100%;
+    min-width: 0;
 }
 
 .api-docs-page .api-badge-preview {
@@ -112,16 +128,18 @@
 }
 
 .api-docs-page .hero-title {
-    font-size: clamp(2.2rem, 3.5vw + 1rem, 3.5rem);
+    font-size: clamp(2rem, 3.5vw + 1rem, 3.5rem);
     font-weight: 800;
-    line-height: 1.15;
+    line-height: 1.18;
     margin-bottom: 16px;
+    overflow-wrap: break-word;
 }
 
 .api-docs-page .hero-subtext {
-    font-size: clamp(1rem, 1.2vw, 1.15rem);
+    font-size: clamp(0.95rem, 1.2vw, 1.15rem);
     color: #475569;
     margin-bottom: 28px;
+    overflow-wrap: break-word;
 }
 
 .api-docs-page .hero-actions {
@@ -130,20 +148,24 @@
     gap: 16px;
     flex-wrap: wrap;
     margin-bottom: 32px;
+    width: 100%;
 }
 
 /* Base URL Card Component */
 .api-docs-page .api-base-url-card {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     background-color: #FFFFFF;
     border: 1px solid #E2E8F0;
     border-radius: 12px;
-    padding: 10px 18px;
+    padding: 10px 16px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     gap: 12px;
     max-width: 100%;
-    overflow-x: auto;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    flex-wrap: wrap;
 }
 
 .api-docs-page .base-url-label {
@@ -152,14 +174,18 @@
     text-transform: uppercase;
     color: #64748B;
     letter-spacing: 0.04em;
+    flex-shrink: 0;
 }
 
 .api-docs-page .base-url-code {
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     color: #2563EB;
     font-weight: 600;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    min-width: 0;
+    flex: 1;
 }
 
 .api-docs-page .btn-copy-url {
@@ -175,6 +201,7 @@
     align-items: center;
     gap: 6px;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 .api-docs-page .btn-copy-url:hover {
     background: #E2E8F0;
@@ -183,6 +210,7 @@
 /* Hero Right Column: Code Preview Panel */
 .api-docs-page .hero-right-col {
     width: 100%;
+    min-width: 0;
 }
 
 .api-docs-page .api-docs-hero-code-card {
@@ -191,15 +219,20 @@
     border-radius: 16px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12);
     overflow: hidden;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .api-docs-page .hero-code-header {
     background-color: #1E293B;
-    padding: 12px 20px;
+    padding: 12px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .api-docs-page .hero-code-lang {
@@ -213,6 +246,8 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.8rem;
     color: #94A3B8;
+    overflow-wrap: anywhere;
+    word-break: break-all;
 }
 
 .api-docs-page .btn-copy-hero-code {
@@ -228,6 +263,7 @@
     align-items: center;
     gap: 4px;
     transition: background 0.15s ease;
+    flex-shrink: 0;
 }
 .api-docs-page .btn-copy-hero-code:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -235,17 +271,21 @@
 
 .api-docs-page .api-docs-hero-code-card pre {
     margin: 0;
-    padding: 20px;
+    padding: 18px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
+    font-size: 0.84rem;
     color: #E2E8F0;
     line-height: 1.6;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 /* --- Developer Notice Section --- */
 .api-docs-page .api-notice-section {
     padding: 24px 0 12px;
+    width: 100%;
 }
 
 .api-docs-page .api-notice-card {
@@ -256,6 +296,8 @@
     display: flex;
     align-items: flex-start;
     gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .api-docs-page .notice-icon {
@@ -276,13 +318,16 @@
     margin: 0;
     font-size: 0.92rem;
     line-height: 1.6;
+    overflow-wrap: break-word;
 }
 
 /* --- Main Layout Container & Toolbar --- */
 .api-docs-page .api-docs-container {
     max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     padding: 24px 24px 60px;
+    box-sizing: border-box;
 }
 
 .api-docs-page .api-docs-toolbar {
@@ -291,6 +336,7 @@
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 /* Client-Side Search Engine Component */
@@ -298,12 +344,14 @@
     position: relative;
     flex-grow: 1;
     max-width: 600px;
+    width: 100%;
 }
 
 .api-docs-page .search-input-inner {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .api-docs-page .search-icon {
@@ -324,6 +372,7 @@
     color: #0F172A;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     transition: all 0.2s ease;
+    box-sizing: border-box;
 }
 
 .api-docs-page .api-search-input:focus {
@@ -420,6 +469,7 @@
     align-items: center;
     gap: 8px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    min-height: 44px;
 }
 
 /* --- 2-Column Responsive Documentation Shell --- */
@@ -427,6 +477,8 @@
     display: flex;
     gap: 40px;
     align-items: flex-start;
+    width: 100%;
+    min-width: 0;
 }
 
 /* Left Sticky Navigation Sidebar */
@@ -442,6 +494,7 @@
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    box-sizing: border-box;
 }
 
 .api-docs-page .sidebar-heading {
@@ -487,6 +540,8 @@
 .api-docs-page .api-docs-content {
     flex: 1;
     min-width: 0;
+    width: 100%;
+    max-width: 100%;
 }
 
 .api-docs-page .doc-section {
@@ -497,6 +552,11 @@
     margin-bottom: 32px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     scroll-margin-top: 110px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
 }
 
 .api-docs-page .doc-section h2 {
@@ -505,6 +565,7 @@
     border-bottom: 1px solid #F1F5F9;
     padding-bottom: 12px;
     margin-bottom: 20px;
+    overflow-wrap: break-word;
 }
 
 .api-docs-page .doc-section h3 {
@@ -512,12 +573,14 @@
     font-weight: 600;
     margin-top: 28px;
     margin-bottom: 14px;
+    overflow-wrap: break-word;
 }
 
 .api-docs-page .doc-section p {
     font-size: 0.98rem;
     margin-bottom: 16px;
     color: #475569;
+    overflow-wrap: break-word;
 }
 
 .api-docs-page .doc-section ul,
@@ -529,6 +592,11 @@
 .api-docs-page .doc-section li {
     margin-bottom: 8px;
     color: #475569;
+    overflow-wrap: break-word;
+}
+
+.api-docs-page .doc-section a {
+    overflow-wrap: break-word;
 }
 
 /* Callout Boxes & Warnings */
@@ -537,6 +605,9 @@
     padding: 20px 24px;
     margin: 20px 0;
     font-size: 0.95rem;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
 }
 
 .api-docs-page .info-callout {
@@ -559,25 +630,33 @@
     color: #B45309;
 }
 
-/* Quickstart Steps */
+/* Quickstart Steps — Responsive Grid Layout */
 .api-docs-page .quickstart-steps {
     list-style: none;
     padding: 0 !important;
+    margin: 24px 0;
     counter-reset: step-counter;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
 }
 
 .api-docs-page .quickstart-steps li {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+    width: 100%;
+    min-width: 0;
     position: relative;
-    padding-left: 48px;
-    margin-bottom: 24px;
+    padding-left: 0 !important;
+    margin-bottom: 0;
 }
 
 .api-docs-page .quickstart-steps li::before {
     counter-increment: step-counter;
     content: counter(step-counter);
-    position: absolute;
-    left: 0;
-    top: 0;
     width: 32px;
     height: 32px;
     background-color: #EFF6FF;
@@ -589,13 +668,38 @@
     font-weight: 700;
     font-size: 0.9rem;
     font-family: 'Outfit', sans-serif;
+    flex-shrink: 0;
 }
 
-.api-docs-page .quickstart-steps li strong {
+.api-docs-page .quickstart-steps .step-content {
+    min-width: 0;
+    width: 100%;
+    overflow-wrap: break-word;
+}
+
+.api-docs-page .quickstart-steps .step-content strong {
     display: block;
     font-size: 1.05rem;
     color: #0F172A;
     margin-bottom: 4px;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.api-docs-page .quickstart-steps .step-content p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #475569;
+    overflow-wrap: break-word;
+}
+
+.api-docs-page .quickstart-steps a {
+    overflow-wrap: break-word;
+}
+
+.api-docs-page .quickstart-steps code {
+    overflow-wrap: anywhere;
+    word-break: break-all;
 }
 
 /* Endpoint Header Badge */
@@ -608,6 +712,8 @@
     border-radius: 12px;
     margin-bottom: 24px;
     flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .api-docs-page .method-badge {
@@ -617,6 +723,7 @@
     padding: 4px 10px;
     border-radius: 6px;
     letter-spacing: 0.05em;
+    flex-shrink: 0;
 }
 
 .api-docs-page .method-badge.post {
@@ -629,6 +736,10 @@
     color: #FFFFFF;
     font-size: 1.05rem;
     font-weight: 600;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    min-width: 0;
+    flex: 1;
 }
 
 .api-docs-page .endpoint-badge-preview {
@@ -646,13 +757,15 @@
     border: 1px solid rgba(96, 165, 250, 0.3);
     margin-left: auto;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .api-docs-page .spec-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 16px;
     margin: 20px 0;
+    width: 100%;
 }
 
 .api-docs-page .spec-item {
@@ -660,6 +773,7 @@
     border: 1px solid #E2E8F0;
     padding: 12px 16px;
     border-radius: 10px;
+    box-sizing: border-box;
 }
 
 .api-docs-page .spec-label {
@@ -679,14 +793,18 @@
 /* --- Tables & Schema Styling --- */
 .api-docs-page .table-container {
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     margin: 20px 0;
     border: 1px solid #E2E8F0;
     border-radius: 12px;
+    box-sizing: border-border;
 }
 
 .api-docs-page .schema-table {
     width: 100%;
+    min-width: 520px;
     border-collapse: collapse;
     text-align: left;
     font-size: 0.9rem;
@@ -706,6 +824,7 @@
     border-bottom: 1px solid #F1F5F9;
     vertical-align: top;
     color: #475569;
+    overflow-wrap: break-word;
 }
 
 .api-docs-page .schema-table tr:last-child td {
@@ -719,6 +838,8 @@
     border-radius: 4px;
     font-size: 0.85rem;
     color: #0F172A;
+    overflow-wrap: anywhere;
+    word-break: break-all;
 }
 
 .api-docs-page .status-pill {
@@ -727,6 +848,7 @@
     font-weight: 700;
     padding: 3px 8px;
     border-radius: 9999px;
+    white-space: nowrap;
 }
 
 .api-docs-page .status-pill.required {
@@ -752,6 +874,10 @@
     overflow: hidden;
     margin: 20px 0;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .api-docs-page .code-tab-header,
@@ -762,6 +888,7 @@
     align-items: center;
     gap: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
 }
 
 .api-docs-page .code-block-title {
@@ -792,6 +919,7 @@
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.15s ease;
+    min-height: 38px;
 }
 
 .api-docs-page .code-tab-btn:hover {
@@ -820,6 +948,8 @@
     align-items: center;
     gap: 6px;
     transition: background 0.15s ease;
+    flex-shrink: 0;
+    min-height: 36px;
 }
 .api-docs-page .btn-copy-code:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -828,12 +958,15 @@
 .api-docs-page .code-tab-panel pre,
 .api-docs-page .code-block-wrapper pre {
     margin: 0;
-    padding: 20px;
+    padding: 18px;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: #E2E8F0;
     line-height: 1.6;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .api-docs-page .code-tab-panel[hidden] {
@@ -852,6 +985,8 @@
     border: 1px solid #E2E8F0;
     padding: 16px;
     border-radius: 12px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .api-docs-page .state-flow-step .flow-code {
@@ -862,6 +997,7 @@
     padding: 4px 8px;
     border-radius: 6px;
     color: #0F172A;
+    white-space: nowrap;
 }
 
 .api-docs-page .state-flow-arrow {
@@ -874,6 +1010,7 @@
     color: #64748B;
     margin-bottom: 24px;
     text-align: center;
+    overflow-wrap: break-word;
 }
 
 /* Uniform 6-Card State Grid */
@@ -882,6 +1019,7 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
     align-items: stretch;
+    width: 100%;
 }
 
 .api-docs-page .api-docs-state-card {
@@ -893,7 +1031,9 @@
     border-left: 4px solid var(--state-accent);
     background-color: var(--state-bg);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
-    box-sizing: border-border;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
 }
 
 .api-docs-page .api-docs-state-card__header {
@@ -903,6 +1043,7 @@
     gap: 12px;
     margin-bottom: 12px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .api-docs-page .api-docs-state-card__constant {
@@ -930,6 +1071,7 @@
     color: #334155;
     margin: 0 !important;
     line-height: 1.55;
+    overflow-wrap: break-word;
 }
 
 /* Exact State Colors matching DESIGN_GUIDELINES.md */
@@ -976,6 +1118,8 @@
     border-radius: 16px;
     padding: 32px;
     margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .api-docs-page .support-card h3 {
@@ -987,6 +1131,7 @@
 .api-docs-page .support-card p {
     color: #94A3B8;
     margin-bottom: 20px;
+    overflow-wrap: break-word;
 }
 
 .api-docs-page .support-actions {
@@ -995,6 +1140,7 @@
     gap: 16px;
     flex-wrap: wrap;
     margin-top: 20px;
+    width: 100%;
 }
 
 .api-docs-page .support-actions .btn {
@@ -1105,9 +1251,23 @@
     }
 }
 
+@media (max-width: 768px) {
+    .api-docs-page .api-docs-hero {
+        padding: 100px 0 36px;
+    }
+
+    .api-docs-page .api-docs-offline-banner {
+        margin-top: 80px;
+    }
+
+    .api-docs-page .footer {
+        padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
 @media (max-width: 640px) {
     .api-docs-page .api-docs-hero {
-        padding: 120px 0 40px;
+        padding: 95px 0 32px;
     }
 
     .api-docs-page .api-docs-container {
@@ -1116,6 +1276,7 @@
 
     .api-docs-page .doc-section {
         padding: 20px 16px;
+        border-radius: 14px;
     }
 
     .api-docs-page .api-docs-state-grid {
@@ -1156,6 +1317,7 @@
 
     .api-docs-page .hero-actions .btn {
         width: 100%;
+        min-height: 44px;
     }
 
     .api-docs-page .support-actions {

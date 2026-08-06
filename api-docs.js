@@ -343,6 +343,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && apiDocsToc.classList.contains('open')) {
+                apiDocsToc.classList.remove('open');
+                btnTocToggle.setAttribute('aria-expanded', 'false');
+                btnTocToggle.focus();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth < 1024 &&
+                apiDocsToc.classList.contains('open') &&
+                !apiDocsToc.contains(e.target) &&
+                !btnTocToggle.contains(e.target)) {
+                apiDocsToc.classList.remove('open');
+                btnTocToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
     }
 
     // --- 7. Offline Network Listener ---

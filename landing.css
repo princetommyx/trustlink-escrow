@@ -6,9 +6,9 @@ body.light-landing {
     -webkit-font-smoothing: antialiased;
 }
 
-.light-landing h1, 
-.light-landing h2, 
-.light-landing h3, 
+.light-landing h1,
+.light-landing h2,
+.light-landing h3,
 .light-landing h4 {
     font-family: 'Outfit', sans-serif;
     color: #030712;
@@ -27,14 +27,14 @@ body.light-landing {
     filter: none; /* Remove expensive blur filter */
     will-change: transform; /* Hardware acceleration for the animation */
 }
-.light-landing .blob-1 { 
-    background: radial-gradient(circle, rgba(255, 237, 213, 1) 0%, rgba(255, 237, 213, 0) 70%); 
+.light-landing .blob-1 {
+    background: radial-gradient(circle, rgba(255, 237, 213, 1) 0%, rgba(255, 237, 213, 0) 70%);
 }
-.light-landing .blob-2 { 
-    background: radial-gradient(circle, rgba(224, 242, 254, 1) 0%, rgba(224, 242, 254, 0) 70%); 
+.light-landing .blob-2 {
+    background: radial-gradient(circle, rgba(224, 242, 254, 1) 0%, rgba(224, 242, 254, 0) 70%);
 }
-.light-landing .blob-3 { 
-    background: radial-gradient(ellipse at center, rgba(254, 240, 138, 0.8) 0%, rgba(167, 243, 208, 0.4) 40%, rgba(167, 243, 208, 0) 70%); 
+.light-landing .blob-3 {
+    background: radial-gradient(ellipse at center, rgba(254, 240, 138, 0.8) 0%, rgba(167, 243, 208, 0.4) 40%, rgba(167, 243, 208, 0) 70%);
 }
 
 /* Navbar Overrides — Floating Card Header (Matching Sample UI) */
@@ -552,11 +552,11 @@ body.light-landing {
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .light-landing .nav-links.active {
         transform: translateY(0);
     }
-    
+
     .light-landing .nav-links a.nav-link-item,
     .light-landing .nav-links .nav-link-dropdown-toggle {
         font-size: 1rem;
@@ -1263,19 +1263,19 @@ body.light-landing {
     .light-landing .showcase-tabs {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .light-landing .showcase-pane.active {
         grid-template-columns: 1fr;
         gap: 36px;
         padding: 36px 24px;
     }
-    
+
     .light-landing .showcase-left-col {
         max-width: 100%;
         text-align: center;
         align-items: center;
     }
-    
+
     .light-landing .diagram-canvas {
         transform: scale(0.92);
         margin: 0 auto;
@@ -1292,7 +1292,7 @@ body.light-landing {
         padding: 12px 16px;
         font-size: 0.88rem;
     }
-    
+
     .light-landing .showcase-card-container {
         border-radius: 24px;
     }
@@ -1387,9 +1387,9 @@ body.light-landing {
 
 /* Overriding specific hero text elements for light mode */
 .light-landing .hero-subtitle { color: #4B5563; }
-.light-landing .badge { 
-    background: #fff; 
-    border-color: #E2E8F0; 
+.light-landing .badge {
+    background: #fff;
+    border-color: #E2E8F0;
     color: #111827;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
@@ -1446,12 +1446,30 @@ body.light-landing {
         margin-left: auto;
         margin-right: auto;
     }
-    .light-landing .showcase-card img {
-        max-width: 280px;
-    }
     .light-landing .showcase-card .floating-ui {
         right: 0px;
         bottom: 10px;
         padding: 12px 16px;
+    }
+}
+
+/* --- Mobile Navbar Bounds & Tawk.to Safe Area Support --- */
+@media (max-width: 768px) {
+    .light-landing .navbar {
+        width: calc(100% - 24px);
+        top: 12px;
+        padding: 10px 16px;
+        min-height: 64px;
+        border-radius: 14px;
+    }
+
+    .light-landing .navbar .logo img {
+        height: 48px;
+        max-height: 48px;
+        max-width: 200px;
+    }
+
+    .light-landing .footer {
+        padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
     }
 }
