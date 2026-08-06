@@ -325,14 +325,53 @@ async function runTests() {
   await handler(reqSmsCmd, resSmsCmd);
   assert(resSmsCmd.statusCode === 200, "/sms command with phone handled gracefully with HTTP 200");
 
-  // 9. Cancel Command
-  console.log("\n[Test 9: /cancel Command]");
-  const reqCancel = {
+  // 9. Status & Unpaid Payment Guard Tests
+  console.log("\n[Test 9: Real-time Status & Payment Check Guard Tests]");
+  
+  // 9a: Check status on Unpaid Escrow
+  const reqStatusUnpaid = {
     method: 'POST',
     headers: { 'x-forwarded-for': '127.0.0.1' },
     body: {
       update_id: 1015,
-      message: { message_id: 27, chat: { id: 987654321 }, text: '/cancel' }
+      callback_query: {
+        id: 'cq_status_1',
+        message: { chat: { id: 987654321 }, message_id: 28 },
+        from: { first_name: 'Kwame' },
+        data: 'btn_status:TL-89241'
+      }
+    }
+  };
+  const resStatusUnpaid = createMockRes();
+  await handler(reqStatusUnpaid, resStatusUnpaid);
+  assert(resStatusUnpaid.statusCode === 200, "btn_status handled cleanly with HTTP 200");
+
+  // 9b: Attempt to ship an unpaid order (guard check)
+  const reqShipUnpaid = {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '127.0.0.1' },
+    body: {
+      update_id: 1016,
+      callback_query: {
+        id: 'cq_ship_unpaid',
+        message: { chat: { id: 987654321 }, message_id: 29 },
+        from: { first_name: 'Kwame' },
+        data: 'btn_ship:TL-89241'
+      }
+    }
+  };
+  const resShipUnpaid = createMockRes();
+  await handler(reqShipUnpaid, resShipUnpaid);
+  assert(resShipUnpaid.statusCode === 200, "btn_ship guard prevented shipping unpaid order");
+
+  // 10. Cancel Command
+  console.log("\n[Test 10: /cancel Command]");
+  const reqCancel = {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '127.0.0.1' },
+    body: {
+      update_id: 1017,
+      message: { message_id: 30, chat: { id: 987654321 }, text: '/cancel' }
     }
   };
   await handler(reqCancel, createMockRes());

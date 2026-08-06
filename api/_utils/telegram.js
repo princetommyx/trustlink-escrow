@@ -176,15 +176,243 @@ export async function persistEscrowToFirestore(escrow) {
 }
 
 /**
- * Returns the action buttons for a created or active Escrow
+ * Fetches an escrow record directly from Firestore REST API
+ */
+export async function getEscrowFromFirestore(escrowId) {
+  try {
+    if (!escrowId) return null;
+    const apiKey = 'AIzaSyA2kBaKsu5WtboFBmOWJTLzESkbh776ij0';
+    const projectId = 'trustlink-escrow';
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/escrows/${escrowId}?key=${apiKey}`;
+
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const doc = await res.json();
+    if (!doc || !doc.fields) return null;
+
+    const parseField = (f) => {
+      if (!f) return null;
+      if (f.stringValue !== undefined) return f.stringValue;
+      if (f.integerValue !== undefined) return parseInt(f.integerValue, 10);
+      if (f.doubleValue !== undefined) return parseFloat(f.doubleValue);
+      if (f.booleanValue !== undefined) return f.booleanValue;
+      if (f.timestampValue !== undefined) return f.timestampValue;
+      return null;
+    };
+
+    return {
+      id: escrowId,
+      escrowId: escrowId,
+      status: parseField(doc.fields.status) || 'PENDING_PAYMENT',
+      amount: parseField(doc.fields.amount) || parseField(doc.fields.totalAmount) || 0,
+      totalAmount: parseField(doc.fields.totalAmount) || parseField(doc.fields.amount) || 0,
+      description: parseField(doc.fields.description) || parseField(doc.fields.itemName) || 'Item',
+      itemName: parseField(doc.fields.description) || parseField(doc.fields.itemName) || 'Item',
+      buyerPhone: parseField(doc.fields.buyerPhone) || '',
+      sellerName: parseField(doc.fields.sellerName) || 'Seller',
+      sellerId: parseField(doc.fields.sellerId) || '',
+      feeAllocation: parseField(doc.fields.feeAllocation) || 'split',
+      createdAt: parseField(doc.fields.createdAt) || null
+    };
+  } catch (err) {
+    console.warn('[FIRESTORE] Fetch escrow warning:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Updates specific fields on an escrow document in Firestore REST API
+ */
+export async function updateEscrowInFirestore(escrowId, fieldsToUpdate = {}) {
+  try {
+    if (!escrowId) return { ok: false };
+    const apiKey = 'AIzaSyA2kBaKsu5WtboFBmOWJTLzESkbh776ij0';
+    const projectId = 'trustlink-escrow';
+
+    const fieldPaths = Object.keys(fieldsToUpdate).map(k => `updateMask.fieldPaths=${encodeURIComponent(k)}`).join('&');
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/escrows/${escrowId}?${fieldPaths}&key=${apiKey}`;
+
+    const formattedFields = {};
+    for (const [key, val] of Object.entries(fieldsToUpdate)) {
+      if (typeof val === 'number') {
+        formattedFields[key] = { doubleValue: val };
+      } else if (typeof val === 'boolean') {
+        formattedFields[key] = { booleanValue: val };
+      } else if (key.endsWith('At') && typeof val === 'string' && val.includes('T')) {
+        formattedFields[key] = { timestampValue: val };
+      } else {
+        formattedFields[key] = { stringValue: String(val) };
+      }
+    }
+
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: formattedFields })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, data };
+  } catch (err) {
+    console.warn('[FIRESTORE] Update escrow warning:', err.message);
+    return { ok: false, error: err.message };
+  }
+}
+
+/**
+ * Formats a clean, user-friendly status message based on actual escrow state
+ */
+export function formatEscrowStatusMessage(order) {
+  const escrowId = order.id || order.escrowId || 'N/A';
+  const amount = Number(order.amount || order.totalAmount || 0).toFixed(2);
+  const itemName = order.itemName || order.description || 'Order Item';
+  const buyerPhone = order.buyerPhone || 'Buyer';
+  const rawStatus = (order.status || 'PENDING_PAYMENT').toUpperCase();
+
+  if (['PENDING_PAYMENT', 'AWAITING_PAYMENT', 'CREATED', 'PENDING'].includes(rawStatus)) {
+    return {
+      status: 'PENDING_PAYMENT',
+      text: `
+<b>Status for #${escrowId}:</b> ⏳ <b>Waiting for Buyer to Pay</b>
+
+<b>Item:</b> ${itemName}
+<b>Amount:</b> GH₵ ${amount}
+<b>Buyer:</b> ${buyerPhone}
+
+❌ <b>Payment has NOT been made yet.</b>
+The buyer has not sent the money yet.
+
+⚠️ <b>Important:</b> Do NOT deliver or send the item until the money is safely held. We will send you an instant message here the moment the buyer pays.
+`.trim()
+    };
+  }
+
+  if (['FUNDS_ESCROWED', 'FUNDED', 'PAID', 'PAYMENT_PROTECTED'].includes(rawStatus)) {
+    return {
+      status: 'FUNDS_ESCROWED',
+      text: `
+<b>Status for #${escrowId}:</b> 🔒 <b>Money Safely Locked!</b>
+
+<b>Item:</b> ${itemName}
+<b>Amount:</b> GH₵ ${amount}
+<b>Buyer:</b> ${buyerPhone}
+
+✅ <b>The buyer has paid GH₵ ${amount}!</b>
+The money is now safely held in TrustLink Escrow.
+
+📦 <b>You can now deliver or send the item</b> to the buyer. After sending, tap <b>I Have Sent the Item</b> below so we can notify the buyer to confirm delivery.
+`.trim()
+    };
+  }
+
+  if (['ITEM_SHIPPED', 'DISPATCHED', 'SHIPPED'].includes(rawStatus)) {
+    return {
+      status: 'ITEM_SHIPPED',
+      text: `
+<b>Status for #${escrowId}:</b> 🚚 <b>Item Sent (In Transit)</b>
+
+<b>Item:</b> ${itemName}
+<b>Amount:</b> GH₵ ${amount}
+<b>Buyer:</b> ${buyerPhone}
+
+You marked this item as sent. We notified the buyer to inspect the package and confirm delivery. Once they confirm, the funds will be released to your wallet immediately.
+`.trim()
+    };
+  }
+
+  if (['COMPLETED', 'CONFIRMED', 'RELEASED'].includes(rawStatus)) {
+    return {
+      status: 'COMPLETED',
+      text: `
+<b>Status for #${escrowId}:</b> 🎉 <b>Order Completed!</b>
+
+<b>Item:</b> ${itemName}
+<b>Amount:</b> GH₵ ${amount}
+
+The buyer confirmed receipt and the payment has been released to your wallet.
+`.trim()
+    };
+  }
+
+  if (['DISPUTED', 'DISPUTE'].includes(rawStatus)) {
+    return {
+      status: 'DISPUTED',
+      text: `
+<b>Status for #${escrowId}:</b> ⚠️ <b>Under Dispute Review</b>
+
+<b>Item:</b> ${itemName}
+<b>Amount:</b> GH₵ ${amount}
+
+This order is currently being reviewed by TrustLink support. Funds remain safely held.
+`.trim()
+    };
+  }
+
+  return {
+    status: rawStatus,
+    text: `
+<b>Status for #${escrowId}:</b> <code>${rawStatus}</code>
+
+<b>Item:</b> ${itemName}
+<b>Amount:</b> GH₵ ${amount}
+`.trim()
+  };
+}
+
+/**
+ * Returns the action buttons for an Escrow based on its live status
  */
 export function getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, options = {}) {
+  const status = (options.status || 'PENDING_PAYMENT').toUpperCase();
   const whatsappShareText = encodeURIComponent(
     `Hello! Here is your TrustLink protected payment link for ${itemName} (GH₵ ${Number(amount).toFixed(2)}):\n\n${checkoutUrl}\n\nYour money is held safely until you receive and check your package.`
   );
 
   const smsButtonText = options.smsSent ? 'Resend SMS to Buyer' : 'Send SMS to Buyer';
 
+  if (['FUNDS_ESCROWED', 'FUNDED', 'PAID', 'PAYMENT_PROTECTED'].includes(status)) {
+    return {
+      inline_keyboard: [
+        [
+          { text: 'I Have Sent the Item', callback_data: `btn_ship:${escrowId}` }
+        ],
+        [
+          { text: 'Check Payment Status', callback_data: `btn_status:${escrowId}` }
+        ],
+        [
+          { text: 'Create Another Link', callback_data: 'btn_new' }
+        ]
+      ]
+    };
+  }
+
+  if (['ITEM_SHIPPED', 'DISPATCHED', 'SHIPPED'].includes(status)) {
+    return {
+      inline_keyboard: [
+        [
+          { text: 'Check Payment Status', callback_data: `btn_status:${escrowId}` }
+        ],
+        [
+          { text: 'Create Another Link', callback_data: 'btn_new' }
+        ]
+      ]
+    };
+  }
+
+  if (['COMPLETED', 'CONFIRMED', 'RELEASED'].includes(status)) {
+    return {
+      inline_keyboard: [
+        [
+          { text: 'My Money / Balance', callback_data: 'btn_balance' }
+        ],
+        [
+          { text: 'Create Payment Link', callback_data: 'btn_new' }
+        ]
+      ]
+    };
+  }
+
+  // Default: PENDING_PAYMENT (Unpaid)
   return {
     inline_keyboard: [
       [
@@ -197,7 +425,6 @@ export function getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount,
         }
       ],
       [
-        { text: 'I Have Sent the Item', callback_data: `btn_ship:${escrowId}` },
         { text: 'Check Payment Status', callback_data: `btn_status:${escrowId}` }
       ],
       [
@@ -211,9 +438,9 @@ export function getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount,
  * Dispatches an instant Push Notification to a Seller on Telegram when their buyer completes MoMo payment
  */
 export async function sendOrderPaymentNotification(chatId, escrow) {
-  const amount = Number(escrow.amount || 0).toFixed(2);
+  const amount = Number(escrow.amount || escrow.totalAmount || 0).toFixed(2);
   const itemName = escrow.description || escrow.itemName || 'Order Item';
-  const escrowId = escrow.id || 'N/A';
+  const escrowId = escrow.id || escrow.escrowId || 'N/A';
   const buyerPhone = escrow.buyerPhone || 'Buyer';
 
   const message = `
@@ -231,6 +458,9 @@ The money is now held safely in TrustLink. You can now deliver or send the item 
     inline_keyboard: [
       [
         { text: 'I Have Sent the Item', callback_data: `btn_ship:${escrowId}` }
+      ],
+      [
+        { text: 'Check Payment Status', callback_data: `btn_status:${escrowId}` }
       ],
       [
         { text: 'View on Web Dashboard', url: `https://www.trustlinkgh.online/dashboard.html` }

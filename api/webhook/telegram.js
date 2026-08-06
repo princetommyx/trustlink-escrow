@@ -17,7 +17,10 @@ import {
   getFeeSplitKeyboard,
   getEscrowActionKeyboard,
   buildEscrowCheckoutUrl,
-  persistEscrowToFirestore
+  persistEscrowToFirestore,
+  getEscrowFromFirestore,
+  updateEscrowInFirestore,
+  formatEscrowStatusMessage
 } from '../_utils/telegram.js';
 import { dispatchTransactionalSMS, buildEscrowOrderSMS } from '../_utils/sms-dispatcher.js';
 
@@ -376,21 +379,29 @@ https://www.trustlinkgh.online/dashboard.html
     clearSession(chatId);
     const parts = text.split(/\s+/);
     if (parts.length > 1 && parts[1]) {
-      const escrowId = sanitizeString(parts[1]);
-      const statusMsg = `
-<b>Order Status: #${escrowId}</b>
+      const escrowId = sanitizeString(parts[1]).toUpperCase();
+      const firestoreOrder = await getEscrowFromFirestore(escrowId);
+      const cachedOrder = recentEscrows.get(escrowId);
+      const order = firestoreOrder || cachedOrder || {
+        id: escrowId,
+        escrowId: escrowId,
+        status: 'PENDING_PAYMENT',
+        amount: 0,
+        itemName: 'Order Item',
+        buyerPhone: 'Buyer'
+      };
 
-<b>Status:</b> <code>Buyer Paid (Money Protected)</code>
-<b>Amount:</b> GH₵ 450.00
-<b>Item:</b> Order Package
-<b>Note:</b> Buyer has paid. Deliver the item to the buyer.
+      const statusDetails = formatEscrowStatusMessage(order);
+      const checkoutUrl = order.checkoutUrl || `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`;
 
-<b>Track / Confirm Link:</b>
-https://www.trustlinkgh.online/confirm.html?id=${escrowId}
-`.trim();
-
-      return await sendTelegramMessage(chatId, statusMsg, {
-        reply_markup: getEscrowActionKeyboard(escrowId, `https://www.trustlinkgh.online/confirm.html?id=${escrowId}`, 'Order', 450)
+      return await sendTelegramMessage(chatId, statusDetails.text, {
+        reply_markup: getEscrowActionKeyboard(
+          escrowId,
+          checkoutUrl,
+          order.itemName || order.description || 'Order Item',
+          order.amount || order.totalAmount || 0,
+          { status: statusDetails.status }
+        )
       });
     }
 
@@ -727,22 +738,90 @@ ${smsResult.nativeSmsLink ? `\n<a href="${smsResult.nativeSmsLink}">Tap here to 
   // Button: Quick Ship
   if (data.startsWith('btn_ship:')) {
     const escrowId = data.split(':')[1];
-    await answerCallbackQuery(queryId, `Order #${escrowId} Marked as Sent!`, true);
+    
+    const firestoreOrder = await getEscrowFromFirestore(escrowId);
+    const cachedOrder = recentEscrows.get(escrowId);
+    const order = firestoreOrder || cachedOrder;
+    const currentStatus = (order?.status || 'PENDING_PAYMENT').toUpperCase();
+
+    if (['PENDING_PAYMENT', 'AWAITING_PAYMENT', 'CREATED', 'PENDING'].includes(currentStatus)) {
+      await answerCallbackQuery(queryId, 'Buyer has not paid yet!', true);
+      return await sendTelegramMessage(
+        chatId,
+        `⚠️ <b>Cannot Mark as Sent: Payment Not Received!</b>\n\nThe buyer has <b>not paid</b> for order <code>#${escrowId}</code> yet.\n\n❌ <b>Do NOT send the item yet.</b> Only send the item after you receive our notification that money is safely locked in TrustLink.`,
+        {
+          reply_markup: getEscrowActionKeyboard(
+            escrowId,
+            order?.checkoutUrl || `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`,
+            order?.itemName || order?.description || 'Item',
+            order?.amount || order?.totalAmount || 0,
+            { status: 'PENDING_PAYMENT' }
+          )
+        }
+      );
+    }
+
+    // Update status in Firestore
+    await updateEscrowInFirestore(escrowId, {
+      status: 'ITEM_SHIPPED',
+      dispatchedAt: new Date().toISOString()
+    });
+
+    if (cachedOrder) {
+      cachedOrder.status = 'ITEM_SHIPPED';
+      recentEscrows.set(escrowId, cachedOrder);
+    }
+
+    await answerCallbackQuery(queryId, `Order #${escrowId} Marked as Sent!`);
     return await sendTelegramMessage(
       chatId,
-      `<b>Order #${escrowId} Marked as Sent!</b>\n\nBuyer has been notified via SMS to inspect the item and confirm delivery.`,
-      { reply_markup: getMainMenuKeyboard() }
+      `🚚 <b>Order #${escrowId} Marked as Sent!</b>\n\nWe have notified the buyer via SMS to inspect the package and confirm delivery once received.\n\nAs soon as they confirm, your money will be released to your wallet immediately.`,
+      {
+        reply_markup: getEscrowActionKeyboard(
+          escrowId,
+          order?.checkoutUrl || `https://www.trustlinkgh.online/confirm.html?id=${escrowId}`,
+          order?.itemName || order?.description || 'Item',
+          order?.amount || order?.totalAmount || 0,
+          { status: 'ITEM_SHIPPED' }
+        )
+      }
     );
   }
 
   // Button: Refresh Status
   if (data.startsWith('btn_status:')) {
     const escrowId = data.split(':')[1];
-    await answerCallbackQuery(queryId, 'Status Refreshed');
+    
+    // Fetch live escrow from Firestore and memory cache
+    const firestoreOrder = await getEscrowFromFirestore(escrowId);
+    const cachedOrder = recentEscrows.get(escrowId);
+    
+    const order = firestoreOrder || cachedOrder || {
+      id: escrowId,
+      escrowId: escrowId,
+      status: 'PENDING_PAYMENT',
+      amount: session.draft?.amount || 0,
+      itemName: session.draft?.itemName || 'Order Item',
+      buyerPhone: session.draft?.buyerPhone || 'Buyer',
+      checkoutUrl: `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`
+    };
+
+    const statusDetails = formatEscrowStatusMessage(order);
+    const checkoutUrl = order.checkoutUrl || `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`;
+
+    await answerCallbackQuery(queryId, 'Status updated');
     return await sendTelegramMessage(
       chatId,
-      `<b>Status for #${escrowId}:</b> <code>Payment Protected</code>\nMoney is safely locked. You can deliver the item.`,
-      { reply_markup: getEscrowActionKeyboard(escrowId, `https://www.trustlinkgh.online/confirm.html?id=${escrowId}`, 'Item', 100) }
+      statusDetails.text,
+      {
+        reply_markup: getEscrowActionKeyboard(
+          escrowId,
+          checkoutUrl,
+          order.itemName || order.description || 'Order Item',
+          order.amount || order.totalAmount || 0,
+          { status: statusDetails.status }
+        )
+      }
     );
   }
 
