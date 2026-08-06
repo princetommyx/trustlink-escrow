@@ -109,10 +109,12 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 - [x] **Stateful Session Manager**: Firestore-backed session state machine (`whatsapp_sessions`) tracking multi-step order creation.
 - [x] **Live Orders & Balance**: Commands `STATUS`, `SHIP <EscrowID>`, and `BALANCE` executable directly from chat.
 
-### 10. Developer REST API & Sandbox (`api-docs.html`, `api-docs.js`, `functions/index.js`)
-- [x] **Developer Preview Labeling**: Labeled sandbox endpoints and responses as `Developer Preview` / `Example Response`.
+### 10. Developer REST API & Sandbox (`api-docs.html`, `api-docs.js`, `api-docs.css`, `functions/index.js`)
+- [x] **Developer Preview Labeling**: Compact status badge (`.endpoint-badge-preview`) aligned beside `/api/v1/escrows` with subtle blue tint and thin border.
+- [x] **Developer Support Button System**: Restyled uniform 44px support buttons (`Contact Support` solid blue and `Explore E-Commerce Solutions` transparent dark surface with light border).
 - [x] **Canonical Endpoint URLs**: Base URL set to `https://www.trustlinkgh.online/api/v1/escrows`.
-- [x] **Multi-Language Snippets**: Python, Node.js, cURL, and PHP code examples.
+- [x] **Multi-Language Snippets**: Python, Node.js, cURL, and PHP code examples with 1-click clipboard copy buttons.
+- [x] **2-Column Hero & Client Search**: Two-column desktop hero with cURL snippet panel and fast client-side documentation search engine.
 
 ### 11. WooCommerce Plugin (`trustlink-woocommerce-plugin/`)
 - [x] **WooCommerce Escrow Payment Gateway**: WordPress PHP plugin file enabling TrustLink Escrow checkout on WooCommerce online stores.

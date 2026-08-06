@@ -631,6 +631,23 @@
     font-weight: 600;
 }
 
+.api-docs-page .endpoint-badge-preview {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background-color: rgba(37, 99, 235, 0.15);
+    color: #60A5FA;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
 .api-docs-page .spec-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -952,7 +969,7 @@
     --state-accent: #94A3B8;
 }
 
-/* Support Card Component */
+/* Support Card Component & Restyled Buttons */
 .api-docs-page .support-card {
     background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
     color: #FFFFFF;
@@ -964,17 +981,78 @@
 .api-docs-page .support-card h3 {
     color: #FFFFFF;
     margin-top: 0;
+    font-size: 1.3rem;
 }
 
 .api-docs-page .support-card p {
     color: #94A3B8;
+    margin-bottom: 20px;
 }
 
 .api-docs-page .support-actions {
     display: flex;
+    align-items: center;
     gap: 16px;
     flex-wrap: wrap;
     margin-top: 20px;
+}
+
+.api-docs-page .support-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 24px;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Primary Button: Contact Support */
+.api-docs-page .support-actions .btn-support-primary {
+    background-color: #2563EB;
+    color: #FFFFFF !important;
+    border: 1px solid #2563EB;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.api-docs-page .support-actions .btn-support-primary:hover {
+    background-color: #1D4ED8;
+    border-color: #1D4ED8;
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+}
+
+.api-docs-page .support-actions .btn-support-primary:active {
+    background-color: #1E40AF;
+    border-color: #1E40AF;
+    transform: translateY(0);
+}
+
+/* Secondary Button: Explore E-Commerce Solutions */
+.api-docs-page .support-actions .btn-support-secondary {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.api-docs-page .support-actions .btn-support-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+}
+
+.api-docs-page .support-actions .btn-support-secondary:active {
+    background-color: rgba(255, 255, 255, 0.05);
+    transform: translateY(0);
 }
 
 /* --- Accessibility Focus Rings --- */
@@ -1061,8 +1139,14 @@
     }
 
     .api-docs-page .endpoint-header-badge {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .api-docs-page .endpoint-header-badge .endpoint-badge-preview {
+        margin-left: 0;
     }
 
     .api-docs-page .hero-actions {
@@ -1071,6 +1155,16 @@
     }
 
     .api-docs-page .hero-actions .btn {
+        width: 100%;
+    }
+
+    .api-docs-page .support-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+
+    .api-docs-page .support-actions .btn {
         width: 100%;
     }
 }

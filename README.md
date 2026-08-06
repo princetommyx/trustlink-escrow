@@ -15,7 +15,7 @@
 ## 🌐 Live Website
 
 * **Production URL:** [https://www.trustlinkgh.online/](https://www.trustlinkgh.online/)
-* **Developer API Docs:** [https://www.trustlinkgh.online/api-docs.html](https://www.trustlinkgh.online/api-docs.html)
+* **Developer API Docs:** [https://www.trustlinkgh.online/api-docs](https://www.trustlinkgh.online/api-docs)
 * **Terms of Use:** [https://www.trustlinkgh.online/terms.html](https://www.trustlinkgh.online/terms.html)
 * **Privacy Policy:** [https://www.trustlinkgh.online/privacy.html](https://www.trustlinkgh.online/privacy.html)
 
