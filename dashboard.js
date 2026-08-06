@@ -2968,6 +2968,42 @@ window.copyWaCommand = function() {
     });
 };
 
+// WhatsApp Assistant Coming Soon Prompt & Modal
+window.showWhatsAppComingSoonPrompt = function() {
+    const modal = document.getElementById('modal-whatsapp-coming-soon');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+    if (typeof showModernToast === 'function') {
+        showModernToast('WhatsApp Bot Coming Soon', 'WhatsApp Assistant is coming soon while we take time to build it. Please use Telegram Bot @trustlinkescrow_bot in the meantime!', 'info');
+    }
+};
+
+window.closeWhatsAppComingSoonModal = function() {
+    const modal = document.getElementById('modal-whatsapp-coming-soon');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+};
+
+const closeWaModalBtn = document.getElementById('close-wa-coming-soon-modal');
+const btnCloseWaPrompt = document.getElementById('btn-close-wa-prompt');
+const modalWaComingSoon = document.getElementById('modal-whatsapp-coming-soon');
+
+if (closeWaModalBtn) {
+    closeWaModalBtn.addEventListener('click', window.closeWhatsAppComingSoonModal);
+}
+if (btnCloseWaPrompt) {
+    btnCloseWaPrompt.addEventListener('click', window.closeWhatsAppComingSoonModal);
+}
+if (modalWaComingSoon) {
+    modalWaComingSoon.addEventListener('click', (e) => {
+        if (e.target === modalWaComingSoon) {
+            window.closeWhatsAppComingSoonModal();
+        }
+    });
+}
+
 // Notify Buyer Modal Interactions (SMS & WhatsApp)
 const notifyBuyerForm = document.getElementById('notify-buyer-form');
 const closeNotifyModalBtn = document.getElementById('close-notify-modal');
