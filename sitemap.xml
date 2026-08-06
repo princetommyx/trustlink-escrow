@@ -45,8 +45,14 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.trustlinkgh.online/api-docs</loc>
+    <lastmod>2026-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.trustlinkgh.online/api-docs.html</loc>
-    <lastmod>2026-08-04</lastmod>
+    <lastmod>2026-08-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

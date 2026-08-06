@@ -1,316 +1,799 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Developer API - TrustLink Escrow</title>
+    <title>TrustLink Developer API Documentation</title>
     <link rel="icon" href="img/logo.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="api-docs.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="landing.css">
     <link rel="stylesheet" href="ui-states.css">
+    <link rel="stylesheet" href="api-docs.css">
+
+    <meta name="description" content="TrustLink Escrow REST API documentation for merchants and platforms. Create protected Mobile Money escrow checkout links programmatically in Ghana.">
+    <meta name="keywords" content="TrustLink API, Escrow API Ghana, Mobile Money API, Payment Gateway API Ghana, WooCommerce Escrow Plugin">
+    <link rel="canonical" href="https://www.trustlinkgh.online/api-docs">
+    <meta property="og:title" content="TrustLink Developer API Documentation">
+    <meta property="og:description" content="Integrate protected Mobile Money payment flows into your application or store with the TrustLink Escrow API.">
+    <meta property="og:url" content="https://www.trustlinkgh.online/api-docs">
+    <meta property="og:type" content="website">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "TrustLink Developer API Documentation",
+      "description": "Server-to-server REST API specification for creating protected Mobile Money escrow transactions in Ghana.",
+      "url": "https://www.trustlinkgh.online/api-docs"
+    }
+    </script>
 </head>
-<body>
 
-    <div class="api-layout">
-        <!-- Sidebar -->
-        <aside class="api-sidebar" id="api-sidebar">
-            <div class="sidebar-top">
-                <div class="brand">
-                    <img src="img/logo.png" alt="TrustLink Logo" class="brand-logo">
-                    <button class="mobile-close" id="mobile-close">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
+<body class="light-landing api-docs-page">
+    <!-- Accessible Skip Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="site-wrapper">
+        <!-- Floating Public Navbar -->
+        <nav class="navbar" aria-label="Main Navigation">
+            <div class="container nav-container">
+                <a href="index.html" class="logo" aria-label="TrustLink Escrow Home">
+                    <img src="img/logo.png" alt="TrustLink Logo" style="height: 68px; width: auto; max-width: 280px; object-fit: contain;">
+                </a>
+
+                <div class="nav-links">
+                    <div class="nav-dropdown">
+                        <a href="index.html#showcase" class="nav-link-dropdown-toggle">
+                            Solutions
+                            <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="individuals.html" class="dropdown-menu-item">
+                                <span class="item-title">Individuals</span>
+                                <span class="item-desc">Secure peer-to-peer payments</span>
+                            </a>
+                            <a href="online-vendors.html" class="dropdown-menu-item">
+                                <span class="item-title">Online Vendors</span>
+                                <span class="item-desc">Social media DM commerce</span>
+                            </a>
+                            <a href="ecommerce.html" class="dropdown-menu-item">
+                                <span class="item-title">E-Commerce &amp; Stores</span>
+                                <span class="item-desc">API &amp; direct checkout links</span>
+                            </a>
+                            <a href="marketplaces.html" class="dropdown-menu-item">
+                                <span class="item-title">Marketplaces</span>
+                                <span class="item-desc">Multi-party escrow solutions</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <a href="api-docs.html" class="nav-link-item active" aria-current="page">Docs</a>
+                    <a href="index.html#how-it-works" class="nav-link-item">How it works</a>
+
+                    <div class="nav-dropdown">
+                        <a href="#" class="nav-link-dropdown-toggle" onclick="return false;">
+                            Company
+                            <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="index.html#about" class="dropdown-menu-item">
+                                <span class="item-title">About Us</span>
+                                <span class="item-desc">Our mission &amp; technology</span>
+                            </a>
+                            <a href="terms.html" class="dropdown-menu-item">
+                                <span class="item-title">Terms of Use</span>
+                                <span class="item-desc">Platform rules &amp; agreement</span>
+                            </a>
+                            <a href="privacy.html" class="dropdown-menu-item">
+                                <span class="item-title">Privacy Policy</span>
+                                <span class="item-desc">Data protection &amp; privacy</span>
+                            </a>
+                            <a href="contact.html" class="dropdown-menu-item">
+                                <span class="item-title">Contact Support</span>
+                                <span class="item-desc">Talk to our team</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="nav-cta-group">
+                        <a href="contact.html" class="btn-nav-contact">Contact us <span class="btn-arrow">&rarr;</span></a>
+                        <a href="signup.html" class="btn-nav-transact">Transact now <span class="btn-arrow">&rarr;</span></a>
+                    </div>
                 </div>
-                
-                <nav class="sidebar-nav">
-                    <a href="#" class="nav-item active" data-target="view-endpoints">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        API Endpoints
-                    </a>
-                    <a href="#" class="nav-item" data-target="view-keys">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-                        API Keys
-                    </a>
-                    <a href="#" class="nav-item" data-target="view-analytics">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                        Analytics
-                    </a>
-                    <a href="#" class="nav-item" data-target="view-docs">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                        Documentation
-                    </a>
-                </nav>
-            </div>
-            
-            <div class="sidebar-bottom">
-                <button class="ai-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    Ask TrustLink AI
-                    <span class="notification-dot"></span>
+
+                <button class="mobile-menu-btn" aria-label="Toggle navigation menu">
+                    <span></span><span></span><span></span>
                 </button>
-                <div class="user-profile">
-                    <div class="user-avatar" id="sidebar-avatar"></div>
-                    <div class="user-info">
-                        <span class="user-name" id="user-name">Loading...</span>
-                        <span class="user-email" id="user-email">...</span>
-                    </div>
-                </div>
             </div>
-        </aside>
+        </nav>
 
-        <!-- Main Content -->
-        <main class="api-main">
-            <!-- Topbar -->
-            <header class="api-topbar">
-                <div class="topbar-left">
-                    <button class="mobile-menu-btn" id="mobile-menu-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    </button>
-                    <div class="search-bar">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <input type="text" placeholder="Search APIs, endpoints, logs...">
+        <!-- Offline Banner (In-Flow beneath Navbar) -->
+        <div id="offline-banner" class="api-docs-offline-banner" hidden role="status" aria-live="polite">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m-12.728 0a9 9 0 010-12.728m10.607 2.121a6 6 0 010 8.485m-8.485 0a6 6 0 010-8.485m5.657 2.121a2 2 0 010 2.828m-2.828 0a2 2 0 010-2.828"/></svg>
+            <span>You are offline. The documentation remains available, but external links and API access may not work.</span>
+        </div>
+
+        <!-- Main Content Landmark -->
+        <main id="main-content" class="api-docs-main">
+            <!-- 2-Column Developer Hero Section -->
+            <section class="api-docs-hero">
+                <div class="container">
+                    <div class="api-docs-hero-grid">
+                        <!-- Hero Left Column -->
+                        <div class="hero-left-col">
+                            <div class="badge api-badge-preview">Developer Preview</div>
+                            <h1 class="hero-title">Build protected payment flows with TrustLink.</h1>
+                            <p class="hero-subtext">Create TrustLink checkout links from your store or platform using a server-to-server API designed for Ghanaian Mobile Money transactions.</p>
+
+                            <div class="hero-actions">
+                                <a href="#quickstart" class="btn btn-primary">Read the quickstart</a>
+                                <a href="dashboard.html" class="btn btn-outline">Open developer settings</a>
+                            </div>
+
+                            <!-- Copyable Base URL Component -->
+                            <div class="api-base-url-card" id="base-url">
+                                <span class="base-url-label">Base URL</span>
+                                <code class="base-url-code" id="hero-base-url">https://www.trustlinkgh.online/api/v1</code>
+                                <button type="button" class="btn-copy-url" id="btn-copy-base-url" aria-label="Copy base URL to clipboard">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                    <span>Copy URL</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Hero Right Column: Code Preview Panel -->
+                        <div class="hero-right-col">
+                            <div class="api-docs-hero-code-card">
+                                <div class="hero-code-header">
+                                    <span class="hero-code-lang">cURL</span>
+                                    <span class="hero-code-endpoint">POST /v1/escrows</span>
+                                    <button type="button" class="btn-copy-hero-code" id="btn-copy-hero-code" aria-label="Copy cURL request example">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                        <span>Copy</span>
+                                    </button>
+                                </div>
+                                <pre><code id="hero-curl-snippet">curl -X POST "https://www.trustlinkgh.online/api/v1/escrows" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_SECRET_API_KEY" \
+  -d '{
+    "amount": 450.00,
+    "description": "Used iPhone 13 Pro",
+    "buyerPhone": "+233550000000",
+    "customReference": "ORDER-1234"
+  }'</code></pre>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="topbar-right">
-                    <button class="icon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></button>
-                    <button class="icon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></button>
+            </section>
+
+            <!-- Notice Banner Section -->
+            <section class="api-notice-section">
+                <div class="container">
+                    <div class="api-notice-card" role="note">
+                        <div class="notice-icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div class="notice-text">
+                            <strong>Developer Preview Information</strong>
+                            <p>The TrustLink Escrow REST API is currently available in <em>Developer Preview</em> mode. Endpoints and request contracts are subject to refinement before final production rollout. Secret API keys must remain strictly on server environments and should never be exposed in client-side JavaScript or mobile app builds.</p>
+                        </div>
+                    </div>
                 </div>
-            </header>
+            </section>
 
-            <div class="api-content-wrapper">
-                <div id="view-endpoints" class="view-section active">
-                <!-- Request Configuration Column -->
-                <section class="request-column">
-                    <div class="breadcrumb">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        API Endpoints <span class="divider">></span> <strong>Create Escrow</strong> <span class="badge" style="background: #3B82F6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">Developer Preview</span>
-                    </div>
-
-                    <div class="endpoint-header">
-                        <span class="method badge-post">POST</span>
-                        <span class="endpoint-path">/api/v1/escrows</span>
-                        <div class="header-actions">
-                            <button class="action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg> Save Test</button>
-                            <button class="action-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> History</button>
-                        </div>
-                    </div>
-
-                    <div class="request-card">
-                        <h3 class="card-title">Request URL</h3>
-                        <div class="url-bar">
-                            <select class="method-select">
-                                <option value="POST">POST</option>
-                                <option value="GET">GET</option>
-                            </select>
-                            <input type="text" class="url-input" value="https://www.trustlinkgh.online/api/v1/escrows" readonly>
-                        </div>
-                        <button class="btn-send" id="btn-send-test">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Send Request (Sandbox)
-                        </button>
-
-                        <div class="tabs-container">
-                            <div class="tabs-header">
-                                <button class="tab-btn active" data-tab="body">Body</button>
-                                <button class="tab-btn" data-tab="headers">Headers</button>
-                                <button class="tab-btn" data-tab="auth">Auth</button>
-                            </div>
-                            
-                            <!-- Body Tab -->
-                            <div class="tab-content active" id="tab-body">
-                                <div class="param-row">
-                                    <input type="text" class="param-key" value="amount" readonly>
-                                    <input type="text" class="param-value" value="450.00" readonly>
-                                </div>
-                                <div class="param-row">
-                                    <input type="text" class="param-key" value="currency" readonly>
-                                    <input type="text" class="param-value" value="GHS" readonly>
-                                </div>
-                                <div class="param-row">
-                                    <input type="text" class="param-key" value="description" readonly>
-                                    <input type="text" class="param-value" value="Used iPhone 13 Pro" readonly>
-                                </div>
-                                <div class="param-row">
-                                    <input type="text" class="param-key" value="buyerEmail" readonly>
-                                    <input type="text" class="param-value" value="buyer@example.com" readonly>
-                                </div>
-                                <div class="param-row">
-                                    <input type="text" class="param-key" value="buyerPhone" readonly>
-                                    <input type="text" class="param-value" value="+233550000000" readonly>
-                                </div>
-                                <div class="param-row">
-                                    <input type="text" class="param-key" value="customReference" readonly>
-                                    <input type="text" class="param-value" value="ORDER-1234" readonly>
-                                </div>
-                            </div>
-                            
-                            <!-- Headers Tab -->
-                            <div class="tab-content" id="tab-headers">
-                                <div class="param-row">
-                                    <input type="text" class="param-key" value="Content-Type" readonly>
-                                    <input type="text" class="param-value" value="application/json" readonly>
-                                </div>
-                                <div class="param-row">
-                                    <input type="text" class="param-key" value="x-api-key" readonly>
-                                    <input type="text" class="param-value" value="tl_live_your_api_key_here" readonly>
-                                </div>
-                            </div>
-                            
-                            <!-- Auth Tab -->
-                            <div class="tab-content" id="tab-auth">
-                                <p style="font-size: 0.9rem; color: #64748B;">Authentication is handled via the <code style="background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">x-api-key</code> header. Generate your key from the API Keys tab in your dashboard.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Response / Code Column -->
-                <section class="response-column">
-                    <div class="response-metrics">
-                        <div class="metric"><span class="label">Status:</span> <span class="value success"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> 201 Created (Example)</span></div>
-                        <div class="metric"><span class="label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span> <span class="value">124ms</span></div>
-                        <div class="metric"><span class="label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></span> <span class="value">1.2 KB</span></div>
-                    </div>
-
-                    <div class="code-panel">
-                        <div class="tabs-header code-tabs">
-                            <button class="tab-btn active" data-code-tab="code">Code</button>
-                            <button class="tab-btn" data-code-tab="response">Example Response</button>
-                            <div style="flex-grow: 1;"></div>
-                            <select class="lang-select">
-                                <option>Python</option>
-                                <option>Node.js</option>
-                                <option>cURL</option>
-                                <option>PHP</option>
-                            </select>
-                            <button class="btn-copy" id="btn-copy-code">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                Copy
+            <!-- Interactive Documentation Container -->
+            <div class="container api-docs-container">
+                <!-- Documentation Toolbar & Client-Side Search -->
+                <div class="api-docs-toolbar">
+                    <div class="api-docs-search">
+                        <label for="api-search-input" class="sr-only">Search documentation sections, request fields, and status codes</label>
+                        <div class="search-input-inner">
+                            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <input type="search" id="api-search-input" class="api-search-input" placeholder="Search documentation (e.g. amount, authentication, status codes...)" autocomplete="off">
+                            <button type="button" id="btn-clear-search" class="btn-clear-search" aria-label="Clear search query" hidden>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                             </button>
                         </div>
+                        <div id="search-results-dropdown" class="search-results-dropdown" hidden role="listbox" aria-label="Search Results"></div>
+                    </div>
 
-                        <!-- Code Snippet Area -->
-                        <div class="code-area active" id="code-code">
-<pre><code><span style="color: #c678dd;">import</span> requests
-<span style="color: #c678dd;">import</span> json
+                    <button type="button" class="api-docs-toc-toggle" id="btn-toc-toggle" aria-expanded="false" aria-controls="api-docs-toc">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                        <span>On this page</span>
+                    </button>
+                </div>
 
-url = <span style="color: #98c379;">"https://www.trustlinkgh.online/api/v1/escrows"</span>
+                <!-- 2-Column Responsive Layout Shell -->
+                <div class="api-docs-shell">
+                    <!-- Left Sticky Navigation Sidebar -->
+                    <aside class="api-docs-toc" id="api-docs-toc" aria-label="Documentation Navigation">
+                        <div class="sidebar-inner">
+                            <h2 class="sidebar-heading">Navigation</h2>
+                            <nav class="toc-nav">
+                                <a href="#overview" class="toc-item active" data-section="overview">1. Overview</a>
+                                <a href="#quickstart" class="toc-item" data-section="quickstart">2. Quickstart</a>
+                                <a href="#authentication" class="toc-item" data-section="authentication">3. Authentication</a>
+                                <a href="#base-url" class="toc-item" data-section="base-url">4. Base URL</a>
+                                <a href="#create-escrow" class="toc-item" data-section="create-escrow">5. Create an Escrow</a>
+                                <a href="#request-fields" class="toc-item" data-section="request-fields">6. Request Fields</a>
+                                <a href="#example-response" class="toc-item" data-section="example-response">7. Example Response</a>
+                                <a href="#errors" class="toc-item" data-section="errors">8. Errors &amp; Statuses</a>
+                                <a href="#transaction-states" class="toc-item" data-section="transaction-states">9. Transaction States</a>
+                                <a href="#webhooks" class="toc-item" data-section="webhooks">10. Webhooks Notice</a>
+                                <a href="#woocommerce" class="toc-item" data-section="woocommerce">11. WooCommerce</a>
+                                <a href="#security" class="toc-item" data-section="security">12. Security Rules</a>
+                                <a href="#support" class="toc-item" data-section="support">13. Developer Support</a>
+                            </nav>
+                        </div>
+                    </aside>
 
-payload = json.dumps({
-  <span style="color: #98c379;">"amount"</span>: <span style="color: #d19a66;">450.00</span>,
-  <span style="color: #98c379;">"currency"</span>: <span style="color: #98c379;">"GHS"</span>,
-  <span style="color: #98c379;">"description"</span>: <span style="color: #98c379;">"Used iPhone 13 Pro"</span>,
-  <span style="color: #98c379;">"buyerEmail"</span>: <span style="color: #98c379;">"buyer@example.com"</span>,
-  <span style="color: #98c379;">"buyerPhone"</span>: <span style="color: #98c379;">"+233550000000"</span>,
-  <span style="color: #98c379;">"customReference"</span>: <span style="color: #98c379;">"ORDER-1234"</span>
-})
+                    <!-- Main Technical Documentation Reading Column -->
+                    <article class="api-docs-content">
+                        <!-- Section 1: Overview -->
+                        <section id="overview" class="doc-section">
+                            <span class="api-docs-eyebrow">OVERVIEW</span>
+                            <h2>1. Overview</h2>
+                            <p>The TrustLink Escrow API allows online stores, marketplaces, and social commerce tools to programmatically issue protected payment links for Ghanaian Mobile Money transactions (MTN MoMo, Telecel Cash, and AT Money).</p>
+                            <p>When an escrow is created via API, TrustLink issues a unique payment contract with a hosted checkout URL. Buyers complete Mobile Money payment on the checkout page, locking funds securely in escrow until item delivery is confirmed.</p>
+                            <div class="info-callout">
+                                <strong>Key Capabilities:</strong>
+                                <ul>
+                                    <li>Server-to-server contract creation with instant hosted payment links.</li>
+                                    <li>Automated WhatsApp invoice delivery to buyer numbers (when provided).</li>
+                                    <li>Integration support for custom web checkout flows and WooCommerce stores.</li>
+                                </ul>
+                            </div>
+                        </section>
+
+                        <!-- Section 2: Quickstart -->
+                        <section id="quickstart" class="doc-section">
+                            <span class="api-docs-eyebrow">GETTING STARTED</span>
+                            <h2>2. Quickstart</h2>
+                            <p>Get up and running with the TrustLink Escrow API in 5 simple steps:</p>
+                            <ol class="quickstart-steps">
+                                <li>
+                                    <strong>Create or access a verified vendor account</strong>
+                                    <p>Sign up at <a href="signup.html">signup</a> or log into your seller account at <a href="login.html">login</a>.</p>
+                                </li>
+                                <li>
+                                    <strong>Generate your Secret API Key</strong>
+                                    <p>Navigate to the <a href="dashboard.html">Vendor Dashboard Settings</a> tab to generate your unique <code>x-api-key</code> credential.</p>
+                                </li>
+                                <li>
+                                    <strong>Store key securely in server environment variables</strong>
+                                    <p>Keep your secret key inside server configuration variables (e.g. <code>TRUSTLINK_API_KEY</code>). Never expose it in client-side code.</p>
+                                </li>
+                                <li>
+                                    <strong>Send a POST request to create an escrow</strong>
+                                    <p>Issue an HTTP POST request to <code>https://www.trustlinkgh.online/api/v1/escrows</code> with required transaction details.</p>
+                                </li>
+                                <li>
+                                    <strong>Redirect buyer to checkoutUrl</strong>
+                                    <p>Redirect the buyer to the returned <code>checkoutUrl</code> or display it in your store UI to complete Mobile Money authorization.</p>
+                                </li>
+                            </ol>
+
+                            <div class="warning-callout">
+                                <strong>Security Callout:</strong> Never expose your TrustLink secret API key in frontend JavaScript, mobile application code, public repositories, or screenshots.
+                            </div>
+                        </section>
+
+                        <!-- Section 3: Authentication -->
+                        <section id="authentication" class="doc-section">
+                            <span class="api-docs-eyebrow">AUTHENTICATION</span>
+                            <h2>3. Authentication</h2>
+                            <p>The API uses custom HTTP header authentication via the <code>x-api-key</code> header. Every request from your application server must include this credential.</p>
+
+                            <div class="code-block-wrapper">
+                                <div class="code-block-header">
+                                    <span class="code-block-title">HTTP Request Header</span>
+                                </div>
+                                <pre><code>x-api-key: YOUR_SECRET_API_KEY</code></pre>
+                            </div>
+
+                            <p>If the <code>x-api-key</code> header is omitted, the server returns an HTTP <code>401 Unauthorized</code> error. If the key is invalid or revoked, the server returns an HTTP <code>403 Forbidden</code> response.</p>
+                        </section>
+
+                        <!-- Section 4: Create an Escrow Reference -->
+                        <section id="create-escrow" class="doc-section">
+                            <span class="api-docs-eyebrow">ENDPOINT · POST /api/v1/escrows</span>
+                            <h2>5. Create an Escrow</h2>
+                            <div class="endpoint-header-badge">
+                                <span class="method-badge post">POST</span>
+                                <code class="endpoint-path-text">/api/v1/escrows</code>
+                                <span class="badge api-badge-preview">Developer Preview</span>
+                            </div>
+
+                            <p>Creates a new escrow record in state <code>PENDING_PAYMENT</code> and returns a hosted checkout URL for the buyer.</p>
+
+                            <div class="spec-grid">
+                                <div class="spec-item">
+                                    <span class="spec-label">Method</span>
+                                    <span class="spec-val">POST</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Content-Type</span>
+                                    <span class="spec-val">application/json</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Auth Header</span>
+                                    <span class="spec-val">x-api-key</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Section 5: Request Fields Table -->
+                        <section id="request-fields" class="doc-section">
+                            <span class="api-docs-eyebrow">SCHEMA · REQUEST_BODY</span>
+                            <h2>6. Request Fields</h2>
+                            <p>The request body must be a JSON object containing the following parameters:</p>
+
+                            <div class="table-container">
+                                <table class="schema-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Field</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Required</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col">Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>amount</code></td>
+                                            <td>Number</td>
+                                            <td><span class="status-pill required">Required</span></td>
+                                            <td>Transaction amount in Ghana Cedis (GH₵). Must be greater than 0.</td>
+                                            <td><code>450.00</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>description</code></td>
+                                            <td>String</td>
+                                            <td><span class="status-pill required">Required</span></td>
+                                            <td>Clear item description or order summary for buyer reference.</td>
+                                            <td><code>"Used iPhone 13 Pro"</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>buyerPhone</code></td>
+                                            <td>String</td>
+                                            <td><span class="status-pill optional">Optional</span></td>
+                                            <td>Buyer's 10-digit Ghanaian phone number (+233 format accepted) for automated WhatsApp invoice delivery.</td>
+                                            <td><code>"+233550000000"</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>buyerEmail</code></td>
+                                            <td>String</td>
+                                            <td><span class="status-pill optional">Optional</span></td>
+                                            <td>Buyer's email address for receipt notifications.</td>
+                                            <td><code>"buyer@example.com"</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>deliveryDate</code></td>
+                                            <td>String</td>
+                                            <td><span class="status-pill optional">Optional</span></td>
+                                            <td>Target delivery timeline or date string.</td>
+                                            <td><code>"2026-08-10"</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>redirectUrl</code></td>
+                                            <td>String</td>
+                                            <td><span class="status-pill optional">Optional</span></td>
+                                            <td>Merchant URL to return the buyer to after payment completion.</td>
+                                            <td><code>"https://merchant.com/success"</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>cancelUrl</code></td>
+                                            <td>String</td>
+                                            <td><span class="status-pill optional">Optional</span></td>
+                                            <td>Merchant URL to return the buyer to if checkout is cancelled.</td>
+                                            <td><code>"https://merchant.com/cancel"</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>customReference</code></td>
+                                            <td>String</td>
+                                            <td><span class="status-pill optional">Optional</span></td>
+                                            <td>Merchant's internal order, invoice, or cart ID for reconciliation.</td>
+                                            <td><code>"ORDER-1234"</code></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <p class="table-note"><em>Note: All transactions default to Ghana Cedis (GH₵ / GHS). Additional currency fields are not required.</em></p>
+                        </section>
+
+                        <!-- Section 6: Code Examples & Response -->
+                        <section id="example-response" class="doc-section">
+                            <span class="api-docs-eyebrow">EXAMPLES · MULTI_LANGUAGE</span>
+                            <h2>7. Code Examples &amp; Example Response</h2>
+
+                            <div class="code-tab-container">
+                                <div class="code-tab-header" role="tablist" aria-label="Code language selection">
+                                    <button type="button" class="code-tab-btn active" role="tab" aria-selected="true" aria-controls="panel-curl" id="tab-curl">cURL</button>
+                                    <button type="button" class="code-tab-btn" role="tab" aria-selected="false" aria-controls="panel-node" id="tab-node">Node.js</button>
+                                    <button type="button" class="code-tab-btn" role="tab" aria-selected="false" aria-controls="panel-python" id="tab-python">Python</button>
+                                    <button type="button" class="code-tab-btn" role="tab" aria-selected="false" aria-controls="panel-php" id="tab-php">PHP</button>
+                                    <div class="tab-spacer"></div>
+                                    <button type="button" class="btn-copy-code" id="btn-copy-code" aria-label="Copy active code snippet">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                        <span>Copy Code</span>
+                                    </button>
+                                </div>
+
+                                <!-- Panel cURL -->
+                                <div id="panel-curl" class="code-tab-panel active" role="tabpanel" aria-labelledby="tab-curl">
+<pre><code>curl -X POST "https://www.trustlinkgh.online/api/v1/escrows" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_SECRET_API_KEY" \
+  -d '{
+    "amount": 450.00,
+    "description": "Used iPhone 13 Pro",
+    "buyerPhone": "+233550000000",
+    "buyerEmail": "buyer@example.com",
+    "customReference": "ORDER-1234"
+  }'</code></pre>
+                                </div>
+
+                                <!-- Panel Node.js -->
+                                <div id="panel-node" class="code-tab-panel" role="tabpanel" aria-labelledby="tab-node" hidden>
+<pre><code>const response = await fetch("https://www.trustlinkgh.online/api/v1/escrows", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "x-api-key": process.env.TRUSTLINK_API_KEY // Use server environment variable
+  },
+  body: JSON.stringify({
+    amount: 450.00,
+    description: "Used iPhone 13 Pro",
+    buyerPhone: "+233550000000",
+    buyerEmail: "buyer@example.com",
+    customReference: "ORDER-1234"
+  })
+});
+
+const data = await response.json();
+console.log(data);</code></pre>
+                                </div>
+
+                                <!-- Panel Python -->
+                                <div id="panel-python" class="code-tab-panel" role="tabpanel" aria-labelledby="tab-python" hidden>
+<pre><code>import os
+import requests
+
+url = "https://www.trustlinkgh.online/api/v1/escrows"
 headers = {
-  <span style="color: #98c379;">'Content-Type'</span>: <span style="color: #98c379;">'application/json'</span>,
-  <span style="color: #98c379;">'x-api-key'</span>: <span style="color: #98c379;">'tl_live_your_api_key'</span>
+    "Content-Type": "application/json",
+    "x-api-key": os.environ.get("TRUSTLINK_API_KEY")
+}
+payload = {
+    "amount": 450.00,
+    "description": "Used iPhone 13 Pro",
+    "buyerPhone": "+233550000000",
+    "buyerEmail": "buyer@example.com",
+    "customReference": "ORDER-1234"
 }
 
-response = requests.request(<span style="color: #98c379;">"POST"</span>, url, headers=headers, data=payload)
+response = requests.post(url, json=payload, headers=headers)
+print(response.json())</code></pre>
+                                </div>
 
-<span style="color: #e5c07b;">print</span>(response.text)
-</code></pre>
-                        </div>
-                        
-                        <!-- Response Area -->
-                        <div class="code-area" id="code-response">
+                                <!-- Panel PHP -->
+                                <div id="panel-php" class="code-tab-panel" role="tabpanel" aria-labelledby="tab-php" hidden>
+<pre><code>&lt;?php
+$apiKey = getenv('TRUSTLINK_API_KEY');
+$url = 'https://www.trustlinkgh.online/api/v1/escrows';
+
+$payload = json_encode([
+    'amount' =&gt; 450.00,
+    'description' =&gt; 'Used iPhone 13 Pro',
+    'buyerPhone' =&gt; '+233550000000',
+    'buyerEmail' =&gt; 'buyer@example.com',
+    'customReference' =&gt; 'ORDER-1234'
+]);
+
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'x-api-key: ' . $apiKey
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$data = json_decode($response, true);
+print_r($data);
+?&gt;</code></pre>
+                                </div>
+                            </div>
+
+                            <h3>Example Response (HTTP 201 Created)</h3>
+                            <div class="code-block-wrapper">
+                                <div class="code-block-header">
+                                    <span class="code-block-title">JSON Response Body</span>
+                                    <span class="status-tag success">201 Created (Example)</span>
+                                </div>
 <pre><code>{
-  <span style="color: #98c379;">"id"</span>: <span style="color: #98c379;">"escrow_12345abcde"</span>,
-  <span style="color: #98c379;">"status"</span>: <span style="color: #98c379;">"PENDING_PAYMENT"</span>,
-  <span style="color: #98c379;">"checkoutUrl"</span>: <span style="color: #98c379;">"https://www.trustlinkgh.online/checkout.html?id=escrow_12345abcde"</span>,
-  <span style="color: #98c379;">"customReference"</span>: <span style="color: #98c379;">"ORDER-1234"</span>
-}
-</code></pre>
-                        </div>
-                    </div>
-                    </div>
-                </section>
-                </div> <!-- /view-endpoints -->
-                
-                <div id="view-keys" class="view-section hidden" style="width: 100%; padding: 32px; display: none;">
-                    <h2 style="margin-bottom: 8px;">API Keys</h2>
-                    <p style="color: #64748B; margin-bottom: 24px;">Manage your developer API keys for authentication.</p>
-                    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px; max-width: 600px;">
-                        <h3 style="margin-bottom: 16px;">Your Secret Key</h3>
-                        <p style="color: #64748B; font-size: 0.95rem; margin-bottom: 16px;">Use this key in the <code>x-api-key</code> header to authenticate API requests.</p>
-                        <div style="display: flex; gap: 12px; margin-top: 16px; align-items: center;">
-                            <input type="password" id="api-docs-key-display" value="tl_live_your_api_key_here" readonly style="padding: 12px; border: 1px solid #E2E8F0; border-radius: 8px; flex-grow: 1; background: #F8FAFC;">
-                        </div>
-                        <p style="margin-top: 20px; font-size: 0.9rem; color: #64748B;">Head back to the main dashboard Settings tab to generate or revoke API keys.</p>
-                    </div>
-                </div>
+  "id": "escrow_8f9a2b3c4d",
+  "status": "PENDING_PAYMENT",
+  "checkoutUrl": "https://www.trustlinkgh.online/checkout.html?id=escrow_8f9a2b3c4d",
+  "customReference": "ORDER-1234"
+}</code></pre>
+                            </div>
+                        </section>
 
-                <div id="view-analytics" class="view-section hidden" style="width: 100%; padding: 32px; display: none;">
-                    <h2 style="margin-bottom: 8px;">API Analytics</h2>
-                    <p style="color: #64748B; margin-bottom: 24px;">View your API request usage and performance metrics.</p>
-                    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 48px 24px; text-align: center; max-width: 800px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#94A3B8" style="width: 48px; height: 48px; margin: 0 auto 16px auto;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
-                        <h3 style="color: #475569; margin-bottom: 8px;">No API requests yet</h3>
-                        <p style="color: #64748B;">Your charts and usage metrics will appear here once you start making requests.</p>
-                    </div>
-                </div>
+                        <!-- Section 7: Errors -->
+                        <section id="errors" class="doc-section">
+                            <span class="api-docs-eyebrow">HTTP_STATUS · ERRORS</span>
+                            <h2>8. Errors &amp; Status Codes</h2>
+                            <p>The TrustLink Escrow API returns standard HTTP status codes to indicate request success or failure:</p>
 
-                <div id="view-docs" class="view-section hidden" style="width: 100%; padding: 32px; display: none; overflow-y: auto;">
-                    <h2 style="margin-bottom: 8px;">Documentation</h2>
-                    <p style="color: #64748B; margin-bottom: 24px;">Integration guides and API reference.</p>
-                    <div style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 32px; max-width: 800px;">
-                        <h3 style="margin-bottom: 16px;">Getting Started</h3>
-                        <p style="color: #475569; line-height: 1.6; margin-bottom: 24px;">To integrate the TrustLink API into your application, you need to make POST requests to our endpoints using your secret API key. All requests should be made over HTTPS and data should be JSON encoded.</p>
-                        
-                        <h4 style="margin-top: 32px; margin-bottom: 12px; font-size: 1.05rem;">Authentication</h4>
-                        <p style="color: #475569; line-height: 1.6; margin-bottom: 16px;">Pass your API key in the <code>x-api-key</code> header for all requests.</p>
-                        <pre style="background: #F8FAFC; padding: 16px; border-radius: 8px; overflow-x: auto; color: #1E293B; border: 1px solid #E2E8F0;"><code>curl -H "x-api-key: tl_live_your_key" https://www.trustlinkgh.online/api/v1/escrows</code></pre>
+                            <div class="table-container">
+                                <table class="schema-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Status Code</th>
+                                            <th scope="col">Cause</th>
+                                            <th scope="col">Example Response Payload</th>
+                                            <th scope="col">Recommended Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>400 Bad Request</code></td>
+                                            <td>Missing required fields (<code>amount</code> or <code>description</code>).</td>
+                                            <td><code>{"error": "Missing required fields: amount, description"}</code></td>
+                                            <td>Ensure both <code>amount</code> and <code>description</code> are supplied in JSON body.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>401 Unauthorized</code></td>
+                                            <td>Missing <code>x-api-key</code> HTTP header.</td>
+                                            <td><code>{"error": "Missing x-api-key header"}</code></td>
+                                            <td>Include the <code>x-api-key</code> header in your request dispatch.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>403 Forbidden</code></td>
+                                            <td>Invalid or revoked API key.</td>
+                                            <td><code>{"error": "Invalid API Key"}</code></td>
+                                            <td>Verify key value in Dashboard Settings or generate a new key.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>500 Server Error</code></td>
+                                            <td>Internal database or execution error.</td>
+                                            <td><code>{"error": "Failed to create escrow"}</code></td>
+                                            <td>Retry request with exponential backoff or contact developer support.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
 
-                        <h4 style="margin-top: 32px; margin-bottom: 12px; font-size: 1.05rem;">Webhooks</h4>
-                        <p style="color: #475569; line-height: 1.6; margin-bottom: 16px;">Configure your Webhook URL in your API Keys settings to receive real-time updates.</p>
-                    </div>
+                        <!-- Section 8: Transaction State Machine -->
+                        <section id="transaction-states" class="doc-section">
+                            <span class="api-docs-eyebrow">ENUM · ESCROW_STATUS</span>
+                            <h2>9. Transaction States</h2>
+                            <p>Every escrow contract created in TrustLink follows a strictly monitored transaction state machine. UI elements and Firestore listeners map these constants to official status colors:</p>
+
+                            <!-- State Machine Flow Summary -->
+                            <div class="api-docs-state-flow">
+                                <div class="state-flow-step"><code class="flow-code">PENDING_PAYMENT</code></div>
+                                <div class="state-flow-arrow">&rarr;</div>
+                                <div class="state-flow-step"><code class="flow-code">FUNDS_ESCROWED</code></div>
+                                <div class="state-flow-arrow">&rarr;</div>
+                                <div class="state-flow-step"><code class="flow-code">ITEM_SHIPPED</code></div>
+                                <div class="state-flow-arrow">&rarr;</div>
+                                <div class="state-flow-step"><code class="flow-code">COMPLETED</code></div>
+                            </div>
+                            <p class="state-flow-subtext"><em>Exceptions: Escrows under dispute move to <code>DISPUTED</code> and resolve to <code>REFUNDED</code> or authorized completion.</em></p>
+
+                            <!-- Uniform 6-Card State Grid -->
+                            <div class="api-docs-state-grid" role="list">
+                                <article class="api-docs-state-card api-docs-state-card--pending" role="listitem">
+                                    <div class="api-docs-state-card__header">
+                                        <code class="api-docs-state-card__constant">PENDING_PAYMENT</code>
+                                        <span class="api-docs-state-card__label">Awaiting payment</span>
+                                    </div>
+                                    <p class="api-docs-state-card__description">Escrow link generated; buyer has not yet completed Mobile Money checkout authorization.</p>
+                                </article>
+
+                                <article class="api-docs-state-card api-docs-state-card--escrowed" role="listitem">
+                                    <div class="api-docs-state-card__header">
+                                        <code class="api-docs-state-card__constant">FUNDS_ESCROWED</code>
+                                        <span class="api-docs-state-card__label">Ready to ship</span>
+                                    </div>
+                                    <p class="api-docs-state-card__description">Mobile Money payment verified by gateway; funds securely locked in escrow. Seller notified to dispatch order.</p>
+                                </article>
+
+                                <article class="api-docs-state-card api-docs-state-card--shipped" role="listitem">
+                                    <div class="api-docs-state-card__header">
+                                        <code class="api-docs-state-card__constant">ITEM_SHIPPED</code>
+                                        <span class="api-docs-state-card__label">In transit</span>
+                                    </div>
+                                    <p class="api-docs-state-card__description">Seller has marked item as shipped or provided tracking waybill. Buyer delivery window active.</p>
+                                </article>
+
+                                <article class="api-docs-state-card api-docs-state-card--completed" role="listitem">
+                                    <div class="api-docs-state-card__header">
+                                        <code class="api-docs-state-card__constant">COMPLETED</code>
+                                        <span class="api-docs-state-card__label">Released</span>
+                                    </div>
+                                    <p class="api-docs-state-card__description">Buyer confirms delivery via PIN or tracking link; escrow funds released to seller's wallet.</p>
+                                </article>
+
+                                <article class="api-docs-state-card api-docs-state-card--disputed" role="listitem">
+                                    <div class="api-docs-state-card__header">
+                                        <code class="api-docs-state-card__constant">DISPUTED</code>
+                                        <span class="api-docs-state-card__label">Under review</span>
+                                    </div>
+                                    <p class="api-docs-state-card__description">Buyer or seller raised a formal dispute; funds frozen pending admin arbitration review.</p>
+                                </article>
+
+                                <article class="api-docs-state-card api-docs-state-card--refunded" role="listitem">
+                                    <div class="api-docs-state-card__header">
+                                        <code class="api-docs-state-card__constant">REFUNDED</code>
+                                        <span class="api-docs-state-card__label">Returned</span>
+                                    </div>
+                                    <p class="api-docs-state-card__description">Dispute resolved in buyer's favor or contract cancelled; payment refunded back to buyer.</p>
+                                </article>
+                            </div>
+                        </section>
+
+                        <!-- Section 9: Webhooks Notice -->
+                        <section id="webhooks" class="doc-section">
+                            <span class="api-docs-eyebrow">WEBHOOKS · PREVIEW</span>
+                            <h2>10. Webhooks Notice</h2>
+                            <div class="info-callout">
+                                <strong>Developer Preview Limitation:</strong>
+                                <p>Outbound HTTP webhook delivery for transaction state changes (e.g. <code>escrow.status_changed</code>) is currently under active development and not yet documented for live production use. Developers building integrations should poll payment status or contact TrustLink support for custom webhook configuration.</p>
+                            </div>
+                        </section>
+
+                        <!-- Section 10: WooCommerce Integration -->
+                        <section id="woocommerce" class="doc-section">
+                            <span class="api-docs-eyebrow">PLUGINS · WOOCOMMERCE</span>
+                            <h2>11. WooCommerce Integration</h2>
+                            <p>TrustLink Escrow provides an official WordPress payment gateway plugin for WooCommerce stores located in <code>trustlink-woocommerce-plugin/</code>.</p>
+
+                            <div class="info-callout">
+                                <strong>Plugin Capabilities:</strong>
+                                <ul>
+                                    <li>Adds "TrustLink Escrow (Mobile Money)" to your WooCommerce checkout page.</li>
+                                    <li>Configurable API URL and Secret API Key in WordPress Admin settings.</li>
+                                    <li>Automatic order redirection to hosted TrustLink Mobile Money checkout.</li>
+                                </ul>
+                            </div>
+                            <p>To inspect or install the WooCommerce plugin source code, refer to <a href="https://github.com/princetommyx/trustlink-escrow/tree/main/trustlink-woocommerce-plugin" target="_blank" rel="noopener noreferrer">the repository plugin directory</a>.</p>
+                        </section>
+
+                        <!-- Section 11: Security Rules -->
+                        <section id="security" class="doc-section">
+                            <span class="api-docs-eyebrow">SECURITY · BEST_PRACTICES</span>
+                            <h2>12. API Key Security Guidelines</h2>
+                            <p>Protect your integration credentials by following these security rules:</p>
+                            <ul>
+                                <li><strong>Never commit secret keys:</strong> Add key configuration files to <code>.gitignore</code>.</li>
+                                <li><strong>Server-side requests only:</strong> Always invoke the API from secure server code or Cloud Functions. Never call <code>/api/v1/escrows</code> directly from frontend JavaScript in the browser.</li>
+                                <li><strong>Rotate compromised keys:</strong> If a key is accidentally leaked in a repository or log, immediately revoke it in your <a href="dashboard.html">Vendor Dashboard Settings</a> and issue a new key.</li>
+                            </ul>
+                        </section>
+
+                        <!-- Section 12: Developer Support -->
+                        <section id="support" class="doc-section">
+                            <span class="api-docs-eyebrow">SUPPORT · CONTACT</span>
+                            <h2>13. Developer Support</h2>
+                            <p>Need assistance integrating TrustLink Escrow into your platform?</p>
+                            <div class="support-card">
+                                <h3>Technical Assistance &amp; Integration Engineering</h3>
+                                <p>Our engineering team can assist with sandbox credentials, custom marketplace workflows, and WooCommerce setup.</p>
+                                <div class="support-actions">
+                                    <a href="contact.html" class="btn btn-primary">Contact Support</a>
+                                    <a href="ecommerce.html" class="btn btn-outline">Explore E-Commerce Solutions</a>
+                                </div>
+                            </div>
+                        </section>
+                    </article>
                 </div>
-                
             </div>
         </main>
+
+        <!-- Canonical Public Footer -->
+        <footer class="footer">
+            <div class="container footer-container">
+                <div class="footer-brand">
+                    <a href="index.html" class="footer-logo">
+                        <img src="img/logo.png" alt="TrustLink Logo" style="height: 60px; width: auto; max-width: 240px; object-fit: contain;">
+                    </a>
+                    <p class="footer-desc">Protected Mobile Money payment infrastructure for social media vendors, online buyers, and e-commerce platforms across Ghana.</p>
+                    <nav class="footer-social-links" aria-label="Social Media Links">
+                        <a class="footer-social-link" href="https://www.linkedin.com/company/trustlinkescrow/" target="_blank" rel="noopener noreferrer external" aria-label="TrustLink on LinkedIn">
+                            <img src="img/social/linkedin.svg" alt="" aria-hidden="true" width="19" height="19">
+                            <span class="sr-only">LinkedIn</span>
+                        </a>
+                        <a class="footer-social-link" href="https://www.instagram.com/trustlinkescrow?igsh=bnpybzFlNHp3aGVt" target="_blank" rel="noopener noreferrer external" aria-label="TrustLink on Instagram">
+                            <img src="img/social/instagram.svg" alt="" aria-hidden="true" width="19" height="19">
+                            <span class="sr-only">Instagram</span>
+                        </a>
+                        <a class="footer-social-link" href="https://www.tiktok.com/@trustlinkescrow?_r=1&amp;_t=ZS-98bbA6OlrSn" target="_blank" rel="noopener noreferrer external" aria-label="TrustLink on TikTok">
+                            <img src="img/social/tiktok.svg" alt="" aria-hidden="true" width="19" height="19">
+                            <span class="sr-only">TikTok</span>
+                        </a>
+                        <a class="footer-social-link" href="https://www.facebook.com/share/19WoRaHJwp/" target="_blank" rel="noopener noreferrer external" aria-label="TrustLink on Facebook">
+                            <img src="img/social/facebook.svg" alt="" aria-hidden="true" width="19" height="19">
+                            <span class="sr-only">Facebook</span>
+                        </a>
+                    </nav>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Solutions</h4>
+                        <a href="individuals.html">Individuals</a>
+                        <a href="online-vendors.html">Online Vendors</a>
+                        <a href="ecommerce.html">E-Commerce</a>
+                        <a href="marketplaces.html">Marketplaces</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Platform</h4>
+                        <a href="index.html#features">Features</a>
+                        <a href="index.html#how-it-works">How it Works</a>
+                        <a href="api-docs.html">API Docs</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <a href="contact.html">Contact Us</a>
+                        <a href="signup.html">Seller Sign Up</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Legal</h4>
+                        <a href="terms.html">Terms of Use</a>
+                        <a href="privacy.html">Privacy Policy</a>
+                    </div>
+                </div>
+            </div>
+            <div class="container copyright">
+                <p>&copy; 2026 TrustLink. Built for secure commerce.</p>
+            </div>
+        </footer>
+
+        <!-- Scripts -->
+        <script src="ui-states.js"></script>
+        <script src="script.js"></script>
+        <script type="module" src="auth-handler.js"></script>
+        <script type="module" src="api-docs.js"></script>
     </div>
 
-    <!-- Scripts -->
-    <script src="ui-states.js"></script>
-    <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="api-docs.js"></script>
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-Tawk_API.customStyle = {
-    visibility: {
-        desktop: {
-            position: 'br',
-            xOffset: '20px',
-            yOffset: '20px'
-        },
-        mobile: {
-            position: 'br',
-            xOffset: '16px',
-            yOffset: '85px'
-        }
-    },
-    zIndex: 2147483647
-};
-Tawk_API.onLoad = function() {
-    if (typeof Tawk_API.showWidget === 'function') {
-        Tawk_API.showWidget();
-    }
-};
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/6a6a2f59a85cac1d445c358f/1junchu38';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
+    <!-- Tawk.to Live Chat Script -->
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+        Tawk_API.customStyle = {
+            visibility: {
+                desktop: { position: 'br', xOffset: '20px', yOffset: '20px' },
+                mobile: { position: 'br', xOffset: '16px', yOffset: '85px' }
+            },
+            zIndex: 2147483647
+        };
+        Tawk_API.onLoad = function () {
+            if (typeof Tawk_API.showWidget === 'function') {
+                Tawk_API.showWidget();
+            }
+        };
+        (function () {
+            var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/6a6a2f59a85cac1d445c358f/1junchu38';
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
 </body>
 </html>

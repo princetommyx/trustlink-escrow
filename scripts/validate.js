@@ -39,6 +39,9 @@ const requiredFiles = [
     'solution-page.js',
     'legal.css',
     'legal.js',
+    'api-docs.css',
+    'api-docs.js',
+    'docs/DESIGN_GUIDELINES.md',
     'moolre-service.js',
     'session-manager.js',
     'vendor/gsap.min.js',
@@ -145,11 +148,34 @@ if (fs.existsSync(wcGatewayFile)) {
     assert(content.includes('api_url'), 'WooCommerce plugin gateway features configurable api_url setting');
 }
 
-// 6. Verify api-docs.js fake timer removal
+// 6. Verify api-docs.js & api-docs.html security & integrity
 const apiDocsJsFile = path.join(ROOT_DIR, 'api-docs.js');
 if (fs.existsSync(apiDocsJsFile)) {
     const content = fs.readFileSync(apiDocsJsFile, 'utf8');
     assert(!content.includes('Request successful! Check the response panel.'), 'api-docs.js contains no fake success toast message');
+    assert(!content.includes('fetch(') || !content.includes('/api/v1/escrows'), 'api-docs.js makes no unsafe sandbox fetch calls');
+    assert(!content.includes('tl_live_preview_key'), 'api-docs.js contains no tl_live_preview_key fetch parameter');
+    assert(!content.includes('data.apiKey'), 'api-docs.js does not inject user API keys into DOM elements');
+}
+
+const apiDocsHtmlFile = path.join(ROOT_DIR, 'api-docs.html');
+if (fs.existsSync(apiDocsHtmlFile)) {
+    const htmlContent = fs.readFileSync(apiDocsHtmlFile, 'utf8');
+    assert(htmlContent.includes('rel="canonical" href="https://www.trustlinkgh.online/api-docs"'), 'api-docs.html includes correct canonical URL');
+    assert(!htmlContent.includes('Ask TrustLink AI'), 'api-docs.html contains no unverified fake AI button');
+    assert(!htmlContent.includes('localhost'), 'api-docs.html contains no development localhost URLs');
+    assert(htmlContent.includes('YOUR_SECRET_API_KEY'), 'api-docs.html uses YOUR_SECRET_API_KEY as key placeholder');
+    assert(htmlContent.includes('terms.html'), 'api-docs.html links to terms.html');
+    assert(htmlContent.includes('privacy.html'), 'api-docs.html links to privacy.html');
+    assert(htmlContent.includes('class="nav-links"'), 'api-docs.html includes public nav-links class');
+    assert(htmlContent.includes('class="footer-links"'), 'api-docs.html includes public footer-links class');
+}
+
+// 7. Verify Sitemap XML
+const sitemapFile = path.join(ROOT_DIR, 'sitemap.xml');
+if (fs.existsSync(sitemapFile)) {
+    const sitemapContent = fs.readFileSync(sitemapFile, 'utf8');
+    assert(sitemapContent.includes('/api-docs'), 'sitemap.xml contains /api-docs entry');
 }
 
 // Final Summary

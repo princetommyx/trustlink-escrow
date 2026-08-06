@@ -1,6 +1,6 @@
 # 🚀 TrustLink Escrow — Comprehensive Project Status & Development Progress
 
-> **Production Canonical Domain:** [https://www.trustlinkgh.online/](https://www.trustlinkgh.online/)  
+> **Production Canonical Domain:** [https://www.trustlinkgh.online/](https://www.trustlinkgh.online/)
 > **Last Updated:** August 5, 2026
 
 ---
@@ -25,6 +25,7 @@ The platform enables sellers to mint instant dynamic checkout & tracking links, 
 - [x] **Standardized OTP Phone Verification Service**: Replaced legacy OTP routines with unified `sendVerificationOTP` across all dashboard modules and serverless functions via SasuSync SMS gateway.
 - [x] **Account Management Lifecycle & Security Controls**: Added user-facing account deactivation and deletion modals, refined modal architecture, and enhanced route guards.
 - [x] **Google Sign-In UX & Reliability**: Eliminated popup block failures with immediate visual loading states and redirect fallback.
+- [x] **Complete Public API Documentation Rebuild (`api-docs.html`)**: Rebuilt the developer API documentation page following `docs/DESIGN_GUIDELINES.md`. Traced and documented the true backend `POST /v1/escrows` contract from `functions/index.js`, eliminated unsafe key injection and fake UI controls, integrated canonical site navbar and 4-column footer, and added a fast client-side documentation search engine, copyable multi-language snippets (cURL, Node.js, Python, PHP), and WCAG 2.1 AA accessibility features.
 - [x] **Ghana Cedis Pricing & Terms Transparency**: Ensured 100% Cedi formatting across all marketing calculators and qualified 72-hour auto-release terminology.
 
 ---

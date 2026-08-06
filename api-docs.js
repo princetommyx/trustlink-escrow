@@ -1,222 +1,359 @@
-import { auth, db } from './firebase-config.js';
+import { auth } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { initSessionTracker } from "./session-manager.js";
 
-// --- Authentication (Optional for viewing docs) ---
-let currentApiKey = '';
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        initSessionTracker({ auth, userType: 'user' });
-        try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-                const data = userDoc.data();
-                
-                document.getElementById('user-name').textContent = data.fullName || user.email.split('@')[0];
-                document.getElementById('user-email').textContent = user.email;
-                
-                if (data.photoURL) {
-                    const avatar = document.getElementById('sidebar-avatar');
-                    avatar.style.backgroundImage = `url('${data.photoURL}')`;
-                }
+/**
+ * TrustLink Escrow — Public API Documentation Interactivity Module
+ * Namespaced selectors to avoid collisions with public site components.
+ * Exposes copy utilities, code language tab switcher, client-side search engine,
+ * IntersectionObserver scroll spy, and offline network listener.
+ */
 
-                if (data.apiKey) {
-                    currentApiKey = data.apiKey;
-                    const apiKeyInputs = document.querySelectorAll('input.param-value');
-                    apiKeyInputs.forEach(input => {
-                        if (input.value === 'tl_live_your_api_key_here' || input.value === 'tl_live_your_api_key') {
-                            input.value = data.apiKey;
-                        }
-                    });
-                    
-                    const codeAreas = document.querySelectorAll('code');
-                    codeAreas.forEach(code => {
-                        code.innerHTML = code.innerHTML.replace('tl_live_your_api_key', data.apiKey);
-                    });
-                }
-            }
-        } catch (error) {
-            console.error("Error fetching user data:", error);
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. Session Persistence & Security Controls ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            initSessionTracker({ auth, userType: 'user' });
         }
-    } else {
-        document.getElementById('user-name').textContent = 'Guest User';
-        document.getElementById('user-email').textContent = 'Login to view your API Key';
-    }
-});
-
-// --- UI Interactivity ---
-
-const sidebar = document.getElementById('api-sidebar');
-const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-const mobileCloseBtn = document.getElementById('mobile-close');
-
-if (mobileMenuBtn) {
-    mobileMenuBtn.addEventListener('click', () => {
-        sidebar.classList.add('open');
+        // Note: Secret API keys are strictly kept server-side and never exposed in DOM.
     });
-}
 
-if (mobileCloseBtn) {
-    mobileCloseBtn.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-    });
-}
-
-document.addEventListener('click', (e) => {
-    if (window.innerWidth <= 768) {
-        if (sidebar && mobileMenuBtn && !sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-            sidebar.classList.remove('open');
-        }
-    }
-});
-
-// Navigation Logic
-const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
-const views = document.querySelectorAll('.view-section');
-
-navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-        const targetId = item.getAttribute('data-target');
-        if (!targetId) return;
-        
-        e.preventDefault();
-        
-        navItems.forEach(nav => nav.classList.remove('active'));
-        views.forEach(view => {
-            view.classList.add('hidden');
-            view.style.display = 'none';
-            view.classList.remove('active');
+    // --- 2. Clipboard Copy Utilities ---
+    const btnCopyBaseUrl = document.getElementById('btn-copy-base-url');
+    if (btnCopyBaseUrl) {
+        btnCopyBaseUrl.addEventListener('click', () => {
+            const baseUrlText = 'https://www.trustlinkgh.online/api/v1';
+            copyTextToClipboard(baseUrlText, btnCopyBaseUrl, 'Copy URL', 'Copied URL!');
         });
-        
-        item.classList.add('active');
-        
-        const targetView = document.getElementById(targetId);
-        if (targetView) {
-            targetView.classList.remove('hidden');
-            targetView.classList.add('active');
-            if (targetId === 'view-endpoints') {
-                targetView.style.display = 'flex';
-            } else {
-                targetView.style.display = 'block';
+    }
+
+    const btnCopyHeroCode = document.getElementById('btn-copy-hero-code');
+    if (btnCopyHeroCode) {
+        btnCopyHeroCode.addEventListener('click', () => {
+            const snippet = document.getElementById('hero-curl-snippet');
+            if (snippet) {
+                copyTextToClipboard(snippet.textContent, btnCopyHeroCode, 'Copy', 'Copied!');
             }
+        });
+    }
+
+    const btnCopyCode = document.getElementById('btn-copy-code');
+    if (btnCopyCode) {
+        btnCopyCode.addEventListener('click', () => {
+            const activePanelCode = document.querySelector('.code-tab-panel.active code');
+            if (activePanelCode) {
+                copyTextToClipboard(activePanelCode.textContent, btnCopyCode, 'Copy Code', 'Copied!');
+            }
+        });
+    }
+
+    function copyTextToClipboard(text, buttonEl, defaultLabel, successLabel) {
+        if (!navigator.clipboard) {
+            fallbackCopyText(text, buttonEl, defaultLabel, successLabel);
+            return;
         }
-        
-        if (window.innerWidth <= 768 && sidebar) {
-            sidebar.classList.remove('open');
-        }
-    });
-});
 
-// Request Config Tabs
-const configTabs = document.querySelectorAll('.tabs-header .tab-btn');
-const configContents = document.querySelectorAll('.request-card .tab-content');
+        navigator.clipboard.writeText(text).then(() => {
+            showCopySuccess(buttonEl, defaultLabel, successLabel);
+        }).catch(() => {
+            showCopyFailure(buttonEl, defaultLabel);
+        });
+    }
 
-configTabs.forEach(tab => {
-    if(tab.closest('.code-tabs')) return;
-    
-    tab.addEventListener('click', () => {
-        configTabs.forEach(t => t.classList.remove('active'));
-        configContents.forEach(c => c.classList.remove('active'));
-        
-        tab.classList.add('active');
-        const targetId = `tab-${tab.dataset.tab}`;
-        const targetContent = document.getElementById(targetId);
-        if (targetContent) targetContent.classList.add('active');
-    });
-});
-
-// Code / Response Tabs
-const codeTabs = document.querySelectorAll('.code-tabs .tab-btn');
-const codeAreas = document.querySelectorAll('.code-area');
-
-codeTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-        codeTabs.forEach(t => t.classList.remove('active'));
-        codeAreas.forEach(c => c.classList.remove('active'));
-        
-        tab.classList.add('active');
-        const targetId = `code-${tab.dataset.codeTab}`;
-        const targetArea = document.getElementById(targetId);
-        if (targetArea) targetArea.classList.add('active');
-    });
-});
-
-// Real / Developer Preview Sandbox Execution
-const btnSend = document.getElementById('btn-send-test');
-if (btnSend) {
-    btnSend.addEventListener('click', async () => {
-        btnSend.disabled = true;
-        const originalText = btnSend.innerHTML;
-        btnSend.innerHTML = `<svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="16"></circle></svg> Sending...`;
-
-        const responseCodeEl = document.querySelector('#code-response code');
-
+    function fallbackCopyText(text, buttonEl, defaultLabel, successLabel) {
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showCopySuccess(buttonEl, defaultLabel, successLabel);
+        } catch (_) {
+            showCopyFailure(buttonEl, defaultLabel);
+        }
+    }
 
-            const apiKey = currentApiKey || 'tl_live_preview_key';
-            const res = await fetch('/api/v1/escrows', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': apiKey
-                },
-                body: JSON.stringify({
-                    amount: 450.00,
-                    description: "Jordan 4 Retro Sneakers",
-                    currency: "GHS"
-                }),
-                signal: controller.signal
+    function showCopySuccess(buttonEl, defaultLabel, successLabel) {
+        const textSpan = buttonEl.querySelector('span');
+        if (textSpan) textSpan.textContent = successLabel;
+        buttonEl.style.borderColor = '#10B981';
+        buttonEl.style.color = '#10B981';
+
+        setTimeout(() => {
+            if (textSpan) textSpan.textContent = defaultLabel;
+            buttonEl.style.borderColor = '';
+            buttonEl.style.color = '';
+        }, 2000);
+    }
+
+    function showCopyFailure(buttonEl, defaultLabel) {
+        const textSpan = buttonEl.querySelector('span');
+        if (textSpan) textSpan.textContent = 'Copy failed';
+        buttonEl.style.borderColor = '#EF4444';
+        buttonEl.style.color = '#EF4444';
+
+        setTimeout(() => {
+            if (textSpan) textSpan.textContent = defaultLabel;
+            buttonEl.style.borderColor = '';
+            buttonEl.style.color = '';
+        }, 2000);
+    }
+
+    // --- 3. Accessible Code Language Tabs ---
+    const codeTabBtns = Array.from(document.querySelectorAll('.code-tab-btn'));
+    const codeTabPanels = Array.from(document.querySelectorAll('.code-tab-panel'));
+
+    codeTabBtns.forEach((tabBtn, index) => {
+        tabBtn.addEventListener('click', () => {
+            activateTab(index);
+        });
+
+        tabBtn.addEventListener('keydown', (e) => {
+            let targetIndex = index;
+            if (e.key === 'ArrowRight') {
+                targetIndex = (index + 1) % codeTabBtns.length;
+            } else if (e.key === 'ArrowLeft') {
+                targetIndex = (index - 1 + codeTabBtns.length) % codeTabBtns.length;
+            } else if (e.key === 'Home') {
+                targetIndex = 0;
+            } else if (e.key === 'End') {
+                targetIndex = codeTabBtns.length - 1;
+            } else {
+                return;
+            }
+            e.preventDefault();
+            codeTabBtns[targetIndex].focus();
+            activateTab(targetIndex);
+        });
+    });
+
+    function activateTab(activeIndex) {
+        codeTabBtns.forEach((btn, idx) => {
+            const isSelected = idx === activeIndex;
+            btn.classList.toggle('active', isSelected);
+            btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        });
+
+        codeTabPanels.forEach((panel, idx) => {
+            const isSelected = idx === activeIndex;
+            panel.classList.toggle('active', isSelected);
+            if (isSelected) {
+                panel.removeAttribute('hidden');
+            } else {
+                panel.setAttribute('hidden', '');
+            }
+        });
+    }
+
+    // --- 4. Client-Side Documentation Search Engine ---
+    const searchInput = document.getElementById('api-search-input');
+    const searchClearBtn = document.getElementById('btn-clear-search');
+    const searchResultsDropdown = document.getElementById('search-results-dropdown');
+
+    // Index all documentation sections
+    const searchIndex = Array.from(document.querySelectorAll('.doc-section')).map(section => {
+        const id = section.getAttribute('id');
+        const heading = section.querySelector('h2')?.textContent || '';
+        const paragraphs = Array.from(section.querySelectorAll('p, li, td'))
+            .map(el => el.textContent)
+            .join(' ');
+        return {
+            id,
+            heading,
+            text: (heading + ' ' + paragraphs).toLowerCase()
+        };
+    });
+
+    let searchDebounceTimer = null;
+    let selectedResultIndex = -1;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchDebounceTimer);
+            const query = searchInput.value.trim();
+
+            if (searchClearBtn) {
+                searchClearBtn.hidden = query.length === 0;
+            }
+
+            if (query.length < 2) {
+                hideSearchResults();
+                return;
+            }
+
+            searchDebounceTimer = setTimeout(() => {
+                performSearch(query);
+            }, 150);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            const results = searchResultsDropdown.querySelectorAll('.search-result-item');
+            if (!results.length) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedResultIndex = (selectedResultIndex + 1) % results.length;
+                updateResultSelection(results);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedResultIndex = (selectedResultIndex - 1 + results.length) % results.length;
+                updateResultSelection(results);
+            } else if (e.key === 'Enter' && selectedResultIndex >= 0) {
+                e.preventDefault();
+                results[selectedResultIndex].click();
+            } else if (e.key === 'Escape') {
+                hideSearchResults();
+            }
+        });
+    }
+
+    if (searchClearBtn) {
+        searchClearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchClearBtn.hidden = true;
+            hideSearchResults();
+            searchInput.focus();
+        });
+    }
+
+    function performSearch(query) {
+        const lowerQuery = query.toLowerCase();
+        const matches = searchIndex.filter(item => item.text.includes(lowerQuery));
+
+        searchResultsDropdown.innerHTML = '';
+        selectedResultIndex = -1;
+
+        if (matches.length === 0) {
+            const noResults = document.createElement('div');
+            noResults.className = 'search-no-results';
+            noResults.textContent = 'No documentation sections match your search.';
+            searchResultsDropdown.appendChild(noResults);
+        } else {
+            matches.forEach(match => {
+                const item = document.createElement('a');
+                item.className = 'search-result-item';
+                item.href = `#${match.id}`;
+                item.setAttribute('role', 'option');
+
+                const title = document.createElement('span');
+                title.className = 'search-result-title';
+                title.textContent = match.heading;
+
+                const snippet = document.createElement('span');
+                snippet.className = 'search-result-snippet';
+                snippet.textContent = `Section: ${match.heading}`;
+
+                item.appendChild(title);
+                item.appendChild(snippet);
+
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    hideSearchResults();
+                    const targetEl = document.getElementById(match.id);
+                    if (targetEl) {
+                        targetEl.scrollIntoView({ behavior: 'smooth' });
+                        window.history.pushState(null, '', `#${match.id}`);
+                    }
+                });
+
+                searchResultsDropdown.appendChild(item);
             });
+        }
 
-            clearTimeout(timeoutId);
+        searchResultsDropdown.hidden = false;
+    }
 
-            const status = res.status;
-            const resText = await res.text();
-            let parsedJson;
-            try { parsedJson = JSON.parse(resText); } catch(e) { parsedJson = resText; }
-
-            if (responseCodeEl) {
-                responseCodeEl.textContent = `// HTTP Status: ${status}\n` + JSON.stringify(parsedJson, null, 2);
+    function updateResultSelection(results) {
+        results.forEach((el, idx) => {
+            if (idx === selectedResultIndex) {
+                el.classList.add('selected');
+                el.scrollIntoView({ block: 'nearest' });
+            } else {
+                el.classList.remove('selected');
             }
-        } catch (err) {
-            if (responseCodeEl) {
-                responseCodeEl.textContent = `// Developer Preview / Beta Mode Notice\n{\n  "status": "DEVELOPER_PREVIEW",\n  "message": "Live sandbox requests will connect directly to /api/v1/escrows upon backend deployment.",\n  "error": ${JSON.stringify(err.message || "Endpoint not reachable")}\n}`;
-            }
-        } finally {
-            btnSend.disabled = false;
-            btnSend.innerHTML = originalText;
-            const responseTab = document.querySelector('.code-tabs .tab-btn[data-code-tab="response"]');
-            if (responseTab) responseTab.click();
+        });
+    }
+
+    function hideSearchResults() {
+        if (searchResultsDropdown) searchResultsDropdown.hidden = true;
+        selectedResultIndex = -1;
+    }
+
+    document.addEventListener('click', (e) => {
+        if (searchResultsDropdown && !searchResultsDropdown.contains(e.target) && !searchInput.contains(e.target)) {
+            hideSearchResults();
         }
     });
-}
 
-// Copy Code Button
-const btnCopy = document.getElementById('btn-copy-code');
-if (btnCopy) {
-    btnCopy.addEventListener('click', () => {
-        const activeCodeArea = document.querySelector('.code-area.active code');
-        if (activeCodeArea) {
-            navigator.clipboard.writeText(activeCodeArea.innerText).then(() => {
-                const originalText = btnCopy.innerHTML;
-                btnCopy.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Copied!`;
-                btnCopy.style.color = '#22C55E';
+    // --- 5. IntersectionObserver Scroll Spy ---
+    const sections = document.querySelectorAll('.doc-section');
+    const tocLinks = document.querySelectorAll('.toc-item');
 
-                setTimeout(() => {
-                    btnCopy.innerHTML = originalText;
-                    btnCopy.style.color = '';
-                }, 2000);
+    if ('IntersectionObserver' in window && sections.length > 0) {
+        const observerOptions = {
+            root: null,
+            rootMargin: '-100px 0px -60% 0px',
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    updateActiveTocLink(id);
+                }
             });
-        }
-    });
-}
+        }, observerOptions);
 
-const style = document.createElement('style');
-style.textContent = `
-@keyframes spin { 100% { transform: rotate(360deg); } }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-`;
-document.head.appendChild(style);
+        sections.forEach(section => observer.observe(section));
+    }
+
+    function updateActiveTocLink(activeId) {
+        tocLinks.forEach(link => {
+            const sectionTarget = link.getAttribute('data-section');
+            if (sectionTarget === activeId) {
+                link.classList.add('active');
+                link.setAttribute('aria-current', 'location');
+            } else {
+                link.classList.remove('active');
+                link.removeAttribute('aria-current');
+            }
+        });
+    }
+
+    // --- 6. Mobile TOC Drawer Toggle ---
+    const btnTocToggle = document.getElementById('btn-toc-toggle');
+    const apiDocsToc = document.getElementById('api-docs-toc');
+
+    if (btnTocToggle && apiDocsToc) {
+        btnTocToggle.addEventListener('click', () => {
+            const isOpen = apiDocsToc.classList.toggle('open');
+            btnTocToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        tocLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 1024 && apiDocsToc.classList.contains('open')) {
+                    apiDocsToc.classList.remove('open');
+                    btnTocToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+    }
+
+    // --- 7. Offline Network Listener ---
+    const offlineBanner = document.getElementById('offline-banner');
+    function updateNetworkStatus() {
+        if (offlineBanner) {
+            offlineBanner.hidden = navigator.onLine;
+        }
+    }
+
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    updateNetworkStatus();
+});
