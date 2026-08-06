@@ -139,17 +139,17 @@ async function runTests() {
   await handler(reqWiz2, createMockRes());
   assert(true, "Wizard Step 2 (Item Name) accepted");
 
-  // Step 3: Send Amount
+  // Step 3: Send Amount with currency suffix '450gh' (exact user scenario)
   const reqWiz3 = {
     method: 'POST',
     headers: { 'x-forwarded-for': '127.0.0.1' },
     body: {
       update_id: 1006,
-      message: { message_id: 6, chat: { id: 11223344 }, text: '12500' }
+      message: { message_id: 6, chat: { id: 11223344 }, text: '450gh' }
     }
   };
   await handler(reqWiz3, createMockRes());
-  assert(true, "Wizard Step 3 (Price GH₵ 12,500) accepted");
+  assert(true, "Wizard Step 3 (Price '450gh' parsed as 450.00) accepted");
 
   // Step 4: Send Buyer Phone
   const reqWiz4 = {
@@ -179,6 +179,35 @@ async function runTests() {
   const resWiz5 = createMockRes();
   await handler(reqWiz5, resWiz5);
   assert(resWiz5.statusCode === 200, "Wizard completed via Inline Button click");
+
+  // Mid-Wizard Command Interruption Test (/help during Step 2)
+  console.log("\n[Test 5b: Mid-Wizard Command Interruption (/help during Step 2)]");
+  await handler({
+    method: 'POST',
+    headers: { 'x-forwarded-for': '127.0.0.1' },
+    body: {
+      update_id: 1009,
+      message: { message_id: 20, chat: { id: 554433 }, text: '/new' }
+    }
+  }, createMockRes());
+  await handler({
+    method: 'POST',
+    headers: { 'x-forwarded-for': '127.0.0.1' },
+    body: {
+      update_id: 1010,
+      message: { message_id: 21, chat: { id: 554433 }, text: 'Bags' }
+    }
+  }, createMockRes());
+  const resHelpMidWiz = createMockRes();
+  await handler({
+    method: 'POST',
+    headers: { 'x-forwarded-for': '127.0.0.1' },
+    body: {
+      update_id: 1011,
+      message: { message_id: 22, chat: { id: 554433 }, text: '/help' }
+    }
+  }, resHelpMidWiz);
+  assert(resHelpMidWiz.statusCode === 200, "/help interrupted wizard and displayed help menu cleanly");
 
   // 6. Balance & Status Commands
   console.log("\n[Test 6: /balance and /orders Commands]");

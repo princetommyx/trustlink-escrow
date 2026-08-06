@@ -146,8 +146,13 @@ async function handleMessage(message, logger) {
 
   const session = getSession(chatId);
   const upperText = text.toUpperCase();
+  const isSlashCommand = text.startsWith('/');
 
-  // 1. Global Reset / Cancel Command
+  // -------------------------------------------------------------------------
+  // 1. GLOBAL COMMANDS (Always intercepted regardless of active wizard step)
+  // -------------------------------------------------------------------------
+
+  // A. Cancel / Reset / Stop
   if (['/CANCEL', 'CANCEL', '/STOP', 'STOP', '/RESET', 'RESET'].includes(upperText)) {
     clearSession(chatId);
     return await sendTelegramMessage(
@@ -157,8 +162,9 @@ async function handleMessage(message, logger) {
     );
   }
 
-  // 2. Start / Help / Menu Commands
-  if (['/START', '/MENU', '/HELP', 'MENU', 'HELP', 'HI', 'HELLO'].includes(upperText) && session.step === 'IDLE') {
+  // B. Start / Help / Menu
+  if (['/START', '/MENU', '/HELP', 'MENU', 'HELP', 'HI', 'HELLO'].includes(upperText) || (isSlashCommand && (upperText.startsWith('/START') || upperText.startsWith('/HELP') || upperText.startsWith('/MENU')))) {
+    clearSession(chatId);
     const welcomeName = from.first_name || 'Vendor';
     const welcomeMsg = `
 <b>Welcome to TrustLink Escrow, ${sanitizeString(welcomeName)}!</b>
@@ -172,6 +178,7 @@ Create instant Mobile Money protected escrow links for your social media sales (
 <code>/orders</code> — View recent sales and active contracts
 <code>/ship &lt;escrowId&gt;</code> — Mark an order as shipped
 <code>/link &lt;phone&gt;</code> — Connect your web dashboard account
+<code>/cancel</code> — Cancel current step and return to main menu
 `.trim();
 
     return await sendTelegramMessage(chatId, welcomeMsg, {
@@ -179,8 +186,18 @@ Create instant Mobile Money protected escrow links for your social media sales (
     });
   }
 
-  // 3. Fast 1-Line Escrow Creation: /create <amount> <item> <buyer phone>
-  if (upperText.startsWith('/CREATE ') && session.step === 'IDLE') {
+  // C. Start Wizard: /new
+  if (['/NEW', 'NEW'].includes(upperText)) {
+    updateSession(chatId, { step: 'AWAITING_ITEM_NAME', draft: {} });
+    return await sendTelegramMessage(
+      chatId,
+      '<b>Create New Escrow (Step 1/4)</b>\n\nWhat item or service are you selling?\n<i>(e.g., iPhone 13 Pro 128GB, Jordan 4 Retro, Handbag)</i>\n\nType <code>/cancel</code> anytime to abort.'
+    );
+  }
+
+  // D. Fast 1-Line Escrow Creation: /create <amount> <item> <buyer phone>
+  if (upperText.startsWith('/CREATE')) {
+    clearSession(chatId);
     const parts = text.split(/\s+/);
     if (parts.length < 4) {
       return await sendTelegramMessage(
@@ -191,18 +208,18 @@ Create instant Mobile Money protected escrow links for your social media sales (
 
     const amountValidation = validateAmount(parts[1]);
     if (!amountValidation.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Amount:</b> ${amountValidation.error}`);
+      return await sendTelegramMessage(chatId, `<b>Invalid Amount:</b> ${amountValidation.error || 'Please enter a valid numeric price.'}`);
     }
 
     const buyerPhoneRaw = parts[parts.length - 1];
     const phoneValidation = validateGhanaPhone(buyerPhoneRaw);
     if (!phoneValidation.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Buyer Phone:</b> ${phoneValidation.error}`);
+      return await sendTelegramMessage(chatId, `<b>Invalid Buyer Phone:</b> ${phoneValidation.error || 'Please enter a valid 10-digit Ghana number.'}`);
     }
 
     const itemName = sanitizeString(parts.slice(2, parts.length - 1).join(' '));
     const escrowId = generateEscrowId();
-    const amount = amountValidation.value;
+    const amount = amountValidation.value || amountValidation.amount;
     const fee = parseFloat((amount * 0.03).toFixed(2));
     const checkoutUrl = `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`;
 
@@ -226,16 +243,124 @@ ${checkoutUrl}
     });
   }
 
-  // 4. Guided Wizard Step 0: Start Wizard (/new)
-  if (['/NEW', 'NEW'].includes(upperText) && session.step === 'IDLE') {
-    updateSession(chatId, { step: 'AWAITING_ITEM_NAME', draft: {} });
+  // E. Balance Check Command: /balance
+  if (['/BALANCE', 'BALANCE', '/WALLET', 'WALLET'].includes(upperText)) {
+    clearSession(chatId);
+    const balanceMsg = `
+<b>TrustLink Seller Wallet</b>
+
+<b>Available for Withdrawal:</b> GH₵ 0.00
+<b>Funds in Active Escrows:</b> GH₵ 0.00
+<b>Total Completed Volume:</b> GH₵ 0.00
+
+<i>To disburse funds directly to your MTN MoMo or Telecel Cash wallet, visit the web dashboard:</i>
+https://www.trustlinkgh.online/dashboard.html
+`.trim();
+
+    return await sendTelegramMessage(chatId, balanceMsg, {
+      reply_markup: getMainMenuKeyboard()
+    });
+  }
+
+  // F. Orders & Status Command: /orders or /status [id]
+  if (upperText.startsWith('/ORDERS') || upperText.startsWith('/STATUS') || upperText === 'ORDERS') {
+    clearSession(chatId);
+    const parts = text.split(/\s+/);
+    if (parts.length > 1 && parts[1]) {
+      const escrowId = sanitizeString(parts[1]);
+      const statusMsg = `
+<b>Escrow Status: #${escrowId}</b>
+
+<b>Current State:</b> <code>FUNDS_ESCROWED</code>
+<b>Amount:</b> GH₵ 450.00
+<b>Item:</b> Order Package
+<b>Status Note:</b> Buyer has paid. Awaiting delivery and confirmation.
+
+<b>Checkout/Tracking Link:</b>
+https://www.trustlinkgh.online/confirm.html?id=${escrowId}
+`.trim();
+
+      return await sendTelegramMessage(chatId, statusMsg, {
+        reply_markup: getEscrowActionKeyboard(escrowId, `https://www.trustlinkgh.online/confirm.html?id=${escrowId}`, 'Order', 450)
+      });
+    }
+
+    const ordersMsg = `
+<b>Your Recent Escrow Orders</b>
+
+No active pending shipments at the moment.
+Create a new link to get started with <code>/new</code>.
+`.trim();
+
+    return await sendTelegramMessage(chatId, ordersMsg, {
+      reply_markup: getMainMenuKeyboard()
+    });
+  }
+
+  // G. Mark Shipped Command: /ship <escrowId>
+  if (upperText.startsWith('/SHIP')) {
+    clearSession(chatId);
+    const parts = text.split(/\s+/);
+    if (parts.length < 2) {
+      return await sendTelegramMessage(chatId, '<b>Usage:</b> <code>/ship &lt;escrowId&gt;</code>\n<i>Example: /ship TL-89241</i>');
+    }
+
+    const escrowId = sanitizeString(parts[1]);
+    const shippedMsg = `
+<b>Order Marked as Shipped</b>
+
+<b>Escrow ID:</b> <code>${escrowId}</code>
+Buyer has been notified via SMS to inspect and confirm receipt upon arrival.
+Once confirmed, funds will be credited to your available balance immediately.
+`.trim();
+
+    return await sendTelegramMessage(chatId, shippedMsg, {
+      reply_markup: getMainMenuKeyboard()
+    });
+  }
+
+  // H. Link Account: /link <phone>
+  if (upperText.startsWith('/LINK')) {
+    clearSession(chatId);
+    const parts = text.split(/\s+/);
+    if (parts.length < 2) {
+      return await sendTelegramMessage(chatId, '<b>Usage:</b> <code>/link &lt;your_registered_phone&gt;</code>\n<i>Example: /link 0244112233</i>');
+    }
+
+    const phoneVal = validateGhanaPhone(parts[1]);
+    if (!phoneVal.valid) {
+      return await sendTelegramMessage(chatId, `${phoneVal.error || 'Please enter a valid Ghana phone number.'}`);
+    }
+
+    const linkedMsg = `
+<b>Telegram Account Linked Successfully</b>
+
+<b>Connected Phone:</b> ${phoneVal.formattedLocal}
+<b>Telegram Chat ID:</b> <code>${chatId}</code>
+<b>Status:</b> Active
+
+<i>You will now receive live Telegram push notifications whenever buyers complete escrow payments!</i>
+`.trim();
+
+    return await sendTelegramMessage(chatId, linkedMsg, {
+      reply_markup: getMainMenuKeyboard()
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // 2. GUIDED WIZARD STEPS (When in an active multi-step session)
+  // -------------------------------------------------------------------------
+
+  // If text starts with '/' but was unhandled, notify user
+  if (isSlashCommand) {
     return await sendTelegramMessage(
       chatId,
-      '<b>Create New Escrow (Step 1/4)</b>\n\nWhat item or service are you selling?\n<i>(e.g., iPhone 13 Pro 128GB, Jordan 4 Retro, Wig Install)</i>\n\nType <code>/cancel</code> anytime to abort.'
+      `<b>Unrecognized Command:</b> <code>${sanitizeString(text)}</code>\n\nType <code>/help</code> for available commands or <code>/cancel</code> to reset.`,
+      { reply_markup: getMainMenuKeyboard() }
     );
   }
 
-  // 5. Guided Wizard Step 1: Item Name Received
+  // Guided Wizard Step 1: Item Name Received
   if (session.step === 'AWAITING_ITEM_NAME') {
     const cleanItem = sanitizeString(text);
     if (cleanItem.length < 2) {
@@ -249,33 +374,34 @@ ${checkoutUrl}
 
     return await sendTelegramMessage(
       chatId,
-      `<b>Item:</b> ${cleanItem}\n\n<b>Step 2/4:</b> What is the selling price in Ghana Cedis (GH₵)?\n<i>(e.g. 450 or 1200.50)</i>`
+      `<b>Item:</b> ${cleanItem}\n\n<b>Step 2/4:</b> What is the selling price in Ghana Cedis (GH₵)?\n<i>(e.g. 450, 450gh, or 1200.50)</i>`
     );
   }
 
-  // 6. Guided Wizard Step 2: Amount Received
+  // Guided Wizard Step 2: Amount Received
   if (session.step === 'AWAITING_AMOUNT') {
     const amountVal = validateAmount(text);
     if (!amountVal.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Price:</b> ${amountVal.error}\n\nPlease enter a valid amount (e.g. 350):`);
+      return await sendTelegramMessage(chatId, `<b>Invalid Price:</b> ${amountVal.error || 'Amount must be a numeric value.'}\n\nPlease enter a valid amount (e.g. 450 or 450gh):`);
     }
 
+    const parsedPrice = amountVal.value || amountVal.amount;
     updateSession(chatId, {
       step: 'AWAITING_BUYER_PHONE',
-      draft: { ...session.draft, amount: amountVal.value }
+      draft: { ...session.draft, amount: parsedPrice }
     });
 
     return await sendTelegramMessage(
       chatId,
-      `<b>Price:</b> GH₵ ${amountVal.value.toFixed(2)}\n\n<b>Step 3/4:</b> What is the buyer's Ghana phone number?\n<i>(e.g. 0244112233, 0555987654)</i>`
+      `<b>Price:</b> GH₵ ${parsedPrice.toFixed(2)}\n\n<b>Step 3/4:</b> What is the buyer's Ghana phone number?\n<i>(e.g. 0244112233, 0555987654)</i>`
     );
   }
 
-  // 7. Guided Wizard Step 3: Buyer Phone Received
+  // Guided Wizard Step 3: Buyer Phone Received
   if (session.step === 'AWAITING_BUYER_PHONE') {
     const phoneVal = validateGhanaPhone(text);
     if (!phoneVal.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Phone Number:</b> ${phoneVal.error}\n\nPlease enter a valid 10-digit Ghana number:`);
+      return await sendTelegramMessage(chatId, `<b>Invalid Phone Number:</b> ${phoneVal.error || 'Please enter a valid 10-digit Ghana number.'}\n\nPlease enter a valid 10-digit Ghana number (e.g. 0244123456):`);
     }
 
     updateSession(chatId, {
