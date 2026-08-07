@@ -53,6 +53,11 @@ function getSasuSyncApiKey() {
     return process.env.SASUSYNC_API_KEY || '';
 }
 
+// Helper: Get SasuSync Base URL
+function getSasuSyncBaseUrl() {
+    return process.env.SASUSYNC_BASE_URL || 'https://sms.sasusync.com';
+}
+
 // Helper: SHA256 Hash
 function hashString(val) {
     return crypto.createHash('sha256').update(String(val || '')).digest('hex');
@@ -225,7 +230,8 @@ async function sendBuyerSmsAlert(phone, message) {
         const { local } = normalizeGhanaPhone(phone);
         if (!local) return;
 
-        await fetch("https://sms.sasulabs.me/api/v1/send", {
+        const baseUrl = getSasuSyncBaseUrl();
+        await fetch(`${baseUrl}/api/v1/send`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -396,9 +402,10 @@ exports.requestPhoneVerificationOtp = functions.runWith({ secrets: [SASUSYNC_API
     }
 
     const intlPhone = '233' + local.slice(1);
+    const baseUrl = getSasuSyncBaseUrl();
 
     try {
-        const response = await fetch("https://sms.sasulabs.me/otp/generate", {
+        const response = await fetch(`${baseUrl}/otp/generate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -459,9 +466,10 @@ exports.verifyPhoneVerificationOtp = functions.runWith({ secrets: [SASUSYNC_API_
     }
 
     const intlPhone = '233' + local.slice(1);
+    const baseUrl = getSasuSyncBaseUrl();
 
     try {
-        const response = await fetch("https://sms.sasulabs.me/otp/verify", {
+        const response = await fetch(`${baseUrl}/otp/verify`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -56,13 +56,14 @@ export default async function handler(req, res) {
     });
 
     const sasuSyncKey = process.env.SASUSYNC_API_KEY;
+    const sasuBaseUrl = process.env.SASUSYNC_BASE_URL || "https://sms.sasusync.com";
     const arkeselKey = process.env.ARKESEL_API_KEY;
     const senderId = process.env.SASUSYNC_SENDER_ID || "TrustEscrow";
 
     // Step 1: Try Primary SasuSync SMS Gateway
     if (sasuSyncKey) {
       try {
-        const sasuRes = await fetch("https://sms.sasulabs.me/api/v1/send", {
+        const sasuRes = await fetch(`${sasuBaseUrl}/api/v1/send`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
