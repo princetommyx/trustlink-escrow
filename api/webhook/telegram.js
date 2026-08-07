@@ -20,7 +20,10 @@ import {
   persistEscrowToFirestore,
   getEscrowFromFirestore,
   updateEscrowInFirestore,
-  formatEscrowStatusMessage
+  formatEscrowStatusMessage,
+  getTelegramSessionFromFirestore,
+  saveTelegramSessionToFirestore,
+  clearTelegramSessionInFirestore
 } from '../_utils/telegram.js';
 import { dispatchTransactionalSMS, buildEscrowOrderSMS } from '../_utils/sms-dispatcher.js';
 
@@ -30,33 +33,50 @@ const telegramSessions = new Map();
 // In-memory cache of recently created escrows (escrowId -> order details)
 const recentEscrows = new Map();
 
-// Helper to get or initialize a seller session
-function getSession(chatId) {
-  if (!telegramSessions.has(chatId)) {
-    telegramSessions.set(chatId, {
-      step: 'IDLE',
-      draft: {},
-      lastUpdated: Date.now()
-    });
+// Helper to get or initialize a seller session with Firestore persistence
+async function getSession(chatId) {
+  if (telegramSessions.has(chatId)) {
+    const s = telegramSessions.get(chatId);
+    if (Date.now() - (s.lastUpdated || 0) < 3600000) {
+      return s;
+    }
   }
-  return telegramSessions.get(chatId);
+
+  // Fallback to Firestore persistent store to prevent cold-start session loss
+  const dbSession = await getTelegramSessionFromFirestore(chatId);
+  if (dbSession && (Date.now() - (dbSession.lastUpdated || 0) < 3600000)) {
+    telegramSessions.set(chatId, dbSession);
+    return dbSession;
+  }
+
+  const fresh = {
+    step: 'IDLE',
+    draft: {},
+    lastUpdated: Date.now()
+  };
+  telegramSessions.set(chatId, fresh);
+  return fresh;
 }
 
-function updateSession(chatId, data) {
-  const current = getSession(chatId);
-  telegramSessions.set(chatId, {
+async function updateSession(chatId, data) {
+  const current = await getSession(chatId);
+  const updated = {
     ...current,
     ...data,
     lastUpdated: Date.now()
-  });
+  };
+  telegramSessions.set(chatId, updated);
+  // Persist to Firestore asynchronously
+  saveTelegramSessionToFirestore(chatId, updated).catch(() => {});
 }
 
-function clearSession(chatId) {
+async function clearSession(chatId) {
   telegramSessions.set(chatId, {
     step: 'IDLE',
     draft: {},
     lastUpdated: Date.now()
   });
+  clearTelegramSessionInFirestore(chatId).catch(() => {});
 }
 
 /**
@@ -153,7 +173,7 @@ async function handleMessage(message, logger) {
   const text = (message.text || '').trim();
   if (!chatId || !text) return;
 
-  const session = getSession(chatId);
+  const session = await getSession(chatId);
   const upperText = text.toUpperCase();
   const isSlashCommand = text.startsWith('/');
 
@@ -163,7 +183,7 @@ async function handleMessage(message, logger) {
 
   // A. Cancel / Reset / Stop
   if (['/CANCEL', 'CANCEL', '/STOP', 'STOP', '/RESET', 'RESET'].includes(upperText)) {
-    clearSession(chatId);
+    await clearSession(chatId);
     return await sendTelegramMessage(
       chatId,
       '<b>Action Stopped.</b> We have returned to the main menu. Tap an option below to continue.',
@@ -173,7 +193,7 @@ async function handleMessage(message, logger) {
 
   // B. Start / Help / Menu
   if (['/START', '/MENU', '/HELP', 'MENU', 'HELP', 'HI', 'HELLO'].includes(upperText) || (isSlashCommand && (upperText.startsWith('/START') || upperText.startsWith('/HELP') || upperText.startsWith('/MENU')))) {
-    clearSession(chatId);
+    await clearSession(chatId);
     const welcomeName = from.first_name || 'Vendor';
     const welcomeMsg = `
 <b>Welcome to TrustLink, ${sanitizeString(welcomeName)}!</b>
@@ -195,7 +215,7 @@ Tap <b>Create Payment Link</b> below, or type:
 
   // C. Start Wizard: /new
   if (['/NEW', 'NEW'].includes(upperText)) {
-    updateSession(chatId, { step: 'AWAITING_ITEM_NAME', draft: {} });
+    await updateSession(chatId, { step: 'AWAITING_ITEM_NAME', draft: {} });
     return await sendTelegramMessage(
       chatId,
       '<b>Step 1 of 4: What are you selling?</b>\n\nType the name of the item or service.\n<i>(For example: iPhone 13, Nike Sneakers, Handbag, Wig)</i>\n\nType <code>/cancel</code> anytime to stop.'
@@ -204,7 +224,7 @@ Tap <b>Create Payment Link</b> below, or type:
 
   // D. Fast 1-Line Escrow Creation: /create <amount> <item> <buyer phone>
   if (upperText.startsWith('/CREATE')) {
-    clearSession(chatId);
+    await clearSession(chatId);
     const parts = text.split(/\s+/);
     if (parts.length < 4) {
       return await sendTelegramMessage(
@@ -277,7 +297,7 @@ ${checkoutUrl}
 
   // D2. Send SMS to Buyer Command: /sms <escrowId> [optional phone]
   if (upperText.startsWith('/SMS')) {
-    clearSession(chatId);
+    await clearSession(chatId);
     const parts = text.split(/\s+/);
     if (parts.length < 2) {
       return await sendTelegramMessage(
@@ -288,76 +308,51 @@ ${checkoutUrl}
 
     const escrowId = sanitizeString(parts[1]).toUpperCase();
     const order = recentEscrows.get(escrowId);
-    const buyerPhoneRaw = parts[2] || order?.buyerPhone;
-
-    if (!buyerPhoneRaw) {
+    if (!order) {
       return await sendTelegramMessage(
         chatId,
-        `<b>Buyer's phone number not found for #${escrowId}.</b>\nPlease specify their number:\n<code>/sms ${escrowId} 0244112233</code>`
+        `<b>Order Not Found:</b> Could not find active session for <code>${escrowId}</code>.\nCreate a new one with <code>/new</code> or <code>/create</code>.`
       );
     }
 
-    const phoneValidation = validateGhanaPhone(buyerPhoneRaw);
-    if (!phoneValidation.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Phone:</b> ${phoneValidation.error || 'Please enter a valid 10-digit Ghana number.'}`);
+    const recipientPhone = parts[2] ? validateGhanaPhone(parts[2]).formattedLocal : order.buyerPhone;
+    if (!recipientPhone) {
+      return await sendTelegramMessage(chatId, '<b>Missing Phone Number:</b> Please provide a valid buyer phone (e.g. <code>/sms TL-89241 0244112233</code>).');
     }
 
-    const sellerName = order?.sellerName || from?.first_name || 'TrustLink Seller';
-    const itemName = order?.itemName || 'Order';
-    const amount = order?.amount || 0;
-    const checkoutUrl = order?.checkoutUrl || `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`;
-
-    const smsMessage = buildEscrowOrderSMS({
-      sellerName,
-      itemName,
-      amount,
-      checkoutUrl
+    const smsText = buildEscrowOrderSMS({
+      escrowId: order.escrowId,
+      itemName: order.itemName,
+      amount: order.amount,
+      sellerName: order.sellerName,
+      checkoutUrl: order.checkoutUrl
     });
 
-    const smsResult = await dispatchTransactionalSMS({
-      phone: phoneValidation.formattedLocal,
-      message: smsMessage,
-      referenceId: `${escrowId}-tg-cmd-sms`
+    const smsRes = await dispatchTransactionalSMS({
+      recipient: recipientPhone,
+      message: smsText
     });
 
-    if (smsResult.success) {
-      const replyMsg = `
-<b>SMS Sent to Buyer!</b>
-
-<b>Recipient:</b> ${smsResult.recipient}
-<b>Order ID:</b> <code>${escrowId}</code>
-
-<b>Message:</b>
-<i>"${smsMessage}"</i>
-
-The buyer has received the payment link on their phone.
-`.trim();
-
-      return await sendTelegramMessage(chatId, replyMsg, {
-        reply_markup: getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, { smsSent: true })
-      });
+    if (smsRes.success) {
+      return await sendTelegramMessage(chatId, `<b>SMS Sent Successfully!</b>\nDirect payment link delivered to <b>${recipientPhone}</b> via SasuSync SMS gateway.`);
     } else {
       const fallbackMsg = `
-<b>SMS Prepared for Buyer</b>
+<b>SMS Gateway Notice:</b>
+${smsRes.error || 'Failed to send automated SMS'}.
 
-<b>Recipient:</b> ${phoneValidation.formattedLocal}
-<b>Order ID:</b> <code>${escrowId}</code>
-
-<b>Message Content:</b>
-<i>"${smsMessage}"</i>
-
-${smsResult.nativeSmsLink ? `\n<a href="${smsResult.nativeSmsLink}">Tap here to open SMS app and send</a>` : ''}
+You can copy and send this message directly on WhatsApp or SMS:
+<blockquote>${smsText}</blockquote>
 `.trim();
 
       return await sendTelegramMessage(chatId, fallbackMsg, {
-        reply_markup: getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, { smsSent: false })
+        reply_markup: getEscrowActionKeyboard(order.escrowId, order.checkoutUrl, order.itemName, order.amount, { smsSent: false })
       });
     }
   }
 
   // E. Balance Check Command: /balance
   if (['/BALANCE', 'BALANCE', '/WALLET', 'WALLET'].includes(upperText)) {
-    clearSession(chatId);
+    await clearSession(chatId);
     const balanceMsg = `
 <b>Your TrustLink Wallet</b>
 
@@ -376,7 +371,7 @@ https://www.trustlinkgh.online/dashboard.html
 
   // F. Orders & Status Command: /orders or /status [id]
   if (upperText.startsWith('/ORDERS') || upperText.startsWith('/STATUS') || upperText === 'ORDERS') {
-    clearSession(chatId);
+    await clearSession(chatId);
     const parts = text.split(/\s+/);
     if (parts.length > 1 && parts[1]) {
       const escrowId = sanitizeString(parts[1]).toUpperCase();
@@ -419,7 +414,7 @@ Tap <b>Create Payment Link</b> below to create a new link.
 
   // G. Mark Shipped Command: /ship <escrowId>
   if (upperText.startsWith('/SHIP')) {
-    clearSession(chatId);
+    await clearSession(chatId);
     const parts = text.split(/\s+/);
     if (parts.length < 2) {
       return await sendTelegramMessage(chatId, '<b>Usage:</b> <code>/ship &lt;orderId&gt;</code>\n<i>Example: /ship TL-89241</i>');
@@ -441,7 +436,7 @@ We have sent an SMS to the buyer to check the item and confirm delivery. Once th
 
   // H. Link Account: /link <phone>
   if (upperText.startsWith('/LINK')) {
-    clearSession(chatId);
+    await clearSession(chatId);
     const parts = text.split(/\s+/);
     if (parts.length < 2) {
       return await sendTelegramMessage(chatId, '<b>Usage:</b> <code>/link &lt;your_phone_number&gt;</code>\n<i>Example: /link 0244112233</i>');
@@ -486,7 +481,7 @@ You will now receive instant push alerts whenever a buyer pays for any of your i
       return await sendTelegramMessage(chatId, 'Please type the item name (at least 2 characters):');
     }
 
-    updateSession(chatId, {
+    await updateSession(chatId, {
       step: 'AWAITING_AMOUNT',
       draft: { ...session.draft, itemName: cleanItem }
     });
@@ -501,11 +496,15 @@ You will now receive instant push alerts whenever a buyer pays for any of your i
   if (session.step === 'AWAITING_AMOUNT') {
     const amountVal = validateAmount(text);
     if (!amountVal.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Price:</b> ${amountVal.error || 'Please enter numbers only.'}\n\nPlease type the amount (e.g. 450 or 1200):`);
+      const currentItem = session.draft?.itemName || 'Item';
+      return await sendTelegramMessage(
+        chatId,
+        `<b>Item:</b> ${currentItem}\n\n⚠️ <b>Invalid Price:</b> ${amountVal.error || 'Please enter numbers only.'}\n\n<i>Your item (${currentItem}) is saved.</i>\nPlease type the price in Ghana Cedis (e.g. 450 or 1200):`
+      );
     }
 
     const parsedPrice = amountVal.value || amountVal.amount;
-    updateSession(chatId, {
+    await updateSession(chatId, {
       step: 'AWAITING_BUYER_PHONE',
       draft: { ...session.draft, amount: parsedPrice }
     });
@@ -520,16 +519,25 @@ You will now receive instant push alerts whenever a buyer pays for any of your i
   if (session.step === 'AWAITING_BUYER_PHONE') {
     const phoneVal = validateGhanaPhone(text);
     if (!phoneVal.valid) {
-      return await sendTelegramMessage(chatId, `<b>Invalid Phone Number:</b> ${phoneVal.error || 'Please enter a valid 10-digit Ghana phone number.'}\n\nPlease type the number (e.g. 0244123456):`);
+      const draft = session.draft || {};
+      const currentItem = draft.itemName || 'Item';
+      const currentAmount = draft.amount ? `GH₵ ${Number(draft.amount).toFixed(2)}` : '';
+      const summaryPrefix = currentAmount ? `<b>${currentItem} (${currentAmount})</b>\n\n` : '';
+
+      return await sendTelegramMessage(
+        chatId,
+        `${summaryPrefix}⚠️ <b>Invalid Phone Number:</b> ${phoneVal.error || 'Standard Ghana numbers are 10 digits.'}\n\n<i>Your order details are saved!</i>\nPlease type the buyer's 10-digit phone number (e.g. <code>0244123456</code> or <code>0208842411</code>):`
+      );
     }
 
-    updateSession(chatId, {
+    await updateSession(chatId, {
       step: 'AWAITING_FEE_SPLIT',
       draft: { ...session.draft, buyerPhone: phoneVal.formattedLocal, network: phoneVal.network }
     });
 
-    const draft = session.draft;
-    const fee = parseFloat(((draft.amount || 0) * 0.03).toFixed(2));
+    const draft = session.draft || {};
+    const amount = Number(draft.amount || 0);
+    const fee = parseFloat((amount * 0.03).toFixed(2));
 
     return await sendTelegramMessage(
       chatId,
@@ -558,11 +566,11 @@ async function handleCallbackQuery(callbackQuery, logger) {
     return await answerCallbackQuery(queryId);
   }
 
-  const session = getSession(chatId);
+  const session = await getSession(chatId);
 
   // Button: Create New Payment Link
   if (data === 'btn_new') {
-    updateSession(chatId, { step: 'AWAITING_ITEM_NAME', draft: {} });
+    await updateSession(chatId, { step: 'AWAITING_ITEM_NAME', draft: {} });
     await answerCallbackQuery(queryId, 'Creating new payment link...');
     return await sendTelegramMessage(
       chatId,
@@ -602,7 +610,7 @@ async function handleCallbackQuery(callbackQuery, logger) {
 
   // Button: Cancel
   if (data === 'btn_cancel') {
-    clearSession(chatId);
+    await clearSession(chatId);
     await answerCallbackQuery(queryId, 'Cancelled');
     return await sendTelegramMessage(
       chatId,
@@ -643,7 +651,7 @@ async function handleCallbackQuery(callbackQuery, logger) {
     // Persist directly to Firestore REST API in background
     persistEscrowToFirestore(escrowObj).catch(err => console.warn('[FIRESTORE] Async save note:', err));
 
-    clearSession(chatId);
+    await clearSession(chatId);
     await answerCallbackQuery(queryId, 'Link Created!');
 
     const successMsg = `

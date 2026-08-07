@@ -260,6 +260,83 @@ export async function updateEscrowInFirestore(escrowId, fieldsToUpdate = {}) {
 }
 
 /**
+ * Fetches a user's Telegram session from Firestore REST API
+ */
+export async function getTelegramSessionFromFirestore(chatId) {
+  try {
+    if (!chatId) return null;
+    const apiKey = 'AIzaSyA2kBaKsu5WtboFBmOWJTLzESkbh776ij0';
+    const projectId = 'trustlink-escrow';
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/telegram_sessions/${chatId}?key=${apiKey}`;
+
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const doc = await res.json();
+    if (!doc || !doc.fields) return null;
+
+    const step = doc.fields.step?.stringValue || 'IDLE';
+    let draft = {};
+    if (doc.fields.draftJson?.stringValue) {
+      try { draft = JSON.parse(doc.fields.draftJson.stringValue); } catch (_) {}
+    }
+
+    return {
+      step,
+      draft,
+      lastUpdated: doc.fields.lastUpdated?.integerValue ? parseInt(doc.fields.lastUpdated.integerValue, 10) : Date.now()
+    };
+  } catch (err) {
+    return null;
+  }
+}
+
+/**
+ * Saves a user's Telegram session to Firestore REST API
+ */
+export async function saveTelegramSessionToFirestore(chatId, session) {
+  try {
+    if (!chatId) return { ok: false };
+    const apiKey = 'AIzaSyA2kBaKsu5WtboFBmOWJTLzESkbh776ij0';
+    const projectId = 'trustlink-escrow';
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/telegram_sessions/${chatId}?key=${apiKey}`;
+
+    const body = {
+      fields: {
+        step: { stringValue: session.step || 'IDLE' },
+        draftJson: { stringValue: JSON.stringify(session.draft || {}) },
+        lastUpdated: { integerValue: String(Date.now()) }
+      }
+    };
+
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return { ok: res.ok };
+  } catch (err) {
+    return { ok: false };
+  }
+}
+
+/**
+ * Deletes/clears a user's Telegram session from Firestore
+ */
+export async function clearTelegramSessionInFirestore(chatId) {
+  try {
+    if (!chatId) return { ok: false };
+    const apiKey = 'AIzaSyA2kBaKsu5WtboFBmOWJTLzESkbh776ij0';
+    const projectId = 'trustlink-escrow';
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/telegram_sessions/${chatId}?key=${apiKey}`;
+
+    await fetch(url, { method: 'DELETE' });
+    return { ok: true };
+  } catch (err) {
+    return { ok: false };
+  }
+}
+
+/**
  * Formats a clean, user-friendly status message based on actual escrow state
  */
 export function formatEscrowStatusMessage(order) {
