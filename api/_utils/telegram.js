@@ -97,6 +97,27 @@ export function getMainMenuKeyboard() {
 }
 
 /**
+ * Returns the Delivery Date Inline Keyboard for Escrow Creation Wizard
+ */
+export function getDeliveryDateKeyboard() {
+  return {
+    inline_keyboard: [
+      [
+        { text: '🚀 Today (Same Day)', callback_data: 'btn_delivery:Today' },
+        { text: '📦 Tomorrow (1 Day)', callback_data: 'btn_delivery:Tomorrow' }
+      ],
+      [
+        { text: '🚚 2 - 3 Days', callback_data: 'btn_delivery:2-3 Days' },
+        { text: '🗓️ 5 - 7 Days', callback_data: 'btn_delivery:5-7 Days' }
+      ],
+      [
+        { text: '❌ Cancel', callback_data: 'btn_cancel' }
+      ]
+    ]
+  };
+}
+
+/**
  * Returns the Fee Split Inline Keyboard for Escrow Creation Wizard
  */
 export function getFeeSplitKeyboard() {
@@ -112,10 +133,40 @@ export function getFeeSplitKeyboard() {
         { text: 'I will pay the fee (3%)', callback_data: 'btn_fee_split:seller' }
       ],
       [
-        { text: 'Cancel', callback_data: 'btn_cancel' }
+        { text: '❌ Cancel', callback_data: 'btn_cancel' }
       ]
     ]
   };
+}
+
+/**
+ * Formats user/button delivery input into a clean, human-readable delivery timeline
+ */
+export function formatDeliveryDate(input) {
+  if (!input) return 'Within 2 - 3 Days';
+  const clean = String(input).trim();
+  const lower = clean.toLowerCase();
+
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const now = new Date();
+  const fmt = (d) => `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+
+  if (lower.includes('today') || lower === 'same day' || lower === 'same-day') {
+    return `Today (${fmt(now)})`;
+  }
+  if (lower.includes('tomorrow') || lower === '1 day') {
+    const d = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    return `Tomorrow (${fmt(d)})`;
+  }
+  if (lower.includes('2-3') || lower.includes('2 to 3') || lower === '2 days' || lower === '3 days') {
+    const d = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+    return `2 - 3 Days (${fmt(d)})`;
+  }
+  if (lower.includes('5-7') || lower.includes('5 to 7') || lower === '1 week' || lower === '7 days') {
+    const d = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    return `5 - 7 Days (${fmt(d)})`;
+  }
+  return clean;
 }
 
 /**
@@ -130,6 +181,7 @@ export function buildEscrowCheckoutUrl(escrow) {
   if (escrow.itemName || escrow.description) params.set('item', escrow.itemName || escrow.description);
   if (escrow.sellerName) params.set('seller', escrow.sellerName);
   if (escrow.buyerPhone) params.set('buyer', escrow.buyerPhone);
+  if (escrow.deliveryDate || escrow.deliveryTimeline) params.set('delivery', escrow.deliveryDate || escrow.deliveryTimeline);
   if (escrow.feeChoice || escrow.feeAllocation) params.set('split', escrow.feeChoice || escrow.feeAllocation || 'split');
   return `${base}?${params.toString()}`;
 }
@@ -146,6 +198,7 @@ export async function persistEscrowToFirestore(escrow) {
     const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/escrows/${escrowId}?key=${apiKey}`;
     
     const amount = Number(escrow.amount || 0);
+    const deliveryDate = String(escrow.deliveryDate || escrow.deliveryTimeline || '');
     const body = {
       fields: {
         amount: { doubleValue: amount },
@@ -154,6 +207,9 @@ export async function persistEscrowToFirestore(escrow) {
         sellerName: { stringValue: String(escrow.sellerName || 'TrustLink Seller') },
         sellerId: { stringValue: String(escrow.sellerId || 'TELEGRAM_BOT') },
         buyerPhone: { stringValue: String(escrow.buyerPhone || '') },
+        deliveryDate: { stringValue: deliveryDate },
+        deliveryDateFrom: { stringValue: deliveryDate },
+        deliveryDateTo: { stringValue: deliveryDate },
         feeAllocation: { stringValue: String(escrow.feeChoice || escrow.feeAllocation || 'split') },
         feePercent: { doubleValue: 3.0 },
         status: { stringValue: 'PENDING_PAYMENT' },
@@ -200,6 +256,8 @@ export async function getEscrowFromFirestore(escrowId) {
       return null;
     };
 
+    const deliveryDate = parseField(doc.fields.deliveryDate) || parseField(doc.fields.deliveryTimeline) || parseField(doc.fields.deliveryDateFrom) || '';
+
     return {
       id: escrowId,
       escrowId: escrowId,
@@ -211,6 +269,8 @@ export async function getEscrowFromFirestore(escrowId) {
       buyerPhone: parseField(doc.fields.buyerPhone) || '',
       sellerName: parseField(doc.fields.sellerName) || 'Seller',
       sellerId: parseField(doc.fields.sellerId) || '',
+      deliveryDate: deliveryDate,
+      deliveryTimeline: deliveryDate,
       feeAllocation: parseField(doc.fields.feeAllocation) || 'split',
       createdAt: parseField(doc.fields.createdAt) || null
     };
@@ -344,6 +404,8 @@ export function formatEscrowStatusMessage(order) {
   const amount = Number(order.amount || order.totalAmount || 0).toFixed(2);
   const itemName = order.itemName || order.description || 'Order Item';
   const buyerPhone = order.buyerPhone || 'Buyer';
+  const deliveryDate = order.deliveryDate || order.deliveryTimeline || '';
+  const deliveryLine = deliveryDate ? `\n<b>Delivery Date:</b> ${deliveryDate}` : '';
   const rawStatus = (order.status || 'PENDING_PAYMENT').toUpperCase();
 
   if (['PENDING_PAYMENT', 'AWAITING_PAYMENT', 'CREATED', 'PENDING'].includes(rawStatus)) {
@@ -354,7 +416,7 @@ export function formatEscrowStatusMessage(order) {
 
 <b>Item:</b> ${itemName}
 <b>Amount:</b> GH₵ ${amount}
-<b>Buyer:</b> ${buyerPhone}
+<b>Buyer:</b> ${buyerPhone}${deliveryLine}
 
 ❌ <b>Payment has NOT been made yet.</b>
 The buyer has not sent the money yet.
@@ -372,7 +434,7 @@ The buyer has not sent the money yet.
 
 <b>Item:</b> ${itemName}
 <b>Amount:</b> GH₵ ${amount}
-<b>Buyer:</b> ${buyerPhone}
+<b>Buyer:</b> ${buyerPhone}${deliveryLine}
 
 ✅ <b>The buyer has paid GH₵ ${amount}!</b>
 The money is now safely held in TrustLink Escrow.
@@ -390,7 +452,7 @@ The money is now safely held in TrustLink Escrow.
 
 <b>Item:</b> ${itemName}
 <b>Amount:</b> GH₵ ${amount}
-<b>Buyer:</b> ${buyerPhone}
+<b>Buyer:</b> ${buyerPhone}${deliveryLine}
 
 You marked this item as sent. We notified the buyer to inspect the package and confirm delivery. Once they confirm, the funds will be released to your wallet immediately.
 `.trim()
@@ -404,7 +466,7 @@ You marked this item as sent. We notified the buyer to inspect the package and c
 <b>Status for #${escrowId}:</b> 🎉 <b>Order Completed!</b>
 
 <b>Item:</b> ${itemName}
-<b>Amount:</b> GH₵ ${amount}
+<b>Amount:</b> GH₵ ${amount}${deliveryLine}
 
 The buyer confirmed receipt and the payment has been released to your wallet.
 `.trim()
@@ -418,7 +480,7 @@ The buyer confirmed receipt and the payment has been released to your wallet.
 <b>Status for #${escrowId}:</b> ⚠️ <b>Under Dispute Review</b>
 
 <b>Item:</b> ${itemName}
-<b>Amount:</b> GH₵ ${amount}
+<b>Amount:</b> GH₵ ${amount}${deliveryLine}
 
 This order is currently being reviewed by TrustLink support. Funds remain safely held.
 `.trim()
@@ -431,7 +493,7 @@ This order is currently being reviewed by TrustLink support. Funds remain safely
 <b>Status for #${escrowId}:</b> <code>${rawStatus}</code>
 
 <b>Item:</b> ${itemName}
-<b>Amount:</b> GH₵ ${amount}
+<b>Amount:</b> GH₵ ${amount}${deliveryLine}
 `.trim()
   };
 }
@@ -441,8 +503,9 @@ This order is currently being reviewed by TrustLink support. Funds remain safely
  */
 export function getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, options = {}) {
   const status = (options.status || 'PENDING_PAYMENT').toUpperCase();
+  const deliveryText = options.deliveryDate ? `\nExpected Delivery: ${options.deliveryDate}` : '';
   const whatsappShareText = encodeURIComponent(
-    `Hello! Here is your TrustLink protected payment link for ${itemName} (GH₵ ${Number(amount).toFixed(2)}):\n\n${checkoutUrl}\n\nYour money is held safely until you receive and check your package.`
+    `Hello! Here is your TrustLink protected payment link for ${itemName} (GH₵ ${Number(amount).toFixed(2)}):${deliveryText}\n\n${checkoutUrl}\n\nYour money is held safely until you receive and check your package.`
   );
 
   const smsButtonText = options.smsSent ? 'Resend SMS to Buyer' : 'Send SMS to Buyer';

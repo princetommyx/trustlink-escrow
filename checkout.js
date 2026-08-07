@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const qSeller = urlParams.get('seller') || urlParams.get('vendor');
     const qBuyer = urlParams.get('buyer') || urlParams.get('phone');
     const qSplit = urlParams.get('split') || urlParams.get('feeAllocation');
+    const qDelivery = urlParams.get('delivery') || urlParams.get('deliveryDate') || urlParams.get('date');
     
     if (!escrowId) {
         document.getElementById('loading-text').textContent = "Error: Invalid Checkout Link";
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // If doc wasn't found in Firestore but query params provide escrow details
         if (!escrow && qAmount && !isNaN(parseFloat(qAmount)) && parseFloat(qAmount) > 0) {
             const parsedAmt = parseFloat(qAmount);
+            const deliveryVal = qDelivery ? decodeURIComponent(qDelivery) : "";
             escrow = {
                 amount: parsedAmt,
                 totalAmount: parsedAmt,
@@ -41,6 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sellerName: qSeller ? decodeURIComponent(qSeller) : "Verified Vendor",
                 sellerId: "TELEGRAM_BOT",
                 buyerPhone: qBuyer ? decodeURIComponent(qBuyer) : "",
+                deliveryDate: deliveryVal,
+                deliveryDateFrom: deliveryVal,
+                deliveryDateTo: deliveryVal,
                 feeAllocation: qSplit ? decodeURIComponent(qSplit) : "split",
                 feePercent: 3.0,
                 status: 'PENDING_PAYMENT',

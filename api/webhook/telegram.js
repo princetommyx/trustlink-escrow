@@ -14,6 +14,8 @@ import {
   sendTelegramMessage,
   answerCallbackQuery,
   getMainMenuKeyboard,
+  getDeliveryDateKeyboard,
+  formatDeliveryDate,
   getFeeSplitKeyboard,
   getEscrowActionKeyboard,
   buildEscrowCheckoutUrl,
@@ -218,7 +220,7 @@ Tap <b>Create Payment Link</b> below, or type:
     await updateSession(chatId, { step: 'AWAITING_ITEM_NAME', draft: {} });
     return await sendTelegramMessage(
       chatId,
-      '<b>Step 1 of 4: What are you selling?</b>\n\nType the name of the item or service.\n<i>(For example: iPhone 13, Nike Sneakers, Handbag, Wig)</i>\n\nType <code>/cancel</code> anytime to stop.'
+      '<b>Step 1 of 5: What are you selling?</b>\n\nType the name of the item or service.\n<i>(For example: iPhone 13, Nike Sneakers, Handbag, Wig)</i>\n\nType <code>/cancel</code> anytime to stop.'
     );
   }
 
@@ -250,6 +252,7 @@ Tap <b>Create Payment Link</b> below, or type:
     const fee = parseFloat((amount * 0.03).toFixed(2));
     const sellerName = from?.first_name || (from?.username ? `@${from.username}` : 'TrustLink Seller');
     const buyerPhone = phoneValidation.formattedLocal || buyerPhoneRaw;
+    const deliveryDate = formatDeliveryDate('2-3 Days');
 
     const escrowObj = {
       escrowId,
@@ -259,6 +262,8 @@ Tap <b>Create Payment Link</b> below, or type:
       buyerPhone,
       sellerName,
       sellerId: `TELEGRAM_${chatId}`,
+      deliveryDate,
+      deliveryTimeline: deliveryDate,
       feeChoice: 'split',
       createdAt: Date.now()
     };
@@ -277,6 +282,7 @@ Tap <b>Create Payment Link</b> below, or type:
 
 <b>Item:</b> ${itemName}
 <b>Price:</b> GH₵ ${amount.toFixed(2)}
+<b>Expected Delivery:</b> ${deliveryDate}
 <b>Protection Fee (3%):</b> GH₵ ${fee.toFixed(2)}
 <b>Buyer's Phone:</b> ${phoneValidation.formattedLocal} (${phoneValidation.network})
 <b>Order ID:</b> <code>${escrowId}</code>
@@ -291,7 +297,7 @@ ${checkoutUrl}
 `.trim();
 
     return await sendTelegramMessage(chatId, successMsg, {
-      reply_markup: getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount)
+      reply_markup: getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, { deliveryDate })
     });
   }
 
@@ -488,7 +494,7 @@ You will now receive instant push alerts whenever a buyer pays for any of your i
 
     return await sendTelegramMessage(
       chatId,
-      `<b>Item:</b> ${cleanItem}\n\n<b>Step 2 of 4: How much is it?</b>\nType the selling price in Ghana Cedis.\n<i>(For example: 450 or 1200)</i>`
+      `<b>Item:</b> ${cleanItem}\n\n<b>Step 2 of 5: How much is it?</b>\nType the selling price in Ghana Cedis.\n<i>(For example: 450 or 1200)</i>`
     );
   }
 
@@ -511,7 +517,7 @@ You will now receive instant push alerts whenever a buyer pays for any of your i
 
     return await sendTelegramMessage(
       chatId,
-      `<b>Price:</b> GH₵ ${parsedPrice.toFixed(2)}\n\n<b>Step 3 of 4: What is the buyer's phone number?</b>\nType their 10-digit Ghana number so we can notify them.\n<i>(For example: 0244112233 or 0551234567)</i>`
+      `<b>Price:</b> GH₵ ${parsedPrice.toFixed(2)}\n\n<b>Step 3 of 5: What is the buyer's phone number?</b>\nType their 10-digit Ghana number so we can notify them.\n<i>(For example: 0244112233 or 0551234567)</i>`
     );
   }
 
@@ -531,17 +537,33 @@ You will now receive instant push alerts whenever a buyer pays for any of your i
     }
 
     await updateSession(chatId, {
-      step: 'AWAITING_FEE_SPLIT',
+      step: 'AWAITING_DELIVERY_DATE',
       draft: { ...session.draft, buyerPhone: phoneVal.formattedLocal, network: phoneVal.network }
     });
 
+    return await sendTelegramMessage(
+      chatId,
+      `<b>Buyer:</b> ${phoneVal.formattedLocal} (${phoneVal.network})\n\n<b>Step 4 of 5: When will the package be delivered?</b>\n\nTap an option below, or type your custom date/timeline (e.g. <i>Tomorrow</i>, <i>Friday</i>, <i>15th August</i>):`,
+      { reply_markup: getDeliveryDateKeyboard() }
+    );
+  }
+
+  // Guided Wizard Step 4: Delivery Date Received
+  if (session.step === 'AWAITING_DELIVERY_DATE') {
+    const cleanDelivery = sanitizeString(text);
+    const formattedDelivery = formatDeliveryDate(cleanDelivery);
     const draft = session.draft || {};
     const amount = Number(draft.amount || 0);
     const fee = parseFloat((amount * 0.03).toFixed(2));
 
+    await updateSession(chatId, {
+      step: 'AWAITING_FEE_SPLIT',
+      draft: { ...draft, deliveryDate: formattedDelivery, deliveryTimeline: formattedDelivery }
+    });
+
     return await sendTelegramMessage(
       chatId,
-      `<b>Buyer:</b> ${phoneVal.formattedLocal} (${phoneVal.network})\n\n<b>Step 4 of 4: Who pays the 3% (GH₵ ${fee.toFixed(2)}) protection fee?</b>\n\nChoose an option below:`,
+      `<b>Expected Delivery:</b> ${formattedDelivery}\n\n<b>Step 5 of 5: Who pays the 3% (GH₵ ${fee.toFixed(2)}) protection fee?</b>\n\nChoose an option below:`,
       { reply_markup: getFeeSplitKeyboard() }
     );
   }
@@ -574,7 +596,7 @@ async function handleCallbackQuery(callbackQuery, logger) {
     await answerCallbackQuery(queryId, 'Creating new payment link...');
     return await sendTelegramMessage(
       chatId,
-      '<b>Step 1 of 4: What are you selling?</b>\n\nType the name of the item or service.\n<i>(For example: iPhone 13, Nike Sneakers, Handbag, Wig)</i>\n\nType <code>/cancel</code> anytime to stop.'
+      '<b>Step 1 of 5: What are you selling?</b>\n\nType the name of the item or service.\n<i>(For example: iPhone 13, Nike Sneakers, Handbag, Wig)</i>\n\nType <code>/cancel</code> anytime to stop.'
     );
   }
 
@@ -619,6 +641,28 @@ async function handleCallbackQuery(callbackQuery, logger) {
     );
   }
 
+  // Button: Delivery Timeline Selection
+  if (data.startsWith('btn_delivery:')) {
+    const rawDelivery = data.split(':')[1] || '2-3 Days';
+    const formattedDelivery = formatDeliveryDate(rawDelivery);
+    const draft = session.draft || {};
+    const amount = Number(draft.amount || 0);
+    const fee = parseFloat((amount * 0.03).toFixed(2));
+
+    await updateSession(chatId, {
+      step: 'AWAITING_FEE_SPLIT',
+      draft: { ...draft, deliveryDate: formattedDelivery, deliveryTimeline: formattedDelivery }
+    });
+
+    await answerCallbackQuery(queryId, `Delivery: ${formattedDelivery}`);
+
+    return await sendTelegramMessage(
+      chatId,
+      `<b>Expected Delivery:</b> ${formattedDelivery}\n\n<b>Step 5 of 5: Who pays the 3% (GH₵ ${fee.toFixed(2)}) protection fee?</b>\n\nChoose an option below:`,
+      { reply_markup: getFeeSplitKeyboard() }
+    );
+  }
+
   // Button: Fee Split Selection (Wizard Completion)
   if (data.startsWith('btn_fee_split:')) {
     const feeChoice = data.split(':')[1] || '50/50';
@@ -626,6 +670,7 @@ async function handleCallbackQuery(callbackQuery, logger) {
     const amount = Number(draft.amount || 0);
     const itemName = draft.itemName || 'Item';
     const buyerPhone = draft.buyerPhone || '0244112233';
+    const deliveryDate = draft.deliveryDate || draft.deliveryTimeline || 'Within 2 - 3 Days';
     const fee = parseFloat((amount * 0.03).toFixed(2));
     const escrowId = generateEscrowId();
     const sellerName = callbackQuery.from?.first_name || (callbackQuery.from?.username ? `@${callbackQuery.from.username}` : 'TrustLink Seller');
@@ -638,6 +683,8 @@ async function handleCallbackQuery(callbackQuery, logger) {
       buyerPhone,
       sellerName,
       sellerId: `TELEGRAM_${chatId}`,
+      deliveryDate,
+      deliveryTimeline: deliveryDate,
       feeChoice,
       createdAt: Date.now()
     };
@@ -659,6 +706,7 @@ async function handleCallbackQuery(callbackQuery, logger) {
 
 <b>Item:</b> ${itemName}
 <b>Price:</b> GH₵ ${amount.toFixed(2)}
+<b>Expected Delivery:</b> ${deliveryDate}
 <b>Protection Fee (3%):</b> GH₵ ${fee.toFixed(2)}
 <b>Buyer's Phone:</b> ${buyerPhone}
 <b>Order ID:</b> <code>${escrowId}</code>
@@ -673,7 +721,7 @@ ${checkoutUrl}
 `.trim();
 
     return await sendTelegramMessage(chatId, successMsg, {
-      reply_markup: getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount)
+      reply_markup: getEscrowActionKeyboard(escrowId, checkoutUrl, itemName, amount, { deliveryDate })
     });
   }
 
@@ -688,6 +736,7 @@ ${checkoutUrl}
         itemName: session.draft?.itemName || 'Order Item',
         amount: session.draft?.amount || 0,
         buyerPhone: session.draft?.buyerPhone || '0244112233',
+        deliveryDate: session.draft?.deliveryDate || 'Within 2 - 3 Days',
         sellerName: callbackQuery.from?.first_name || 'TrustLink Seller',
         checkoutUrl: `https://www.trustlinkgh.online/checkout.html?id=${escrowId}`
       };
@@ -697,6 +746,7 @@ ${checkoutUrl}
       sellerName: order.sellerName,
       itemName: order.itemName,
       amount: order.amount,
+      deliveryDate: order.deliveryDate,
       checkoutUrl: order.checkoutUrl
     });
 

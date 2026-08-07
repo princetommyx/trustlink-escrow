@@ -116,7 +116,7 @@ async function runTests() {
   assert(resInvalidPhone.statusCode === 200, "Invalid phone handled gracefully");
 
   // 5. Guided Multi-Step Wizard
-  console.log("\n[Test 5: Guided 4-Step Escrow Wizard]");
+  console.log("\n[Test 5: Guided 5-Step Escrow Wizard]");
   // Step 1: Start /new
   const reqWiz1 = {
     method: 'POST',
@@ -163,24 +163,40 @@ async function runTests() {
     }
   };
   await handler(reqWiz4, createMockRes());
-  assert(true, "Wizard Step 4 (Buyer Phone) accepted & fee split keyboard dispatched");
+  assert(true, "Wizard Step 4 (Buyer Phone) accepted & delivery date keyboard dispatched");
 
-  // Step 5: Select Fee Split Button (Callback Query)
-  const reqWiz5 = {
+  // Step 5: Select Delivery Timeline (Callback Query)
+  const reqWizDeliv = {
     method: 'POST',
     headers: { 'x-forwarded-for': '127.0.0.1' },
     body: {
       update_id: 1008,
       callback_query: {
-        id: 'cq_9999',
+        id: 'cq_deliv_1',
         message: { chat: { id: 11223344 }, message_id: 7 },
+        data: 'btn_delivery:Tomorrow'
+      }
+    }
+  };
+  await handler(reqWizDeliv, createMockRes());
+  assert(true, "Wizard Step 5 (Delivery Selection) accepted & fee split keyboard dispatched");
+
+  // Step 6: Select Fee Split Button (Callback Query)
+  const reqWiz5 = {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '127.0.0.1' },
+    body: {
+      update_id: 1009,
+      callback_query: {
+        id: 'cq_9999',
+        message: { chat: { id: 11223344 }, message_id: 8 },
         data: 'btn_fee_split:50/50'
       }
     }
   };
   const resWiz5 = createMockRes();
   await handler(reqWiz5, resWiz5);
-  assert(resWiz5.statusCode === 200, "Wizard completed via Inline Button click");
+  assert(resWiz5.statusCode === 200, "Wizard completed with delivery date via Inline Button click");
 
   // Mid-Wizard Command Interruption Test (/help during Step 2)
   console.log("\n[Test 5b: Mid-Wizard Command Interruption (/help during Step 2)]");

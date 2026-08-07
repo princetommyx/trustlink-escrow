@@ -114,11 +114,14 @@ export async function dispatchTransactionalSMS({ phone, message, referenceId = '
  * @param {string} params.itemName - Title / description of item
  * @param {number|string} params.amount - Order amount
  * @param {string} params.checkoutUrl - Direct payment link
+ * @param {string} [params.deliveryDate] - Optional delivery timeline
  * @returns {string} Exact SMS body matching the web dashboard
  */
-export function buildEscrowOrderSMS({ sellerName, itemName, amount, checkoutUrl }) {
+export function buildEscrowOrderSMS({ sellerName, itemName, amount, checkoutUrl, deliveryDate = '' }) {
   const formattedAmount = Number(amount || 0).toFixed(2);
   const orderTitle = itemName || 'Order';
   const seller = sellerName || 'TrustLink Seller';
-  return `TrustLink: ${seller} created an escrow for ${orderTitle} (GH₵ ${formattedAmount}). Pay securely at: ${checkoutUrl}`;
+  const deliveryStr = deliveryDate ? ` Delivery: ${deliveryDate}.` : '';
+  return `TrustLink: ${seller} created an escrow for ${orderTitle} (GH₵ ${formattedAmount}).${deliveryStr} Pay securely at: ${checkoutUrl}`;
 }
+
