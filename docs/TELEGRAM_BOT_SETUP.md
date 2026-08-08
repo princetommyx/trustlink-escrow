@@ -64,7 +64,7 @@ In your **Vercel Dashboard** (`Project Settings` -> `Environment Variables`), co
 
 | Key | Value | Description |
 | :--- | :--- | :--- |
-| `TELEGRAM_BOT_TOKEN` | `8708346113:AAH09D5L2DgZb1qhTpkZLZqeRKlwBKripv8` | The Bot API Token from @BotFather |
+| `TELEGRAM_BOT_TOKEN` | `your_bot_token_from_botfather` | The Bot API Token from @BotFather |
 | `TELEGRAM_WEBHOOK_SECRET` | *(Optional random secret)* | Optional secret for `X-Telegram-Bot-Api-Secret-Token` |
 
 ---
@@ -77,12 +77,13 @@ Sellers can create an escrow link in 5 seconds by typing:
 /create 450 Nike Air Jordan 0244112233
 ```
 
-### B. Guided 4-Step Interactive Wizard
+### B. Guided 5-Step Interactive Wizard
 Type `/new` and the bot will prompt:
 1. **Item Name:** `iPhone 13 Pro Max`
 2. **Price in GH₵:** `6500`
 3. **Buyer Phone:** `0555987654`
-4. **Fee Split:** Taps `[ 50/50 Split ]` inline button.
+4. **Delivery Timeline:** Taps `[ 📦 Tomorrow ]` or `[ 🚚 In 2 - 3 Days ]` inline button
+5. **Fee Split:** Taps `[ 50/50 Split ]` inline button.
 
 ### C. 1-Tap Actions & Push Notifications
 - **`[ Send SMS to Buyer ]`**: Dispatches the exact site-standard SMS payment invitation to the buyer's phone with the direct payment link.
