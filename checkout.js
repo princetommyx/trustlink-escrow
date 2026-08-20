@@ -161,10 +161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 actionButtons.innerHTML = `
                     <button id="btn-pay-link" class="btn btn-primary btn-large" style="width: 100%; margin-bottom: 16px;">Pay via Secure Web Link</button>
                     
-                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.2); text-align: center; margin-bottom: 16px;">
-                        <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: rgba(255,255,255,0.8);">Or pay via USSD Short Code:</p>
-                        <h3 style="margin: 0; color: var(--primary); font-family: monospace; font-size: 1.5rem; letter-spacing: 2px;">*203*0774950#</h3>
-                        <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.6);">Dial this code to see your order details and pay.</p>
+                    <div style="background: rgba(0, 0, 0, 0.03); padding: 15px; border-radius: 8px; border: 1px dashed rgba(0, 0, 0, 0.15); text-align: center; margin-bottom: 16px;">
+                        <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: #4b5563; font-weight: 500;">Or pay via USSD Short Code:</p>
+                        <h3 style="margin: 0; color: #2563eb; font-family: monospace; font-size: 1.6rem; letter-spacing: 2px; font-weight: bold;">*203*0774950#</h3>
+                        <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: #6b7280;">Dial this code on your phone to view order details and pay.</p>
                     </div>
 
                     <button id="btn-verify" class="btn btn-outline" style="width: 100%;">I have made the payment</button>
