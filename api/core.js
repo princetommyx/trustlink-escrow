@@ -1,6 +1,4 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const cors = require('cors')({ origin: true });
+// Removed external dependencies to bypass Vercel ncc bundler crashes
 
 async function sendBuyerSmsAlert(phone, message) {
     try {
@@ -105,14 +103,14 @@ const handleSendPaymentLinkViaWhatsApp = async (data) => {
 };
 
 export default async (req, res) => {
-    await new Promise((resolve, reject) => {
-        cors(req, res, (result) => {
-            if (result instanceof Error) return reject(result);
-            resolve(result);
-        });
-    });
+    // Manually set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
     const { action, data } = req.body;
