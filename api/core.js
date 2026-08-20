@@ -19,31 +19,53 @@ async function sendBuyerSmsAlert(phone, message) {
 }
 
 async function handleCreateMoolreCheckout(data) {
-    const { amount, phone, email, orderId } = data || {};
-    if (!amount || (!phone && !email)) throw new Error('Missing amount, phone, or email.');
+    const { amount, email, orderId, metadata } = data || {};
+    if (!amount) throw new Error('Missing amount.');
 
     const reference = orderId || ('ESCROW-' + Date.now());
-    const MOOLRE_PUBLIC_KEY = process.env.MOOLRE_PUBLIC_KEY;
-    if (!MOOLRE_PUBLIC_KEY) throw new Error('Payment gateway not configured. Contact support.');
+
+    const MOOLRE_PUBLIC_KEY  = process.env.MOOLRE_PUBLIC_KEY;  // X-API-PUBKEY
+    const MOOLRE_API_USER    = process.env.MOOLRE_API_USER;    // X-API-USER
+    const MOOLRE_ACCOUNT_NUM = process.env.MOOLRE_ACCOUNT_NUMBER; // accountnumber
+    const MOOLRE_EMAIL       = process.env.MOOLRE_MERCHANT_EMAIL || email;
+
+    if (!MOOLRE_PUBLIC_KEY || !MOOLRE_API_USER || !MOOLRE_ACCOUNT_NUM) {
+        throw new Error('Payment gateway not fully configured. Contact support.');
+    }
+
+    const callbackUrl  = 'https://trustlinkgh.online/api/webhook/moolre';
+    const redirectUrl  = `https://trustlinkgh.online/checkout.html?id=${reference}&payment=success`;
 
     const payload = {
-        amount: parseFloat(amount),
-        customer_email: email || 'buyer@trustlinkgh.online',
-        customer_phone: phone || '',
-        reference,
-        metadata: data.metadata || {}
+        type: 1,
+        amount: String(parseFloat(amount).toFixed(2)),
+        email: MOOLRE_EMAIL,
+        externalref: reference,
+        reusable: '0',
+        currency: 'GHS',
+        accountnumber: MOOLRE_ACCOUNT_NUM,
+        callback: callbackUrl,
+        redirect: redirectUrl,
+        metadata: JSON.stringify(metadata || { escrowId: reference })
     };
 
-    const response = await fetch('https://api.moolre.com/v1/payments/initialize', {
+    const response = await fetch('https://api.moolre.com/embed/link', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${MOOLRE_PUBLIC_KEY}` },
+        headers: {
+            'Content-Type': 'application/json',
+            'X-API-USER': MOOLRE_API_USER,
+            'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
+        },
         body: JSON.stringify(payload)
     });
 
     const text = await response.text();
     let resData;
-    try { resData = JSON.parse(text); } catch (e) { throw new Error('Payment gateway error: ' + text.slice(0, 200)); }
-    if (!response.ok || !resData.status) throw new Error(resData.message || 'Payment initialization failed.');
+    try { resData = JSON.parse(text); } catch (e) { throw new Error('Payment gateway error: ' + text.slice(0, 300)); }
+
+    if (!response.ok || resData.status !== 1) {
+        throw new Error(resData.message || 'Payment initialization failed.');
+    }
 
     return { checkoutUrl: resData.data.authorization_url, reference };
 }
@@ -53,10 +75,14 @@ async function handleVerifyMoolrePayment(data) {
     if (!reference) throw new Error('Missing payment reference.');
 
     const MOOLRE_SECRET_KEY = process.env.MOOLRE_SECRET_KEY;
-    if (!MOOLRE_SECRET_KEY) throw new Error('Payment gateway not configured.');
+    const MOOLRE_API_USER   = process.env.MOOLRE_API_USER;
+    if (!MOOLRE_SECRET_KEY || !MOOLRE_API_USER) throw new Error('Payment gateway not configured.');
 
-    const response = await fetch(`https://api.moolre.com/v1/payments/verify/${encodeURIComponent(reference)}`, {
-        headers: { 'Authorization': `Bearer ${MOOLRE_SECRET_KEY}` }
+    const response = await fetch(`https://api.moolre.com/embed/verify/${encodeURIComponent(reference)}`, {
+        headers: {
+            'X-API-USER': MOOLRE_API_USER,
+            'X-API-PRIKEY': MOOLRE_SECRET_KEY
+        }
     });
 
     const text = await response.text();
