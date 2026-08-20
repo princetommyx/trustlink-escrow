@@ -4,6 +4,7 @@ import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { generateSecureToken, sha256Hex, computeFeeSplit, pickUserPhone, normalizePhone, sendWhatsAppNotification, sendEscrowStatusSMS, sendSMSNotification, sendVerificationOTP } from "./moolre-service.js";
 import { initSessionTracker, clearUserSession } from "./session-manager.js";
+import { callApi } from "./api-client.js";
 
 let currentUser = null;
 let currentBalance = 0;
@@ -2068,7 +2069,17 @@ if (withdrawForm) {
 
             // Auto-process payout directly
             try {
-                await executeMoolrePayout(txRef.id, amount, phone, network);
+                const processPayoutFn = callApi('processPayout');
+                const payoutRes = await processPayoutFn({
+                    amount: amount,
+                    bankCode: network,
+                    accountNumber: phone,
+                    transactionId: txRef.id
+                });
+                
+                if (!payoutRes || !payoutRes.data || !payoutRes.data.success) {
+                    throw new Error(payoutRes?.data?.message || "Payout failed via API");
+                }
                 
                 await updateDoc(txRef, {
                     status: 'completed',

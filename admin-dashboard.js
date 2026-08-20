@@ -1268,8 +1268,14 @@ const loadPayoutsAdmin = async () => {
                     approveBtn.textContent = 'Processing...';
                     try {
                         const processPayoutFn = callApi('processPayout');
-                        await processPayoutFn({ transactionId: t.id });
+                        await processPayoutFn({ amount: t.amount, bankCode: t.network, accountNumber: t.momoNumber, transactionId: t.id });
                         
+                        await updateDoc(doc(db, "transactions", t.id), {
+                            status: 'completed',
+                            processedAt: new Date(),
+                            processedBy: auth.currentUser ? auth.currentUser.email : 'admin'
+                        });
+
                         loadPayoutsAdmin();
                         fetchAdminStats();
                     } catch (error) {

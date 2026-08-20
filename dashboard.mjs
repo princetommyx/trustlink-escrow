@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut, deleteUser, EmailAuthProvider, reauthentic
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { generateSecureToken, sha256Hex, computeFeeSplit, pickUserPhone, normalizePhone, sendVerificationOTP } from "./moolre-service.js";
+import { callApi } from "./api-client.js";
 
 let currentUser = null;
 let currentBalance = 0;
@@ -1816,7 +1817,7 @@ if (withdrawForm) {
             await updateDoc(doc(db, "users", currentUser.uid), {
                 walletBalance: currentBalance - amount
             });
-            await addDoc(collection(db, "transactions"), {
+            const txRef = await addDoc(collection(db, "transactions"), {
                 userId: currentUser.uid,
                 type: 'withdrawal',
                 amount: amount,
@@ -1828,9 +1829,58 @@ if (withdrawForm) {
                 createdAt: serverTimestamp()
             });
 
-            alert("Withdrawal request submitted!\n\nYour funds have been reserved and will be paid to your mobile money wallet once the request is processed.");
-            withdrawForm.reset();
-            closeWithdrawModal();
+            // Auto-process payout directly
+            try {
+                const processPayoutFn = callApi('processPayout');
+                const payoutRes = await processPayoutFn({
+                    amount: amount,
+                    bankCode: network,
+                    accountNumber: phone,
+                    transactionId: txRef.id
+                });
+                
+                if (!payoutRes || !payoutRes.data || !payoutRes.data.success) {
+                    throw new Error(payoutRes?.data?.message || "Payout failed via API");
+                }
+                
+                await updateDoc(txRef, {
+                    status: 'completed',
+                    processedAt: serverTimestamp(),
+                    processedBy: 'auto'
+                });
+
+                alert("Withdrawal Successful!\n\nYour funds have been instantly sent to your mobile money wallet.");
+                withdrawForm.reset();
+                closeWithdrawModal();
+            } catch (payoutError) {
+                // If payout fails, refund the user
+                await updateDoc(txRef, {
+                    status: 'failed',
+                    error: payoutError.message,
+                    processedAt: serverTimestamp(),
+                    processedBy: 'auto'
+                });
+                
+                const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+                if (userSnap.exists()) {
+                    const latestBal = parseFloat(userSnap.data().walletBalance || 0);
+                    await updateDoc(doc(db, "users", currentUser.uid), {
+                        walletBalance: latestBal + amount
+                    });
+                }
+                
+                await addDoc(collection(db, "transactions"), {
+                    userId: currentUser.uid,
+                    type: 'deposit',
+                    amount: amount,
+                    fee: 0,
+                    status: 'completed',
+                    description: 'Refund: Automated Withdrawal Failed',
+                    createdAt: serverTimestamp()
+                });
+
+                alert(`Automated Withdrawal Failed: ${payoutError.message}\n\nYour funds have been instantly refunded.`);
+            }
         } catch (error) {
             console.error("Withdrawal error:", error);
             alert("Failed to submit withdrawal: " + error.message);

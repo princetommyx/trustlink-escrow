@@ -328,18 +328,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                         btnManual.disabled = true;
                         
                         try {
-                            await updateDoc(docRef, {
-                                status: 'AWAITING_VERIFICATION',
-                                manualPaymentProof: txnId,
-                                proofSubmittedAt: serverTimestamp()
-                            });
-                            
-                            alert(`Your payment proof (ID: ${txnId}) has been submitted successfully! An admin will verify the payment shortly.`);
-                            window.location.reload();
+                            const verifyCallable = callApi('verifyMoolrePayment');
+                            let verificationRes;
+                            try {
+                                verificationRes = await verifyCallable({ reference: txnId });
+                            } catch (verifyErr) {
+                                throw new Error("Transaction verification failed or not found.");
+                            }
+
+                            if (verificationRes && verificationRes.data && (verificationRes.data.paid || verificationRes.data.status === 'success' || verificationRes.data.status === 1)) {
+                                await updateDoc(docRef, {
+                                    status: 'FUNDS_ESCROWED',
+                                    manualPaymentProof: txnId,
+                                    paidAt: serverTimestamp()
+                                });
+                                
+                                alert(`Payment successfully verified! Your funds are now securely held in escrow.`);
+                                window.location.reload();
+                            } else {
+                                throw new Error("Payment is not successful or could not be verified.");
+                            }
                         } catch (error) {
                             btnManual.textContent = "Submit Payment Proof";
                             btnManual.disabled = false;
-                            alert("Failed to submit proof: " + error.message);
+                            alert("Failed to verify transaction: " + error.message);
                         }
                     });
                 }
