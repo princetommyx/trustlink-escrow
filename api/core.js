@@ -82,9 +82,10 @@ async function handleSendUssdPush(data) {
     const reference = orderId || ('ESCROW-' + Date.now());
 
     const MOOLRE_API_USER = process.env.MOOLRE_API_USER;
-    const MOOLRE_VAS_KEY  = process.env.MOOLRE_VAS_KEY; // X-API-VASKEY for direct collection
+    const MOOLRE_PUBKEY   = process.env.MOOLRE_PUBLIC_KEY;
+    const MOOLRE_ACCOUNT  = process.env.MOOLRE_ACCOUNT_NUMBER;
 
-    if (!MOOLRE_API_USER || !MOOLRE_VAS_KEY) {
+    if (!MOOLRE_API_USER || !MOOLRE_PUBKEY || !MOOLRE_ACCOUNT) {
         throw new Error('USSD push not configured. Contact support.');
     }
 
@@ -92,20 +93,28 @@ async function handleSendUssdPush(data) {
     let cleanPhone = String(phone).replace(/[^\d]/g, '');
     if (cleanPhone.startsWith('233') && cleanPhone.length === 12) cleanPhone = '0' + cleanPhone.slice(3);
 
+    // Map network to Moolre channel IDs
+    const net = (network || 'MTN').toUpperCase();
+    let channelId = '13'; // Default to MTN
+    if (net.includes('TELECEL') || net.includes('VODAFONE')) channelId = '6';
+    if (net.includes('AIRTEL') || net.includes('TIGO') || net.includes('AT')) channelId = '7';
+
     const payload = {
-        phone: cleanPhone,
+        type: 1,
+        channel: channelId,
+        currency: 'GHS',
+        payer: cleanPhone,
         amount: String(parseFloat(amount).toFixed(2)),
-        network: (network || 'MTN').toUpperCase(),
-        reference,
-        callback_url: 'https://trustlinkgh.online/api/webhook/moolre'
+        externalref: reference,
+        accountnumber: MOOLRE_ACCOUNT
     };
 
-    const response = await fetch('https://api.moolre.com/vas/collect', {
+    const response = await fetch('https://api.moolre.com/open/transact/payment', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-API-USER': MOOLRE_API_USER,
-            'X-API-VASKEY': MOOLRE_VAS_KEY
+            'X-API-PUBKEY': MOOLRE_PUBKEY
         },
         body: JSON.stringify(payload)
     });
@@ -121,7 +130,8 @@ async function handleSendUssdPush(data) {
         throw new Error('USSD push failed: ' + detail);
     }
 
-    return { sent: true, reference, message: resData.message || 'Prompt sent successfully.' };
+    // resData.data usually contains a transaction/reference UUID on success
+    return { sent: true, reference: typeof resData.data === 'string' ? resData.data : reference, message: resData.message || 'Prompt sent successfully.' };
 }
 
 async function handleVerifyMoolrePayment(data) {
