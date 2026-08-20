@@ -46,7 +46,7 @@ async function handleCreateMoolreCheckout(data) {
         accountnumber: MOOLRE_ACCOUNT_NUM,
         callback: callbackUrl,
         redirect: redirectUrl,
-        metadata: JSON.stringify(metadata || { escrowId: reference })
+        metadata: [{ escrowId: reference, ...(metadata || {}) }]
     };
 
     const response = await fetch('https://api.moolre.com/embed/link', {
