@@ -211,6 +211,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         btnUssd.textContent = "Sending Prompt...";
                         btnUssd.disabled = true;
                         
+                        const paymentRef = escrowId + '-P-' + Date.now();
+                        
                         try {
                             const rawAmt = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
                             const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'buyer');
@@ -219,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             // Use dedicated USSD push endpoint (vas/collect) — sends real MoMo prompt
                             const sendPush = callApi('sendUssdPush');
                             let res = await sendPush({
-                                orderId: escrowId,
+                                orderId: paymentRef,
                                 amount: totalToPay,
                                 phone: phone,
                                 network: network
@@ -265,9 +267,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 
                                 btnUssd.textContent = "Verifying...";
                                 
-                                // Retry with OTP using the exact same externalref (escrowId)
+                                // Retry with OTP using the exact same externalref (paymentRef)
                                 res = await sendPush({
-                                    orderId: escrowId,
+                                    orderId: paymentRef,
                                     amount: totalToPay,
                                     phone: phone,
                                     network: network,
@@ -275,7 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 });
                             }
 
-                            const reference = res.data?.reference || escrowId;
+                            const reference = res.data?.reference || paymentRef;
                             alert(`A payment prompt has been sent to ${phone}. Approve on your phone to complete payment.`);
                             
                             document.getElementById('loading-text').textContent = "Waiting for payment confirmation...";

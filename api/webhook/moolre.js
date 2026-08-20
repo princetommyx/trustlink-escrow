@@ -45,7 +45,13 @@ module.exports = async (req, res) => {
         if (isSuccess) {
             const {admin,db} = getFirebase();
             if (db) {
-                const ref = db.collection('escrows').doc(payload.externalref);
+                // Extract original escrowId if reference contains the unique '-P-' suffix
+                let docId = payload.externalref;
+                if (docId.includes('-P-')) {
+                    docId = docId.split('-P-')[0];
+                }
+                
+                const ref = db.collection('escrows').doc(docId);
                 const snap = await ref.get();
                 if (snap.exists && snap.data().status==='PENDING_PAYMENT') {
                     await ref.update({status:'FUNDS_ESCROWED', paidAt:admin.firestore.FieldValue.serverTimestamp(), moolreWebhookReceived:true});
