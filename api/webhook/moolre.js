@@ -1,93 +1,54 @@
-import corsModule from 'cors';
-const cors = (corsModule.default || corsModule)({ origin: true });
-import { db, admin, normalizeGhanaPhone } from '../_firebase-admin.js';
+'use strict';
+const { db, admin, normalizeGhanaPhone } = require('../_firebase-admin.js');
 
-async function sendBuyerSmsAlert(phone, message) {
+async function sendSmsAlert(phone, message) {
     try {
         const apiKey = process.env.SASUSYNC_API_KEY;
-        if (!apiKey) return;
-
+        if (!apiKey || !phone) return;
         const { local } = normalizeGhanaPhone(phone);
         if (!local) return;
-
         const baseUrl = process.env.SASUSYNC_BASE_URL || 'https://sms.sasusync.com';
         await fetch(`${baseUrl}/api/v1/send`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': apiKey
-            },
-            body: JSON.stringify({
-                sender: "TrustEscrow",
-                recipients: ['233' + local.slice(1)],
-                message: message
-            })
+            headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+            body: JSON.stringify({ sender: 'TrustLink', recipients: [local], message })
         });
-    } catch (err) {
-        console.error("SMS notification delivery error", err);
-    }
+    } catch (err) { console.error('SMS error:', err.message); }
 }
 
-export default async (req, res) => {
-    // Enable CORS for Moolre
-    await new Promise((resolve, reject) => {
-        cors(req, res, (result) => {
-            if (result instanceof Error) return reject(result);
-            resolve(result);
-        });
-    });
-
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed. Must be POST.' });
-    }
+module.exports = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
     try {
         const payload = req.body;
-        console.log("Moolre Webhook Received:", JSON.stringify(payload, null, 2));
-
-        // Basic payload validation - Moolre usually sends status and externalref
-        if (!payload || !payload.externalref) {
-            return res.status(400).json({ error: 'Missing externalref in payload' });
-        }
+        console.log('[Moolre Webhook]', JSON.stringify(payload));
+        if (!payload || !payload.externalref) return res.status(400).json({ error: 'Missing externalref' });
 
         const escrowId = payload.externalref;
-        
-        // Moolre uses status = 1 or transaction_status = 'SUCCESS' for successful payments
         const isSuccess = payload.status == 1 || payload.transaction_status === 'SUCCESS';
 
-        if (isSuccess) {
+        if (isSuccess && db) {
             const escrowRef = db.collection('escrows').doc(escrowId);
-            const escSnap = await escrowRef.get();
-            
-            if (escSnap.exists) {
-                const esc = escSnap.data();
-                
-                // Only transition if it's currently pending payment
-                if (esc.status === 'PENDING_PAYMENT') {
-                    await escrowRef.update({
-                        status: 'FUNDS_ESCROWED',
-                        paidAt: admin.firestore.FieldValue.serverTimestamp(),
-                        moolreWebhookReceived: true
-                    });
-
-                    // Notify the seller to dispatch
-                    if (esc.sellerPhone) {
-                        await sendBuyerSmsAlert(esc.sellerPhone, `TrustLink: Payment of GH₵ ${esc.amount} for "${esc.description}" has been secured in escrow! Please dispatch the item.`);
-                    }
-                    console.log(`[Moolre Webhook] Escrow ${escrowId} marked as FUNDS_ESCROWED`);
-                } else {
-                    console.log(`[Moolre Webhook] Escrow ${escrowId} is already in state: ${esc.status}`);
+            const snap = await escrowRef.get();
+            if (snap.exists && snap.data().status === 'PENDING_PAYMENT') {
+                await escrowRef.update({
+                    status: 'FUNDS_ESCROWED',
+                    paidAt: admin.firestore.FieldValue.serverTimestamp(),
+                    moolreWebhookReceived: true
+                });
+                const esc = snap.data();
+                if (esc.sellerPhone) {
+                    await sendSmsAlert(esc.sellerPhone, `TrustLink: Payment of GH\u20b5${esc.amount} for "${esc.description}" secured. Please dispatch the item.`);
                 }
-            } else {
-                console.log(`[Moolre Webhook] Escrow ${escrowId} not found in database.`);
             }
         }
-
-        // Always return 200 OK so Moolre knows we received it
-        return res.status(200).json({ success: true, message: 'Webhook received and processed' });
-
+        return res.status(200).json({ success: true });
     } catch (err) {
-        console.error("Moolre webhook processing error:", err);
+        console.error('[Moolre Webhook] Error:', err.message);
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
