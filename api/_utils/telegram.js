@@ -182,7 +182,7 @@ export function buildEscrowCheckoutUrl(escrow) {
   if (escrow.sellerName) params.set('seller', escrow.sellerName);
   if (escrow.buyerPhone) params.set('buyer', escrow.buyerPhone);
   if (escrow.deliveryDate || escrow.deliveryTimeline) params.set('delivery', escrow.deliveryDate || escrow.deliveryTimeline);
-  if (escrow.feeChoice || escrow.feeAllocation) params.set('split', escrow.feeChoice || escrow.feeAllocation || 'split');
+  if (escrow.feeChoice || escrow.feeAllocation) params.set('split', escrow.feeChoice || escrow.feeAllocation || 'buyer');
   return `${base}?${params.toString()}`;
 }
 
@@ -210,7 +210,7 @@ export async function persistEscrowToFirestore(escrow) {
         deliveryDate: { stringValue: deliveryDate },
         deliveryDateFrom: { stringValue: deliveryDate },
         deliveryDateTo: { stringValue: deliveryDate },
-        feeAllocation: { stringValue: String(escrow.feeChoice || escrow.feeAllocation || 'split') },
+        feeAllocation: { stringValue: String(escrow.feeChoice || escrow.feeAllocation || 'buyer') },
         feePercent: { doubleValue: 3.0 },
         status: { stringValue: 'PENDING_PAYMENT' },
         source: { stringValue: 'TELEGRAM_BOT' },
@@ -271,7 +271,7 @@ export async function getEscrowFromFirestore(escrowId) {
       sellerId: parseField(doc.fields.sellerId) || '',
       deliveryDate: deliveryDate,
       deliveryTimeline: deliveryDate,
-      feeAllocation: parseField(doc.fields.feeAllocation) || 'split',
+      feeAllocation: parseField(doc.fields.feeAllocation) || 'buyer',
       createdAt: parseField(doc.fields.createdAt) || null
     };
   } catch (err) {

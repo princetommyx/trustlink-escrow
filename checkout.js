@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 deliveryDate: deliveryVal,
                 deliveryDateFrom: deliveryVal,
                 deliveryDateTo: deliveryVal,
-                feeAllocation: qSplit ? decodeURIComponent(qSplit) : "split",
+                feeAllocation: qSplit ? decodeURIComponent(qSplit) : "buyer",
                 feePercent: 3.0,
                 status: 'PENDING_PAYMENT',
                 source: 'TELEGRAM_BOT'
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Platform fee: buyer's share is added on top of the item amount.
         const rawAmount = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
-        const fees = computeFeeSplit(rawAmount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
+        const fees = computeFeeSplit(rawAmount, escrow.feePercent || 0, escrow.feeAllocation || 'buyer');
 
         // Populate Data
         // Platform fee is always GH₵ 1.50 flat, on top of escrow fee
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         // Include GH₵ 1.50 platform fee on top of escrow fee
                         const rawAmt = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
-                        const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'split');
+                        const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'buyer');
                         const totalToPay = Number((feeSplit.buyerTotal || rawAmt) + PLATFORM_FEE);
 
                         const createCheckout = callApi('createMoolreCheckout');
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         try {
                             // Include GH₵ 1.50 platform fee on top of escrow fee
                             const rawAmt = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
-                            const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'split');
+                            const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'buyer');
                             const totalToPay = Number((feeSplit.buyerTotal || rawAmt) + PLATFORM_FEE);
 
                             const createCheckout = callApi('createMoolreCheckout');

@@ -264,7 +264,7 @@ Tap <b>Create Payment Link</b> below, or type:
       sellerId: `TELEGRAM_${chatId}`,
       deliveryDate,
       deliveryTimeline: deliveryDate,
-      feeChoice: 'split',
+      feeChoice: 'buyer',
       createdAt: Date.now()
     };
 
