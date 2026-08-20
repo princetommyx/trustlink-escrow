@@ -646,3 +646,24 @@ exports.sendPaymentLinkViaWhatsApp = functions.https.onCall(async (data, context
         throw new functions.https.HttpsError('internal', 'Failed to send WhatsApp message.');
     }
 });
+
+/**
+ * Server-Side Endpoint for POS Payment Link
+ * This ensures the private link is never exposed in the frontend source code.
+ */
+exports.getPosPaymentLink = functions.https.onCall(async (data, context) => {
+    // You could also add authentication checks here if required:
+    // if (!context.auth) {
+    //     throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated to get the POS link.');
+    // }
+    
+    const posLink = process.env.MOOLRE_POS_LINK;
+    if (!posLink) {
+        throw new functions.https.HttpsError('internal', 'POS link not configured on the server.');
+    }
+
+    return {
+        success: true,
+        link: posLink
+    };
+});

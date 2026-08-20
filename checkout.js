@@ -159,35 +159,83 @@ document.addEventListener('DOMContentLoaded', async () => {
                 statusBadge.classList.add('status-pending');
                 
                 actionButtons.innerHTML = `
-                    <button id="btn-pay" class="btn btn-primary btn-large" style="width: 100%; margin-bottom: 8px;">Pay securely via Mobile Money</button>
+                    <button id="btn-pay-link" class="btn btn-primary btn-large" style="width: 100%; margin-bottom: 16px;">Pay via Secure Web Link</button>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.2); text-align: center; margin-bottom: 16px;">
+                        <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: rgba(255,255,255,0.8);">Or pay via USSD Short Code:</p>
+                        <h3 style="margin: 0; color: var(--primary); font-family: monospace; font-size: 1.5rem; letter-spacing: 2px;">*203*0774950#</h3>
+                        <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.6);">Dial this code to see your order details and pay.</p>
+                    </div>
+
+                    <button id="btn-verify" class="btn btn-outline" style="width: 100%;">I have made the payment</button>
                 `;
                 
-                document.getElementById('btn-pay').addEventListener('click', async (e) => {
-                    const phonePrompt = prompt("Enter your Mobile Money phone number (e.g. 0551234567):", escrow.buyerPhone || "");
-                    if (!phonePrompt) return;
-
+                document.getElementById('btn-pay-link').addEventListener('click', async (e) => {
                     const btn = e.target;
+                    const originalText = btn.textContent;
                     btn.disabled = true;
-                    btn.textContent = "Sending USSD Payment Prompt...";
+                    btn.textContent = "Generating Secure Link...";
 
                     try {
-                        const createCheckout = httpsCallable(functionsApp, 'createMoolreCheckout');
-                        const res = await createCheckout({
-                            escrowId,
-                            buyerPhone: phonePrompt,
-                            channel: 13
-                        });
+                        const getPosLink = httpsCallable(functionsApp, 'getPosPaymentLink');
+                        const res = await getPosLink();
 
-                        if (res.data && res.data.success) {
-                            alert(`USSD Payment prompt sent to ${phonePrompt}. Please enter your MoMo PIN on your phone to complete payment.`);
-                            btn.textContent = "Awaiting Payment Confirmation...";
+                        if (res.data && res.data.success && res.data.link) {
+                            const rawAmount = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
+                            const fees = computeFeeSplit(rawAmount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
+                            const totalToPay = Number(fees.buyerTotal || rawAmount).toFixed(2);
+                            
+                            const sep = res.data.link.includes('?') ? '&' : '?';
+                            const finalLink = `${res.data.link}${sep}reference=${escrowId}&amount=${totalToPay}`;
+                            
+                            window.open(finalLink, '_blank');
+                            btn.textContent = "Payment link opened in new tab";
                         } else {
-                            throw new Error("Failed to dispatch USSD prompt.");
+                            throw new Error("Could not retrieve POS link");
                         }
                     } catch(err) {
                         btn.disabled = false;
-                        btn.textContent = "Pay securely via Mobile Money";
-                        alert("Payment prompt dispatch failed: " + err.message);
+                        btn.textContent = originalText;
+                        alert("Failed to get payment link: " + err.message);
+                    }
+                });
+
+                document.getElementById('btn-verify').addEventListener('click', async (e) => {
+                    const btn = e.target;
+                    btn.disabled = true;
+                    btn.textContent = "Verifying Payment...";
+                    document.getElementById('loading-text').textContent = "Verifying Payment...";
+                    document.getElementById('loader').style.display = 'block';
+                    document.getElementById('loading-text').style.display = 'block';
+                    document.getElementById('escrow-content').classList.add('hidden');
+
+                    try {
+                        const verifyCallable = httpsCallable(functionsApp, 'verifyMoolrePayment');
+                        let attempts = 0;
+                        let interval = setInterval(async () => {
+                            attempts++;
+                            try {
+                                const vRes = await verifyCallable({ escrowId });
+                                if (vRes.data && vRes.data.paid) {
+                                    clearInterval(interval);
+                                    alert("Payment Successful! Funds are now securely held in escrow.");
+                                    window.location.reload();
+                                }
+                            } catch(e) { }
+
+                            if (attempts > 6) {
+                                clearInterval(interval);
+                                alert("Payment verification pending. The status will automatically update once confirmed.");
+                                window.location.reload();
+                            }
+                        }, 5000);
+                    } catch (error) {
+                        btn.textContent = "I have made the payment";
+                        btn.disabled = false;
+                        document.getElementById('loader').style.display = 'none';
+                        document.getElementById('loading-text').style.display = 'none';
+                        document.getElementById('escrow-content').classList.remove('hidden');
+                        alert("Failed to start verification: " + error.message);
                     }
                 });
 
