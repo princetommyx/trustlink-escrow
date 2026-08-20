@@ -1,5 +1,5 @@
 import corsModule from 'cors';
-const cors = corsModule({ origin: true });
+const cors = (corsModule.default || corsModule)({ origin: true });
 import twilio from 'twilio';
 import { db, admin, normalizeGhanaPhone, authenticateToken } from './_firebase-admin.js';
 

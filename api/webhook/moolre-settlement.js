@@ -1,5 +1,5 @@
 import corsModule from 'cors';
-const cors = corsModule({ origin: true });
+const cors = (corsModule.default || corsModule)({ origin: true });
 import { db, admin, normalizeGhanaPhone } from '../_firebase-admin.js';
 
 async function sendSmsAlert(phone, message) {

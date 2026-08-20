@@ -22,11 +22,11 @@ export const callApi = (functionName) => {
                 body: JSON.stringify({ action: functionName, data })
             });
 
+            const text = await response.text();
             let result;
             try {
-                result = await response.json();
+                result = JSON.parse(text);
             } catch (jsonErr) {
-                const text = await response.text();
                 throw new Error(`Server returned invalid JSON. Status: ${response.status}. Body: ${text.substring(0, 100)}...`);
             }
             
