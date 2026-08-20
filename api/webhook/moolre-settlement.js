@@ -1,5 +1,6 @@
-const cors = require('cors')({ origin: true });
-const { db, admin, normalizeGhanaPhone } = require('../_firebase-admin');
+import corsModule from 'cors';
+const cors = corsModule({ origin: true });
+import { db, admin, normalizeGhanaPhone } from '../_firebase-admin.js';
 
 async function sendSmsAlert(phone, message) {
     try {
@@ -27,7 +28,7 @@ async function sendSmsAlert(phone, message) {
     }
 }
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
     // Enable CORS
     await new Promise((resolve, reject) => {
         cors(req, res, (result) => {

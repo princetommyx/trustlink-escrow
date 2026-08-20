@@ -1,6 +1,7 @@
-const cors = require('cors')({ origin: true });
+import corsModule from 'cors';
+const cors = corsModule({ origin: true });
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
     await new Promise((resolve, reject) => {
         cors(req, res, (result) => {
             if (result instanceof Error) return reject(result);

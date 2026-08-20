@@ -1,6 +1,7 @@
-const cors = require('cors')({ origin: true });
-const { db, admin } = require('./firebase-admin');
-const twilio = require('twilio');
+import corsModule from 'cors';
+const cors = corsModule({ origin: true });
+import { db, admin } from './_firebase-admin.js';
+import twilio from 'twilio';
 
 const APP_BASE_URL = process.env.APP_BASE_URL || 'https://www.trustlinkgh.online';
 
@@ -31,7 +32,7 @@ const getTwilioClient = () => {
     return twilio(accountSid, authToken);
 };
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
     await new Promise((resolve, reject) => {
         cors(req, res, (result) => {
             if (result instanceof Error) return reject(result);

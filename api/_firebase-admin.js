@@ -1,23 +1,33 @@
-const admin = require('firebase-admin');
+import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
-if (!admin.apps.length) {
+let app;
+if (!getApps().length) {
     try {
         if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
             // Provided in Vercel settings as a JSON string
             const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-            admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount)
+            app = initializeApp({
+                credential: cert(serviceAccount)
             });
         } else {
             // Fallback (might fail in Vercel without proper env vars)
-            admin.initializeApp();
+            app = initializeApp();
         }
     } catch (error) {
         console.error('Firebase admin initialization error', error.stack);
     }
 }
 
-const db = admin.firestore();
+const db = getFirestore();
+const auth = getAuth();
+// For backwards compatibility in other files that use admin.firestore or admin.auth
+const admin = {
+    firestore: () => db,
+    auth: () => auth,
+    credential: { cert }
+};
 
 // Helper to authenticate user from Authorization Header (Bearer Token)
 const authenticateToken = async (req, res) => {
@@ -28,7 +38,7 @@ const authenticateToken = async (req, res) => {
     }
     const idToken = authHeader.split('Bearer ')[1];
     try {
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const decodedToken = await auth.verifyIdToken(idToken);
         return decodedToken; // contains uid, email, etc.
     } catch (error) {
         console.error('Error verifying auth token', error);
@@ -54,4 +64,4 @@ const normalizeGhanaPhone = (phone) => {
     return { local, intl, raw: phone };
 };
 
-module.exports = { admin, db, authenticateToken, normalizeGhanaPhone };
+export { admin, db, authenticateToken, normalizeGhanaPhone };

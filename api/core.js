@@ -1,6 +1,7 @@
-const cors = require('cors')({ origin: true });
-const twilio = require('twilio');
-const { db, admin, normalizeGhanaPhone, authenticateToken } = require('./_firebase-admin');
+import corsModule from 'cors';
+const cors = corsModule({ origin: true });
+import twilio from 'twilio';
+import { db, admin, normalizeGhanaPhone, authenticateToken } from './_firebase-admin.js';
 
 // --- Helper Functions ---
 const getTwilioClient = () => {
@@ -280,7 +281,7 @@ async function handleSendPaymentLinkViaWhatsApp(data) {
 
 // --- Main Handler ---
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
     await new Promise((resolve, reject) => {
         cors(req, res, (result) => {
             if (result instanceof Error) return reject(result);
