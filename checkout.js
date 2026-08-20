@@ -3,8 +3,6 @@ import { callApi } from "./api-client.js";
 import { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { computeFeeSplit, pickUserPhone } from "./moolre-service.js";
 
-const PLATFORM_FEE = 1.50; // GH₵ flat fee per transaction credited to TrustLink
-
 document.addEventListener('DOMContentLoaded', async () => {
     // Extract ID and fallback attributes from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -106,13 +104,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const fees = computeFeeSplit(rawAmount, escrow.feePercent || 0, escrow.feeAllocation || 'buyer');
 
         // Populate Data
-        // Platform fee is always GH₵ 1.50 flat, on top of escrow fee
-        const formattedBuyerTotal = Number(fees.buyerTotal + PLATFORM_FEE).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        // Buyer total includes escrow fee (TrustLink's revenue) — no extra platform fee
+        const formattedBuyerTotal = Number(fees.buyerTotal || rawAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const formattedRawAmount = rawAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         
         document.getElementById('escrow-amount').textContent = `GH₵ ${formattedBuyerTotal}`;
-        const platformFeeEl = document.getElementById('summary-platform-fee-display');
-        if (platformFeeEl) platformFeeEl.textContent = `GH₵ ${PLATFORM_FEE.toFixed(2)}`;
         const itemSubtotalEl = document.getElementById('item-subtotal-display');
         if (itemSubtotalEl) itemSubtotalEl.textContent = `GH₵ ${formattedRawAmount}`;
         const summarySubtotalEl = document.getElementById('summary-subtotal-display');
@@ -175,10 +171,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     btn.textContent = "Generating Secure Link...";
 
                     try {
-                        // Include GH₵ 1.50 platform fee on top of escrow fee
                         const rawAmt = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
                         const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'buyer');
-                        const totalToPay = Number((feeSplit.buyerTotal || rawAmt) + PLATFORM_FEE);
+                        const totalToPay = Number(feeSplit.buyerTotal || rawAmt);
 
                         const createCheckout = callApi('createMoolreCheckout');
                         const res = await createCheckout({
@@ -186,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             amount: totalToPay,
                             email: escrow.buyerEmail || escrow.sellerEmail || 'buyer@trustlinkgh.online',
                             phone: escrow.buyerPhone || '',
-                            metadata: { escrowId, description: escrow.description, platformFee: PLATFORM_FEE }
+                            metadata: { escrowId, description: escrow.description }
                         });
 
                         if (res.data && res.data.checkoutUrl) {
@@ -217,10 +212,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         btnUssd.disabled = true;
                         
                         try {
-                            // Include GH₵ 1.50 platform fee on top of escrow fee
                             const rawAmt = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
                             const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'buyer');
-                            const totalToPay = Number((feeSplit.buyerTotal || rawAmt) + PLATFORM_FEE);
+                            const totalToPay = Number(feeSplit.buyerTotal || rawAmt);
 
                             const createCheckout = callApi('createMoolreCheckout');
                             const res = await createCheckout({
@@ -229,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 phone: phone,
                                 email: escrow.buyerEmail || escrow.sellerEmail || 'buyer@trustlinkgh.online',
                                 channel: network,
-                                metadata: { escrowId, description: escrow.description, platformFee: PLATFORM_FEE }
+                                metadata: { escrowId, description: escrow.description }
                             });
 
                             if (res.data && res.data.checkoutUrl) {
@@ -336,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 completedAt: serverTimestamp()
                             });
                             
-                            // Credit seller's wallet (escrow amount minus seller's fee share)
+                            // Credit seller their full listed amount
                             const sellerRef = doc(db, "users", sellerId);
                             const sellerSnap = await getDoc(sellerRef);
                             if (sellerSnap.exists()) {
@@ -344,20 +338,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 await updateDoc(sellerRef, { walletBalance: currentBalance + amount });
                             }
 
-                            // Credit GH₵ 1.50 platform fee to TrustLink account
-                            const platformRef = doc(db, "accounts", "trustlink");
-                            await updateDoc(platformRef, {
-                                balance: increment(PLATFORM_FEE),
-                                totalTransactions: increment(1),
-                                lastUpdated: serverTimestamp()
-                            }).catch(async () => {
-                                // Create doc if it doesn't exist yet
-                                await setDoc(platformRef, {
-                                    balance: PLATFORM_FEE,
-                                    totalTransactions: 1,
+                            // Credit Escrow Protection Fee to TrustLink's account
+                            const rawAmt = Number(escrow.amount || amount || 0);
+                            const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'buyer');
+                            const trustlinkEarning = Number(feeSplit.buyerFee || 0);
+                            if (trustlinkEarning > 0) {
+                                const platformRef = doc(db, "accounts", "trustlink");
+                                await updateDoc(platformRef, {
+                                    balance: increment(trustlinkEarning),
+                                    totalTransactions: increment(1),
                                     lastUpdated: serverTimestamp()
+                                }).catch(async () => {
+                                    await setDoc(platformRef, {
+                                        balance: trustlinkEarning,
+                                        totalTransactions: 1,
+                                        lastUpdated: serverTimestamp()
+                                    });
                                 });
-                            });
+                            }
 
                             // Record audit log for financial settlement
                             try {
