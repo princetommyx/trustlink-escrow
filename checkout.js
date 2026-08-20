@@ -216,21 +216,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                             const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'buyer');
                             const totalToPay = Number(feeSplit.buyerTotal || rawAmt);
 
-                            const createCheckout = callApi('createMoolreCheckout');
-                            const res = await createCheckout({
+                            // Use dedicated USSD push endpoint (vas/collect) — sends real MoMo prompt
+                            const sendPush = callApi('sendUssdPush');
+                            const res = await sendPush({
                                 orderId: escrowId,
                                 amount: totalToPay,
                                 phone: phone,
-                                email: escrow.buyerEmail || escrow.sellerEmail || 'buyer@trustlinkgh.online',
-                                channel: network,
-                                metadata: { escrowId, description: escrow.description }
+                                network: network
                             });
 
-                            if (res.data && res.data.checkoutUrl) {
-                                alert(`A payment prompt has been sent to ${phone}. Approve on your phone to complete payment.`);
-                            } else {
-                                alert(`Prompt sent to ${phone}. Enter your PIN to approve.`);
-                            }
+                            const reference = res.data?.reference || escrowId;
+                            alert(`A payment prompt has been sent to ${phone}. Approve on your phone to complete payment.`);
                             
                             document.getElementById('loading-text').textContent = "Waiting for payment confirmation...";
                             document.getElementById('loader').style.display = 'block';
@@ -243,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             const interval = setInterval(async () => {
                                 attempts++;
                                 try {
-                                    const vRes = await verifyCallable({ reference: res.data?.reference || escrowId });
+                                    const vRes = await verifyCallable({ reference });
                                     if (vRes.data && (vRes.data.paid || vRes.data.status === 'success')) {
                                         clearInterval(interval);
                                         alert("Payment Successful! Funds are now securely held in escrow.");

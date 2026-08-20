@@ -74,6 +74,56 @@ async function handleCreateMoolreCheckout(data) {
     return { checkoutUrl: resData.data.authorization_url, reference };
 }
 
+async function handleSendUssdPush(data) {
+    const { phone, amount, network, orderId } = data || {};
+    if (!phone) throw new Error('Phone number is required for USSD push.');
+    if (!amount)  throw new Error('Amount is required.');
+
+    const reference = orderId || ('ESCROW-' + Date.now());
+
+    const MOOLRE_API_USER = process.env.MOOLRE_API_USER;
+    const MOOLRE_VAS_KEY  = process.env.MOOLRE_VAS_KEY; // X-API-VASKEY for direct collection
+
+    if (!MOOLRE_API_USER || !MOOLRE_VAS_KEY) {
+        throw new Error('USSD push not configured. Contact support.');
+    }
+
+    // Normalize phone to local 10-digit format (e.g. 0551234567)
+    let cleanPhone = String(phone).replace(/[^\d]/g, '');
+    if (cleanPhone.startsWith('233') && cleanPhone.length === 12) cleanPhone = '0' + cleanPhone.slice(3);
+
+    const payload = {
+        phone: cleanPhone,
+        amount: String(parseFloat(amount).toFixed(2)),
+        network: (network || 'MTN').toUpperCase(),
+        reference,
+        callback_url: 'https://trustlinkgh.online/api/webhook/moolre'
+    };
+
+    const response = await fetch('https://api.moolre.com/vas/collect', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-API-USER': MOOLRE_API_USER,
+            'X-API-VASKEY': MOOLRE_VAS_KEY
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const text = await response.text();
+    let resData;
+    try { resData = JSON.parse(text); } catch (e) { throw new Error('USSD push error: ' + text.slice(0, 300)); }
+
+    console.log('[Moolre USSD] status:', response.status, 'body:', JSON.stringify(resData));
+
+    if (!response.ok || (resData.status !== 1 && resData.status !== true && resData.status !== 'success')) {
+        const detail = resData.message || resData.error || resData.description || JSON.stringify(resData);
+        throw new Error('USSD push failed: ' + detail);
+    }
+
+    return { sent: true, reference, message: resData.message || 'Prompt sent successfully.' };
+}
+
 async function handleVerifyMoolrePayment(data) {
     const { reference } = data || {};
     if (!reference) throw new Error('Missing payment reference.');
@@ -134,6 +184,9 @@ module.exports = async (req, res) => {
                 break;
             case 'createMoolreCheckout':
                 result = await handleCreateMoolreCheckout(data);
+                break;
+            case 'sendUssdPush':
+                result = await handleSendUssdPush(data);
                 break;
             case 'verifyMoolrePayment':
                 result = await handleVerifyMoolrePayment(data);
