@@ -288,7 +288,7 @@
             width: 64px;
             height: 64px;
             background: #f0f4ff;
-            color: var(--primary-color);
+            color: var(--primary);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -327,7 +327,7 @@
             transition: border-color 0.2s;
         }
         .otp-input:focus {
-            border-color: var(--primary-color);
+            border-color: var(--primary);
         }
         .otp-actions {
             display: flex;
@@ -351,12 +351,13 @@
             background: #e5e7eb;
         }
         .btn-verify {
-            background: var(--primary-color);
+            background: var(--primary);
             color: white;
             border: none;
         }
         .btn-verify:hover {
-            background: var(--primary-hover);
+            background: var(--primary);
+            filter: brightness(1.1);
             transform: translateY(-1px);
         }
     </style>

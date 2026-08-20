@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 network: network
                             });
 
-                            if (res.data && res.data.code === 'TP14') {
+                            while (res.data && res.data.code === 'TP14') {
                                 // Moolre sent an SMS verification code
                                 const otp = await new Promise((resolve) => {
                                     const modal = document.getElementById('otp-modal-overlay');
