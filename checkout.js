@@ -218,12 +218,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                             // Use dedicated USSD push endpoint (vas/collect) — sends real MoMo prompt
                             const sendPush = callApi('sendUssdPush');
-                            const res = await sendPush({
+                            let res = await sendPush({
                                 orderId: escrowId,
                                 amount: totalToPay,
                                 phone: phone,
                                 network: network
                             });
+
+                            if (res.data && res.data.code === 'TP14') {
+                                // Moolre sent an SMS verification code
+                                const otp = prompt(`Moolre sent a verification code to ${phone} via SMS. Please enter it here:`);
+                                if (!otp) {
+                                    alert("Verification code is required to proceed.");
+                                    btnUssd.textContent = "Pay via Mobile Money";
+                                    btnUssd.disabled = false;
+                                    return;
+                                }
+                                
+                                // Retry with OTP and a new unique reference
+                                res = await sendPush({
+                                    orderId: escrowId + '-OTP-' + Date.now(),
+                                    amount: totalToPay,
+                                    phone: phone,
+                                    network: network,
+                                    otpcode: otp
+                                });
+                            }
 
                             const reference = res.data?.reference || escrowId;
                             alert(`A payment prompt has been sent to ${phone}. Approve on your phone to complete payment.`);

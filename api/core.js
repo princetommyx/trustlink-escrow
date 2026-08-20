@@ -75,7 +75,7 @@ async function handleCreateMoolreCheckout(data) {
 }
 
 async function handleSendUssdPush(data) {
-    const { phone, amount, network, orderId } = data || {};
+    const { phone, amount, network, orderId, otpcode } = data || {};
     if (!phone) throw new Error('Phone number is required for USSD push.');
     if (!amount)  throw new Error('Amount is required.');
 
@@ -109,6 +109,10 @@ async function handleSendUssdPush(data) {
         accountnumber: MOOLRE_ACCOUNT
     };
 
+    if (otpcode) {
+        payload.otpcode = otpcode;
+    }
+
     const response = await fetch('https://api.moolre.com/open/transact/payment', {
         method: 'POST',
         headers: {
@@ -131,7 +135,12 @@ async function handleSendUssdPush(data) {
     }
 
     // resData.data usually contains a transaction/reference UUID on success
-    return { sent: true, reference: typeof resData.data === 'string' ? resData.data : reference, message: resData.message || 'Prompt sent successfully.' };
+    return { 
+        sent: true, 
+        reference: typeof resData.data === 'string' ? resData.data : reference, 
+        message: resData.message || 'Prompt sent successfully.',
+        code: resData.code
+    };
 }
 
 async function handleVerifyMoolrePayment(data) {
