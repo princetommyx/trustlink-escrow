@@ -161,14 +161,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 actionButtons.innerHTML = `
                     <button id="btn-pay-link" class="btn btn-primary btn-large" style="width: 100%; margin-bottom: 16px;">Pay via Secure Web Link</button>
-                    
-                    <div style="background: rgba(0, 0, 0, 0.03); padding: 15px; border-radius: 8px; border: 1px dashed rgba(0, 0, 0, 0.15); text-align: center; margin-bottom: 16px;">
-                        <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: #4b5563; font-weight: 500;">Or pay via USSD Short Code:</p>
-                        <h3 style="margin: 0; color: #2563eb; font-family: monospace; font-size: 1.6rem; letter-spacing: 2px; font-weight: bold;">*203*0774950#</h3>
-                        <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: #6b7280;">Dial this code on your phone to view order details and pay.</p>
-                    </div>
-
-                    <button id="btn-verify" class="btn btn-outline" style="width: 100%;">I have made the payment</button>
                 `;
                 
                 document.getElementById('btn-pay-link').addEventListener('click', async (e) => {
@@ -198,45 +190,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         btn.disabled = false;
                         btn.textContent = originalText;
                         alert("Failed to get payment link: " + err.message);
-                    }
-                });
-
-                document.getElementById('btn-verify').addEventListener('click', async (e) => {
-                    const btn = e.target;
-                    btn.disabled = true;
-                    btn.textContent = "Verifying Payment...";
-                    document.getElementById('loading-text').textContent = "Verifying Payment...";
-                    document.getElementById('loader').style.display = 'block';
-                    document.getElementById('loading-text').style.display = 'block';
-                    document.getElementById('escrow-content').classList.add('hidden');
-
-                    try {
-                        const verifyCallable = callApi('verifyMoolrePayment');
-                        let attempts = 0;
-                        let interval = setInterval(async () => {
-                            attempts++;
-                            try {
-                                const vRes = await verifyCallable({ escrowId });
-                                if (vRes.data && vRes.data.paid) {
-                                    clearInterval(interval);
-                                    alert("Payment Successful! Funds are now securely held in escrow.");
-                                    window.location.reload();
-                                }
-                            } catch(e) { }
-
-                            if (attempts > 6) {
-                                clearInterval(interval);
-                                alert("Payment verification pending. The status will automatically update once confirmed.");
-                                window.location.reload();
-                            }
-                        }, 5000);
-                    } catch (error) {
-                        btn.textContent = "I have made the payment";
-                        btn.disabled = false;
-                        document.getElementById('loader').style.display = 'none';
-                        document.getElementById('loading-text').style.display = 'none';
-                        document.getElementById('escrow-content').classList.remove('hidden');
-                        alert("Failed to start verification: " + error.message);
                     }
                 });
 
