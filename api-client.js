@@ -16,10 +16,10 @@ export const callApi = (functionName) => {
         }
 
         try {
-            const response = await fetch(`/api/${functionName}`, {
+            const response = await fetch(`/api/core`, {
                 method: 'POST',
                 headers: headers,
-                body: JSON.stringify({ data })
+                body: JSON.stringify({ action: functionName, data })
             });
 
             const result = await response.json();
