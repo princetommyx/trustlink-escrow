@@ -1,7 +1,0 @@
-{
-  "type": "module",
-  "dependencies": {
-    "cors": "^2.8.6",
-    "firebase-admin": "^14.3.0"
-  }
-}
