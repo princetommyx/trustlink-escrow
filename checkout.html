@@ -326,6 +326,26 @@
                         <input type="tel" id="ussd-phone" placeholder="e.g. 0541234567" style="width: 100%; padding: 14px; border: 1px solid #D1D5DB; border-radius: 10px; font-family: inherit; font-size: 1rem; background: #FAFAFA;">
                     </div>
                 </div>
+
+                <!-- Manual POS Option -->
+                <div class="payment-method-card" id="card-moolre-manual" onclick="selectPaymentMethod('manual')">
+                    <div class="payment-header">
+                        <div class="payment-radio"></div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 1.1rem; color: #111827;">Manual POS Payment</div>
+                            <div style="font-size: 0.9rem; color: #6B7280; margin-top: 4px;">Dial our USSD code and enter Transaction ID</div>
+                        </div>
+                    </div>
+                    
+                    <div id="manual-form-container" style="display: none; width: 100%; margin-top: 20px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
+                        <div style="background: rgba(0, 0, 0, 0.03); padding: 15px; border-radius: 8px; border: 1px dashed rgba(0, 0, 0, 0.15); text-align: center; margin-bottom: 16px;">
+                            <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: #4B5563;">Dial the code below to pay via POS:</p>
+                            <div style="font-weight: 700; font-size: 1.3rem; color: #2563eb; letter-spacing: 1px;">*203*0774950#</div>
+                        </div>
+                        <label style="display: block; margin-bottom: 8px; color: #4B5563; font-size: 0.95rem; font-weight: 500;">Enter Transaction ID / Reference</label>
+                        <input type="text" id="manual-txn-id" placeholder="e.g. 123456789" style="width: 100%; padding: 14px; border: 1px solid #D1D5DB; border-radius: 10px; font-family: inherit; font-size: 1rem; background: #FAFAFA;">
+                    </div>
+                </div>
             </div>
 
             <!-- Right Side: Order Summary -->
@@ -364,6 +384,9 @@
                     
                     <!-- The hardcoded USSD button goes here (hidden by default) -->
                     <button id="btn-pay-ussd" class="btn-pay" style="display: none;">Send USSD Prompt to Phone</button>
+                    
+                    <!-- The hardcoded Manual button goes here (hidden by default) -->
+                    <button id="btn-pay-manual" class="btn-pay" style="display: none;">Submit Payment Proof</button>
                 </div>
 
                 <div style="margin-top: 32px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; color: #9CA3AF;">
@@ -383,20 +406,34 @@
         window.selectPaymentMethod = function(method) {
             document.getElementById('card-moolre-web').classList.remove('active');
             document.getElementById('card-moolre-ussd').classList.remove('active');
+            const cardManual = document.getElementById('card-moolre-manual');
+            if(cardManual) cardManual.classList.remove('active');
             
             const btnPay = document.getElementById('btn-pay'); // Dynamic from JS
             const btnPayUssd = document.getElementById('btn-pay-ussd');
+            const btnPayManual = document.getElementById('btn-pay-manual');
             
             if (method === 'web') {
                 document.getElementById('card-moolre-web').classList.add('active');
                 document.getElementById('ussd-form-container').style.display = 'none';
+                if(document.getElementById('manual-form-container')) document.getElementById('manual-form-container').style.display = 'none';
                 if(btnPay) btnPay.style.display = 'block';
                 if(btnPayUssd) btnPayUssd.style.display = 'none';
-            } else {
+                if(btnPayManual) btnPayManual.style.display = 'none';
+            } else if (method === 'ussd') {
                 document.getElementById('card-moolre-ussd').classList.add('active');
                 document.getElementById('ussd-form-container').style.display = 'block';
+                if(document.getElementById('manual-form-container')) document.getElementById('manual-form-container').style.display = 'none';
                 if(btnPay) btnPay.style.display = 'none';
                 if(btnPayUssd) btnPayUssd.style.display = 'block';
+                if(btnPayManual) btnPayManual.style.display = 'none';
+            } else if (method === 'manual') {
+                if(cardManual) cardManual.classList.add('active');
+                document.getElementById('ussd-form-container').style.display = 'none';
+                if(document.getElementById('manual-form-container')) document.getElementById('manual-form-container').style.display = 'block';
+                if(btnPay) btnPay.style.display = 'none';
+                if(btnPayUssd) btnPayUssd.style.display = 'none';
+                if(btnPayManual) btnPayManual.style.display = 'block';
             }
         };
 
