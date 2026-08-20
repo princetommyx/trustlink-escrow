@@ -170,21 +170,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                     btn.textContent = "Generating Secure Link...";
 
                     try {
-                        const getPosLink = callApi('getPosPaymentLink');
-                        const res = await getPosLink();
+                        // Use order details directly — no user input needed
+                        const rawAmt = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
+                        const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'split');
+                        const totalToPay = Number(feeSplit.buyerTotal || rawAmt);
 
-                        if (res.data && res.data.success && res.data.link) {
-                            const rawAmount = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
-                            const fees = computeFeeSplit(rawAmount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
-                            const totalToPay = Number(fees.buyerTotal || rawAmount).toFixed(2);
-                            
-                            const sep = res.data.link.includes('?') ? '&' : '?';
-                            const finalLink = `${res.data.link}${sep}reference=${escrowId}&amount=${totalToPay}`;
-                            
-                            window.open(finalLink, '_blank');
-                            btn.textContent = "Payment link opened in new tab";
+                        const createCheckout = callApi('createMoolreCheckout');
+                        const res = await createCheckout({
+                            orderId: escrowId,
+                            amount: totalToPay,
+                            email: escrow.buyerEmail || escrow.sellerEmail || 'buyer@trustlinkgh.online',
+                            phone: escrow.buyerPhone || '',
+                            metadata: { escrowId, description: escrow.description }
+                        });
+
+                        if (res.data && res.data.checkoutUrl) {
+                            window.location.href = res.data.checkoutUrl;
                         } else {
-                            throw new Error("Could not retrieve POS link");
+                            throw new Error("Could not retrieve payment link");
                         }
                     } catch(err) {
                         btn.disabled = false;
@@ -193,15 +196,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 });
 
-                // Handle USSD Push Payment Form if present
+                // Handle USSD Push Payment — only asks for MoMo number, order data comes from escrow
                 const btnUssd = document.getElementById('btn-pay-ussd');
                 if (btnUssd) {
                     btnUssd.addEventListener('click', async () => {
-                        const network = document.getElementById('ussd-network').value;
-                        const phone = document.getElementById('ussd-phone').value;
+                        const network = document.getElementById('ussd-network')?.value || 'MTN';
+                        const phone = document.getElementById('ussd-phone')?.value?.trim();
                         
-                        if(!phone) {
-                            alert("Please enter a valid phone number.");
+                        if (!phone) {
+                            alert("Please enter the MoMo number to send the payment prompt to.");
                             return;
                         }
                         
@@ -209,37 +212,49 @@ document.addEventListener('DOMContentLoaded', async () => {
                         btnUssd.disabled = true;
                         
                         try {
+                            // Pull amount from order — no user input needed
+                            const rawAmt = Number(escrow.amount || escrow.totalAmount || escrow.price || 0);
+                            const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'split');
+                            const totalToPay = Number(feeSplit.buyerTotal || rawAmt);
+
                             const createCheckout = callApi('createMoolreCheckout');
-                            await createCheckout({
-                                escrowId,
-                                buyerPhone: phone,
-                                channel: network
+                            const res = await createCheckout({
+                                orderId: escrowId,
+                                amount: totalToPay,
+                                phone: phone,
+                                email: escrow.buyerEmail || escrow.sellerEmail || 'buyer@trustlinkgh.online',
+                                channel: network,
+                                metadata: { escrowId, description: escrow.description }
                             });
 
-                            alert(`A prompt has been sent to ${phone}. Check your mobile phone and enter your PIN to approve the payment.`);
+                            if (res.data && res.data.checkoutUrl) {
+                                alert(`A payment prompt has been sent to ${phone}. Approve on your phone to complete payment.`);
+                            } else {
+                                alert(`Prompt sent to ${phone}. Enter your PIN to approve.`);
+                            }
                             
-                            document.getElementById('loading-text').textContent = "Verifying Payment...";
+                            document.getElementById('loading-text').textContent = "Waiting for payment confirmation...";
                             document.getElementById('loader').style.display = 'block';
                             document.getElementById('loading-text').style.display = 'block';
                             document.getElementById('escrow-content').classList.add('hidden');
                             
-                            // Poll status via server-side Callable function
+                            // Poll for confirmation (webhook updates Firestore)
                             const verifyCallable = callApi('verifyMoolrePayment');
                             let attempts = 0;
-                            let interval = setInterval(async () => {
+                            const interval = setInterval(async () => {
                                 attempts++;
                                 try {
-                                    const vRes = await verifyCallable({ escrowId });
-                                    if (vRes.data && vRes.data.paid) {
+                                    const vRes = await verifyCallable({ reference: res.data?.reference || escrowId });
+                                    if (vRes.data && (vRes.data.paid || vRes.data.status === 'success')) {
                                         clearInterval(interval);
                                         alert("Payment Successful! Funds are now securely held in escrow.");
                                         window.location.reload();
                                     }
-                                } catch(e) { }
+                                } catch(e) { /* keep polling */ }
 
-                                if (attempts > 6) {
+                                if (attempts > 12) {
                                     clearInterval(interval);
-                                    alert("Payment verification pending. The status will automatically update once confirmed.");
+                                    alert("Payment is being processed. This page will update automatically when confirmed.");
                                     window.location.reload();
                                 }
                             }, 5000);
