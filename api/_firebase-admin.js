@@ -3,31 +3,68 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 
 let app;
+let initError = null;
+
 if (!getApps().length) {
     try {
         if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
             // Provided in Vercel settings as a JSON string
-            const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+            let keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+            
+            // Handle escaped newlines if passed via certain CLI tools
+            if (keyString.includes('\\n')) {
+                keyString = keyString.replace(/\\n/g, '\n');
+            }
+
+            // Fallback for base64 encoded strings
+            if (!keyString.startsWith('{')) {
+                try {
+                    keyString = Buffer.from(keyString, 'base64').toString('utf8');
+                } catch(e) {}
+            }
+
+            const serviceAccount = JSON.parse(keyString);
             app = initializeApp({
                 credential: cert(serviceAccount)
             });
+            console.log("Firebase Admin initialized successfully using service account.");
         } else {
             // Fallback (might fail in Vercel without proper env vars)
             app = initializeApp();
+            console.log("Firebase Admin initialized successfully using default credentials.");
         }
     } catch (error) {
-        console.error('Firebase admin initialization error', error.stack);
+        initError = error;
+        console.error('Firebase admin initialization error:', error.message);
     }
+} else {
+    app = getApps()[0];
 }
 
-const db = getFirestore();
-const auth = getAuth();
-// For backwards compatibility in other files that use admin.firestore or admin.auth
+// Defer initialization of db and auth so the module doesn't crash on import
+// if the Firebase app failed to initialize due to invalid credentials.
+const getDb = () => {
+    if (initError) throw new Error("Firebase Admin failed to initialize: " + initError.message);
+    return getFirestore();
+};
+
+const getAuthService = () => {
+    if (initError) throw new Error("Firebase Admin failed to initialize: " + initError.message);
+    return getAuth();
+};
+
 const admin = {
-    firestore: () => db,
-    auth: () => auth,
+    firestore: getDb,
+    auth: getAuthService,
     credential: { cert }
 };
+
+// Proxy db to call getDb() under the hood, or just export it as a proxy
+const db = new Proxy({}, {
+    get: (target, prop) => {
+        return getDb()[prop];
+    }
+});
 
 // Helper to authenticate user from Authorization Header (Bearer Token)
 const authenticateToken = async (req, res) => {
@@ -38,7 +75,7 @@ const authenticateToken = async (req, res) => {
     }
     const idToken = authHeader.split('Bearer ')[1];
     try {
-        const decodedToken = await auth.verifyIdToken(idToken);
+        const decodedToken = await getAuthService().verifyIdToken(idToken);
         return decodedToken; // contains uid, email, etc.
     } catch (error) {
         console.error('Error verifying auth token', error);

@@ -9,7 +9,7 @@ export const callApi = (functionName) => {
         if (auth.currentUser) {
             try {
                 const token = await auth.currentUser.getIdToken();
-                headers['Authorization'] = `Bearer ${token}`;
+                headers['Authorization'] = `Bearer ${token.trim()}`;
             } catch (err) {
                 console.warn('Failed to get auth token', err);
             }
@@ -22,7 +22,13 @@ export const callApi = (functionName) => {
                 body: JSON.stringify({ action: functionName, data })
             });
 
-            const result = await response.json();
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonErr) {
+                const text = await response.text();
+                throw new Error(`Server returned invalid JSON. Status: ${response.status}. Body: ${text.substring(0, 100)}...`);
+            }
             
             if (!response.ok) {
                 const errorMsg = result.error || 'API call failed';
