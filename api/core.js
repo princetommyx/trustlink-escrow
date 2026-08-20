@@ -1,15 +1,6 @@
 import corsModule from 'cors';
 const cors = (corsModule.default || corsModule)({ origin: true });
-import twilio from 'twilio';
 import { db, admin, normalizeGhanaPhone, authenticateToken } from './_firebase-admin.js';
-
-// --- Helper Functions ---
-const getTwilioClient = () => {
-    const accountSid = process.env.TWILIO_SID;
-    const authToken = process.env.TWILIO_TOKEN;
-    if (!accountSid || !authToken) return null;
-    return twilio(accountSid, authToken);
-};
 
 async function sendBuyerSmsAlert(phone, message) {
     try {
@@ -264,20 +255,9 @@ async function handleProcessPayout(data, decodedToken) {
     });
 }
 
-async function handleSendPaymentLinkViaWhatsApp(data) {
-    const { buyerPhone, transactionId, paymentLink } = data;
-    if (!buyerPhone || !paymentLink) throw new Error('Missing buyerPhone and paymentLink.');
-
-    const client = getTwilioClient();
-    if (!client) throw new Error('Twilio client not configured properly.');
-
-    const twilioNumber = process.env.TWILIO_WHATSAPP_NUMBER || "whatsapp:+16624904332";
-    const toWhatsAppNumber = buyerPhone.startsWith('whatsapp:') ? buyerPhone : `whatsapp:${buyerPhone}`;
-    const messageBody = `TRUSTLINK ESCROW PAYMENT INVOICE\n\nYour escrow payment (ID: ${transactionId}) is ready for checkout.\n\nYour payment remains securely protected in TrustLink Escrow until you receive and verify your order.\n\nPay securely here:\n${paymentLink}\n\nProtected by TrustLink Escrow Ghana`;
-
-    const message = await client.messages.create({ body: messageBody, from: twilioNumber, to: toWhatsAppNumber });
-    return { success: true, messageId: message.sid };
-}
+const handleSendPaymentLinkViaWhatsApp = async (data) => {
+    throw new Error('WhatsApp sending is currently disabled.');
+};
 
 // --- Main Handler ---
 
