@@ -227,7 +227,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                             if (res.data && res.data.code === 'TP14') {
                                 // Moolre sent an SMS verification code
-                                const otp = prompt(`Moolre sent a verification code to ${phone} via SMS. Please enter it here:`);
+                                const otp = await new Promise((resolve) => {
+                                    const modal = document.getElementById('otp-modal-overlay');
+                                    const input = document.getElementById('otp-input');
+                                    const btnCancel = document.getElementById('btn-cancel-otp');
+                                    const btnSubmit = document.getElementById('btn-submit-otp');
+                                    const msg = document.getElementById('otp-message');
+                                    
+                                    msg.textContent = `Moolre sent a verification code to ${phone} via SMS. Please enter it below.`;
+                                    modal.classList.add('active');
+                                    input.value = '';
+                                    input.focus();
+
+                                    const cleanup = () => {
+                                        modal.classList.remove('active');
+                                        btnCancel.onclick = null;
+                                        btnSubmit.onclick = null;
+                                    };
+
+                                    btnCancel.onclick = () => {
+                                        cleanup();
+                                        resolve(null);
+                                    };
+
+                                    btnSubmit.onclick = () => {
+                                        cleanup();
+                                        resolve(input.value.trim());
+                                    };
+                                });
+
                                 if (!otp) {
                                     alert("Verification code is required to proceed.");
                                     btnUssd.textContent = "Pay via Mobile Money";
@@ -235,9 +263,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     return;
                                 }
                                 
-                                // Retry with OTP and a new unique reference
+                                btnUssd.textContent = "Verifying...";
+                                
+                                // Retry with OTP using the exact same externalref (escrowId)
                                 res = await sendPush({
-                                    orderId: escrowId + '-OTP-' + Date.now(),
+                                    orderId: escrowId,
                                     amount: totalToPay,
                                     phone: phone,
                                     network: network,

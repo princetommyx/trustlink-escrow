@@ -252,6 +252,113 @@
                 position: static;
             }
         }
+        /* Custom OTP Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .otp-modal {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 32px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .otp-modal {
+            transform: translateY(0);
+        }
+        .otp-icon {
+            width: 64px;
+            height: 64px;
+            background: #f0f4ff;
+            color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .otp-icon svg {
+            width: 32px;
+            height: 32px;
+        }
+        .otp-modal h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+        .otp-modal p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .otp-input-container {
+            margin-bottom: 24px;
+        }
+        .otp-input {
+            width: 100%;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 4px;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .otp-input:focus {
+            border-color: var(--primary-color);
+        }
+        .otp-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-cancel, .btn-verify {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #4b5563;
+            border: none;
+        }
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+        .btn-verify {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        .btn-verify:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body class="light-landing">
@@ -266,11 +373,31 @@
 
     <div class="checkout-layout" id="checkout-container">
         
-        <!-- Loading State -->
-        <div id="loader-section" style="grid-column: 1 / -1; text-align: center;">
-            <div class="loader" id="loader"></div>
-            <h2 id="loading-text" style="font-family: 'Outfit', sans-serif;">Loading Escrow Details...</h2>
+        <!-- Loading Overlay -->
+    <div id="loader" class="loader-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loading-text">Generating secure checkout...</p>
+    </div>
+
+    <!-- OTP Modal -->
+    <div id="otp-modal-overlay" class="modal-overlay">
+        <div class="otp-modal">
+            <div class="otp-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <h3>Verification Required</h3>
+            <p id="otp-message">Moolre has sent a verification code via SMS. Please enter it below.</p>
+            <div class="otp-input-container">
+                <input type="text" id="otp-input" class="otp-input" placeholder="Enter Code" autocomplete="one-time-code" maxlength="6">
+            </div>
+            <div class="otp-actions">
+                <button type="button" class="btn-cancel" id="btn-cancel-otp">Cancel</button>
+                <button type="button" class="btn-verify" id="btn-submit-otp">Verify & Pay</button>
+            </div>
         </div>
+    </div>
 
         <!-- Main Content -->
         <div id="escrow-content" class="hidden" style="grid-column: 1 / -1; display: grid; grid-template-columns: inherit; gap: inherit;">
