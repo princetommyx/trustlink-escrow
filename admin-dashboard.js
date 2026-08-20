@@ -435,7 +435,7 @@ const fetchAdminStats = async () => {
             const data = doc.data();
             const amt = parseFloat(data.amount) || 0;
             const status = normStatus(data.status);
-            const feePercent = parseFloat(data.feePercent) || 2.5;
+            const feePercent = parseFloat(data.feePercent) || 1.5;
             const feeAllocation = data.feeAllocation || 'split';
             const fees = computeFeeSplit(amt, feePercent, feeAllocation);
             const date = toDate(data.createdAt) || new Date();

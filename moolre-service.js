@@ -41,7 +41,7 @@ export function formatCurrency(amount) {
  * Buyer pays: amount + buyerFee. Seller receives: amount - sellerFee.
  * @returns {{ totalFee: number, buyerFee: number, sellerFee: number, buyerTotal: number, sellerNet: number }}
  */
-export function computeFeeSplit(amount, feePercent = 3, allocation = 'split') {
+export function computeFeeSplit(amount, feePercent = 1.5, allocation = 'split') {
     const amt = parseFloat(amount) || 0;
     const pct = (parseFloat(feePercent) || 0) / 100;
     const totalFee = Math.round(amt * pct * 100) / 100;

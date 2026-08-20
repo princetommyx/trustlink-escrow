@@ -18,7 +18,7 @@ const loadPlatformSettings = async () => {
     try {
         const feeSnap = await getDoc(doc(db, "settings", "platform"));
         if (feeSnap.exists() && feeSnap.data().feePercent !== undefined) {
-            cachedPlatformFeePercent = parseFloat(feeSnap.data().feePercent) || 2.5;
+            cachedPlatformFeePercent = parseFloat(feeSnap.data().feePercent) || 1.5;
         }
     } catch (err) {
         console.warn("Using default platform fee (2.5%):", err);
@@ -2295,7 +2295,7 @@ if (formNewEscrow) {
                 buyerEmail: buyerEmail,
                 buyerPhone: buyerPhone,
                 feeAllocation: feeAllocation,
-                feePercent: cachedPlatformFeePercent || 2.5,
+                feePercent: cachedPlatformFeePercent || 1.5,
                 deliveryDateFrom: deliveryDateFrom,
                 deliveryDateTo: deliveryDateTo,
                 deliveryReminderSent: false,

@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 deliveryDateFrom: deliveryVal,
                 deliveryDateTo: deliveryVal,
                 feeAllocation: qSplit ? decodeURIComponent(qSplit) : "buyer",
-                feePercent: 3.0,
+                feePercent: 1.5,
                 status: 'PENDING_PAYMENT',
                 source: 'TELEGRAM_BOT'
             };
