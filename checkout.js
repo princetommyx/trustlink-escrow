@@ -298,6 +298,41 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 }
 
+                // Handle Manual POS Payment Form if present
+                const btnManual = document.getElementById('btn-pay-manual');
+                if (btnManual) {
+                    btnManual.addEventListener('click', async () => {
+                        const txnId = document.getElementById('manual-txn-id').value.trim();
+                        
+                        if(!txnId) {
+                            alert("Please enter your Transaction ID or Reference.");
+                            return;
+                        }
+                        
+                        btnManual.textContent = "Submitting Proof...";
+                        btnManual.disabled = true;
+                        
+                        try {
+                            await updateDoc(docRef, {
+                                status: 'AWAITING_VERIFICATION',
+                                manualPaymentProof: txnId,
+                                proofSubmittedAt: serverTimestamp()
+                            });
+                            
+                            alert(`Your payment proof (ID: ${txnId}) has been submitted successfully! An admin will verify the payment shortly.`);
+                            window.location.reload();
+                        } catch (error) {
+                            btnManual.textContent = "Submit Payment Proof";
+                            btnManual.disabled = false;
+                            alert("Failed to submit proof: " + error.message);
+                        }
+                    });
+                }
+
+            } else if (status === 'AWAITING_VERIFICATION') {
+                statusBadge.textContent = 'Status: Awaiting Verification';
+                statusBadge.classList.add('status-pending');
+                actionButtons.innerHTML = `<p style="color: #D97706; font-weight: 600;">Your manual payment proof has been submitted and is currently being verified by an admin.</p>`;
             } else if (status === 'FUNDS_ESCROWED' || status === 'FUNDED') {
                 statusBadge.textContent = 'Status: Paid (Awaiting Dispatch)';
                 statusBadge.classList.add('status-funded');

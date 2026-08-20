@@ -652,6 +652,8 @@ function loadEscrows() {
                             </button>
                         </div>
                     `;
+                } else if (data.status === 'AWAITING_VERIFICATION') {
+                    statusUI = `<span style="background-color: rgba(217, 119, 6, 0.15); color: #d97706; border: 1px solid #d97706; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">VERIFYING PAYMENT</span>`;
                 } else if (data.status === 'FUNDED') {
                     statusUI = `<span style="background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid #3b82f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">FUNDED - DISPATCH NOW</span>`;
                     actionBtn = `
@@ -727,6 +729,8 @@ function loadEscrows() {
                 if (data.status === 'PENDING_PAYMENT') {
                     statusUI = `<span style="background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">PAYMENT REQUIRED</span>`;
                     actionBtn = `<a href="checkout.html?id=${escrowId}" target="_blank" class="btn btn-primary">PAY NOW</a>`;
+                } else if (data.status === 'AWAITING_VERIFICATION') {
+                    statusUI = `<span style="background-color: rgba(217, 119, 6, 0.15); color: #d97706; border: 1px solid #d97706; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">VERIFYING PAYMENT</span>`;
                 } else if (data.status === 'FUNDED') {
                     statusUI = `<span style="background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid #3b82f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">AWAITING DISPATCH</span>`;
                 } else if (data.status === 'DISPATCHED') {

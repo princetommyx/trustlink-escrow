@@ -1383,7 +1383,7 @@ const loadEscrowsAdmin = async () => {
 
 const ESCROW_STATUS_COLORS = {
     pending_payment: '#f59e0b', funded: '#3b82f6', dispatched: '#10b981',
-    completed: '#10b981', disputed: '#ef4444', refunded: '#ef4444', released: '#10b981'
+    completed: '#10b981', disputed: '#ef4444', refunded: '#ef4444', released: '#10b981', awaiting_verification: '#d97706'
 };
 
 const renderEscrowsAdmin = () => {
@@ -1425,6 +1425,43 @@ const renderEscrowsAdmin = () => {
             <td>${created ? created.toLocaleDateString() : '—'}</td>
             <td></td>
         `;
+        const actionCell = tr.querySelector('td:last-child');
+        
+        if (status === 'awaiting_verification') {
+            const verifyBtn = document.createElement('button');
+            verifyBtn.className = 'btn btn-primary';
+            verifyBtn.style.cssText = 'padding: 4px 12px; font-size: 0.8rem; margin-right: 8px; background: var(--success); border-color: var(--success);';
+            verifyBtn.textContent = 'Verify';
+            verifyBtn.addEventListener('click', async () => {
+                if (!confirm(`Verify manual payment for ${formatGHS(parseFloat(e.amount) || 0)}?\nTransaction ID/Proof: ${e.manualPaymentProof || 'N/A'}`)) return;
+                verifyBtn.disabled = true;
+                verifyBtn.textContent = 'Verifying...';
+                try {
+                    await updateDoc(doc(db, "escrows", e.id), {
+                        status: 'FUNDS_ESCROWED',
+                        verifiedAt: new Date(),
+                        verifiedBy: auth.currentUser ? auth.currentUser.email : 'admin'
+                    });
+                    
+                    // Add audit log
+                    await addDoc(collection(db, "audit_logs"), {
+                        event: 'MANUAL_PAYMENT_VERIFIED',
+                        escrowId: e.id,
+                        actor: auth.currentUser ? auth.currentUser.email : 'admin',
+                        timestamp: new Date()
+                    });
+                    
+                    await loadEscrowsAdmin();
+                    fetchAdminStats();
+                } catch (error) {
+                    alert("Failed to verify payment: " + error.message);
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = 'Verify';
+                }
+            });
+            actionCell.appendChild(verifyBtn);
+        }
+
         const delBtn = document.createElement('button');
         delBtn.className = 'btn btn-outline';
         delBtn.style.cssText = 'padding: 4px 12px; font-size: 0.8rem; border-color: #ef4444; color: #ef4444;';
@@ -1444,7 +1481,7 @@ const renderEscrowsAdmin = () => {
                 delBtn.textContent = 'Delete';
             }
         });
-        tr.querySelector('td:last-child').appendChild(delBtn);
+        actionCell.appendChild(delBtn);
         tbody.appendChild(tr);
     });
 };
