@@ -63,8 +63,12 @@ async function handleCreateMoolreCheckout(data) {
     let resData;
     try { resData = JSON.parse(text); } catch (e) { throw new Error('Payment gateway error: ' + text.slice(0, 300)); }
 
+    // Log full response for debugging
+    console.log('[Moolre] status:', response.status, 'body:', JSON.stringify(resData));
+
     if (!response.ok || resData.status !== 1) {
-        throw new Error(resData.message || 'Payment initialization failed.');
+        const detail = resData.message || resData.error || resData.description || JSON.stringify(resData);
+        throw new Error('Moolre: ' + detail);
     }
 
     return { checkoutUrl: resData.data.authorization_url, reference };
