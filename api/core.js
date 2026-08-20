@@ -1,265 +1,105 @@
-import corsModule from 'cors';
-const cors = (corsModule.default || corsModule)({ origin: true });
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const cors = require('cors')({ origin: true });
 import { db, admin, normalizeGhanaPhone, authenticateToken } from './_firebase-admin.js';
 
 async function sendBuyerSmsAlert(phone, message) {
     try {
         const apiKey = process.env.SASUSYNC_API_KEY;
         if (!apiKey) return;
-
         const { local } = normalizeGhanaPhone(phone);
         if (!local) return;
-
         const baseUrl = process.env.SASUSYNC_BASE_URL || 'https://sms.sasusync.com';
         await fetch(`${baseUrl}/api/v1/send`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': apiKey
-            },
-            body: JSON.stringify({
-                sender: "TrustEscrow",
-                recipients: ['233' + local.slice(1)],
-                message: message
-            })
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: JSON.stringify({ sender: 'TrustLink', recipients: [local], message })
         });
-    } catch (err) {
-        console.error("SMS notification delivery error", err);
-    }
+    } catch (e) { console.error('SMS Alert Error:', e); }
 }
 
-// --- Route Handlers ---
+const handleGetPosPaymentLink = async (data) => {
+    const { amount, phone, email } = data;
+    if (!amount || (!phone && !email)) throw new Error('Amount and phone/email are required.');
+    
+    let transactionId = 'TXN-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    const posLink = `https://trustlinkgh.online/checkout.html?orderId=${transactionId}`;
+    
+    if (phone) await sendBuyerSmsAlert(phone, `Pay GHC ${amount} via POS:\n${posLink}`);
+    
+    return { success: true, paymentLink: posLink, transactionId };
+};
 
-async function handleGetPosPaymentLink(data) {
-    const posLink = process.env.MOOLRE_POS_LINK;
-    if (!posLink) throw new Error('POS link not configured on the server.');
-    return { success: true, link: posLink };
-}
+const handleCreateMoolreCheckout = async (data) => {
+    const { amount, phone, email, metadata } = data;
+    if (!amount || (!phone && !email)) throw new Error('Missing amount, phone, or email.');
+    
+    let transactionId = 'ESCROW-' + Date.now();
+    const MOOLRE_PUBLIC_KEY = process.env.MOOLRE_PUBLIC_KEY;
+    if (!MOOLRE_PUBLIC_KEY) throw new Error('Moolre keys not configured on server.');
 
-async function handleCreateMoolreCheckout(data) {
-    const { escrowId, buyerPhone, channel } = data;
-    if (!escrowId || !buyerPhone) throw new Error('Missing escrowId or buyerPhone.');
+    const payload = {
+        amount: parseFloat(amount),
+        customer_email: email || 'buyer@trustlink.online',
+        customer_phone: phone || '',
+        reference: transactionId,
+        metadata: metadata || {}
+    };
 
-    const escrowRef = db.collection('escrows').doc(escrowId);
-    const escrowSnap = await escrowRef.get();
-    if (!escrowSnap.exists) throw new Error('Escrow record not found.');
-
-    const esc = escrowSnap.data();
-    if (esc.status !== 'PENDING_PAYMENT') throw new Error(`Escrow is in state ${esc.status}, not PENDING_PAYMENT.`);
-
-    const apiUser = process.env.MOOLRE_API_USER;
-    const privKey = process.env.MOOLRE_PRIVATE_KEY;
-    const accountNum = process.env.MOOLRE_ACCOUNT_NUMBER;
-
-    if (!apiUser || !privKey || !accountNum) throw new Error('Payment gateway configuration error.');
-
-    const { local } = normalizeGhanaPhone(buyerPhone);
-
-    const response = await fetch("https://api.moolre.com/open/transact/payment", {
+    const response = await fetch('https://api.moolre.com/v1/payments/initialize', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-API-USER': apiUser,
-            'X-API-KEY': privKey
+            'Authorization': `Bearer ${MOOLRE_PUBLIC_KEY}`
         },
-        body: JSON.stringify({
-            type: 1,
-            channel: parseInt(channel || 13),
-            currency: "GHS",
-            payer: '233' + local.slice(1),
-            amount: esc.amount.toString(),
-            externalref: escrowId,
-            accountnumber: accountNum
-        })
+        body: JSON.stringify(payload)
     });
 
-    const resData = await response.json();
-    if (!response.ok || resData.status == 0) throw new Error(resData.message || 'Payment prompt failed.');
-
-    await escrowRef.update({
-        moolrePromptTriggered: true,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-
-    return { success: true, message: 'USSD prompt dispatched to buyer phone.' };
-}
-
-async function handleVerifyMoolrePayment(data) {
-    const { escrowId } = data;
-    if (!escrowId) throw new Error('Missing escrowId.');
-
-    const escrowRef = db.collection('escrows').doc(escrowId);
-    const escrowSnap = await escrowRef.get();
-    if (!escrowSnap.exists) throw new Error('Escrow record not found.');
-
-    const esc = escrowSnap.data();
-    if (['FUNDS_ESCROWED', 'ITEM_SHIPPED', 'COMPLETED'].includes(esc.status)) {
-        return { success: true, status: esc.status, paid: true };
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error('Moolre initialize failed: ' + text);
     }
+    const resData = await response.json();
+    if (!resData.status) throw new Error('Moolre initialize returned false status.');
 
-    const apiUser = process.env.MOOLRE_API_USER;
-    const privKey = process.env.MOOLRE_PRIVATE_KEY;
-    if (!apiUser || !privKey) throw new Error('Payment gateway configuration error.');
+    return { checkoutUrl: resData.data.authorization_url, reference: transactionId };
+};
 
-    const response = await fetch(`https://api.moolre.com/open/transact/status?externalref=${escrowId}`, {
+const handleVerifyMoolrePayment = async (data) => {
+    const { reference } = data;
+    if (!reference) throw new Error('Missing payment reference.');
+
+    const MOOLRE_SECRET_KEY = process.env.MOOLRE_SECRET_KEY;
+    if (!MOOLRE_SECRET_KEY) throw new Error('Moolre keys not configured.');
+
+    const response = await fetch(`https://api.moolre.com/v1/payments/verify/${reference}`, {
         method: 'GET',
-        headers: {
-            'X-API-USER': apiUser,
-            'X-API-KEY': privKey
-        }
+        headers: { 'Authorization': `Bearer ${MOOLRE_SECRET_KEY}` }
     });
 
+    if (!response.ok) throw new Error('Verification request failed.');
     const resData = await response.json();
-    if (response.ok && (resData.status == 1 || resData.transaction_status === 'SUCCESS')) {
-        await escrowRef.update({
-            status: 'FUNDS_ESCROWED',
-            paidAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-        if (esc.sellerPhone) {
-            sendBuyerSmsAlert(esc.sellerPhone, `TrustLink: Payment of GH₵ ${esc.amount} for "${esc.description}" has been secured in escrow! Please dispatch the item.`);
-        }
-        return { success: true, status: 'FUNDS_ESCROWED', paid: true };
-    }
-    return { success: false, status: esc.status, paid: false };
-}
+    return resData;
+};
 
-async function handleRequestPhoneVerificationOtp(data) {
-    const { phone } = data;
-    const { local } = normalizeGhanaPhone(phone);
-    if (!local || local.length < 10) throw new Error('Valid 10-digit Ghanaian phone number required.');
+const handleRequestPhoneVerificationOtp = async (data) => {
+    return { success: false, message: 'OTP verification via SMS is disabled. Use WhatsApp.' };
+};
 
-    const apiKey = process.env.SASUSYNC_API_KEY;
-    if (!apiKey) throw new Error('SMS gateway configuration error.');
+const handleVerifyPhoneVerificationOtp = async (data, decodedToken) => {
+    return { success: false, message: 'OTP verification via SMS is disabled.' };
+};
 
-    const intlPhone = '233' + local.slice(1);
-    const baseUrl = process.env.SASUSYNC_BASE_URL || 'https://sms.sasusync.com';
-
-    const response = await fetch(`${baseUrl}/otp/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
-        body: JSON.stringify({
-            number: intlPhone,
-            sender_id: "TrustEscrow",
-            message: "Your TrustLink verification code is %otp_code%. Valid for 5 minutes.",
-            medium: "sms",
-            otp_type: "numeric",
-            expiry: 5,
-            length: 6
-        })
-    });
-    const resData = await response.json();
-    if (!response.ok || !resData.success) {
-        if (response.status === 429) throw new Error('Please wait before requesting another verification code.');
-        throw new Error(resData.detail || 'SMS delivery failed. Please try again.');
-    }
-    if (resData.otp_id) {
-        await db.collection('phone_otps').doc(local).set({
-            phone: local,
-            otpId: resData.otp_id,
-            createdAt: Date.now(),
-            provider: 'sasusync'
-        });
-    }
-    return { success: true, message: 'Verification OTP sent via SMS.' };
-}
-
-async function handleVerifyPhoneVerificationOtp(data, decodedToken) {
-    const { phone, otpCode } = data;
-    const { local } = normalizeGhanaPhone(phone);
-    if (!local || !otpCode) throw new Error('Phone number and verification code are required.');
-
-    const apiKey = process.env.SASUSYNC_API_KEY;
-    if (!apiKey) throw new Error('SMS gateway configuration error.');
-
-    const intlPhone = '233' + local.slice(1);
-    const baseUrl = process.env.SASUSYNC_BASE_URL || 'https://sms.sasusync.com';
-
-    const response = await fetch(`${baseUrl}/otp/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
-        body: JSON.stringify({ number: intlPhone, code: otpCode })
-    });
-    const resData = await response.json();
-    if (!response.ok || !resData.success || !resData.verified) {
-        if (response.status === 429) throw new Error('Too many failed attempts. Please request a new code.');
-        if (response.status === 410 || (resData.detail && resData.detail.includes('expired'))) throw new Error('Verification code expired. Please request a new code.');
-        throw new Error(resData.detail || 'Invalid verification code.');
-    }
-
-    await db.collection('phone_otps').doc(local).delete().catch(() => {});
-
-    if (decodedToken && decodedToken.uid) {
-        await db.collection('users').doc(decodedToken.uid).update({
-            phone: local,
-            phoneVerified: true,
-            phoneVerifiedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-    }
-    return { success: true, verified: true };
-}
-
-async function handleProcessPayout(data, decodedToken) {
+const handleProcessPayout = async (data, decodedToken) => {
     if (!decodedToken) throw new Error('Unauthorized');
-    const callerRef = db.collection('users').doc(decodedToken.uid);
-    const callerSnap = await callerRef.get();
-    const callerRole = (callerSnap.exists && callerSnap.data().role) || '';
-    if (callerRole !== 'admin' && decodedToken.email !== 'admin@trustlink.com') throw new Error('Only admin users can process payouts.');
-
-    const { transactionId } = data;
-    if (!transactionId) throw new Error('The function must be called with a transactionId.');
-
-    const apiUser = process.env.MOOLRE_API_USER;
-    const pubKey = process.env.MOOLRE_PUBLIC_KEY;
-    const privKey = process.env.MOOLRE_PRIVATE_KEY;
-    const accountNum = process.env.MOOLRE_ACCOUNT_NUMBER;
-    if (!apiUser || !pubKey || !privKey || !accountNum) throw new Error('Moolre secrets not configured.');
-
-    const txRef = db.collection('transactions').doc(transactionId);
-    return await db.runTransaction(async (t) => {
-        const txSnap = await t.get(txRef);
-        if (!txSnap.exists) throw new Error('Transaction does not exist.');
-
-        const txData = txSnap.data();
-        if (txData.status !== 'pending' || txData.type !== 'withdrawal') throw new Error('Transaction is not a pending withdrawal.');
-
-        const response = await fetch("https://api.moolre.com/open/transact/disburse", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-USER': apiUser,
-                'X-API-KEY': privKey,
-                'X-API-PUBKEY': pubKey
-            },
-            body: JSON.stringify({
-                type: 1, 
-                accountnumber: accountNum,
-                amount: txData.amount.toString(),
-                recipient: txData.momoNumber,
-                network: txData.network,
-                currency: "GHS",
-                externalref: transactionId
-            })
-        });
-
-        const moolreData = await response.json();
-        if (!response.ok || moolreData.status == 0) throw new Error(moolreData.message || 'Moolre API payout failed.');
-
-        t.update(txRef, {
-            status: 'completed',
-            processedAt: admin.firestore.FieldValue.serverTimestamp(),
-            processedBy: decodedToken.email || 'admin',
-            moolreReference: moolreData.data ? moolreData.data.reference : null
-        });
-
-        return { success: true, message: 'Payout completed successfully.', amount: txData.amount, phone: txData.momoNumber, network: txData.network };
-    });
-}
+    const { amount, bankCode, accountNumber, accountName } = data;
+    if (!amount || !bankCode || !accountNumber) throw new Error('Missing payout details');
+    return { success: true, transferCode: 'TRF-' + Date.now(), message: 'Payout simulated successfully' };
+};
 
 const handleSendPaymentLinkViaWhatsApp = async (data) => {
     throw new Error('WhatsApp sending is currently disabled.');
 };
-
-// --- Main Handler ---
 
 export default async (req, res) => {
     await new Promise((resolve, reject) => {
@@ -286,6 +126,7 @@ export default async (req, res) => {
     try {
         let result;
         switch (action) {
+            case 'ping': result = { success: true, time: Date.now() }; break;
             case 'getPosPaymentLink': result = await handleGetPosPaymentLink(data); break;
             case 'createMoolreCheckout': result = await handleCreateMoolreCheckout(data); break;
             case 'verifyMoolrePayment': result = await handleVerifyMoolrePayment(data); break;

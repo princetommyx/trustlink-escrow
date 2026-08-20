@@ -1,4 +1,6 @@
-import admin from 'firebase-admin';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const admin = require('firebase-admin');
 
 let app;
 let initError = null;
@@ -6,30 +8,15 @@ let initError = null;
 if (!admin.apps.length) {
     try {
         if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-            // Provided in Vercel settings as a JSON string
             let keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-            
-            // Handle escaped newlines if passed via certain CLI tools
-            if (keyString.includes('\\n')) {
-                keyString = keyString.replace(/\\n/g, '\n');
-            }
-
-            // Fallback for base64 encoded strings
+            if (keyString.includes('\\n')) keyString = keyString.replace(/\\n/g, '\n');
             if (!keyString.startsWith('{')) {
-                try {
-                    keyString = Buffer.from(keyString, 'base64').toString('utf8');
-                } catch(e) {}
+                try { keyString = Buffer.from(keyString, 'base64').toString('utf8'); } catch(e) {}
             }
-
             const serviceAccount = JSON.parse(keyString);
-            app = admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount)
-            });
-            console.log("Firebase Admin initialized successfully using service account.");
+            app = admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
         } else {
-            // Fallback (might fail in Vercel without proper env vars)
             app = admin.initializeApp();
-            console.log("Firebase Admin initialized successfully using default credentials.");
         }
     } catch (error) {
         initError = error;
@@ -39,8 +26,6 @@ if (!admin.apps.length) {
     app = admin.apps[0];
 }
 
-// Defer initialization of db and auth so the module doesn't crash on import
-// if the Firebase app failed to initialize due to invalid credentials.
 const getDb = () => {
     if (initError) throw new Error("Firebase Admin failed to initialize: " + initError.message);
     return admin.firestore();
@@ -51,16 +36,8 @@ const getAuthService = () => {
     return admin.auth();
 };
 
+const db = new Proxy({}, { get: (target, prop) => getDb()[prop] });
 
-
-// Proxy db to call getDb() under the hood, or just export it as a proxy
-const db = new Proxy({}, {
-    get: (target, prop) => {
-        return getDb()[prop];
-    }
-});
-
-// Helper to authenticate user from Authorization Header (Bearer Token)
 const authenticateToken = async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -69,30 +46,21 @@ const authenticateToken = async (req, res) => {
     }
     const idToken = authHeader.split('Bearer ')[1];
     try {
-        const decodedToken = await getAuthService().verifyIdToken(idToken);
-        return decodedToken; // contains uid, email, etc.
+        return await getAuthService().verifyIdToken(idToken);
     } catch (error) {
-        console.error('Error verifying auth token', error);
         res.status(403).json({ error: 'Unauthorized: Invalid token' });
         return null;
     }
 };
 
-// Helper: Normalize Ghana Phone Numbers
 const normalizeGhanaPhone = (phone) => {
     if (!phone) return { local: '', intl: '', raw: '' };
     let clean = phone.replace(/^whatsapp:/i, '').replace(/[^\d+]/g, '');
     let digits = clean.replace(/\+/g, '');
-
     let local = digits;
-    if (digits.startsWith('233') && digits.length === 12) {
-        local = '0' + digits.slice(3);
-    } else if (!digits.startsWith('0') && digits.length === 9) {
-        local = '0' + digits;
-    }
-
-    let intl = '+233' + local.slice(1);
-    return { local, intl, raw: phone };
+    if (digits.startsWith('233') && digits.length === 12) local = '0' + digits.slice(3);
+    else if (!digits.startsWith('0') && digits.length === 9) local = '0' + digits;
+    return { local, intl: '+233' + local.slice(1), raw: phone };
 };
 
 export { admin, db, authenticateToken, normalizeGhanaPhone };
