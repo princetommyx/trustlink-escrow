@@ -1,4 +1,5 @@
-import { auth, db, firebaseConfig, functionsApp, httpsCallable } from "./firebase-config.js";
+import { auth, db, firebaseConfig, functionsApp } from "./firebase-config.js";
+import { callApi } from "./api-client.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { onAuthStateChanged, signOut, getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, getCountFromServer, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -1266,7 +1267,7 @@ const loadPayoutsAdmin = async () => {
                     approveBtn.disabled = true;
                     approveBtn.textContent = 'Processing...';
                     try {
-                        const processPayoutFn = httpsCallable(functionsApp, 'processPayout');
+                        const processPayoutFn = callApi('processPayout');
                         await processPayoutFn({ transactionId: t.id });
                         
                         loadPayoutsAdmin();

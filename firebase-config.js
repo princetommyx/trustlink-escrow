@@ -21,7 +21,6 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functionsApp = getFunctions(app, "us-central1");
-export { httpsCallable };
 
 // Enable offline caching so data loads instantly on subsequent visits
 enableIndexedDbPersistence(db).catch((err) => {

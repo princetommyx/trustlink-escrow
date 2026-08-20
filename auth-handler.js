@@ -1,4 +1,5 @@
-import { auth, db, functionsApp, httpsCallable } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
+import { callApi } from "./api-client.js";
 import { 
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
@@ -265,7 +266,7 @@ if (signupForm) {
             if (email.endsWith("@phone.trustlink.app")) {
                 const phone = rawEmailOrPhone.replace(/\D/g, '');
                 
-                const requestOtp = httpsCallable(functionsApp, 'requestPhoneVerificationOtp');
+                const requestOtp = callApi('requestPhoneVerificationOtp');
                 await requestOtp({ phone });
                 
                 sessionStorage.setItem("pendingSignup", JSON.stringify({
@@ -525,7 +526,7 @@ if (verifyForm && window.location.pathname.includes("verify.html")) {
                 otpError.style.display = "none";
 
                 try {
-                    const verifyOtp = httpsCallable(functionsApp, 'verifyPhoneVerificationOtp');
+                    const verifyOtp = callApi('verifyPhoneVerificationOtp');
                     const res = await verifyOtp({
                         phone: pendingData.rawEmailOrPhone,
                         otpCode: otpInput.value.trim()

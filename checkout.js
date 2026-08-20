@@ -1,4 +1,5 @@
-import { db, functionsApp, httpsCallable } from "./firebase-config.js";
+import { db } from "./firebase-config.js";
+import { callApi } from "./api-client.js";
 import { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { computeFeeSplit, pickUserPhone } from "./moolre-service.js";
 
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (paymentStatus === 'success' && escrow.status === 'PENDING_PAYMENT') {
             document.getElementById('loading-text').textContent = "Verifying Payment...";
             try {
-                const verifyCallable = httpsCallable(functionsApp, 'verifyMoolrePayment');
+                const verifyCallable = callApi('verifyMoolrePayment');
                 const res = await verifyCallable({ escrowId });
                 
                 if (res.data && res.data.paid) {
@@ -177,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     btn.textContent = "Generating Secure Link...";
 
                     try {
-                        const getPosLink = httpsCallable(functionsApp, 'getPosPaymentLink');
+                        const getPosLink = callApi('getPosPaymentLink');
                         const res = await getPosLink();
 
                         if (res.data && res.data.success && res.data.link) {
@@ -210,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.getElementById('escrow-content').classList.add('hidden');
 
                     try {
-                        const verifyCallable = httpsCallable(functionsApp, 'verifyMoolrePayment');
+                        const verifyCallable = callApi('verifyMoolrePayment');
                         let attempts = 0;
                         let interval = setInterval(async () => {
                             attempts++;
@@ -255,7 +256,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         btnUssd.disabled = true;
                         
                         try {
-                            const createCheckout = httpsCallable(functionsApp, 'createMoolreCheckout');
+                            const createCheckout = callApi('createMoolreCheckout');
                             await createCheckout({
                                 escrowId,
                                 buyerPhone: phone,
@@ -270,7 +271,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             document.getElementById('escrow-content').classList.add('hidden');
                             
                             // Poll status via server-side Callable function
-                            const verifyCallable = httpsCallable(functionsApp, 'verifyMoolrePayment');
+                            const verifyCallable = callApi('verifyMoolrePayment');
                             let attempts = 0;
                             let interval = setInterval(async () => {
                                 attempts++;
