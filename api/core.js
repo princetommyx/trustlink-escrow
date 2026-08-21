@@ -203,8 +203,10 @@ async function handleProcessPayout(data) {
 
         console.log("Sending Moolre Payout:", payload);
 
-        // Route through Fixie static IP proxy so Moolre IP whitelist always matches
-        const fetchOptions = {
+        // Route through Fixie static IP proxy using undici ProxyAgent
+        const FIXIE_URL = process.env.FIXIE_URL;
+        let moolreFetch = fetch;
+        let fetchOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -213,12 +215,12 @@ async function handleProcessPayout(data) {
             },
             body: JSON.stringify(payload)
         };
-        const FIXIE_URL = process.env.FIXIE_URL;
         if (FIXIE_URL) {
-            const { HttpsProxyAgent } = require('https-proxy-agent');
-            fetchOptions.agent = new HttpsProxyAgent(FIXIE_URL);
+            const { fetch: undiciFetch, ProxyAgent } = require('undici');
+            moolreFetch = undiciFetch;
+            fetchOptions.dispatcher = new ProxyAgent(FIXIE_URL);
         }
-        const response = await fetch('https://api.moolre.com/open/transact/transfer', fetchOptions);
+        const response = await moolreFetch('https://api.moolre.com/open/transact/transfer', fetchOptions);
 
         const text = await response.text();
         let resData;
