@@ -147,12 +147,9 @@ onAuthStateChanged(auth, async (user) => {
         sessionStorage.removeItem("authToastIsError");
     }
 
-    // Now that we are verified as an admin, fetch the dashboard data
-    fetchAdminStats();
-    await loadUsersList();
-    loadDisputes();
-    loadEscrowsAdmin();
-    loadPayoutsAdmin();
+    // Now that we are verified as an admin, fetch the dashboard data in optimal sequence
+    await loadUsersList(); // Await users first so email resolution works for transactions
+    await fetchAdminStats(); // Fetches stats once and triggers dependent layouts synchronously
     loadPlatformSettings();
 });
 
@@ -679,6 +676,11 @@ const fetchAdminStats = async () => {
 
         renderDwChart();
         renderTxChart();
+
+        // Automatically trigger dependent views using the loaded raw data
+        loadDisputes();
+        loadEscrowsAdmin();
+        loadPayoutsAdmin();
     } catch (error) {
         console.error("Error loading stats:", error);
     }
@@ -1078,11 +1080,10 @@ const loadDisputes = async () => {
     const listEl = document.getElementById('admin-disputes-list');
     if (!listEl) return;
     try {
-        const snap = await getDocs(collection(db, 'escrows'));
         const disputes = [];
-        snap.forEach(d => {
-            if (normStatus(d.data().status) === 'disputed') {
-                disputes.push({ id: d.id, ...d.data() });
+        allRawEscrows.forEach(d => {
+            if (normStatus(d.status) === 'disputed') {
+                disputes.push(d);
             }
         });
 
@@ -1242,9 +1243,7 @@ const loadPayoutsAdmin = async () => {
     const tBody = document.getElementById('admin-transactions-list');
     if (!wBody && !tBody) return;
     try {
-        const snap = await getDocs(collection(db, 'transactions'));
-        const all = [];
-        snap.forEach(d => all.push({ id: d.id, ...d.data() }));
+        const all = [...allRawTransactions];
         all.sort((a, b) => {
             const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
             const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
@@ -1392,9 +1391,7 @@ const loadEscrowsAdmin = async () => {
     const tbody = document.getElementById('admin-escrows-list');
     if (!tbody) return;
     try {
-        const snap = await getDocs(collection(db, 'escrows'));
-        allEscrows = [];
-        snap.forEach(d => allEscrows.push({ id: d.id, ...d.data() }));
+        allEscrows = [...allRawEscrows];
         renderEscrowsAdmin();
     } catch (error) {
         console.error("Error loading escrows:", error);
