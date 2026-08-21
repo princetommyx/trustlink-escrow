@@ -26,9 +26,34 @@ module.exports = async (req, res) => {
 
         const transactions = txSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+        let refunded = false;
+        if (req.query.execute === 'true') {
+            // Give them back 50 GHC for example, or wait... let's check how much they lost.
+            // If we don't know exactly, we should just read it from the failed transaction, but since it wasn't saved...
+            // Let's add 50 GHC to their wallet (the waakye order amount from the chat context).
+            // Actually, let's allow passing amount via query ?execute=true&amount=50
+            const refundAmount = parseFloat(req.query.amount || 0);
+            if (refundAmount > 0) {
+                await userDoc.ref.update({
+                    walletBalance: (parseFloat(userData.walletBalance) || 0) + refundAmount
+                });
+                await db.collection('transactions').add({
+                    userId: userDoc.id,
+                    type: 'deposit',
+                    amount: refundAmount,
+                    fee: 0,
+                    status: 'completed',
+                    description: 'Refund: Automated Withdrawal Failed (System Recovery)',
+                    createdAt: db.FieldValue ? db.FieldValue.serverTimestamp() : new Date()
+                });
+                refunded = true;
+            }
+        }
+
         return res.status(200).json({
             success: true,
             user: { id: userDoc.id, walletBalance: userData.walletBalance },
+            refunded: refunded,
             transactions: transactions
         });
     } catch (e) {
