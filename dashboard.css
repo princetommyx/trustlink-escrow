@@ -2364,6 +2364,84 @@ input[type=number] {
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
 }
 
+/* ==========================================================================
+   Premium Animations & Micro-interactions
+   ========================================================================== */
+
+/* 1. Spring Physics Entrances */
+@keyframes spring-up {
+    0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+    50% { transform: translateY(-2px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 2. Seamless Routing (Slide and fade) */
+@keyframes fade-in-right {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-out-left {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-20px); }
+}
+
+/* Button & Card Haptics */
+.btn, button, .btn-icon, .btn-primary, .btn-outline, .btn-state-btn {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease, background-color 0.15s ease !important;
+}
+.btn:active, button:active, .btn-icon:active, .btn-primary:active, .btn-outline:active {
+    transform: scale(0.96) !important;
+}
+
+.portal-card, .order-ledger-row, .stat-card {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.portal-card:active, .order-ledger-row:active {
+    transform: scale(0.98);
+    background-color: #F8FAFC;
+}
+
+/* Modal Enhancements */
+.modal-overlay {
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+.modal-content {
+    animation: spring-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both !important;
+    transition: height 0.3s ease, transform 0.3s ease !important;
+}
+
+/* Copy Action Morph */
+.copy-morph-success {
+    background: #D1FAE5 !important;
+    border-color: #10B981 !important;
+    color: #065F46 !important;
+}
+.copy-morph-success svg {
+    color: #10B981 !important;
+    animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes pop-in {
+    0% { transform: scale(0.5); opacity: 0; }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Staggered Lists */
+.stagger-item {
+    opacity: 0;
+    animation: fade-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Count Up Number */
+.number-ticker {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+}
+
 
 
 

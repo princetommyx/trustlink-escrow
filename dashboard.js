@@ -27,6 +27,20 @@ const loadPlatformSettings = async () => {
 };
 loadPlatformSettings();
 
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const current = progress * (end - start) + start;
+        obj.textContent = `GH₵ ${current.toFixed(2)}`;
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
 const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
 ));
@@ -59,22 +73,21 @@ navItems.forEach(item => {
         }
 
         if (currentView && currentView !== targetView) {
-            // Smoothly fade out current view
-            currentView.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-            currentView.style.opacity = '0';
-            currentView.style.transform = 'translateY(10px)';
+            // Smoothly slide and fade out current view
+            currentView.style.animation = 'fade-out-left 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards';
             
             setTimeout(() => {
                 currentView.classList.add('hidden');
-                currentView.style.opacity = '';
-                currentView.style.transform = '';
+                currentView.style.animation = '';
                 
                 if (targetView) {
                     targetView.classList.remove('hidden');
+                    targetView.style.animation = 'fade-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards';
                 }
-            }, 200);
+            }, 250);
         } else if (!currentView && targetView) {
             targetView.classList.remove('hidden');
+            targetView.style.animation = 'fade-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards';
         }
     });
 });
@@ -277,13 +290,15 @@ onAuthStateChanged(auth, async (user) => {
                 }
 
                 currentBalance = parseFloat(data.walletBalance || 0);
-                const balance = currentBalance.toFixed(2);
-                document.getElementById('overview-balance').textContent = `GH₵ ${balance}`;
-                if(document.getElementById('verification-email-text')) {
-                    document.getElementById('verification-email-text').textContent = data.email || user.email;
+                const overviewBalanceEl = document.getElementById('overview-balance');
+                if (overviewBalanceEl) {
+                    const currentVal = parseFloat(overviewBalanceEl.textContent.replace(/[^\d.-]/g, '')) || 0;
+                    animateValue(overviewBalanceEl, currentVal, currentBalance, 1000);
                 }
-                if(document.getElementById('wallet-available-balance')) {
-                    document.getElementById('wallet-available-balance').textContent = `GH₵ ${balance}`;
+                const walletBalanceEl = document.getElementById('wallet-available-balance');
+                if (walletBalanceEl) {
+                    const currentVal = parseFloat(walletBalanceEl.textContent.replace(/[^\d.-]/g, '')) || 0;
+                    animateValue(walletBalanceEl, currentVal, currentBalance, 1000);
                 }
 
                 if(!currentUser) {
@@ -649,7 +664,7 @@ function loadEscrows() {
                 return timeB - timeA;
             });
             
-            sortedDocs.forEach((data) => {
+            sortedDocs.forEach((data, index) => {
                 const escrowId = data.id;
                 allLoadedSellerEscrows.push(data);
                 maybeSendDeliveryReminder(escrowId, data);
@@ -673,7 +688,7 @@ function loadEscrows() {
                     const checkoutUrl = `${window.location.origin}/checkout.html?id=${escrowId}`;
                     actionBtn = `
                         <div class="order-action-group">
-                            <button type="button" class="btn-order-action btn-order-copy" onclick="window.copyToClipboard('${checkoutUrl}')" title="Copy checkout link">
+                            <button type="button" class="btn-order-action btn-order-copy" onclick="window.copyToClipboard('${checkoutUrl}', this)" title="Copy checkout link">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
                                 </svg>
@@ -716,7 +731,7 @@ function loadEscrows() {
 
                 const formattedAmount = Number(data.amount || data.totalAmount || data.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 sellerEscrowsContainer.innerHTML += `
-                    <div class="order-ledger-row">
+                    <div class="order-ledger-row stagger-item" style="animation-delay: ${index * 0.05}s">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                             <span style="font-weight: 700; color: #0F172A; font-size: 1rem;">${escapeHtml(data.description || data.productName || 'Order')} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
@@ -755,7 +770,7 @@ function loadEscrows() {
                 return timeB - timeA;
             });
             
-            sortedDocs.forEach((data) => {
+            sortedDocs.forEach((data, index) => {
                 const escrowId = data.id;
                 allLoadedBuyerEscrows.push(data);
                 maybeSendDeliveryReminder(escrowId, data);
@@ -797,7 +812,7 @@ function loadEscrows() {
 
                 const buyerAmount = Number(data.amount || data.totalAmount || data.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 buyerEscrowsContainer.innerHTML += `
-                    <div class="order-ledger-row">
+                    <div class="order-ledger-row stagger-item" style="animation-delay: ${index * 0.05}s">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                             <span style="font-weight: 700; color: #0F172A; font-size: 1rem;">${escapeHtml(data.description || data.productName || 'Order')} - #${escrowId.substring(0, 8).toUpperCase()}</span>
                             ${statusUI}
@@ -813,7 +828,7 @@ function loadEscrows() {
 }
 
 // Global functions for inline HTML event handlers
-window.copyToClipboard = async (text) => {
+window.copyToClipboard = async (text, btnElement) => {
     let copied = false;
     try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -842,6 +857,15 @@ window.copyToClipboard = async (text) => {
     }
 
     if (copied) {
+        if (btnElement) {
+            btnElement.classList.add('copy-morph-success');
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span>COPIED</span>`;
+            setTimeout(() => {
+                btnElement.classList.remove('copy-morph-success');
+                btnElement.innerHTML = originalHtml;
+            }, 1500);
+        }
         if (typeof showModernToast === 'function') {
             showModernToast("Link Copied!", "Payment link copied to clipboard. You can now paste and send it to the buyer.", "success");
         } else if (typeof window.showModernToast === 'function') {
