@@ -641,10 +641,17 @@ function loadEscrows() {
             // Remove old seller activities
             recentActivities = recentActivities.filter(a => a.type !== 'seller');
             
-            snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const escrowId = docSnap.id;
-                allLoadedSellerEscrows.push({ id: escrowId, ...data });
+            // Map and sort client-side by createdAt descending (newest first)
+            const sortedDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            sortedDocs.sort((a, b) => {
+                const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+                const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+                return timeB - timeA;
+            });
+            
+            sortedDocs.forEach((data) => {
+                const escrowId = data.id;
+                allLoadedSellerEscrows.push(data);
                 maybeSendDeliveryReminder(escrowId, data);
                 
                 if(data.createdAt) {
@@ -740,10 +747,17 @@ function loadEscrows() {
             // Remove old buyer activities
             recentActivities = recentActivities.filter(a => a.type !== 'buyer');
             
-            snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const escrowId = docSnap.id;
-                allLoadedBuyerEscrows.push({ id: escrowId, ...data });
+            // Map and sort client-side by createdAt descending (newest first)
+            const sortedDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            sortedDocs.sort((a, b) => {
+                const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+                const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+                return timeB - timeA;
+            });
+            
+            sortedDocs.forEach((data) => {
+                const escrowId = data.id;
+                allLoadedBuyerEscrows.push(data);
                 maybeSendDeliveryReminder(escrowId, data);
                 
                 if(data.createdAt) {
