@@ -180,18 +180,28 @@ async function handleProcessPayout(data) {
     
     const MOOLRE_SECRET_KEY = process.env.MOOLRE_SECRET_KEY;
     const MOOLRE_API_USER   = process.env.MOOLRE_API_USER;
+    const MOOLRE_ACCOUNT_NUM = process.env.MOOLRE_ACCOUNT_NUMBER;
     
     if (!MOOLRE_SECRET_KEY || !MOOLRE_API_USER) {
         return { success: false, message: 'Payout API credentials missing on server.' };
     }
 
+    let channel = '1'; // Default MTN
+    if (bankCode === 'VODAFONE' || bankCode === 'TELECEL') channel = '6';
+    else if (bankCode === 'TIGO' || bankCode === 'AIRTELTIGO' || bankCode === 'AT') channel = '7';
+
     try {
         const payload = {
+            type: 1,
             amount: parseFloat(amount),
-            bankCode: bankCode,
-            accountNumber: accountNumber,
+            receiver: accountNumber,
+            channel: channel,
+            currency: 'GHS',
+            accountnumber: MOOLRE_ACCOUNT_NUM,
             externalref: 'WD-' + Date.now() + '-' + Math.floor(Math.random() * 1000)
         };
+
+        console.log("Sending Moolre Payout:", payload);
 
         const response = await fetch('https://api.moolre.com/open/transact/transfer', {
             method: 'POST',
