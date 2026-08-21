@@ -1109,16 +1109,15 @@ input[type=number] {
     .dashboard-layout { flex-direction: column; }
     .dashboard-main { margin-left: 0; margin-bottom: calc(70px + env(safe-area-inset-bottom)); }
     .dashboard-topbar {
-        margin: 0 !important;
+        margin: calc(env(safe-area-inset-top, 0px) + 16px) 16px 0 16px !important;
         top: 0 !important;
-        border-radius: 0 0 16px 16px !important;
-        border-top: none !important;
-        border-left: none !important;
-        border-right: none !important;
-        border-bottom: 1px solid #E2E8F0 !important;
-        padding: calc(6px + env(safe-area-inset-top, 0px)) 16px 6px 16px !important;
-        background: #FFFFFF !important;
-        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        padding: 12px 20px !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04) !important;
         position: sticky !important;
         z-index: 100 !important;
         height: 60px !important;
@@ -1134,6 +1133,7 @@ input[type=number] {
     .topbar-left {
         display: flex !important;
         align-items: center !important;
+        justify-content: space-between !important;
         gap: 10px !important;
         flex: 1 !important;
         min-width: 0 !important;
@@ -1168,8 +1168,8 @@ input[type=number] {
         min-height: 38px !important;
         padding: 0 !important;
         border-radius: 10px !important;
-        border: 1px solid #E2E8F0 !important;
-        background: #F8FAFC !important;
+        border: none !important;
+        background: transparent !important;
         color: #334155 !important;
         cursor: pointer !important;
         flex-shrink: 0 !important;
@@ -1178,7 +1178,7 @@ input[type=number] {
         transition: all 0.2s ease !important;
     }
     #topbar-menu-toggle:hover {
-        background: #F1F5F9 !important;
+        background: rgba(15, 23, 42, 0.05) !important;
         color: #0F172A !important;
     }
     /* Hide view title in topbar on mobile to eliminate overcrowding */
@@ -1187,12 +1187,7 @@ input[type=number] {
         display: none !important;
     }
     .topbar-actions {
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        flex-shrink: 0 !important;
-        flex-wrap: nowrap !important;
-        justify-content: flex-end !important;
+        display: none !important;
     }
     .topbar-actions .btn-icon,
     #btn-notifications,
