@@ -48,12 +48,12 @@
                         
                         <div class="form-group">
                             <label for="name">Name</label>
-                            <input type="text" id="name" placeholder="John Doe" required>
+                            <input type="text" id="name" placeholder="John Doe" pattern="^[A-Za-zÀ-ÖØ-öø-ÿ\s\'\.\-]+$" title="Names should only contain letters, spaces, hyphens, or apostrophes. No numbers allowed." required>
                         </div>
 
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" id="email" placeholder="example@email.com" required>
+                            <input type="email" id="email" placeholder="example@email.com" pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" title="Please enter a valid email address (e.g. you@example.com)" required>
                         </div>
                         
                         <div class="form-group">
