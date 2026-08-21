@@ -43,19 +43,38 @@ navItems.forEach(item => {
         const targetId = item.getAttribute('data-target');
         if (!targetId) return;
 
-        // Remove active class from all
+        // Remove active class from all nav items
         navItems.forEach(nav => nav.classList.remove('active'));
-        views.forEach(view => view.classList.add('hidden'));
         
         // Add active to all matching nav items (sidebar + bottom nav)
         document.querySelectorAll(`.nav-item[data-target="${targetId}"]`).forEach(nav => nav.classList.add('active'));
+        
         const targetView = document.getElementById(targetId);
-        if (targetView) targetView.classList.remove('hidden');
+        const currentView = Array.from(views).find(view => !view.classList.contains('hidden'));
         
         // Update Title
         const navTextEl = item.querySelector('.nav-text');
         if (navTextEl && topbarTitle) {
             topbarTitle.textContent = navTextEl.textContent.trim();
+        }
+
+        if (currentView && currentView !== targetView) {
+            // Smoothly fade out current view
+            currentView.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+            currentView.style.opacity = '0';
+            currentView.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+                currentView.classList.add('hidden');
+                currentView.style.opacity = '';
+                currentView.style.transform = '';
+                
+                if (targetView) {
+                    targetView.classList.remove('hidden');
+                }
+            }, 200);
+        } else if (!currentView && targetView) {
+            targetView.classList.remove('hidden');
         }
     });
 });
