@@ -1813,54 +1813,44 @@ if (withdrawForm) {
         submitBtn.textContent = 'Submitting...';
 
         try {
-            // Lock the funds immediately, then record the pending request.
-            await updateDoc(doc(db, "users", currentUser.uid), {
-                walletBalance: currentBalance - amount
-            });
-            const txRef = await addDoc(collection(db, "transactions"), {
-                userId: currentUser.uid,
-                type: 'withdrawal',
-                amount: amount,
-                fee: 0,
-                status: 'pending',
-                description: `Withdrawal to ${phone}`,
-                momoNumber: phone,
-                network: network,
-                createdAt: serverTimestamp()
-            });
-
             // Auto-process payout directly
             try {
+                // Generate internal tx ID
+                const internalTxId = 'WD-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                
                 const processPayoutFn = callApi('processPayout');
                 const payoutRes = await processPayoutFn({
                     amount: amount,
                     bankCode: network,
                     accountNumber: phone,
-                    transactionId: txRef.id
+                    transactionId: internalTxId
                 });
                 
                 if (!payoutRes || !payoutRes.data || !payoutRes.data.success) {
                     throw new Error(payoutRes?.data?.message || "Payout failed via API");
                 }
                 
-                await updateDoc(txRef, {
+                // Only create transaction log on success (transactions are immutable)
+                await addDoc(collection(db, "transactions"), {
+                    userId: currentUser.uid,
+                    type: 'withdrawal',
+                    amount: amount,
+                    fee: 0,
                     status: 'completed',
+                    description: `Withdrawal to ${phone}`,
+                    momoNumber: phone,
+                    network: network,
+                    createdAt: serverTimestamp(),
                     processedAt: serverTimestamp(),
-                    processedBy: 'auto'
+                    processedBy: 'auto',
+                    reference: internalTxId
                 });
 
                 alert("Withdrawal Successful!\n\nYour funds have been instantly sent to your mobile money wallet.");
                 withdrawForm.reset();
                 closeWithdrawModal();
             } catch (payoutError) {
-                // If payout fails, refund the user
-                await updateDoc(txRef, {
-                    status: 'failed',
-                    error: payoutError.message,
-                    processedAt: serverTimestamp(),
-                    processedBy: 'auto'
-                });
-                
+                // Refund the user's wallet since payout failed
                 const userSnap = await getDoc(doc(db, "users", currentUser.uid));
                 if (userSnap.exists()) {
                     const latestBal = parseFloat(userSnap.data().walletBalance || 0);
@@ -1869,14 +1859,20 @@ if (withdrawForm) {
                     });
                 }
                 
+                // Add a failed record for transparency
                 await addDoc(collection(db, "transactions"), {
                     userId: currentUser.uid,
-                    type: 'deposit',
+                    type: 'withdrawal',
                     amount: amount,
                     fee: 0,
-                    status: 'completed',
-                    description: 'Refund: Automated Withdrawal Failed',
-                    createdAt: serverTimestamp()
+                    status: 'failed',
+                    description: `Failed withdrawal to ${phone}`,
+                    momoNumber: phone,
+                    network: network,
+                    error: payoutError.message,
+                    createdAt: serverTimestamp(),
+                    processedAt: serverTimestamp(),
+                    processedBy: 'auto'
                 });
 
                 alert(`Automated Withdrawal Failed: ${payoutError.message}\n\nYour funds have been instantly refunded.`);

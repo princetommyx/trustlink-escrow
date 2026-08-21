@@ -2047,62 +2047,58 @@ if (withdrawForm) {
         }
 
         const submitBtn = withdrawForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn ? submitBtn.textContent : 'Request Withdrawal';
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
 
         try {
-            // Lock the funds immediately, then record the pending request.
+            // Lock the funds immediately
             await updateDoc(doc(db, "users", currentUser.uid), {
                 walletBalance: currentBalance - amount
-            });
-            const txRef = await addDoc(collection(db, "transactions"), {
-                userId: currentUser.uid,
-                type: 'withdrawal',
-                amount: amount,
-                fee: 0,
-                status: 'pending',
-                description: `Withdrawal to ${phone}`,
-                momoNumber: phone,
-                network: network,
-                createdAt: serverTimestamp()
             });
 
             // Auto-process payout directly
             try {
+                // Generate internal tx ID
+                const internalTxId = 'WD-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                
                 const processPayoutFn = callApi('processPayout');
                 const payoutRes = await processPayoutFn({
                     amount: amount,
                     bankCode: network,
                     accountNumber: phone,
-                    transactionId: txRef.id
+                    transactionId: internalTxId
                 });
                 
                 if (!payoutRes || !payoutRes.data || !payoutRes.data.success) {
                     throw new Error(payoutRes?.data?.message || "Payout failed via API");
                 }
                 
-                await updateDoc(txRef, {
+                // Only create transaction log on success (transactions are immutable)
+                await addDoc(collection(db, "transactions"), {
+                    userId: currentUser.uid,
+                    type: 'withdrawal',
+                    amount: amount,
+                    fee: 0,
                     status: 'completed',
+                    description: `Withdrawal to ${phone}`,
+                    momoNumber: phone,
+                    network: network,
+                    createdAt: serverTimestamp(),
                     processedAt: serverTimestamp(),
-                    processedBy: 'auto'
+                    processedBy: 'auto',
+                    reference: internalTxId
                 });
                 
                 // Try sending SMS for automated withdrawal success
                 try {
-                    await sendEscrowStatusSMS(phone, `TrustLink: Your automated withdrawal of GH₵ ${amount.toFixed(2)} has been sent to your mobile money wallet.`, `${txRef.id}-payout`);
+                    await sendEscrowStatusSMS(phone, `TrustLink: Your automated withdrawal of GH₵ ${amount.toFixed(2)} has been sent to your mobile money wallet.`, `${internalTxId}-payout`);
                 } catch(smsErr) { console.warn("Withdrawal SMS failed", smsErr); }
 
                 showModernToast("Withdrawal Successful", "Your funds have been instantly sent to your mobile money wallet.", "success");
                 withdrawForm.reset();
                 closeWithdrawModal();
             } catch (payoutError) {
-                // If payout fails, refund the user!
-                await updateDoc(txRef, {
-                    status: 'failed',
-                    error: payoutError.message,
-                    processedAt: serverTimestamp(),
-                    processedBy: 'auto'
-                });
                 // Refund the balance
                 const userSnap = await getDoc(doc(db, "users", currentUser.uid));
                 if (userSnap.exists()) {
@@ -2112,18 +2108,25 @@ if (withdrawForm) {
                     });
                 }
                 
-                // Log refund deposit
+                // Log failed withdrawal directly
                 await addDoc(collection(db, "transactions"), {
                     userId: currentUser.uid,
-                    type: 'deposit',
+                    type: 'withdrawal',
                     amount: amount,
                     fee: 0,
-                    status: 'completed',
-                    description: 'Refund: Automated Withdrawal Failed',
-                    createdAt: serverTimestamp()
+                    status: 'failed',
+                    description: `Failed withdrawal to ${phone}`,
+                    momoNumber: phone,
+                    network: network,
+                    error: payoutError.message,
+                    createdAt: serverTimestamp(),
+                    processedAt: serverTimestamp(),
+                    processedBy: 'auto'
                 });
 
-                showModernToast("Automated Withdrawal Failed", `${payoutError.message}. Your funds have been instantly refunded.`, "error");
+                showModernToast("Withdrawal Failed", `Payout failed: ${payoutError.message}. Funds refunded to wallet.`, "error");
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             }
 
         } catch (error) {

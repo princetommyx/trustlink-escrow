@@ -177,7 +177,46 @@ async function handleGetPosPaymentLink(data) {
 async function handleProcessPayout(data) {
     const { amount, bankCode, accountNumber } = data || {};
     if (!amount || !bankCode || !accountNumber) throw new Error('Missing payout details.');
-    return { success: true, transferCode: 'TRF-' + Date.now(), message: 'Payout initiated successfully.' };
+    
+    const MOOLRE_SECRET_KEY = process.env.MOOLRE_SECRET_KEY;
+    const MOOLRE_API_USER   = process.env.MOOLRE_API_USER;
+    
+    if (!MOOLRE_SECRET_KEY || !MOOLRE_API_USER) {
+        return { success: false, message: 'Payout API credentials missing on server.' };
+    }
+
+    try {
+        const payload = {
+            amount: parseFloat(amount),
+            bankCode: bankCode,
+            accountNumber: accountNumber,
+            externalref: 'WD-' + Date.now() + '-' + Math.floor(Math.random() * 1000)
+        };
+
+        const response = await fetch('https://api.moolre.com/open/transact/transfer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-USER': MOOLRE_API_USER,
+                'X-API-PRIKEY': MOOLRE_SECRET_KEY
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+        let resData;
+        try { resData = JSON.parse(text); } catch(e) { throw new Error("Invalid response from Moolre: " + text.slice(0, 100)); }
+
+        if (!response.ok || resData.status === 0 || resData.code === 'AIN01') {
+            console.error("Moolre Payout Failed:", resData);
+            return { success: false, message: resData.message || 'Payout failed at gateway' };
+        }
+
+        return { success: true, transferCode: resData.data?.reference || payload.externalref, message: 'Payout initiated successfully.' };
+    } catch(err) {
+        console.error("Moolre Payout Error:", err.message);
+        return { success: false, message: err.message };
+    }
 }
 
 module.exports = async (req, res) => {
