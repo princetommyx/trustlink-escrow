@@ -18,6 +18,16 @@ module.exports = async (req, res) => {
         MOOLRE_PUBLIC_KEY:  MOOLRE_PUBLIC_KEY  ? `SET (${MOOLRE_PUBLIC_KEY.length} chars)`  : 'MISSING',
     };
 
+    // Get this server's outbound IP address
+    let serverOutboundIP = 'unknown';
+    try {
+        const ipRes = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipRes.json();
+        serverOutboundIP = ipData.ip;
+    } catch(e) {
+        serverOutboundIP = 'Could not detect: ' + e.message;
+    }
+
     if (!MOOLRE_SECRET_KEY || !MOOLRE_API_USER || !MOOLRE_ACCOUNT_NUM) {
         return res.status(200).json({ error: 'Missing env vars', envCheck });
     }
@@ -81,5 +91,5 @@ module.exports = async (req, res) => {
         tryPubKey()
     ]);
 
-    return res.status(200).json({ envCheck, results });
+    return res.status(200).json({ envCheck, serverOutboundIP, results });
 };
