@@ -1,22 +1,7 @@
 module.exports = async (req, res) => {
     try {
-        const admin = require('firebase-admin');
-        const { getApps, initializeApp, cert } = require('firebase-admin/app');
-        const { getFirestore } = require('firebase-admin/firestore');
-        
-        let app;
-        if (!getApps().length) {
-            let key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '';
-            if (key.includes('\\n')) key = key.replace(/\\n/g, '\n');
-            if (key && !key.startsWith('{')) {
-                try { key = Buffer.from(key, 'base64').toString('utf8'); } catch(e) {}
-            }
-            app = initializeApp({ credential: cert(JSON.parse(key)) });
-        } else {
-            app = getApps()[0];
-        }
-        
-        const db = getFirestore(app);
+        const { db, admin } = require('./_firebase-admin.js');
+        if (!db) return res.status(500).json({ error: 'DB not initialized' });
         
         const usersRef = db.collection('users');
         const querySnapshot = await usersRef.where('momoNumber', '==', '0208842410').get();
