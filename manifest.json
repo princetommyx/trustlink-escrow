@@ -1,0 +1,17 @@
+{
+  "name": "TrustLink Escrow",
+  "short_name": "TrustLink",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#EEF2F6",
+  "theme_color": "#EEF2F6",
+  "description": "Secure asynchronous escrow platform for social media vendors.",
+  "icons": [
+    {
+      "src": "img/logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
