@@ -22,41 +22,64 @@ module.exports = async (req, res) => {
         return res.status(200).json({ error: 'Missing env vars', envCheck });
     }
 
-    // Try a minimal payout call to Moolre
-    const payload = {
+    const basePayload = {
         type: 1,
         amount: 1,
         receiver: '0208842410',
-        channel: '6', // Telecel
+        channel: '6',
         currency: 'GHS',
         accountnumber: MOOLRE_ACCOUNT_NUM,
-        externalref: 'DEBUG-' + Date.now()
     };
 
-    let moolreResponse = null;
-    let moolreStatus = null;
-    let moolreText = null;
-    try {
-        const r = await fetch('https://api.moolre.com/open/transact/transfer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-USER': MOOLRE_API_USER,
-                'X-API-KEY':  MOOLRE_SECRET_KEY
-            },
-            body: JSON.stringify(payload)
-        });
-        moolreStatus = r.status;
-        moolreText   = await r.text();
-        try { moolreResponse = JSON.parse(moolreText); } catch(e) { moolreResponse = moolreText; }
-    } catch(e) {
-        moolreText = 'FETCH ERROR: ' + e.message;
+    async function tryHeader(headerName) {
+        const payload = { ...basePayload, externalref: 'DBG-' + headerName.replace(/[^A-Z]/g,'') + '-' + Date.now() };
+        try {
+            const r = await fetch('https://api.moolre.com/open/transact/transfer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-USER': MOOLRE_API_USER,
+                    [headerName]: MOOLRE_SECRET_KEY
+                },
+                body: JSON.stringify(payload)
+            });
+            const text = await r.text();
+            let json;
+            try { json = JSON.parse(text); } catch(e) { json = text; }
+            return { headerUsed: headerName, httpStatus: r.status, response: json };
+        } catch(e) {
+            return { headerUsed: headerName, error: e.message };
+        }
     }
 
-    return res.status(200).json({
-        envCheck,
-        payloadSent: payload,
-        moolreHttpStatus: moolreStatus,
-        moolreResponse
-    });
+    // Also try with PUBLIC key using X-API-PUBKEY
+    async function tryPubKey() {
+        const payload = { ...basePayload, externalref: 'DBG-PUBKEY-' + Date.now() };
+        try {
+            const r = await fetch('https://api.moolre.com/open/transact/transfer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-USER': MOOLRE_API_USER,
+                    'X-API-PUBKEY': MOOLRE_PUBLIC_KEY
+                },
+                body: JSON.stringify(payload)
+            });
+            const text = await r.text();
+            let json;
+            try { json = JSON.parse(text); } catch(e) { json = text; }
+            return { headerUsed: 'X-API-PUBKEY (public key)', httpStatus: r.status, response: json };
+        } catch(e) {
+            return { headerUsed: 'X-API-PUBKEY', error: e.message };
+        }
+    }
+
+    const results = await Promise.all([
+        tryHeader('X-API-KEY'),
+        tryHeader('X-API-PRIKEY'),
+        tryHeader('X-API-PRIVATE'),
+        tryPubKey()
+    ]);
+
+    return res.status(200).json({ envCheck, results });
 };
