@@ -154,7 +154,7 @@ async function handleVerifyMoolrePayment(data) {
     const response = await fetch(`https://api.moolre.com/embed/verify/${encodeURIComponent(reference)}`, {
         headers: {
             'X-API-USER': MOOLRE_API_USER,
-            'X-API-PRIKEY': MOOLRE_SECRET_KEY
+            'X-API-KEY': MOOLRE_SECRET_KEY
         }
     });
 
@@ -198,7 +198,7 @@ async function handleProcessPayout(data) {
             headers: {
                 'Content-Type': 'application/json',
                 'X-API-USER': MOOLRE_API_USER,
-                'X-API-PRIKEY': MOOLRE_SECRET_KEY
+                'X-API-KEY': MOOLRE_SECRET_KEY
             },
             body: JSON.stringify(payload)
         });
