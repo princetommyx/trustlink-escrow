@@ -94,9 +94,7 @@
                     <a href="index.html" class="logo">
                         <img src="img/logo.png" alt="TrustLink Logo">
                     </a>
-                    <button id="topbar-menu-toggle" class="mobile-menu-btn btn-icon" aria-label="Toggle Navigation">
-                        <span></span><span></span><span></span>
-                    </button>
+                    <button id="topbar-menu-toggle" class="btn-icon" aria-label="Toggle Navigation"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg></button>
                     <h1 class="topbar-title" id="current-view-title">Overview</h1>
                 </div>
                 <div class="topbar-actions">
@@ -838,7 +836,6 @@
                 if (window.innerWidth <= 768) {
                     sidebar.classList.toggle('open');
                     backdrop.classList.toggle('active');
-                    mobileMenuBtn?.classList.toggle('active');
                 }
             }
 
@@ -847,13 +844,11 @@
                 if (window.innerWidth <= 768) {
                     sidebar.classList.remove('open');
                     backdrop.classList.remove('active');
-                    mobileMenuBtn?.classList.remove('active');
                 }
             });
             backdrop?.addEventListener('click', () => {
                 sidebar.classList.remove('open');
                 backdrop.classList.remove('active');
-                mobileMenuBtn?.classList.remove('active');
             });
 
             // Also close drawer if a sidebar nav item is clicked on mobile
@@ -863,7 +858,6 @@
                     if (window.innerWidth <= 768) {
                         sidebar.classList.remove('open');
                         backdrop.classList.remove('active');
-                        mobileMenuBtn?.classList.remove('active');
                     }
                 });
             });
