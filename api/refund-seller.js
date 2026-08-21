@@ -20,8 +20,7 @@ module.exports = async (req, res) => {
         // Let's just return the user data so we can see their balance and transactions.
         const txSnap = await db.collection('transactions')
                                .where('userId', '==', userDoc.id)
-                               .orderBy('createdAt', 'desc')
-                               .limit(10)
+                               .limit(20)
                                .get();
 
         const transactions = txSnap.docs.map(d => ({ id: d.id, ...d.data() }));
