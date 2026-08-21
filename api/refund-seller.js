@@ -49,6 +49,6 @@ module.exports = async (req, res) => {
         });
     } catch (e) {
         console.error("Endpoint Error:", e);
-        return res.status(500).json({ error: e.message || String(e) });
+        return res.status(500).json({ error: e.message || String(e), stack: e.stack });
     }
 };
