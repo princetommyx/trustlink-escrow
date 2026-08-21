@@ -40,6 +40,18 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    const url = new URL(event.request.url);
+
+    // Skip cross-origin requests (e.g., Google APIs, Firestore)
+    if (url.origin !== self.location.origin) {
+        return;
+    }
+
+    // Skip Firebase reserved URLs used for Authentication
+    if (url.pathname.startsWith('/__/')) {
+        return;
+    }
+
     // Network-first strategy with cache fallback
     event.respondWith(
         fetch(event.request).then((response) => {
