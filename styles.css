@@ -1145,7 +1145,7 @@ h4 {
 /* Modern Toast UI — Floating card drops from top */
 #modern-toast-container {
     position: fixed;
-    top: 0;
+    top: 1px; /* Offset to prevent iOS Safari from inheriting background color into status bar */
     left: 0;
     right: 0;
     z-index: 10000;
@@ -1164,9 +1164,9 @@ h4 {
     display: flex;
     align-items: center;
     gap: 13px;
-    transform: translateY(calc(-100% - env(safe-area-inset-top, 0px) - 20px));
+    transform: translateY(-30px);
     opacity: 0;
-    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
     pointer-events: auto;
     position: relative;
     overflow: hidden;
@@ -1185,7 +1185,7 @@ h4 {
 }
 
 .modern-toast.hide {
-    transform: translateY(calc(-100% - env(safe-area-inset-top, 0px) - 20px));
+    transform: translateY(-30px);
     opacity: 0;
 }
 
