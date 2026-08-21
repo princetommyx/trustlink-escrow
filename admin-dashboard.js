@@ -132,6 +132,20 @@ onAuthStateChanged(auth, async (user) => {
 
     // Initialize session inactivity tracker for admin (15m idle)
     initSessionTracker({ auth, userType: 'admin' });
+    
+    // Show pending auth toast if any
+    const pendingToast = sessionStorage.getItem("authToast");
+    if (pendingToast) {
+        const type = sessionStorage.getItem("authToastType") || (sessionStorage.getItem("authToastIsError") === "true" ? "error" : "success");
+        if (typeof showModernToast === 'function') {
+            showModernToast(pendingToast, "", type);
+        } else if (typeof window.showModernToast === 'function') {
+            window.showModernToast(pendingToast, "", type);
+        }
+        sessionStorage.removeItem("authToast");
+        sessionStorage.removeItem("authToastType");
+        sessionStorage.removeItem("authToastIsError");
+    }
 
     // Now that we are verified as an admin, fetch the dashboard data
     fetchAdminStats();

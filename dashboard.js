@@ -197,6 +197,20 @@ onAuthStateChanged(auth, async (user) => {
     // Initialize session inactivity tracker
     initSessionTracker({ auth, userType: 'user' });
     
+    // Show pending auth toast if any
+    const pendingToast = sessionStorage.getItem("authToast");
+    if (pendingToast) {
+        const type = sessionStorage.getItem("authToastType") || (sessionStorage.getItem("authToastIsError") === "true" ? "error" : "success");
+        if (typeof showModernToast === 'function') {
+            showModernToast(pendingToast, "", type);
+        } else if (typeof window.showModernToast === 'function') {
+            window.showModernToast(pendingToast, "", type);
+        }
+        sessionStorage.removeItem("authToast");
+        sessionStorage.removeItem("authToastType");
+        sessionStorage.removeItem("authToastIsError");
+    }
+    
     try {
         onSnapshot(doc(db, "users", user.uid), (docSnap) => {
             if (docSnap.exists()) {
