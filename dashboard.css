@@ -2426,11 +2426,7 @@ input[type=number] {
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Staggered Lists */
-.stagger-item {
-    opacity: 0;
-    animation: fade-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
+
 
 /* Count Up Number */
 .number-ticker {
