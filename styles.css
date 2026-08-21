@@ -1153,6 +1153,7 @@ h4 {
     flex-direction: column;
     gap: 0;
     pointer-events: none;
+    padding-top: env(safe-area-inset-top, 0px);
 }
 
 .modern-toast {
