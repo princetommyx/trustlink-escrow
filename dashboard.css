@@ -1151,10 +1151,10 @@ input[type=number] {
     .topbar-left .logo img,
     .dashboard-topbar .logo img {
         transform: none !important;
-        height: 32px !important;
+        height: 48px !important;
         width: auto !important;
-        max-height: 34px !important;
-        max-width: 120px !important;
+        max-height: 50px !important;
+        max-width: 160px !important;
         object-fit: contain !important;
         display: block !important;
     }
