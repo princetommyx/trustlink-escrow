@@ -1,4 +1,7 @@
 // /api/ai-proxy.js
+import { db } from './_firebase-admin.js';
+import { enforceUserAndIpRateLimit } from './_utils/rate-limiter.js';
+
 export default async function handler(req, res) {
     // 1. Only allow POST requests
     if (req.method !== 'POST') {
@@ -6,6 +9,27 @@ export default async function handler(req, res) {
     }
 
     try {
+        // Enforce Authentication / User Identification
+        // In a production app, verify this via a secure auth token, not just a header
+        const userId = req.headers['x-user-id'] || req.body.userId;
+        if (!userId) {
+            return res.status(401).json({ error: 'Unauthorized: Missing User ID' });
+        }
+
+        // Apply Rate Limiting Middleware
+        const isAllowed = await enforceUserAndIpRateLimit(req, res, {
+            userId: userId,
+            db: db,
+            userMaxDailyRequests: 50,  // Daily quota per user
+            ipMaxRequests: 10,         // Max requests per IP window
+            ipWindowSeconds: 60,       // 1 minute window for IP
+            keyPrefix: 'ai_proxy'
+        });
+
+        if (!isAllowed) {
+            return; // Rate limiter already sent the 429 response
+        }
+
         const { prompt } = req.body;
 
         // 2. Validate and sanitize input

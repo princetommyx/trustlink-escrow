@@ -111,3 +111,82 @@ export function enforceRateLimit(req, res, options = {}) {
 
   return true;
 }
+
+/**
+ * Middleware helper that enforces both IP-based (in-memory) and User-based (database) rate limits.
+ * @param {import('http').IncomingMessage} req
+ * @param {import('http').ServerResponse} res
+ * @param {Object} options
+ * @param {string} options.userId - The authenticated user's ID.
+ * @param {Object} options.db - Firestore or database instance for usage tracking.
+ * @param {number} [options.userMaxDailyRequests=50] - Max daily requests per user.
+ * @param {number} [options.ipMaxRequests=10] - Max requests per IP window.
+ * @param {number} [options.ipWindowSeconds=60] - Window duration for IP limit in seconds.
+ * @returns {Promise<boolean>} True if allowed, false if rate limited (response already sent).
+ */
+export async function enforceUserAndIpRateLimit(req, res, options = {}) {
+  const {
+    userId,
+    db,
+    userMaxDailyRequests = 50,
+    ipMaxRequests = 10,
+    ipWindowSeconds = 60,
+    keyPrefix = 'global'
+  } = options;
+
+  // 1. IP-based Rate Limiting (In-Memory Sliding Window)
+  const ipAllowed = enforceRateLimit(req, res, {
+    maxRequests: ipMaxRequests,
+    windowSeconds: ipWindowSeconds,
+    keyPrefix
+  });
+
+  if (!ipAllowed) {
+    // enforceRateLimit automatically handles the 429 response
+    return false;
+  }
+
+  // 2. User-based Rate Limiting (Database Backed)
+  if (userId && db) {
+    try {
+      // Get current date string (YYYY-MM-DD) for daily reset
+      const today = new Date().toISOString().split('T')[0];
+      const usageRef = db.collection('user_usage_limits').doc(`${userId}_${today}`);
+      
+      const usageDoc = await usageRef.get();
+      let currentUsage = 0;
+
+      if (usageDoc.exists) {
+        currentUsage = usageDoc.data().count || 0;
+      }
+
+      if (currentUsage >= userMaxDailyRequests) {
+        res.setHeader('X-User-RateLimit-Limit', userMaxDailyRequests.toString());
+        res.setHeader('X-User-RateLimit-Remaining', '0');
+        res.status(429).json({
+          error: 'Too Many Requests',
+          message: 'Daily user generation limit exceeded. Please try again tomorrow.'
+        });
+        return false;
+      }
+
+      // Increment usage count for the user
+      await usageRef.set({
+        count: currentUsage + 1,
+        lastUpdated: new Date()
+      }, { merge: true });
+
+      res.setHeader('X-User-RateLimit-Limit', userMaxDailyRequests.toString());
+      res.setHeader('X-User-RateLimit-Remaining', (userMaxDailyRequests - (currentUsage + 1)).toString());
+
+    } catch (error) {
+      console.error('Failed to check user rate limits in database:', error);
+      // In production, you might want to return 500 here, or fail open.
+      // We will fail closed to prevent abuse if DB goes down during an attack.
+      res.status(500).json({ error: 'Internal Server Error' });
+      return false;
+    }
+  }
+
+  return true;
+}
