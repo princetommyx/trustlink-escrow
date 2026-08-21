@@ -72,22 +72,44 @@ navItems.forEach(item => {
             topbarTitle.textContent = navTextEl.textContent.trim();
         }
 
-        if (currentView && currentView !== targetView) {
-            // Smoothly slide and fade out current view
-            currentView.style.animation = 'fade-out-left 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-            
-            setTimeout(() => {
+        const doTransition = () => {
+            if (currentView) {
                 currentView.classList.add('hidden');
                 currentView.style.animation = '';
-                
-                if (targetView) {
-                    targetView.classList.remove('hidden');
-                    targetView.style.animation = 'fade-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-                }
-            }, 250);
+                currentView.style.opacity = '';
+                currentView.style.transform = '';
+            }
+            if (targetView) {
+                targetView.classList.remove('hidden');
+                targetView.style.animation = '';
+                targetView.style.opacity = '';
+                targetView.style.transform = '';
+            }
+        };
+
+        if (currentView && currentView !== targetView) {
+            if (document.startViewTransition) {
+                document.startViewTransition(doTransition);
+            } else {
+                currentView.style.transition = 'opacity 0.15s ease';
+                currentView.style.opacity = '0';
+                setTimeout(() => {
+                    doTransition();
+                    if (targetView) {
+                        targetView.style.opacity = '0';
+                        targetView.style.transition = 'none';
+                        void targetView.offsetWidth;
+                        targetView.style.transition = 'opacity 0.15s ease';
+                        targetView.style.opacity = '1';
+                        setTimeout(() => {
+                            targetView.style.transition = '';
+                            targetView.style.opacity = '';
+                        }, 150);
+                    }
+                }, 150);
+            }
         } else if (!currentView && targetView) {
-            targetView.classList.remove('hidden');
-            targetView.style.animation = 'fade-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+            doTransition();
         }
     });
 });
@@ -97,11 +119,51 @@ const btnSettingsNav = document.getElementById('btn-settings-nav');
 if (btnSettingsNav) {
     btnSettingsNav.addEventListener('click', (e) => {
         e.preventDefault();
-        navItems.forEach(nav => nav.classList.remove('active'));
-        views.forEach(view => view.classList.add('hidden'));
+        const targetView = document.getElementById('view-settings');
+        const currentView = Array.from(views).find(view => !view.classList.contains('hidden'));
         
-        document.getElementById('view-settings').classList.remove('hidden');
+        navItems.forEach(nav => nav.classList.remove('active'));
         topbarTitle.textContent = 'Settings';
+        
+        const doTransition = () => {
+            if (currentView) {
+                currentView.classList.add('hidden');
+                currentView.style.animation = '';
+                currentView.style.opacity = '';
+                currentView.style.transform = '';
+            }
+            if (targetView) {
+                targetView.classList.remove('hidden');
+                targetView.style.animation = '';
+                targetView.style.opacity = '';
+                targetView.style.transform = '';
+            }
+        };
+
+        if (currentView && currentView !== targetView) {
+            if (document.startViewTransition) {
+                document.startViewTransition(doTransition);
+            } else {
+                currentView.style.transition = 'opacity 0.15s ease';
+                currentView.style.opacity = '0';
+                setTimeout(() => {
+                    doTransition();
+                    if (targetView) {
+                        targetView.style.opacity = '0';
+                        targetView.style.transition = 'none';
+                        void targetView.offsetWidth;
+                        targetView.style.transition = 'opacity 0.15s ease';
+                        targetView.style.opacity = '1';
+                        setTimeout(() => {
+                            targetView.style.transition = '';
+                            targetView.style.opacity = '';
+                        }, 150);
+                    }
+                }, 150);
+            }
+        } else if (!currentView && targetView) {
+            doTransition();
+        }
         
         // On mobile, close sidebar automatically
         const sidebar = document.querySelector('.sidebar');
