@@ -115,11 +115,12 @@ function showToast(message, isError = false) {
 }
 
 const pendingToast = sessionStorage.getItem("authToast");
-const pendingToastIsError = sessionStorage.getItem("authToastIsError") === "true";
+const pendingToastType = sessionStorage.getItem("authToastType") || (sessionStorage.getItem("authToastIsError") === "true" ? "error" : "success");
 if (pendingToast) {
-    showToast(pendingToast, pendingToastIsError);
+    showModernToast(pendingToast, pendingToastType);
     sessionStorage.removeItem("authToast");
     sessionStorage.removeItem("authToastIsError");
+    sessionStorage.removeItem("authToastType");
 }
 
 // Handle URL query parameters for deactivation or deletion confirmation

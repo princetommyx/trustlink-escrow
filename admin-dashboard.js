@@ -176,6 +176,7 @@ document.getElementById('btn-signout')?.addEventListener('click', async () => {
         clearUserSession();
         await signOut(auth);
         sessionStorage.setItem("authToast", "Logged out successfully");
+        sessionStorage.setItem("authToastType", "info");
         window.location.href = "admin-login.html";
     } catch (error) {
         console.error("Sign out error", error);
