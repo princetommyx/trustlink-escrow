@@ -1,8 +1,8 @@
 module.exports = async (req, res) => {
-    const { db } = require('./_firebase-admin.js');
-    if (!db) return res.status(500).json({ error: 'DB not initialized' });
-
     try {
+        const { db, admin } = require('./_firebase-admin.js');
+        if (!db) return res.status(500).json({ error: 'DB not initialized' });
+
         const usersRef = db.collection('users');
         const querySnapshot = await usersRef.where('momoNumber', '==', '0208842410').get();
 
@@ -13,11 +13,6 @@ module.exports = async (req, res) => {
         const userDoc = querySnapshot.docs[0];
         const userData = userDoc.data();
         
-        // Find the failed withdrawal transaction. Wait, if it wasn't saved, we don't know the amount!
-        // But we know from the previous transaction that it was 50 GHC for Waakye? 
-        // Wait, the user said "he recieves confirmation that money withdrew".
-        
-        // Let's just return the user data so we can see their balance and transactions.
         const txSnap = await db.collection('transactions')
                                .where('userId', '==', userDoc.id)
                                .limit(20)
@@ -27,10 +22,6 @@ module.exports = async (req, res) => {
 
         let refunded = false;
         if (req.query.execute === 'true') {
-            // Give them back 50 GHC for example, or wait... let's check how much they lost.
-            // If we don't know exactly, we should just read it from the failed transaction, but since it wasn't saved...
-            // Let's add 50 GHC to their wallet (the waakye order amount from the chat context).
-            // Actually, let's allow passing amount via query ?execute=true&amount=50
             const refundAmount = parseFloat(req.query.amount || 0);
             if (refundAmount > 0) {
                 await userDoc.ref.update({
@@ -43,7 +34,7 @@ module.exports = async (req, res) => {
                     fee: 0,
                     status: 'completed',
                     description: 'Refund: Automated Withdrawal Failed (System Recovery)',
-                    createdAt: db.FieldValue ? db.FieldValue.serverTimestamp() : new Date()
+                    createdAt: admin.firestore.FieldValue.serverTimestamp()
                 });
                 refunded = true;
             }
@@ -56,6 +47,7 @@ module.exports = async (req, res) => {
             transactions: transactions
         });
     } catch (e) {
-        return res.status(500).json({ error: e.message });
+        console.error("Endpoint Error:", e);
+        return res.status(500).json({ error: e.message || String(e) });
     }
 };
