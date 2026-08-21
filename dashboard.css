@@ -1107,9 +1107,9 @@ input[type=number] {
    ========================================== */
 @media (max-width: 768px) {
     .dashboard-layout { flex-direction: column; }
-    .dashboard-main { margin-left: 0; margin-bottom: calc(70px + env(safe-area-inset-bottom)); }
+    .dashboard-main { margin-left: 0; margin-bottom: calc(100px + env(safe-area-inset-bottom)); }
     .dashboard-topbar {
-        margin: calc(env(safe-area-inset-top, 0px) + 16px) 16px 0 16px !important;
+        margin: calc(env(safe-area-inset-top, 0px) + 16px) 16px 16px 16px !important;
         top: 0 !important;
         border-radius: 20px !important;
         border: 1px solid rgba(255, 255, 255, 0.8) !important;
@@ -1293,78 +1293,89 @@ input[type=number] {
     .nav-item:hover { transform: translateX(4px); }
     .badge { position: relative; top: auto; right: auto; margin-left: auto; font-size: 0.7rem; }
     
-    /* Mobile Bottom Nav */
+    /* Mobile Bottom Nav - Floating Pill Redesign */
     .mobile-bottom-nav {
-        display: flex; justify-content: space-around; align-items: center;
-        position: fixed; bottom: 0; left: 0; width: 100%; 
-        height: calc(64px + env(safe-area-inset-bottom));
+        display: flex; 
+        justify-content: space-around; 
+        align-items: center;
+        position: fixed; 
+        bottom: calc(16px + env(safe-area-inset-bottom)); 
+        left: 20px; 
+        right: 20px; 
+        width: auto;
+        height: 72px;
         background: #FFFFFF;
-        border-top: 1px solid #F1F5F9;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
+        border: 1px solid #E2E8F0;
+        border-radius: 40px;
+        box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.15), inset 0 0 0 4px rgba(241, 245, 249, 0.6);
         z-index: 1000;
-        padding-top: 6px;
-        padding-bottom: env(safe-area-inset-bottom);
+        padding: 6px 12px;
         text-decoration: none !important;
         -webkit-text-decoration: none !important;
+        gap: 6px;
     }
+    
     .mobile-bottom-nav a,
     .mobile-bottom-nav .nav-item,
     .mobile-bottom-nav .nav-text {
         text-decoration: none !important;
         -webkit-text-decoration: none !important;
     }
+    
     .mobile-bottom-nav .nav-item {
-        flex-direction: column; padding: 4px 2px; border-radius: 8px;
-        font-size: 0.78rem; font-weight: 500; flex: 1; text-align: center; justify-content: center;
+        display: flex;
+        flex-direction: column; 
+        padding: 8px 12px; 
+        border-radius: 30px;
+        font-size: 0.72rem; 
+        font-weight: 500; 
+        flex: 1; 
+        text-align: center; 
+        justify-content: center;
+        align-items: center;
         color: #475569;
         background: transparent;
         box-shadow: none;
-        gap: 2px;
-        text-decoration: none !important;
-        -webkit-text-decoration: none !important;
-        transition: color 0.15s ease;
+        gap: 4px;
+        transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        height: 100%;
     }
+    
     .mobile-bottom-nav a:hover,
     .mobile-bottom-nav a:focus,
     .mobile-bottom-nav a:active,
-    .mobile-bottom-nav a:visited,
     .mobile-bottom-nav .nav-item:hover,
-    .mobile-bottom-nav .nav-item:focus,
-    .mobile-bottom-nav .nav-item:active,
-    .mobile-bottom-nav .nav-item:visited {
+    .mobile-bottom-nav .nav-item:focus {
         text-decoration: none !important;
-        -webkit-text-decoration: none !important;
         transform: none;
     }
+    
     .mobile-bottom-nav .nav-text {
-        text-decoration: none !important;
-        -webkit-text-decoration: none !important;
         line-height: 1.2;
     }
-    [data-theme="light"] .mobile-bottom-nav .nav-item {
-        color: #475569;
-        text-decoration: none !important;
-    }
+    
     .mobile-bottom-nav .nav-icon { 
-        margin-right: 0; 
-        margin-bottom: 2px; 
+        margin: 0;
         display: flex; 
         align-items: center; 
         justify-content: center;
-        text-decoration: none !important;
     }
+    
     .mobile-bottom-nav .nav-icon svg {
-        width: 23px;
-        height: 23px;
+        width: 22px;
+        height: 22px;
         stroke: currentColor;
     }
+    
     .mobile-bottom-nav .nav-item.active { 
-        color: #0F172A; 
-        font-weight: 700; 
-        text-decoration: none !important;
+        background: #0F172A;
+        color: #FFFFFF !important; 
+        font-weight: 600; 
     }
+    
     .mobile-bottom-nav .nav-item.active .nav-icon svg { 
-        stroke-width: 2.1; 
+        stroke-width: 2.2; 
+        stroke: #FFFFFF;
     }
     
     /* Grids & Cards */
