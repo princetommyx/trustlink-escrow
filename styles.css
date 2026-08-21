@@ -1142,7 +1142,7 @@ h4 {
     color: #F87171;
 }
 
-/* Modern Toast UI — Full-width banner style */
+/* Modern Toast UI — Floating card drops from top */
 #modern-toast-container {
     position: fixed;
     top: 0;
@@ -1151,24 +1151,26 @@ h4 {
     z-index: 10000;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    align-items: stretch;
+    gap: 10px;
+    padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 0;
     pointer-events: none;
-    padding-top: env(safe-area-inset-top, 0px);
 }
 
 .modern-toast {
     width: 100%;
-    border-radius: 0;
-    padding: 17px 24px;
+    border-radius: 16px;
+    padding: 16px 18px;
     display: flex;
     align-items: center;
-    gap: 14px;
-    transform: translateY(-110%);
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    gap: 13px;
+    transform: translateY(calc(-100% - env(safe-area-inset-top, 0px) - 20px));
+    opacity: 0;
+    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
     pointer-events: auto;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
     background: #29B6F6;
 }
 
@@ -1177,24 +1179,31 @@ h4 {
 .modern-toast.modern-toast-warning { background: #FF9800; }
 .modern-toast.modern-toast-error   { background: #F44336; }
 
-.modern-toast.show { transform: translateY(0); }
-.modern-toast.hide { transform: translateY(-110%); }
+.modern-toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.modern-toast.hide {
+    transform: translateY(calc(-100% - env(safe-area-inset-top, 0px) - 20px));
+    opacity: 0;
+}
 
 .modern-toast-icon {
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     border: 2px solid rgba(255,255,255,0.9);
     background: transparent;
 }
 
 .modern-toast-icon svg {
-    width: 17px !important;
-    height: 17px !important;
+    width: 15px !important;
+    height: 15px !important;
     color: #fff !important;
     stroke: #fff !important;
 }
@@ -1209,7 +1218,7 @@ h4 {
 
 .modern-toast-content h4 {
     margin: 0;
-    font-size: 0.975rem;
+    font-size: 0.96rem;
     color: #fff;
     font-family: var(--font-heading);
     font-weight: 700;
@@ -1218,7 +1227,7 @@ h4 {
 
 .modern-toast-content p {
     margin: 0;
-    font-size: 0.975rem;
+    font-size: 0.96rem;
     color: rgba(255,255,255,0.93);
     line-height: 1.4;
     display: inline;
@@ -1229,9 +1238,9 @@ h4 {
     background: none;
     border: none;
     color: rgba(255,255,255,0.75);
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     cursor: pointer;
-    padding: 0 4px;
+    padding: 0 2px;
     line-height: 1;
     transition: color 0.2s;
     align-self: center;
@@ -1256,16 +1265,6 @@ h4 {
     to   { transform: scaleX(0); }
 }
 
-@media (max-width: 640px) {
-    .modern-toast {
-        padding: 15px 16px;
-        gap: 12px;
-    }
-    .modern-toast-content h4,
-    .modern-toast-content p {
-        font-size: 0.9rem;
-    }
-}
 
 
 
