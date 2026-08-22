@@ -2635,6 +2635,9 @@ const fetchProducts = async () => {
     }
 };
 
+let currentSortOrder = 'asc';
+let currentSearchQuery = '';
+
 const renderProducts = () => {
     const productsEmptyView = document.getElementById('products-empty-view');
     const productsListView = document.getElementById('products-list-view');
@@ -2646,11 +2649,29 @@ const renderProducts = () => {
             window.showProductSubView('empty');
         } else {
             window.showProductSubView('list');
-            myProducts.forEach(prod => {
-                const imgUrl = (prod.image && prod.image.startsWith('data:image/')) ? prod.image : 'https://via.placeholder.com/48';
-                productsTableBody.innerHTML += `
+            
+            let displayedProducts = [...myProducts];
+            
+            if (currentSearchQuery) {
+                const q = currentSearchQuery.toLowerCase();
+                displayedProducts = displayedProducts.filter(p => p.name?.toLowerCase().includes(q) || p.desc?.toLowerCase().includes(q));
+            }
+            
+            displayedProducts.sort((a, b) => {
+                const nameA = a.name?.toLowerCase() || '';
+                const nameB = b.name?.toLowerCase() || '';
+                if (nameA < nameB) return currentSortOrder === 'asc' ? -1 : 1;
+                if (nameA > nameB) return currentSortOrder === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            if (displayedProducts.length === 0) {
+                productsTableBody.innerHTML = '<tr><td colspan="5" style="padding: 24px; text-align: center; color: #64748B;">No products match your search.</td></tr>';
+            } else {
+                displayedProducts.forEach(prod => {
+                    const imgUrl = (prod.image && prod.image.startsWith('data:image/')) ? prod.image : 'https://via.placeholder.com/48';
+                    productsTableBody.innerHTML += `
                     <tr>
-                        <td style="padding: 16px;"><input type="checkbox" style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid #CBD5E1;"></td>
                         <td style="padding: 16px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <div style="width: 48px; height: 48px; background: #F1F5F9; border-radius: 8px; overflow: hidden;">
@@ -2673,7 +2694,8 @@ const renderProducts = () => {
                         </td>
                     </tr>
                 `;
-            });
+                });
+            }
         }
     }
 
@@ -3058,6 +3080,46 @@ document.getElementById('products-table-body')?.addEventListener('click', async 
         }
     }
 });
+
+const searchInput = document.getElementById('prod-search-input');
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        currentSearchQuery = e.target.value;
+        renderProducts();
+    });
+}
+
+const btnSort = document.getElementById('btn-sort-products');
+if (btnSort) {
+    btnSort.addEventListener('click', () => {
+        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+        btnSort.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+            </svg>
+            Sort by name ${currentSortOrder === 'asc' ? 'Z-A' : 'A-Z'}
+        `;
+        renderProducts();
+    });
+}
+
+const btnShowAll = document.getElementById('btn-show-all-products');
+if (btnShowAll) {
+    btnShowAll.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        currentSearchQuery = '';
+        currentSortOrder = 'asc';
+        if (btnSort) {
+            btnSort.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+                Sort by name A-Z
+            `;
+        }
+        renderProducts();
+    });
+}
 
 // ==========================================
 // EXCEL IMPORT / EXPORT FOR PRODUCTS

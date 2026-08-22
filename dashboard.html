@@ -689,10 +689,10 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.15 5.15a7.5 7.5 0 0011.5 11.5z" />
                                 </svg>
-                                <input type="text" placeholder="Search products..." class="modern-search-input">
+                                <input type="text" id="prod-search-input" placeholder="Search products..." class="modern-search-input">
                             </div>
                             <div style="display: flex; gap: 12px;">
-                                <button
+                                <button id="btn-show-all-products"
                                     style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 500; color: #111827; cursor: pointer;">
                                     <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;"
                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -701,7 +701,7 @@
                                     </svg>
                                     Show All Products
                                 </button>
-                                <button
+                                <button id="btn-sort-products"
                                     style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 500; color: #111827; cursor: pointer;">
                                     <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;"
                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -719,9 +719,6 @@
                                 style="width: 100%; min-width: 700px; border-collapse: collapse; text-align: left;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid #E2E8F0; background: #F8FAFC;">
-                                        <th style="padding: 16px; width: 48px;"><input type="checkbox"
-                                                style="width: 16px; height: 16px; border-radius: 4px; border: 1px solid #CBD5E1;">
-                                        </th>
                                         <th style="padding: 16px; font-weight: 600; color: #0F172A;">Product</th>
                                         <th style="padding: 16px; font-weight: 600; color: #0F172A;">Status</th>
                                         <th style="padding: 16px; font-weight: 600; color: #0F172A;">Price</th>
