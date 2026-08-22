@@ -2664,7 +2664,13 @@ const renderProducts = () => {
                         </td>
                         <td style="padding: 16px;">GH₵ ${parseFloat(prod.price).toLocaleString()}</td>
                         <td style="padding: 16px;">100 stock for 1 variants</td>
-                        <td style="padding: 16px; text-align: right;"><button class="btn-icon">⋯</button></td>
+                        <td style="padding: 16px; text-align: right; position: relative;">
+                            <button class="btn-icon prod-action-btn" data-id="${prod.id}" onclick="event.stopPropagation(); document.getElementById('prod-menu-${prod.id}').classList.toggle('hidden')">⋯</button>
+                            <div class="prod-action-menu hidden" id="prod-menu-${prod.id}" style="position: absolute; right: 40px; top: 16px; background: white; border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); z-index: 10; display: flex; flex-direction: column; min-width: 120px; overflow: hidden; text-align: left;">
+                                <button class="prod-action-edit" data-id="${prod.id}" style="padding: 12px 16px; background: transparent; border: none; text-align: left; cursor: pointer; color: #111827; font-size: 0.9rem; width: 100%;">Edit</button>
+                                <button class="prod-action-delete" data-id="${prod.id}" style="padding: 12px 16px; background: transparent; border: none; text-align: left; cursor: pointer; color: #DC2626; font-size: 0.9rem; border-top: 1px solid #E2E8F0; width: 100%;">Delete</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
@@ -2883,16 +2889,38 @@ if(formNewProd) {
                 createdAt: serverTimestamp()
             };
 
-            // 1. Instantly save to Firestore
-            const docRef = await addDoc(collection(db, "products"), newProd);
-
-            // 2. Optimistic instant local update
-            const productWithId = {
-                id: docRef.id,
-                ...newProd,
-                createdAt: new Date()
-            };
-            myProducts.unshift(productWithId);
+            const editId = formNewProd.getAttribute('data-editing-id');
+            if (editId) {
+                // Update mode
+                await updateDoc(doc(db, "products", editId), {
+                    name: newProd.name,
+                    price: newProd.price,
+                    desc: newProd.desc,
+                    image: newProd.image || ""
+                });
+                const idx = myProducts.findIndex(p => p.id === editId);
+                if (idx > -1) {
+                    myProducts[idx] = { ...myProducts[idx], ...newProd };
+                }
+                formNewProd.removeAttribute('data-editing-id');
+                if (typeof showModernToast === 'function') {
+                    showModernToast("Product Updated!", `"${name}" was updated successfully.`, "success");
+                }
+            } else {
+                // 1. Instantly save to Firestore
+                const docRef = await addDoc(collection(db, "products"), newProd);
+    
+                // 2. Optimistic instant local update
+                const productWithId = {
+                    id: docRef.id,
+                    ...newProd,
+                    createdAt: new Date()
+                };
+                myProducts.unshift(productWithId);
+                if (typeof showModernToast === 'function') {
+                    showModernToast("Product Added!", `"${name}" was added successfully.`, "success");
+                }
+            }
             renderProducts();
 
             // 3. Reset form and switch view immediately
@@ -2902,10 +2930,6 @@ if(formNewProd) {
             
             closeProdModal();
             window.showProductSubView('list');
-            
-            if (typeof showModernToast === 'function') {
-                showModernToast("Product Added!", `"${name}" was added successfully.`, "success");
-            }
 
             // 4. Background re-sync
             fetchProducts();
@@ -2949,6 +2973,16 @@ window.showProductSubView = (state) => {
 };
 
 window.openAddProductFlow = () => {
+    // Reset form to Add Mode
+    const form = document.getElementById('new-product-form');
+    if (form) {
+        form.reset();
+        form.removeAttribute('data-editing-id');
+        const header = form.querySelector('.view-header h2');
+        if (header) header.textContent = 'Add Products';
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) btn.textContent = 'Add';
+    }
     // Go to Products view first
     const productsNav = document.querySelector('.nav-item[data-target="view-products"]');
     if(productsNav) productsNav.click();
@@ -2959,6 +2993,15 @@ window.openAddProductFlow = () => {
 
 document.querySelectorAll('.btn-add-product-trigger').forEach(btn => {
     btn.addEventListener('click', () => {
+        const form = document.getElementById('new-product-form');
+        if (form) {
+            form.reset();
+            form.removeAttribute('data-editing-id');
+            const header = form.querySelector('.view-header h2');
+            if (header) header.textContent = 'Add Products';
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn) btn.textContent = 'Add';
+        }
         window.showProductSubView('add');
     });
 });
@@ -2968,6 +3011,52 @@ document.querySelectorAll('.btn-discard-product').forEach(btn => {
         // Go back to list, if list is empty renderProducts will switch to empty state
         if (typeof renderProducts === 'function') renderProducts();
     });
+});
+
+// Close product action menus when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.prod-action-btn') && !e.target.closest('.prod-action-menu')) {
+        document.querySelectorAll('.prod-action-menu').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+    }
+});
+
+document.getElementById('products-table-body')?.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('prod-action-delete')) {
+        const id = e.target.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this product?')) {
+            try {
+                await deleteDoc(doc(db, "products", id));
+                if (typeof showModernToast === 'function') showModernToast("Success", "Product deleted.", "success");
+                myProducts = myProducts.filter(p => p.id !== id);
+                renderProducts();
+            } catch (err) {
+                console.error(err);
+                if (typeof showModernToast === 'function') showModernToast("Error", "Failed to delete product.", "error");
+            }
+        }
+    } else if (e.target.classList.contains('prod-action-edit')) {
+        const id = e.target.getAttribute('data-id');
+        const prod = myProducts.find(p => p.id === id);
+        if (prod) {
+            const form = document.getElementById('new-product-form');
+            if (form) {
+                form.setAttribute('data-editing-id', id);
+                document.getElementById('new-prod-name').value = prod.name || "";
+                document.getElementById('new-prod-price').value = prod.price || "";
+                document.getElementById('new-prod-desc').value = prod.desc || "";
+                
+                const header = form.querySelector('.view-header h2');
+                if (header) header.textContent = "Edit Product";
+                const btn = form.querySelector('button[type="submit"]');
+                if (btn) btn.textContent = "Save Changes";
+                
+                window.showProductSubView('add');
+            }
+            document.querySelectorAll('.prod-action-menu').forEach(m => m.classList.add('hidden'));
+        }
+    }
 });
 
 // ==========================================
@@ -2990,10 +3079,11 @@ document.querySelectorAll('.btn-export-products').forEach(btn => {
         }));
 
         try {
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
-            XLSX.writeFile(workbook, "My_TrustLink_Products.xlsx");
+            if (!window.XLSX) throw new Error("Excel library is still loading. Please try again in a moment.");
+            const worksheet = window.XLSX.utils.json_to_sheet(exportData);
+            const workbook = window.XLSX.utils.book_new();
+            window.XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
+            window.XLSX.writeFile(workbook, "My_TrustLink_Products.xlsx");
         } catch (err) {
             console.error("Error exporting products: ", err);
             if (typeof showModernToast === 'function') showModernToast("Export Failed", "Could not generate Excel file.", "error");
@@ -3014,12 +3104,13 @@ if (importFileInput) {
         if (!file) return;
 
         try {
+            if (!window.XLSX) throw new Error("Excel library is still loading. Please try again in a moment.");
             if (typeof showModernToast === 'function') showModernToast("Importing...", "Reading your Excel file.", "info");
             const data = await file.arrayBuffer();
-            const workbook = XLSX.read(data, { type: 'array' });
+            const workbook = window.XLSX.read(data, { type: 'array' });
             const firstSheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[firstSheetName];
-            const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+            const jsonRows = window.XLSX.utils.sheet_to_json(worksheet);
 
             if (!jsonRows || jsonRows.length === 0) {
                 throw new Error("No data found in the file.");
