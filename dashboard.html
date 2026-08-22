@@ -651,6 +651,9 @@
                             <button class="btn btn-primary btn-add-product-trigger"
                                 style="background: #111827; border-radius: 24px; padding: 12px 32px; font-weight: 500;">+
                                 Add Product</button>
+                            <button class="btn btn-outline btn-import-products"
+                                style="background: white; border: 1px solid #E2E8F0; color: #111827; border-radius: 24px; padding: 12px 32px; font-weight: 500; margin-left: 8px;">
+                                Import Excel</button>
                         </div>
                     </div>
 
@@ -659,9 +662,16 @@
                         <div class="view-header"
                             style="justify-content: space-between; align-items: center; margin-bottom: 24px; display: flex;">
                             <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #111827;">Products</h2>
-                            <button class="btn btn-primary btn-add-product-trigger"
-                                style="background: #111827; border-radius: 20px; padding: 10px 20px;">+ Add
-                                Product</button>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="file" id="import-products-file" accept=".xlsx, .xls, .csv" class="hidden">
+                                <button class="btn btn-outline btn-export-products"
+                                    style="background: white; border: 1px solid #E2E8F0; color: #111827; border-radius: 20px; padding: 10px 20px;">Export</button>
+                                <button class="btn btn-outline btn-import-products"
+                                    style="background: white; border: 1px solid #E2E8F0; color: #111827; border-radius: 20px; padding: 10px 20px;">Import</button>
+                                <button class="btn btn-primary btn-add-product-trigger"
+                                    style="background: #111827; border-radius: 20px; padding: 10px 20px;">+ Add
+                                    Product</button>
+                            </div>
                         </div>
                         <div class="products-toolbar"
                             style="display: flex; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
@@ -2053,7 +2063,7 @@
     <script src="vendor/gsap.min.js"></script>
     <!-- ui-states must load before dashboard.js -->
     <script src="ui-states.js"></script>
-    <!-- Firebase SDKs -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script type="module" src="dashboard.js"></script>
 
     <!-- Mobile Drawer Logic -->

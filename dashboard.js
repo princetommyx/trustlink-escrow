@@ -2971,6 +2971,104 @@ document.querySelectorAll('.btn-discard-product').forEach(btn => {
 });
 
 // ==========================================
+// EXCEL IMPORT / EXPORT FOR PRODUCTS
+// ==========================================
+
+document.querySelectorAll('.btn-export-products').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (!myProducts || myProducts.length === 0) {
+            if (typeof showModernToast === 'function') showModernToast("Notice", "You have no products to export.", "info");
+            else alert("No products to export.");
+            return;
+        }
+        
+        const exportData = myProducts.map(p => ({
+            Name: p.name || "",
+            Price: p.price || 0,
+            Description: p.desc || "",
+            ImageURL: p.image || ""
+        }));
+
+        try {
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
+            XLSX.writeFile(workbook, "My_TrustLink_Products.xlsx");
+        } catch (err) {
+            console.error("Error exporting products: ", err);
+            if (typeof showModernToast === 'function') showModernToast("Export Failed", "Could not generate Excel file.", "error");
+        }
+    });
+});
+
+const importFileInput = document.getElementById('import-products-file');
+document.querySelectorAll('.btn-import-products').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (importFileInput) importFileInput.click();
+    });
+});
+
+if (importFileInput) {
+    importFileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            if (typeof showModernToast === 'function') showModernToast("Importing...", "Reading your Excel file.", "info");
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+
+            if (!jsonRows || jsonRows.length === 0) {
+                throw new Error("No data found in the file.");
+            }
+
+            let importCount = 0;
+            
+            for (const row of jsonRows) {
+                const name = row.Name || row.name || row.Title || row.title;
+                const price = parseFloat(row.Price || row.price || 0);
+                const desc = row.Description || row.description || row.Desc || row.desc || "";
+                const image = row.ImageURL || row.image || row.Image || "";
+
+                if (name && !isNaN(price) && price > 0) {
+                    const newProd = {
+                        name: name,
+                        price: price,
+                        desc: desc,
+                        image: image,
+                        userId: currentUser.uid,
+                        createdAt: serverTimestamp()
+                    };
+                    await addDoc(collection(db, "products"), newProd);
+                    importCount++;
+                }
+            }
+
+            if (typeof showModernToast === 'function') {
+                showModernToast("Import Complete", `Successfully imported ${importCount} products.`, "success");
+            } else {
+                alert(`Successfully imported ${importCount} products.`);
+            }
+
+            if (typeof fetchProducts === 'function') fetchProducts();
+            
+        } catch (error) {
+            console.error("Error importing products:", error);
+            if (typeof showModernToast === 'function') {
+                showModernToast("Import Failed", "Failed to parse the file. Please check the format.", "error");
+            } else {
+                alert("Import failed. Please make sure the Excel file has Name and Price columns.");
+            }
+        } finally {
+            importFileInput.value = "";
+        }
+    });
+}
+
+// ==========================================
 // API & DEVELOPER SETTINGS
 // ==========================================
 
