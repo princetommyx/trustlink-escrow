@@ -1617,3 +1617,57 @@ body.light-landing {
         padding: 14px 12px;
     }
 }
+
+/* --- Ghana Coverage Section --- */
+.light-landing .coverage-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+    border-top: 1px solid #E2E8F0;
+    padding-top: 48px;
+}
+
+.light-landing .coverage-stat h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.75rem;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 8px;
+}
+
+.light-landing .coverage-stat p {
+    color: #64748B;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 280px;
+}
+
+/* --- Footer compliance note --- */
+.light-landing .footer-compliance-note {
+    font-size: 0.8rem;
+    color: #94A3B8;
+    margin-top: 6px;
+}
+
+.light-landing .footer-compliance-note a {
+    color: #94A3B8;
+    text-decoration: underline;
+}
+
+.light-landing .footer-compliance-note a:hover {
+    color: #0F172A;
+}
+
+@media (max-width: 768px) {
+    .light-landing .coverage-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        text-align: center;
+    }
+
+    .light-landing .coverage-stat p {
+        max-width: none;
+        margin: 0 auto;
+    }
+}
