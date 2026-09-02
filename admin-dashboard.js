@@ -1156,15 +1156,17 @@ const selectDispute = (d, el) => {
     setDisputeButtonsEnabled(true);
 };
 
-const resolveDispute = async (newStatus, confirmMsg) => {
+const resolveDispute = async (resolution, confirmMsg) => {
     if (!currentDisputeId) return;
     if (!confirm(confirmMsg)) return;
     try {
-        await updateDoc(doc(db, "escrows", currentDisputeId), {
-            status: newStatus,
-            resolvedAt: new Date(),
-            resolvedBy: auth.currentUser ? auth.currentUser.email : 'admin'
-        });
+        // Both the RELEASE (pay seller, atomic wallet credit) and REFUND
+        // (real Moolre payout back to the buyer's mobile money number) paths
+        // run server-side with admin-token verification - an admin console
+        // updateDoc() can no longer move money or close out an escrow
+        // directly. See docs/SECURITY_SETUP.md.
+        const resolveFn = callApi('adminResolveDispute');
+        await resolveFn({ escrowId: currentDisputeId, resolution });
         await loadDisputes();
         fetchAdminStats();
     } catch (error) {
@@ -1173,8 +1175,8 @@ const resolveDispute = async (newStatus, confirmMsg) => {
     }
 };
 
-refundBtn?.addEventListener('click', () => resolveDispute('REFUNDED', 'Refund the escrowed funds to the buyer? This closes the dispute.'));
-releaseBtn?.addEventListener('click', () => resolveDispute('RELEASED', 'Release the escrowed funds to the seller? This closes the dispute.'));
+refundBtn?.addEventListener('click', () => resolveDispute('REFUND', 'Refund the escrowed funds to the buyer? This closes the dispute.'));
+releaseBtn?.addEventListener('click', () => resolveDispute('RELEASE', 'Release the escrowed funds to the seller? This closes the dispute.'));
 
 // -------------------------------------------------------------
 // Notification bell: open disputes + pending withdrawals

@@ -1,6 +1,6 @@
 import { db } from "./firebase-config.js";
 import { callApi } from "./api-client.js";
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { computeFeeSplit, pickUserPhone } from "./moolre-service.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -285,8 +285,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                             document.getElementById('loading-text').style.display = 'block';
                             document.getElementById('escrow-content').classList.add('hidden');
                             
-                            // Poll for confirmation (webhook updates Firestore)
+                            // Poll for confirmation. The Moolre webhook normally updates
+                            // Firestore first, but if it's delayed we also confirm
+                            // ourselves via the same server-side action (idempotent -
+                            // it independently re-verifies with Moolre and no-ops if the
+                            // webhook already escrowed the funds).
                             const verifyCallable = callApi('verifyMoolrePayment');
+                            const confirmFn = callApi('confirmEscrowFundsEscrowed');
                             let attempts = 0;
                             const interval = setInterval(async () => {
                                 attempts++;
@@ -294,6 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     const vRes = await verifyCallable({ reference });
                                     if (vRes.data && (vRes.data.paid || vRes.data.status === 'success')) {
                                         clearInterval(interval);
+                                        try { await confirmFn({ escrowId, reference }); } catch (e) { /* webhook may have already escrowed it */ }
                                         alert("Payment Successful! Funds are now securely held in escrow.");
                                         window.location.reload();
                                     }
@@ -337,12 +343,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
 
                             if (verificationRes && verificationRes.data && (verificationRes.data.paid || verificationRes.data.status === 'success' || verificationRes.data.status === 1)) {
-                                await updateDoc(docRef, {
-                                    status: 'FUNDS_ESCROWED',
-                                    manualPaymentProof: txnId,
-                                    paidAt: serverTimestamp()
-                                });
-                                
+                                // The actual status + manualPaymentProof write happens
+                                // server-side (Admin SDK) via confirmEscrowFundsEscrowed,
+                                // which independently re-verifies with Moolre before
+                                // writing anything - Firestore rules no longer allow this
+                                // client to set FUNDS_ESCROWED directly.
+                                const confirmFn = callApi('confirmEscrowFundsEscrowed');
+                                await confirmFn({ escrowId, reference: txnId });
+
                                 alert(`Payment successfully verified! Your funds are now securely held in escrow.`);
                                 window.location.reload();
                             } else {
@@ -382,57 +390,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('btn-release').addEventListener('click', async () => {
                     if(confirm("Are you sure you want to release the funds to the seller? This action cannot be undone.")) {
                         try {
-                            const sellerId = escrow.sellerId;
-                            const amount = parseFloat(escrow.amount);
-                            
-                            await updateDoc(docRef, { 
-                                status: 'COMPLETED',
-                                completedAt: serverTimestamp()
-                            });
-                            
-                            // Credit seller their full listed amount
-                            const sellerRef = doc(db, "users", sellerId);
-                            const sellerSnap = await getDoc(sellerRef);
-                            if (sellerSnap.exists()) {
-                                const currentBalance = parseFloat(sellerSnap.data().walletBalance || 0);
-                                await updateDoc(sellerRef, { walletBalance: currentBalance + amount });
-                            }
+                            // Status change + wallet credit happen server-side
+                            // (Admin SDK, atomic transaction) - Firestore rules no
+                            // longer let a client write COMPLETED or a wallet
+                            // balance directly.
+                            const releaseFn = callApi('releaseEscrowFunds');
+                            await releaseFn({ escrowId });
 
-                            // Credit Escrow Protection Fee to TrustLink's account
-                            const rawAmt = Number(escrow.amount || amount || 0);
-                            const feeSplit = computeFeeSplit(rawAmt, escrow.feePercent || 0, escrow.feeAllocation || 'buyer');
-                            const trustlinkEarning = Number(feeSplit.buyerFee || 0);
-                            if (trustlinkEarning > 0) {
-                                const platformRef = doc(db, "accounts", "trustlink");
-                                await updateDoc(platformRef, {
-                                    balance: increment(trustlinkEarning),
-                                    totalTransactions: increment(1),
-                                    lastUpdated: serverTimestamp()
-                                }).catch(async () => {
-                                    await setDoc(platformRef, {
-                                        balance: trustlinkEarning,
-                                        totalTransactions: 1,
-                                        lastUpdated: serverTimestamp()
-                                    });
-                                });
-                            }
-
-                            // Record audit log for financial settlement
-                            try {
-                                await addDoc(collection(db, "audit_logs"), {
-                                    event: 'ESCROW_RELEASE_CONFIRMED',
-                                    escrowId: escrowId,
-                                    sellerId: sellerId,
-                                    amount: amount,
-                                    status: 'COMPLETED',
-                                    actor: 'buyer',
-                                    timestamp: serverTimestamp(),
-                                    userAgent: navigator.userAgent
-                                });
-                            } catch (auditErr) {
-                                console.warn("Audit logging error:", auditErr);
-                            }
-                            
                             alert("Funds Released! Thank you for using TrustLink Escrow.");
                             window.location.reload();
                         } catch (err) {
@@ -440,30 +404,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 });
-                
+
                 document.getElementById('btn-dispute').addEventListener('click', async () => {
                     if(confirm("Are you sure you want to raise a dispute? Escrow funds will remain locked while an admin reviews the case.")) {
                         try {
-                            await updateDoc(docRef, { 
-                                status: 'DISPUTED',
-                                disputedAt: serverTimestamp()
-                            });
-
-                            // Record audit log for dispute
-                            try {
-                                await addDoc(collection(db, "audit_logs"), {
-                                    event: 'ESCROW_DISPUTE_RAISED',
-                                    escrowId: escrowId,
-                                    sellerId: escrow.sellerId || '',
-                                    amount: parseFloat(escrow.amount || 0),
-                                    status: 'DISPUTED',
-                                    actor: 'buyer',
-                                    timestamp: serverTimestamp(),
-                                    userAgent: navigator.userAgent
-                                });
-                            } catch (auditErr) {
-                                console.warn("Audit logging error:", auditErr);
-                            }
+                            const disputeFn = callApi('raiseEscrowDispute');
+                            await disputeFn({ escrowId });
 
                             alert("Dispute Raised. Support will contact you shortly.");
                             window.location.reload();

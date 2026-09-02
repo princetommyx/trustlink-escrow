@@ -3,8 +3,9 @@
 // escrow, so links cannot be forged. Each link is single-use and expires 72h
 // after dispatch. Every failure mode gets an explicit error screen.
 import { db } from "./firebase-config.js";
-import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { sha256Hex, computeFeeSplit, sendEscrowStatusSMS, pickUserPhone } from "./moolre-service.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { sha256Hex } from "./moolre-service.js";
+import { callApi } from "./api-client.js";
 
 const show = (stateId) => {
     ['state-loading', 'state-confirm', 'state-success', 'state-disputed', 'state-error'].forEach(id => {
@@ -84,66 +85,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.disabled = true;
         btn.textContent = "Confirming...";
         try {
-            await updateDoc(escrowRef, {
-                status: 'COMPLETED',
-                confirmTokenUsed: true,
-                confirmedAt: serverTimestamp()
-            });
-
-            // Credit the seller's wallet and log the payout (same as the
-            // dashboard's releaseFunds flow). Seller receives amount minus
-            // their share of the platform fee.
-            const fees = computeFeeSplit(escrow.amount, escrow.feePercent || 0, escrow.feeAllocation || 'split');
-            if (escrow.sellerId && fees.sellerNet > 0) {
-                try {
-                    const sellerRef = doc(db, "users", escrow.sellerId);
-                    const sellerSnap = await getDoc(sellerRef);
-                    if (sellerSnap.exists()) {
-                        const sellerBalance = parseFloat(sellerSnap.data().walletBalance || 0);
-                        await updateDoc(sellerRef, { walletBalance: sellerBalance + fees.sellerNet });
-
-                        // Let the seller know their money has arrived
-                        const sellerPhone = pickUserPhone(sellerSnap.data());
-                        if (sellerPhone) {
-                            try {
-                                const itemLabel = (escrow.description || 'your item').replace(/\s+/g, ' ').trim().substring(0, 60);
-                                await sendEscrowStatusSMS(sellerPhone, `TrustLink: The buyer confirmed delivery of "${itemLabel}". GH₵ ${fees.sellerNet.toFixed(2)} has been credited to your TrustLink wallet. Withdraw anytime from your dashboard.`, `${escrowId}-released`);
-                            } catch (smsErr) {
-                                console.warn("Seller release SMS failed:", smsErr);
-                            }
-                        }
-                    }
-                    await addDoc(collection(db, "transactions"), {
-                        userId: escrow.sellerId,
-                        type: 'deposit',
-                        amount: fees.sellerNet,
-                        fee: fees.totalFee,
-                        status: 'completed',
-                        description: `Escrow release: ${escrow.description || escrowId}`,
-                        escrowId: escrowId,
-                        createdAt: serverTimestamp()
-                    });
-                } catch (walletErr) {
-                    // The escrow itself is completed; wallet credit is best-effort here
-                    console.warn("Could not credit seller wallet from confirm page:", walletErr);
-                }
-            }
-
-            // Record immutable financial audit trail
-            try {
-                await addDoc(collection(db, "audit_logs"), {
-                    event: 'ESCROW_DELIVERY_CONFIRMED',
-                    escrowId: escrowId,
-                    sellerId: escrow.sellerId || '',
-                    amount: Number(escrow.amount || 0),
-                    status: 'COMPLETED',
-                    timestamp: serverTimestamp(),
-                    actor: 'buyer',
-                    userAgent: navigator.userAgent
-                });
-            } catch (auditErr) {
-                console.warn("Audit log record error:", auditErr);
-            }
+            // Status change, the single-use token check/consumption, the
+            // seller wallet credit, and the transaction ledger entry all
+            // happen atomically server-side (Admin SDK) - Firestore rules no
+            // longer allow a client to write any of these directly.
+            const releaseFn = callApi('releaseEscrowFunds');
+            await releaseFn({ escrowId, confirmToken: token });
 
             show('state-success');
         } catch (err) {
@@ -159,27 +106,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const btn = e.target;
         btn.disabled = true;
         try {
-            await updateDoc(escrowRef, {
-                status: 'DISPUTED',
-                confirmTokenUsed: true,
-                disputedAt: serverTimestamp()
-            });
-
-            // Record immutable financial audit trail for dispute
-            try {
-                await addDoc(collection(db, "audit_logs"), {
-                    event: 'ESCROW_DISPUTE_RAISED',
-                    escrowId: escrowId,
-                    sellerId: escrow.sellerId || '',
-                    amount: Number(escrow.amount || 0),
-                    status: 'DISPUTED',
-                    timestamp: serverTimestamp(),
-                    actor: 'buyer',
-                    userAgent: navigator.userAgent
-                });
-            } catch (auditErr) {
-                console.warn("Audit log record error:", auditErr);
-            }
+            const disputeFn = callApi('raiseEscrowDispute');
+            await disputeFn({ escrowId, confirmToken: token });
 
             show('state-disputed');
         } catch (err) {

@@ -70,9 +70,18 @@ service cloud.firestore {
       isValidText(request.resource.data.description, 1, 500);
 
       // Escrow state updates:
-      // 1. Seller can mark as DISPATCHED / ITEM_SHIPPED
-      // 2. Buyer can confirm delivery (COMPLETED) or raise DISPUTED
-      // 3. Admin can update or resolve disputes
+      // 1. Seller can mark as DISPATCHED / ITEM_SHIPPED (non-financial)
+      // 2. FUNDS_ESCROWED, COMPLETED, DISPUTED and REFUNDED are financial /
+      //    trust-sensitive state transitions and are written ONLY by the
+      //    Admin SDK from api/core.js's secured server actions
+      //    (confirmEscrowFundsEscrowed, releaseEscrowFunds,
+      //    raiseEscrowDispute, adminResolveDispute), which independently
+      //    verify payment with Moolre / the confirm.html single-use token /
+      //    an admin auth token before writing anything, and credit wallet
+      //    balances atomically. The Admin SDK bypasses these rules, so no
+      //    client branch below needs to (or should) allow those statuses -
+      //    see docs/SECURITY_SETUP.md.
+      // 3. Admin can still update/resolve disputes directly if needed
       // 4. Financial amount, sellerId, and createdAt are IMMUTABLE
       allow update: if (
         isAdmin() ||
@@ -80,17 +89,8 @@ service cloud.firestore {
           // Protect immutable financial fields
           request.resource.data.amount == resource.data.amount &&
           request.resource.data.sellerId == resource.data.sellerId &&
-          (
-            // Seller marking dispatch
-            (
-              isOwner(resource.data.sellerId) &&
-              request.resource.data.status in ['ITEM_SHIPPED', 'DISPATCHED', 'PENDING_PAYMENT', 'CANCELLED']
-            ) ||
-            // Buyer / Client completing delivery or raising dispute
-            (
-              request.resource.data.status in ['COMPLETED', 'DISPUTED', 'FUNDS_ESCROWED', 'FUNDED']
-            )
-          )
+          isOwner(resource.data.sellerId) &&
+          request.resource.data.status in ['ITEM_SHIPPED', 'DISPATCHED', 'PENDING_PAYMENT', 'CANCELLED']
         )
       );
 

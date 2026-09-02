@@ -1151,49 +1151,12 @@ window.dispatchItem = async (escrowId) => {
 window.releaseFunds = async (escrowId) => {
     if(confirm("Are you sure you want to release the funds to the seller? This cannot be undone.")) {
         try {
-            const escrowRef = doc(db, "escrows", escrowId);
-            const escrowSnap = await getDoc(escrowRef);
-            if (!escrowSnap.exists()) return;
-            
-            const escrowData = escrowSnap.data();
-            const sellerId = escrowData.sellerId;
-
-            // Seller receives the amount minus their share of the platform fee
-            const fees = computeFeeSplit(escrowData.amount, escrowData.feePercent || 0, escrowData.feeAllocation || 'split');
-
-            // 1. Mark escrow as COMPLETED
-            await updateDoc(escrowRef, { status: 'COMPLETED' });
-
-            // 2. Increment Seller's Wallet Balance
-            const sellerRef = doc(db, "users", sellerId);
-            const sellerSnap = await getDoc(sellerRef);
-            if (sellerSnap.exists()) {
-                const sellerBalance = parseFloat(sellerSnap.data().walletBalance || 0);
-                await updateDoc(sellerRef, { walletBalance: sellerBalance + fees.sellerNet });
-
-                // SMS the seller that their money has arrived
-                const sellerPhone = pickUserPhone(sellerSnap.data());
-                if (sellerPhone) {
-                    try {
-                        const itemLabel = (escrowData.description || 'your item').replace(/\s+/g, ' ').trim().substring(0, 60);
-                        await sendEscrowStatusSMS(sellerPhone, `TrustLink: The buyer released payment for "${itemLabel}". GH₵ ${fees.sellerNet.toFixed(2)} has been credited to your TrustLink wallet. Withdraw anytime from your dashboard.`, `${escrowId}-released`);
-                    } catch (smsErr) {
-                        console.warn("Seller release SMS failed:", smsErr);
-                    }
-                }
-            }
-
-            // 3. Record the wallet credit (and the platform's fee) in the log
-            await addDoc(collection(db, "transactions"), {
-                userId: sellerId,
-                type: 'deposit',
-                amount: fees.sellerNet,
-                fee: fees.totalFee,
-                status: 'completed',
-                description: `Escrow release: ${escrowData.description || escrowId}`,
-                escrowId: escrowId,
-                createdAt: serverTimestamp()
-            });
+            // Status change + wallet credit happen server-side (Admin SDK,
+            // atomic transaction) - Firestore rules no longer let a client
+            // write COMPLETED or a wallet balance directly. See
+            // docs/SECURITY_SETUP.md.
+            const releaseFn = callApi('releaseEscrowFunds');
+            await releaseFn({ escrowId });
 
             if (typeof showModernToast === 'function') {
                 showModernToast("Funds Released!", "Thank you for using TrustLink. Funds credited to seller.", "success");
@@ -1212,7 +1175,9 @@ window.releaseFunds = async (escrowId) => {
 window.raiseDispute = async (escrowId) => {
     if(confirm("Are you sure you want to raise a dispute? Escrow funds will remain locked.")) {
         try {
-            await updateDoc(doc(db, "escrows", escrowId), { status: 'DISPUTED' });
+            const disputeFn = callApi('raiseEscrowDispute');
+            await disputeFn({ escrowId });
+
             if (typeof showModernToast === 'function') {
                 showModernToast("Dispute Raised", "Escrow locked. TrustLink support will review and reach out.", "warning");
             }
@@ -2185,81 +2150,24 @@ if (withdrawForm) {
         submitBtn.textContent = 'Submitting...';
 
         try {
-            // Lock the funds immediately
-            await updateDoc(doc(db, "users", currentUser.uid), {
-                walletBalance: currentBalance - amount
-            });
+            // The balance debit, the real Moolre payout, the refund-on-
+            // failure, and the transaction ledger entry all happen
+            // atomically server-side (Admin SDK) - Firestore rules don't
+            // let a client write walletBalance directly, even on their own
+            // account. See docs/SECURITY_SETUP.md.
+            const withdrawFn = callApi('requestWithdrawal');
+            const res = await withdrawFn({ amount, phone, network });
 
-            // Auto-process payout directly
-            try {
-                // Generate internal tx ID
-                const internalTxId = 'WD-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-                
-                const processPayoutFn = callApi('processPayout');
-                const payoutRes = await processPayoutFn({
-                    amount: amount,
-                    bankCode: network,
-                    accountNumber: phone,
-                    transactionId: internalTxId
-                });
-                
-                if (!payoutRes || !payoutRes.data || !payoutRes.data.success) {
-                    throw new Error(payoutRes?.data?.message || "Payout failed via API");
-                }
-                
-                // Only create transaction log on success (transactions are immutable)
-                await addDoc(collection(db, "transactions"), {
-                    userId: currentUser.uid,
-                    type: 'withdrawal',
-                    amount: amount,
-                    fee: 0,
-                    status: 'completed',
-                    description: `Withdrawal to ${phone}`,
-                    momoNumber: phone,
-                    network: network,
-                    createdAt: serverTimestamp(),
-                    processedAt: serverTimestamp(),
-                    processedBy: 'auto',
-                    reference: internalTxId
-                });
-                
-                // Try sending SMS for automated withdrawal success
+            if (res && res.data && res.data.success) {
                 try {
-                    await sendEscrowStatusSMS(phone, `TrustLink: Your automated withdrawal of GH₵ ${amount.toFixed(2)} has been sent to your mobile money wallet.`, `${internalTxId}-payout`);
+                    await sendEscrowStatusSMS(phone, `TrustLink: Your automated withdrawal of GH₵ ${amount.toFixed(2)} has been sent to your mobile money wallet.`, `${res.data.reference}-payout`);
                 } catch(smsErr) { console.warn("Withdrawal SMS failed", smsErr); }
 
                 showModernToast("Withdrawal Successful", "Your funds have been instantly sent to your mobile money wallet.", "success");
                 withdrawForm.reset();
                 closeWithdrawModal();
-            } catch (payoutError) {
-                // Refund the balance
-                const userSnap = await getDoc(doc(db, "users", currentUser.uid));
-                if (userSnap.exists()) {
-                    const latestBal = parseFloat(userSnap.data().walletBalance || 0);
-                    await updateDoc(doc(db, "users", currentUser.uid), {
-                        walletBalance: latestBal + amount
-                    });
-                }
-                
-                // Log failed withdrawal directly
-                await addDoc(collection(db, "transactions"), {
-                    userId: currentUser.uid,
-                    type: 'withdrawal',
-                    amount: amount,
-                    fee: 0,
-                    status: 'failed',
-                    description: `Failed withdrawal to ${phone}`,
-                    momoNumber: phone,
-                    network: network,
-                    error: payoutError.message,
-                    createdAt: serverTimestamp(),
-                    processedAt: serverTimestamp(),
-                    processedBy: 'auto'
-                });
-
-                showModernToast("Withdrawal Failed", `Payout failed: ${payoutError.message}. Funds refunded to wallet.`, "error");
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
+            } else {
+                throw new Error("Withdrawal could not be completed.");
             }
 
         } catch (error) {

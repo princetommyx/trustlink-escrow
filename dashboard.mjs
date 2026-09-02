@@ -763,49 +763,12 @@ window.dispatchItem = async (escrowId) => {
 window.releaseFunds = async (escrowId) => {
     if(confirm("Are you sure you want to release the funds to the seller? This cannot be undone.")) {
         try {
-            const escrowRef = doc(db, "escrows", escrowId);
-            const escrowSnap = await getDoc(escrowRef);
-            if (!escrowSnap.exists()) return;
-            
-            const escrowData = escrowSnap.data();
-            const sellerId = escrowData.sellerId;
-
-            // Seller receives the amount minus their share of the platform fee
-            const fees = computeFeeSplit(escrowData.amount, escrowData.feePercent || 0, escrowData.feeAllocation || 'split');
-
-            // 1. Mark escrow as COMPLETED
-            await updateDoc(escrowRef, { status: 'COMPLETED' });
-
-            // 2. Increment Seller's Wallet Balance
-            const sellerRef = doc(db, "users", sellerId);
-            const sellerSnap = await getDoc(sellerRef);
-            if (sellerSnap.exists()) {
-                const sellerBalance = parseFloat(sellerSnap.data().walletBalance || 0);
-                await updateDoc(sellerRef, { walletBalance: sellerBalance + fees.sellerNet });
-
-                // SMS the seller that their money has arrived
-                const sellerPhone = pickUserPhone(sellerSnap.data());
-                if (sellerPhone) {
-                    try {
-                        const itemLabel = (escrowData.description || 'your item').replace(/\s+/g, ' ').trim().substring(0, 60);
-                        await sendEscrowStatusSMS(sellerPhone, `TrustLink: The buyer released payment for "${itemLabel}". GH₵ ${fees.sellerNet.toFixed(2)} has been credited to your TrustLink wallet. Withdraw anytime from your dashboard.`, `${escrowId}-released`);
-                    } catch (smsErr) {
-                        console.warn("Seller release SMS failed:", smsErr);
-                    }
-                }
-            }
-
-            // 3. Record the wallet credit (and the platform's fee) in the log
-            await addDoc(collection(db, "transactions"), {
-                userId: sellerId,
-                type: 'deposit',
-                amount: fees.sellerNet,
-                fee: fees.totalFee,
-                status: 'completed',
-                description: `Escrow release: ${escrowData.description || escrowId}`,
-                escrowId: escrowId,
-                createdAt: serverTimestamp()
-            });
+            // Status change + wallet credit happen server-side (Admin SDK,
+            // atomic transaction) - Firestore rules no longer let a client
+            // write COMPLETED or a wallet balance directly. See
+            // docs/SECURITY_SETUP.md.
+            const releaseFn = callApi('releaseEscrowFunds');
+            await releaseFn({ escrowId });
 
             if (typeof showModernToast === 'function') {
                 showModernToast("Funds Released!", "Thank you for using TrustLink. Funds credited to seller.", "success");
@@ -824,7 +787,9 @@ window.releaseFunds = async (escrowId) => {
 window.raiseDispute = async (escrowId) => {
     if(confirm("Are you sure you want to raise a dispute? Escrow funds will remain locked.")) {
         try {
-            await updateDoc(doc(db, "escrows", escrowId), { status: 'DISPUTED' });
+            const disputeFn = callApi('raiseEscrowDispute');
+            await disputeFn({ escrowId });
+
             if (typeof showModernToast === 'function') {
                 showModernToast("Dispute Raised", "Escrow locked. TrustLink support will review and reach out.", "warning");
             }
