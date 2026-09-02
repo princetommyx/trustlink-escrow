@@ -1473,3 +1473,147 @@ body.light-landing {
         padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
     }
 }
+
+/* --- Trust Strip: Powered by real Ghanaian payment rails --- */
+.light-landing .trust-strip-section {
+    padding: 56px 0;
+}
+
+.light-landing .trust-strip-label {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #64748B;
+    margin-bottom: 28px;
+}
+
+.light-landing .trust-strip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.light-landing .trust-strip-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 18px 16px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #111827;
+}
+
+.light-landing .trust-strip-logo {
+    height: 22px;
+    width: auto;
+    max-width: 90px;
+    object-fit: contain;
+}
+
+.light-landing .trust-strip-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* --- Buyer / Seller Protection --- */
+.light-landing .protection-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 56px;
+}
+
+.light-landing .protection-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 36px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+}
+
+.light-landing .protection-tag {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    margin-bottom: 24px;
+}
+
+.light-landing .protection-tag-buyer {
+    background: #EFF6FF;
+    color: #2563EB;
+}
+
+.light-landing .protection-tag-seller {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+.light-landing .protection-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.light-landing .protection-list li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.light-landing .protection-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.light-landing .protection-list h4 {
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+}
+
+.light-landing .protection-list p {
+    color: #64748B;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .light-landing .protection-grid {
+        grid-template-columns: 1fr;
+        margin-top: 40px;
+    }
+
+    .light-landing .protection-card {
+        padding: 28px 24px;
+    }
+
+    .light-landing .trust-strip-card {
+        font-size: 0.85rem;
+        padding: 14px 12px;
+    }
+}
