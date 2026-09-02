@@ -6,8 +6,18 @@ body.light-landing {
     -webkit-font-smoothing: antialiased;
 }
 
+/* Editorial display type (page/section headlines, hero, big stat numbers)
+   vs. UI type (card titles, labels, buttons). Restrained on purpose: only
+   the large headline level goes serif, everything else stays Outfit/Inter -
+   applying serif everywhere reads as decorative rather than intentional. */
 .light-landing h1,
 .light-landing h2,
+.light-landing .display-serif {
+    font-family: 'Lora', Georgia, serif;
+    font-weight: 600;
+    color: #030712;
+}
+
 .light-landing h3,
 .light-landing h4 {
     font-family: 'Outfit', sans-serif;
@@ -1521,7 +1531,7 @@ body.light-landing {
 .light-landing .trust-strip-mark {
     width: 28px;
     height: 28px;
-    border-radius: 8px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1583,7 +1593,7 @@ body.light-landing {
 .light-landing .protection-icon {
     width: 40px;
     height: 40px;
-    border-radius: 10px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1629,9 +1639,9 @@ body.light-landing {
 }
 
 .light-landing .coverage-stat h3 {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Lora', Georgia, serif;
     font-size: 2.75rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #0F172A;
     margin-bottom: 8px;
 }
@@ -1669,5 +1679,90 @@ body.light-landing {
     .light-landing .coverage-stat p {
         max-width: none;
         margin: 0 auto;
+    }
+}
+
+/* --- Hero: full-bleed editorial photo --- */
+.light-landing .hero-photo {
+    position: relative;
+    min-height: 92vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    padding-bottom: 88px;
+}
+
+.light-landing .hero-photo-bg {
+    position: absolute;
+    inset: 0;
+    background-color: #0F172A; /* fallback while the photo loads (or if it can't) */
+    background-size: cover;
+    background-position: center 20%;
+    background-repeat: no-repeat;
+}
+
+.light-landing .hero-photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.55) 55%, rgba(15, 23, 42, 0.92) 100%);
+}
+
+.light-landing .hero-photo-content {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+}
+
+.light-landing .hero-title-photo {
+    color: #FFFFFF;
+    font-size: clamp(2.5rem, 5vw + 1rem, 4.25rem);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 24px;
+}
+
+.light-landing .text-accent {
+    color: #60A5FA;
+}
+
+.light-landing .hero-subtitle-photo {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 1.15rem;
+    max-width: 520px;
+    margin-bottom: 40px;
+}
+
+.light-landing .badge-on-dark {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #FFFFFF;
+    backdrop-filter: blur(6px);
+}
+
+.light-landing .btn-outline-on-dark {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #FFFFFF;
+}
+
+.light-landing .btn-outline-on-dark:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+    .light-landing .hero-photo {
+        min-height: 82vh;
+        padding-bottom: 56px;
+    }
+
+    .light-landing .hero-cta {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .light-landing .hero-cta .btn {
+        width: 100%;
+        text-align: center;
     }
 }

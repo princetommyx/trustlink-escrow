@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&family=Lora:ital,wght@0,500;0,600;0,700;1,500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="landing.css">
@@ -144,30 +144,24 @@
         </nav>
 
         <main>
-            <!-- Hero Section -->
-            <section class="hero" style="padding-top: 165px; text-align: center; min-height: auto;">
-                <div class="container">
-                    <div class="hero-content fade-up" style="max-width: 800px; margin: 0 auto;">
-                        <div class="badge">Powered by Moolre <img src="moolre.webp" alt="Moolre Logo" class="badge-logo"
-                                style="display:inline-block; vertical-align:middle; margin-left: 6px;"></div>
-                        <h1 class="hero-title"
-                            style="font-size: clamp(2.5rem, 5vw + 1rem, 4.5rem); letter-spacing: -0.03em;">Protected
-                            Mobile Money<br><span class="text-gradient">payments for social-media sales</span></h1>
-                        <p class="hero-subtitle" style="font-size: 1.25rem; margin: 24px auto 40px;">Create a secure
-                            payment link, share it in any DM, and receive your money after the buyer confirms delivery.
-                        </p>
+            <!-- Hero Section: full-bleed editorial photo treatment -->
+            <section class="hero-photo">
+                <div class="hero-photo-bg"
+                    style="background-image: url('https://images.unsplash.com/photo-1649532345697-12f864b9062b?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1920');"
+                    role="img" aria-label="A Ghanaian social-media vendor checking an order on his phone"></div>
+                <div class="hero-photo-overlay"></div>
+                <div class="container hero-photo-content">
+                    <div class="badge badge-on-dark fade-up">Powered by Moolre <img src="moolre.webp" alt="Moolre Logo" class="badge-logo"
+                            style="display:inline-block; vertical-align:middle; margin-left: 6px;"></div>
+                    <h1 class="hero-title hero-title-photo fade-up">Protected <span class="text-accent">Mobile
+                            Money</span><br>payments for social-media sales</h1>
+                    <p class="hero-subtitle hero-subtitle-photo fade-up">Create a secure payment link, share it in
+                        any DM, and receive your money after the buyer confirms delivery.</p>
 
-                        <div class="hero-cta" style="justify-content: center; flex-wrap: wrap;">
-                            <a href="signup.html" class="btn btn-primary btn-large">Create a TrustLink</a>
-                            <a href="#how-it-works" class="btn btn-outline btn-large">See how it works</a>
-                        </div>
-                    </div>
-
-                    <div class="hero-visual fade-up"
-                        style="margin-top: 60px; position: relative; display: inline-block;">
-                        <img src="img/hero-vendor-new.jpg" alt="Social Seller" class="hero-central-image"
-                             style="border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);"
-                             loading="eager" decoding="async">
+                    <div class="hero-cta fade-up">
+                        <a href="signup.html" class="btn btn-primary btn-large">Create a TrustLink</a>
+                        <a href="#how-it-works" class="btn btn-outline btn-large btn-outline-on-dark">See how it
+                            works</a>
                     </div>
                 </div>
             </section>
@@ -581,7 +575,7 @@
                         <!-- Step 1 -->
                         <div class="bento-card" style="padding: 32px; min-height: 250px;">
                             <div
-                                style="width: 48px; height: 48px; border-radius: 12px; background: #E0F2FE; color: #0284C7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
+                                style="width: 48px; height: 48px; border-radius: 50%; background: #E0F2FE; color: #0284C7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
                                 1</div>
                             <h4 style="font-size: 1.25rem; margin-bottom: 8px;">Create a Link</h4>
                             <p style="color: #64748B; font-size: 0.95rem;">Provide the buyer's details along with the
@@ -592,7 +586,7 @@
                         <!-- Step 2 -->
                         <div class="bento-card" style="padding: 32px; min-height: 250px;">
                             <div
-                                style="width: 48px; height: 48px; border-radius: 12px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
+                                style="width: 48px; height: 48px; border-radius: 50%; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
                                 2</div>
                             <h4 style="font-size: 1.25rem; margin-bottom: 8px;">Buyer Deposits</h4>
                             <p style="color: #64748B; font-size: 0.95rem;">The buyer pays securely via Mobile Money. The
@@ -602,7 +596,7 @@
                         <!-- Step 3 -->
                         <div class="bento-card" style="padding: 32px; min-height: 250px;">
                             <div
-                                style="width: 48px; height: 48px; border-radius: 12px; background: #F3E8FF; color: #9333EA; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
+                                style="width: 48px; height: 48px; border-radius: 50%; background: #F3E8FF; color: #9333EA; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
                                 3</div>
                             <h4 style="font-size: 1.25rem; margin-bottom: 8px;">Ship & Fulfill</h4>
                             <p style="color: #64748B; font-size: 0.95rem;">Deliver the product or service with
@@ -612,7 +606,7 @@
                         <!-- Step 4 -->
                         <div class="bento-card" style="padding: 32px; min-height: 250px;">
                             <div
-                                style="width: 48px; height: 48px; border-radius: 12px; background: #DCFCE7; color: #15803D; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
+                                style="width: 48px; height: 48px; border-radius: 50%; background: #DCFCE7; color: #15803D; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
                                 4</div>
                             <h4 style="font-size: 1.25rem; margin-bottom: 8px;">Get Paid</h4>
                             <p style="color: #64748B; font-size: 0.95rem;">Once the buyer confirms receipt, funds are

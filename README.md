@@ -90,7 +90,7 @@ Social commerce in Ghana relies heavily on Direct Messages (DMs) across WhatsApp
 We welcome contributions to TrustLink Escrow! To maintain architectural integrity and design uniformity, all contributors must observe these core engineering rules:
 
 1. **Preserve the Core Stack:** Do **not** migrate the repository to React, Next.js, Vue, TypeScript, Tailwind, or external heavy frameworks.
-2. **Follow Visual Guidelines:** Inspect [docs/DESIGN_GUIDELINES.md](docs/DESIGN_GUIDELINES.md) before designing UI components. Maintain the Slate Navy (`#0F172A`), Accent Blue (`#2563EB`), and `Outfit`/`Inter` typography.
+2. **Follow Visual Guidelines:** Inspect [docs/DESIGN_GUIDELINES.md](docs/DESIGN_GUIDELINES.md) before designing UI components. Maintain the Slate Navy (`#0F172A`), Accent Blue (`#2563EB`), `Lora` editorial serif for hero/section headlines, and `Outfit`/`Inter` for everything else.
 3. **No Unverified Claims:** Do not add unverified marketing guarantees or fake metrics.
 4. **Ghana Localization:** Visible currency amounts must use `GH₵` for display and `GHS` for backend payloads.
 5. **Preserve State Machine Constants:** Do not rename database fields or state machine constants (`PENDING_PAYMENT`, `FUNDS_ESCROWED`, `ITEM_SHIPPED`, `COMPLETED`, `DISPUTED`, `REFUNDED`).

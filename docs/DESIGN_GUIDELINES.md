@@ -66,35 +66,32 @@ Match Firestore transaction states with their official color coding:
 
 ## 🔤 Typography & Font Hierarchy
 
-TrustLink uses two primary Google Fonts loaded via HTML head:
+TrustLink uses three Google Fonts loaded via HTML head:
 
-1. **Headings & Titles:** `'Outfit', sans-serif` (Weights: 500, 600, 700, 800, 900)
-2. **Body Copy, Inputs & Controls:** `'Inter', system-ui, -apple-system, sans-serif` (Weights: 400, 500, 600, 700)
-3. **Code & API Documentation:** Monospace (`'JetBrains Mono'`, `'Fira Code'`, or browser monospace)
+1. **Editorial Display (H1/H2 - hero, section headlines, big stat numbers):** `'Lora', Georgia, serif` (Weights: 500, 600, 700). Used deliberately and only at this level - it's what signals a considered, premium brand rather than a generic template. Do not apply it to card titles, labels, or UI copy.
+2. **Card & UI Titles (H3/H4), Buttons, Labels:** `'Outfit', sans-serif` (Weights: 500, 600, 700, 800, 900)
+3. **Body Copy, Inputs & Controls:** `'Inter', system-ui, -apple-system, sans-serif` (Weights: 400, 500, 600, 700)
+4. **Code & API Documentation:** Monospace (`'JetBrains Mono'`, `'Fira Code'`, or browser monospace)
 
 ### Typographic Scale
 
 ```css
-/* Hero Headings */
-.hero-title {
-    font-family: 'Outfit', sans-serif;
-    font-size: clamp(2.5rem, 5vw + 1rem, 4.5rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
+/* Hero Headings (H1) and Section Headlines (H2) - editorial serif */
+.hero-title, h1, h2 {
+    font-family: 'Lora', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     line-height: 1.1;
     color: #0F172A;
 }
-
-/* Section Headings (H2) */
+.hero-title {
+    font-size: clamp(2.5rem, 5vw + 1rem, 4.5rem);
+}
 h2 {
-    font-family: 'Outfit', sans-serif;
     font-size: clamp(1.75rem, 3vw, 2.75rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #0F172A;
 }
 
-/* Card & Component Titles (H3/H4) */
+/* Card & Component Titles (H3/H4) - stay on the sans UI face */
 h3, h4 {
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
@@ -109,6 +106,12 @@ p {
     color: #475569;
 }
 ```
+
+### Icon chips
+
+Feature/step icon chips (protection cards, "How it Works" steps, trust-strip
+marks) are circular (`border-radius: 50%`), not rounded-square - keep new
+ones consistent with this.
 
 ---
 
