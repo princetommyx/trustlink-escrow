@@ -32,8 +32,14 @@ service cloud.firestore {
     // Users Collection: Strict Profile Security & Wallet Protection
     // ---------------------------------------------------------------
     match /users/{userId} {
-      // Users can read their own profile; admins can read all; public can read basic vendor info
-      allow read: if isOwner(userId) || isAdmin() || resource.data.role == 'seller';
+      // Own profile or admin only. The previous rule also allowed ANYONE -
+      // unauthenticated included - to read any document with role == 'seller',
+      // which exposed every seller's full record: the plaintext `apiKey` that
+      // authenticates api/escrows.js (so anyone could mint escrows as that
+      // vendor), plus walletBalance, phone, momoNumber and email. No client
+      // path needs it: public pages read the denormalised sellerName off the
+      // escrow document instead.
+      allow read: if isOwner(userId) || isAdmin();
 
       // User creation during signup: wallet balances must start at 0
       allow create: if isOwner(userId) && (

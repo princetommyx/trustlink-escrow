@@ -675,7 +675,7 @@ function updateOverviewStats(timeframe) {
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" d="${arrowPath}" /></svg>
                             </div>
                             <div class="tx-info" style="display: flex; flex-direction: column; gap: 2px;">
-                                <span class="tx-name" style="font-size: 0.95rem; font-weight: 600; color: #111827;">${act.title}</span>
+                                <span class="tx-name" style="font-size: 0.95rem; font-weight: 600; color: #111827;">${escapeHtml(act.title)}</span>
                                 <span class="tx-date" style="font-size: 0.75rem; color: #64748B;">${new Date(act.time).toLocaleDateString('en-GB')}</span>
                             </div>
                         </div>
@@ -683,7 +683,7 @@ function updateOverviewStats(timeframe) {
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#94A3B8" style="width: 16px; height: 16px; transform: rotate(-45deg);">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                             </svg>
-                            <span style="font-size: 0.9rem; font-weight: 500; color: #111827; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${act.description}">${act.description.split('(')[0].trim()}</span>
+                            <span style="font-size: 0.9rem; font-weight: 500; color: #111827; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(act.description)}">${escapeHtml(String(act.description || '').split('(')[0].trim())}</span>
                         </div>
                     </div>
                 `;
