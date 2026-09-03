@@ -1540,12 +1540,21 @@
                     <select id="escrow-product-select" required>
                         <option value="" disabled selected>Loading your products...</option>
                     </select>
+                    <div id="escrow-no-products-hint" class="hidden"
+                        style="margin-top: 10px; padding: 12px 14px; border: 1px solid var(--border-light, #E2E8F0); border-radius: 10px; font-size: 0.85rem;">
+                        An order is linked to one of your products. You don't have any yet.
+                        <button type="button" id="btn-escrow-add-product" class="btn-add-product-trigger"
+                            style="margin-top: 8px; display: block; background: none; border: none; padding: 0; font: inherit; font-weight: 600; color: #2563EB; cursor: pointer; text-decoration: underline;">Add
+                            your first product</button>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label>Total Amount (GH₵)</label>
-                    <input type="number" id="escrow-amount" placeholder="0.00" min="0" step="0.01" required
+                    <input type="number" id="escrow-amount" placeholder="0.00" min="1" max="50000" step="0.01" required
                         style="color: #10B981; font-weight: bold; font-size: 1.2rem;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; display: block;">Between
+                        GH₵ 1.00 and GH₵ 50,000.00 per escrow.</span>
                 </div>
 
                 <div class="form-group">

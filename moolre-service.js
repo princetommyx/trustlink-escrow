@@ -28,6 +28,36 @@ export function formatGhanaPhoneNumber(phone) {
 }
 
 /**
+ * Validates a Ghanaian mobile money number client-side, so a typo is caught
+ * while the seller is still looking at the form rather than surfacing later
+ * as an SMS that quietly never arrives.
+ * Mirrors the prefix table in api/_utils/validator.js (kept in sync by hand:
+ * that module is server-side ESM under api/ and isn't shipped to browsers).
+ * @returns {{ valid: boolean, local: string, network: string, error?: string }}
+ */
+export function validateGhanaPhoneClient(phone) {
+    let digits = String(phone || '').replace(/[^\d]/g, '');
+    if (digits.startsWith('233') && digits.length === 12) digits = '0' + digits.slice(3);
+    if (!digits.startsWith('0') && digits.length === 9) digits = '0' + digits;
+
+    if (digits.length !== 10) {
+        return { valid: false, local: '', network: '', error: 'Enter a 10-digit Ghanaian number, e.g. 0551234567.' };
+    }
+
+    const prefixes = {
+        '024': 'MTN', '025': 'MTN', '053': 'MTN', '054': 'MTN', '055': 'MTN', '059': 'MTN',
+        '020': 'Telecel', '050': 'Telecel',
+        '026': 'AT', '027': 'AT', '028': 'AT', '056': 'AT', '057': 'AT'
+    };
+    const network = prefixes[digits.slice(0, 3)];
+    if (!network) {
+        return { valid: false, local: '', network: '', error: `${digits.slice(0, 3)} isn't a Ghanaian MTN, Telecel or AT prefix.` };
+    }
+
+    return { valid: true, local: digits, network };
+}
+
+/**
  * Formats currency in Ghana Cedis (GH₵).
  */
 export function formatCurrency(amount) {

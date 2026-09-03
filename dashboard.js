@@ -2,7 +2,7 @@ import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { generateSecureToken, sha256Hex, computeFeeSplit, pickUserPhone, normalizePhone, sendWhatsAppNotification, sendEscrowStatusSMS, sendSMSNotification, sendVerificationOTP } from "./moolre-service.js";
+import { generateSecureToken, sha256Hex, computeFeeSplit, pickUserPhone, normalizePhone, validateGhanaPhoneClient, sendWhatsAppNotification, sendEscrowStatusSMS, sendSMSNotification, sendVerificationOTP } from "./moolre-service.js";
 import { initSessionTracker, clearUserSession } from "./session-manager.js";
 import { callApi } from "./api-client.js";
 
@@ -2215,6 +2215,14 @@ const btnCancelEscrow = document.getElementById('btn-cancel-escrow');
 const formNewEscrow = document.getElementById('new-escrow-form');
 
 const openModal = () => {
+    // Stop a delivery window being set in the past - the buyer's "collect and
+    // confirm" SMS reminder fires on the last day, so a past date means it
+    // never usefully fires.
+    const today = new Date().toISOString().split('T')[0];
+    ['escrow-delivery-date-from', 'escrow-delivery-date-to'].forEach(id => {
+        document.getElementById(id)?.setAttribute('min', today);
+    });
+
     modalOverlay.classList.remove('hidden');
     // Allow display:block to apply before animating opacity
     setTimeout(() => {
@@ -2256,9 +2264,15 @@ async function populateEscrowProductSelect() {
         const snap = await getDocs(q);
         
         if (snap.empty) {
-            select.innerHTML = '<option value="" disabled>No products found. Please add a product first.</option>';
+            // The select is `required`, so with no products the seller was
+            // stuck in a modal with no way forward. Give them the action.
+            select.innerHTML = '<option value="" disabled selected>No products yet — add one to continue</option>';
+            const hint = document.getElementById('escrow-no-products-hint');
+            if (hint) hint.classList.remove('hidden');
             return;
         }
+        const hint = document.getElementById('escrow-no-products-hint');
+        if (hint) hint.classList.add('hidden');
 
         select.innerHTML = '<option value="" disabled selected>Select a product to link...</option>';
         snap.forEach(docSnap => {
@@ -2310,6 +2324,11 @@ document.addEventListener('click', (e) => {
 });
 if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
 if (btnCancelEscrow) btnCancelEscrow.addEventListener('click', closeModal);
+
+// The "add your first product" escape hatch shown when the seller has no
+// products: the .btn-add-product-trigger listener switches to the add-product
+// view, so this only has to get the escrow modal out of the way.
+document.getElementById('btn-escrow-add-product')?.addEventListener('click', closeModal);
 if (formNewEscrow) {
     formNewEscrow.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -2322,18 +2341,38 @@ if (formNewEscrow) {
         }
         
         try {
+            // An escrow created without a real seller can never be released:
+            // the payout step looks up users/{sellerId}, so a "GUEST" record
+            // would take the buyer's money with nowhere to send it.
+            if (!currentUser || !currentUser.uid) {
+                throw new Error("Your session has expired. Please sign in again before creating an order.");
+            }
+
             // Get the total amount calculated in the UI
             const amountInput = document.getElementById('escrow-amount');
             const totalAmount = amountInput ? parseFloat(amountInput.value) : 0;
-            
-            if (totalAmount <= 0) {
-                throw new Error("Total escrow amount must be greater than 0");
+
+            // These bounds mirror isValidAmount() in firestore.rules. Without
+            // them the write is rejected server-side and the seller just sees
+            // a raw "Missing or insufficient permissions" error.
+            if (!Number.isFinite(totalAmount) || totalAmount < 1) {
+                throw new Error("Enter an amount of at least GH₵ 1.00.");
+            }
+            if (totalAmount > 50000) {
+                throw new Error("Amount cannot exceed GH₵ 50,000.00 per escrow. Split larger deals into multiple orders.");
             }
 
             const description = document.getElementById('escrow-terms') ? document.getElementById('escrow-terms').value.trim() : "TrustLink Escrow Deposit";
             const buyerEmail = document.getElementById('buyer-email') ? document.getElementById('buyer-email').value.trim() : "";
             const buyerPhoneInput = document.getElementById('buyer-phone');
             const buyerPhone = buyerPhoneInput ? buyerPhoneInput.value.trim() : "";
+
+            // The checkout link reaches the buyer by SMS, so a malformed number
+            // means the order is created but the buyer never hears about it.
+            const phoneCheck = validateGhanaPhoneClient(buyerPhone);
+            if (!phoneCheck.valid) {
+                throw new Error(`Buyer phone number: ${phoneCheck.error}`);
+            }
 
             const feeAllocation = document.getElementById('escrow-fee-allocation') ? document.getElementById('escrow-fee-allocation').value : 'split';
             const deliveryDateFrom = document.getElementById('escrow-delivery-date-from') ? document.getElementById('escrow-delivery-date-from').value : "";
@@ -2347,10 +2386,10 @@ if (formNewEscrow) {
             const newEscrow = {
                 amount: totalAmount,
                 description: description,
-                sellerId: currentUser ? currentUser.uid : "GUEST",
-                sellerName: currentUser && currentUser.displayName ? currentUser.displayName : "TrustLink User",
+                sellerId: currentUser.uid,
+                sellerName: currentUser.displayName ? currentUser.displayName : "TrustLink User",
                 buyerEmail: buyerEmail,
-                buyerPhone: buyerPhone,
+                buyerPhone: phoneCheck.local,
                 feeAllocation: feeAllocation,
                 feePercent: cachedPlatformFeePercent || 1.5,
                 deliveryDateFrom: deliveryDateFrom,
@@ -2368,7 +2407,7 @@ if (formNewEscrow) {
                 await addDoc(collection(db, "audit_logs"), {
                     event: 'ESCROW_CREATED',
                     escrowId: escrowId,
-                    sellerId: currentUser ? currentUser.uid : "GUEST",
+                    sellerId: currentUser.uid,
                     amount: totalAmount,
                     status: 'PENDING_PAYMENT',
                     actor: 'seller',
