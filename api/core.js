@@ -47,6 +47,22 @@ function computeFeeSplit(amount, feePercent = 1.5, allocation = 'split') {
     };
 }
 
+// Moolre collection channel IDs: 13 = MTN, 6 = Telecel, 7 = AT.
+// checkout.html's network <select> already submits the numeric channel id,
+// while bots and API callers pass a network name - accept either. The old
+// version only string-matched names, so the numeric ids from the UI never
+// matched and every push silently went out on the MTN channel.
+function resolveMoolreChannel(network) {
+    const raw = String(network == null ? '' : network).trim();
+    if (/^\d+$/.test(raw)) return raw;
+
+    const net = raw.toUpperCase();
+    if (net.includes('TELECEL') || net.includes('VODAFONE')) return '6';
+    if (net.includes('AIRTELTIGO') || net.includes('AIRTEL') || net.includes('TIGO') ||
+        net === 'AT' || net.startsWith('AT ') || net.startsWith('AT-')) return '7';
+    return '13';
+}
+
 function detectGhanaNetwork(phone) {
     let digits = String(phone || '').replace(/[^\d]/g, '');
     if (digits.startsWith('233') && digits.length === 12) digits = '0' + digits.slice(3);
@@ -514,11 +530,7 @@ async function handleSendUssdPush(data) {
     let cleanPhone = String(phone).replace(/[^\d]/g, '');
     if (cleanPhone.startsWith('233') && cleanPhone.length === 12) cleanPhone = '0' + cleanPhone.slice(3);
 
-    // Map network to Moolre channel IDs
-    const net = (network || 'MTN').toUpperCase();
-    let channelId = '13'; // Default to MTN
-    if (net.includes('TELECEL') || net.includes('VODAFONE')) channelId = '6';
-    if (net.includes('AIRTEL') || net.includes('TIGO') || net.includes('AT')) channelId = '7';
+    const channelId = resolveMoolreChannel(network);
 
     const payload = {
         type: 1,
@@ -550,9 +562,26 @@ async function handleSendUssdPush(data) {
 
     console.log('[Moolre USSD] status:', response.status, 'body:', JSON.stringify(resData));
 
+    // TP14 is not a failure: Moolre has SMSed the payer a verification code and
+    // wants the same request resubmitted with `otpcode`. checkout.js has an OTP
+    // modal loop waiting on exactly this code - throwing here (as the previous
+    // version did for any non-1 status) made that loop unreachable and surfaced
+    // a "USSD push failed" alert instead of the verification prompt.
+    if (resData.code === 'TP14') {
+        return {
+            sent: false,
+            otpRequired: true,
+            code: 'TP14',
+            reference,
+            message: resData.message || 'A verification code was sent to the payer by SMS.'
+        };
+    }
+
     if (!response.ok || (resData.status !== 1 && resData.status !== true && resData.status !== 'success')) {
         const detail = resData.message || resData.error || resData.description || JSON.stringify(resData);
-        throw new Error('USSD push failed: ' + detail);
+        const err = new Error('USSD push failed: ' + detail);
+        err.moolreCode = resData.code || '';
+        throw err;
     }
 
     // resData.data usually contains a transaction/reference UUID on success

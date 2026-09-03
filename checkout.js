@@ -277,6 +277,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 });
                             }
 
+                            if (!res.data?.sent) {
+                                throw new Error(res.data?.message || 'The payment prompt could not be sent. Please try again.');
+                            }
+
                             const reference = res.data?.reference || paymentRef;
                             alert(`A payment prompt has been sent to ${phone}. Approve on your phone to complete payment.`);
                             
