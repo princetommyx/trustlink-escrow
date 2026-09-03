@@ -24,27 +24,12 @@ body.light-landing {
     color: #030712;
 }
 
-.light-landing .text-gradient {
-    background: linear-gradient(135deg, #111827 0%, #4B5563 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Background Blobs */
+/* Decorative background gradient "blobs" were removed deliberately: soft
+   multi-hue washes floating behind content are the single clearest tell of a
+   generated template. The palette now carries the page - flat surfaces,
+   one accent, and real content hierarchy. Do not reintroduce them. */
 .light-landing .glow-blob {
-    opacity: 0.7;
-    filter: none; /* Remove expensive blur filter */
-    will-change: transform; /* Hardware acceleration for the animation */
-}
-.light-landing .blob-1 {
-    background: radial-gradient(circle, rgba(255, 237, 213, 1) 0%, rgba(255, 237, 213, 0) 70%);
-}
-.light-landing .blob-2 {
-    background: radial-gradient(circle, rgba(224, 242, 254, 1) 0%, rgba(224, 242, 254, 0) 70%);
-}
-.light-landing .blob-3 {
-    background: radial-gradient(ellipse at center, rgba(254, 240, 138, 0.8) 0%, rgba(167, 243, 208, 0.4) 40%, rgba(167, 243, 208, 0) 70%);
+    display: none;
 }
 
 /* Navbar Overrides — Floating Card Header (Matching Sample UI) */
@@ -351,9 +336,9 @@ body.light-landing {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: #0F172A;
     color: #FFFFFF !important;
-    border: 2px solid #0d0d1a;
+    border: 2px solid #0F172A;
     border-radius: 10px;
     padding: 11px 26px;
     font-size: 1rem;
@@ -369,9 +354,9 @@ body.light-landing {
 }
 
 .light-landing .btn-nav-transact:hover {
-    background: linear-gradient(135deg, #2d2d4e 0%, #1a2a4e 100%);
-    border-color: #111;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+    background: #1E293B;
+    border-color: #1E293B;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.25);
     transform: translateY(-2px);
     color: #FFFFFF !important;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
@@ -424,7 +409,7 @@ body.light-landing {
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3B82F6, #06B6D4);
+    background: #2563EB;
     display: flex;
     align-items: center;
     justify-content: center;

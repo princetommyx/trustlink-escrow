@@ -59,13 +59,6 @@ h4 {
     line-height: 1.2;
 }
 
-.text-gradient {
-    background: linear-gradient(135deg, #60A5FA 0%, #22D3EE 60%, #A78BFA 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
 /* Background Effects */
 .glow-blob {
     position: absolute;
@@ -95,7 +88,7 @@ h4 {
     bottom: -300px;
     left: 50%;
     transform: translateX(-50%);
-    background: linear-gradient(to right, var(--primary), var(--secondary));
+    background: var(--primary);
     width: 800px;
 }
 
@@ -158,15 +151,15 @@ h4 {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+    background: #0F172A;
     color: #fff;
-    box-shadow: 0 4px 15px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.18);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
     transform: translateY(-2px);
-    filter: brightness(1.08);
+    background: #1E293B;
 }
 
 .btn-secondary {
@@ -235,10 +228,9 @@ h4 {
 .logo-icon {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #3b82f6, #9333ea);
+    background: #2563EB;
     border-radius: 8px;
     position: relative;
-    box-shadow: 0 0 15px rgba(147, 51, 234, 0.4);
 }
 
 .logo-icon::after {
@@ -634,7 +626,7 @@ h4 {
     width: 56px;
     height: 56px;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.15));
+    background: rgba(59, 130, 246, 0.12);
     border: 1px solid rgba(59, 130, 246, 0.25);
     margin-bottom: 24px;
     display: flex;
@@ -680,14 +672,13 @@ h4 {
     height: 48px;
     min-width: 48px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: var(--font-heading);
     font-weight: 700;
     font-size: 1.2rem;
-    box-shadow: 0 0 20px var(--primary-glow);
 }
 
 .step-content {
@@ -879,16 +870,69 @@ h4 {
     font-size: 0.85rem;
 }
 
-/* Animations */
+/* Animations
+   Tuned to docs/DESIGN_GUIDELINES.md: 180-350ms, ease-out or
+   cubic-bezier(0.16, 1, 0.3, 1), entrance travel capped at 8-12px. The
+   previous 0.8s/30px reveal read as sluggish and drew attention to itself;
+   short travel with a decelerating curve feels like the content was already
+   there rather than being animated at you. */
 .fade-up {
     opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
+    transform: translateY(12px);
+    transition: opacity 320ms cubic-bezier(0.16, 1, 0.3, 1),
+                transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fade-up.visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
+}
+
+/* Grids that should reveal their children in sequence rather than as one
+   block. The container itself stays static; each child carries the motion. */
+.fade-up.stagger {
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+.fade-up.stagger > * {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 320ms cubic-bezier(0.16, 1, 0.3, 1),
+                transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-up.stagger.visible > * {
+    opacity: 1;
+    transform: none;
+}
+
+.fade-up.stagger.visible > *:nth-child(2) { transition-delay: 60ms; }
+.fade-up.stagger.visible > *:nth-child(3) { transition-delay: 120ms; }
+.fade-up.stagger.visible > *:nth-child(4) { transition-delay: 180ms; }
+
+@media (prefers-reduced-motion: reduce) {
+
+    .fade-up,
+    .fade-up.stagger > * {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    .fade-up.stagger.visible > * {
+        transition-delay: 0ms;
+    }
+
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 /* Responsive Design */

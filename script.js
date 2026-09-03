@@ -196,10 +196,12 @@ if (mobileMenuBtn && navLinks) {
     // Scroll Animations (Intersection Observer)
     const fadeUpElements = document.querySelectorAll('.fade-up');
     
+    // Start the reveal slightly before the element is fully in view, so
+    // content is settling as you arrive at it instead of popping in after.
     const observerOptions = {
         root: null,
-        rootMargin: '0px',
-        threshold: 0.1
+        rootMargin: '0px 0px -8% 0px',
+        threshold: 0.05
     };
 
     const observer = new IntersectionObserver((entries, observer) => {
