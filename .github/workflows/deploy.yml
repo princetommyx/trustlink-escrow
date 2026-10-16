@@ -27,7 +27,11 @@ jobs:
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          sed -i "s|YOUR_DEEPSEEK_API_KEY_HERE|${DEEPSEEK_API_KEY}|g" chatbot.js
+          if [ -f chatbot.js ]; then
+            sed -i "s|YOUR_DEEPSEEK_API_KEY_HERE|${DEEPSEEK_API_KEY}|g" chatbot.js
+          else
+            echo "chatbot.js not found, skipping API key injection."
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
