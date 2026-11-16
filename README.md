@@ -41,6 +41,25 @@ Social commerce in Ghana relies heavily on Direct Messages (DMs) across WhatsApp
 
 ---
 
+## 📁 Project Structure
+
+```
+pages/                         All HTML pages. Public addresses are unchanged: vercel.json rewrites
+                               /login.html and /login to pages/login.html (same for every page).
+css/                           Stylesheets (auth-split.css = login, signup, reset, verify, admin login)
+js/                            Browser scripts; js/vendor/ holds third-party libraries
+img/                           Images and logos
+api/                           Vercel serverless functions (must stay at the top level)
+tests/                         Test scripts
+scripts/                       Validation, audit and backup scripts
+docs/                          Project documentation
+scripts/dev-server.js          Local preview with the same rewrites: npm run dev
+trustlink-woocommerce-plugin/  WooCommerce plugin source and zip
+sw.js, manifest.json           PWA files (must stay at the top level)
+```
+
+---
+
 ## 🔥 Key Platform Features & Functions
 
 ### 1. Vendor & Seller Control Center (`dashboard.html`)

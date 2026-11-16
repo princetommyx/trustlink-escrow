@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>TrustLink Escrow - Secure Checkout</title>
-    <link rel="icon" href="img/logo.png">
+    <link rel="icon" href="../img/logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="auth.css">
-    <link rel="stylesheet" href="landing.css">
-    <link rel="stylesheet" href="ui-states.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/auth.css">
+    <link rel="stylesheet" href="../css/landing.css">
+    <link rel="stylesheet" href="../css/ui-states.css">
     <style>
         body {
             background-color: #FAFAFA;
@@ -362,7 +362,7 @@
         }
     </style>
     <!-- PWA Meta Tags -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="TrustLink">
@@ -372,7 +372,7 @@
     <nav class="navbar" style="position: static; background: #fff; border-bottom: 1px solid #E5E7EB; padding: 20px 0;">
         <div class="container nav-container" style="justify-content: center;">
             <a href="index.html" class="logo" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                <img src="img/logo.png" alt="TrustLink Logo" style="height: 80px; width: auto; max-width: 220px; object-fit: contain; transform: none !important; margin: 0 auto;">
+                <img src="../img/logo.png" alt="TrustLink Logo" style="height: 80px; width: auto; max-width: 220px; object-fit: contain; transform: none !important; margin: 0 auto;">
             </a>
         </div>
     </nav>
@@ -521,7 +521,7 @@
                 </div>
 
                 <div style="margin-top: 32px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; color: #9CA3AF;">
-                    <img src="moolre.webp" alt="Moolre" style="height: 18px; opacity: 0.4; filter: grayscale(100%);">
+                    <img src="../img/moolre.webp" alt="Moolre" style="height: 18px; opacity: 0.4; filter: grayscale(100%);">
                     <span>Payments secured by Moolre</span>
                 </div>
                 
@@ -577,9 +577,9 @@
     </script>
     
     <!-- ui-states must load before checkout.js -->
-    <script src="ui-states.js"></script>
+    <script src="../js/ui-states.js"></script>
     <!-- Firebase & Custom Script -->
-    <script type="module" src="checkout.js"></script>
+    <script type="module" src="../js/checkout.js"></script>
     
     <!-- Small patch to update the new UI elements after checkout.js finishes -->
     <script type="module">

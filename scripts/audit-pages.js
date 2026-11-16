@@ -2,11 +2,11 @@ const fs = require('fs');
 const path = require('path');
 
 const pages = [
-  'index.html', 'individuals.html', 'online-vendors.html', 'ecommerce.html',
-  'marketplaces.html', 'api-docs.html', 'contact.html', 'terms.html', 'privacy.html',
-  'login.html', 'signup.html', 'admin-login.html', 'reset-password.html',
-  'verify.html', 'checkout.html', 'confirm.html', 'dashboard.html',
-  'admin-dashboard.html', 'users-dashboard.html'
+  'pages/index.html', 'pages/individuals.html', 'pages/online-vendors.html', 'pages/ecommerce.html',
+  'pages/marketplaces.html', 'pages/api-docs.html', 'pages/contact.html', 'pages/terms.html', 'pages/privacy.html',
+  'pages/login.html', 'pages/signup.html', 'pages/admin-login.html', 'pages/reset-password.html',
+  'pages/verify.html', 'pages/checkout.html', 'pages/confirm.html', 'pages/dashboard.html',
+  'pages/admin-dashboard.html', 'pages/users-dashboard.html'
 ];
 
 console.log('=== TrustLink 19-Page Responsive Audit ===');

@@ -1,9 +1,9 @@
-const CACHE_NAME = 'trustlink-cache-v1';
+const CACHE_NAME = 'trustlink-cache-v2';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
-    '/styles.css',
-    '/script.js',
+    '/css/styles.css',
+    '/js/script.js',
     '/img/logo.png',
     '/img/logo-footer.png',
     '/img/logo-dark.png',
