@@ -4,15 +4,79 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/pages/index.html"
+      "destination": "/pages/index"
     },
     {
-      "source": "/:page(admin-dashboard|admin-login|api-docs|checkout|confirm|contact|dashboard|ecommerce|index|individuals|login|marketplaces|online-vendors|privacy|reset-password|signup|terms|users-dashboard|verify)",
-      "destination": "/pages/:page.html"
+      "source": "/admin-dashboard",
+      "destination": "/pages/admin-dashboard"
     },
     {
-      "source": "/:page(admin-dashboard|admin-login|api-docs|checkout|confirm|contact|dashboard|ecommerce|index|individuals|login|marketplaces|online-vendors|privacy|reset-password|signup|terms|users-dashboard|verify).html",
-      "destination": "/pages/:page.html"
+      "source": "/admin-login",
+      "destination": "/pages/admin-login"
+    },
+    {
+      "source": "/api-docs",
+      "destination": "/pages/api-docs"
+    },
+    {
+      "source": "/checkout",
+      "destination": "/pages/checkout"
+    },
+    {
+      "source": "/confirm",
+      "destination": "/pages/confirm"
+    },
+    {
+      "source": "/contact",
+      "destination": "/pages/contact"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/pages/dashboard"
+    },
+    {
+      "source": "/ecommerce",
+      "destination": "/pages/ecommerce"
+    },
+    {
+      "source": "/individuals",
+      "destination": "/pages/individuals"
+    },
+    {
+      "source": "/login",
+      "destination": "/pages/login"
+    },
+    {
+      "source": "/marketplaces",
+      "destination": "/pages/marketplaces"
+    },
+    {
+      "source": "/online-vendors",
+      "destination": "/pages/online-vendors"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/pages/privacy"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/pages/reset-password"
+    },
+    {
+      "source": "/signup",
+      "destination": "/pages/signup"
+    },
+    {
+      "source": "/terms",
+      "destination": "/pages/terms"
+    },
+    {
+      "source": "/users-dashboard",
+      "destination": "/pages/users-dashboard"
+    },
+    {
+      "source": "/verify",
+      "destination": "/pages/verify"
     }
   ],
   "headers": [
