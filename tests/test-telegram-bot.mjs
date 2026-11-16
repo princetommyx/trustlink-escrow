@@ -6,9 +6,9 @@
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-import handler from './api/webhook/telegram.js';
-import { getEscrowActionKeyboard, buildEscrowCheckoutUrl } from './api/_utils/telegram.js';
-import { buildEscrowOrderSMS } from './api/_utils/sms-dispatcher.js';
+import handler from '../api/webhook/telegram.js';
+import { getEscrowActionKeyboard, buildEscrowCheckoutUrl } from '../api/_utils/telegram.js';
+import { buildEscrowOrderSMS } from '../api/_utils/sms-dispatcher.js';
 
 // Mock Response Object for Vercel Serverless Function testing
 function createMockRes() {

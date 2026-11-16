@@ -22,25 +22,25 @@ function assert(condition, message) {
 
 // 1. Required Legal, Security, Telegram & Core Files Exist
 const requiredFiles = [
-    'terms.html',
-    'privacy.html',
-    'index.html',
-    'signup.html',
-    'login.html',
-    'verify.html',
-    'api-docs.html',
-    'dashboard.html',
-    'admin-dashboard.html',
-    'individuals.html',
-    'online-vendors.html',
-    'ecommerce.html',
-    'marketplaces.html',
-    'solutions.css',
-    'solution-page.js',
-    'legal.css',
-    'legal.js',
-    'api-docs.css',
-    'api-docs.js',
+    'pages/terms.html',
+    'pages/privacy.html',
+    'pages/index.html',
+    'pages/signup.html',
+    'pages/login.html',
+    'pages/verify.html',
+    'pages/api-docs.html',
+    'pages/dashboard.html',
+    'pages/admin-dashboard.html',
+    'pages/individuals.html',
+    'pages/online-vendors.html',
+    'pages/ecommerce.html',
+    'pages/marketplaces.html',
+    'css/solutions.css',
+    'js/solution-page.js',
+    'css/legal.css',
+    'js/legal.js',
+    'css/api-docs.css',
+    'js/api-docs.js',
     'docs/DESIGN_GUIDELINES.md',
     'docs/SECURITY_SETUP.md',
     'docs/BACKUP_AND_DISASTER_RECOVERY.md',
@@ -52,11 +52,11 @@ const requiredFiles = [
     'api/_utils/telegram.js',
     'api/_utils/sms-dispatcher.js',
     'api/webhook/telegram.js',
-    'test-telegram-bot.mjs',
+    'tests/test-telegram-bot.mjs',
     'scripts/backup-firestore.js',
-    'moolre-service.js',
-    'session-manager.js',
-    'vendor/gsap.min.js',
+    'js/moolre-service.js',
+    'js/session-manager.js',
+    'js/vendor/gsap.min.js',
     'img/mail-icon.svg',
     'LICENSE',
     'vercel.json',
@@ -70,20 +70,20 @@ requiredFiles.forEach(relPath => {
 
 // 2. Check HTML files for obsolete node_modules & domain references
 const htmlFiles = [
-    'index.html',
-    'signup.html',
-    'login.html',
-    'terms.html',
-    'privacy.html',
-    'verify.html',
-    'api-docs.html',
-    'dashboard.html',
-    'admin-dashboard.html',
-    'users-dashboard.html',
-    'individuals.html',
-    'online-vendors.html',
-    'ecommerce.html',
-    'marketplaces.html'
+    'pages/index.html',
+    'pages/signup.html',
+    'pages/login.html',
+    'pages/terms.html',
+    'pages/privacy.html',
+    'pages/verify.html',
+    'pages/api-docs.html',
+    'pages/dashboard.html',
+    'pages/admin-dashboard.html',
+    'pages/users-dashboard.html',
+    'pages/individuals.html',
+    'pages/online-vendors.html',
+    'pages/ecommerce.html',
+    'pages/marketplaces.html'
 ];
 
 htmlFiles.forEach(file => {
@@ -97,10 +97,10 @@ htmlFiles.forEach(file => {
 
 // 3. Solution Page Specific Validations
 const solutionPages = [
-    { file: 'individuals.html', route: '/individuals' },
-    { file: 'online-vendors.html', route: '/online-vendors' },
-    { file: 'ecommerce.html', route: '/ecommerce' },
-    { file: 'marketplaces.html', route: '/marketplaces' }
+    { file: 'pages/individuals.html', route: '/individuals' },
+    { file: 'pages/online-vendors.html', route: '/online-vendors' },
+    { file: 'pages/ecommerce.html', route: '/ecommerce' },
+    { file: 'pages/marketplaces.html', route: '/marketplaces' }
 ];
 
 solutionPages.forEach(({ file, route }) => {
@@ -123,15 +123,15 @@ solutionPages.forEach(({ file, route }) => {
 
 // 4. Verify No Exposed Secret String Literals in Source Code
 const sensitiveJsFiles = [
-    'moolre-service.js',
+    'js/moolre-service.js',
     'functions/index.js',
-    'test-moolre.js',
-    'test-moolre.mjs',
-    'checkout.js',
-    'dashboard.js',
-    'admin-dashboard.js',
-    'session-manager.js',
-    'solution-page.js',
+    'tests/test-moolre.js',
+    'tests/test-moolre.mjs',
+    'js/checkout.js',
+    'js/dashboard.js',
+    'js/admin-dashboard.js',
+    'js/session-manager.js',
+    'js/solution-page.js',
     'api/send-whatsapp.js',
     'api/webhook/whatsapp.js',
     'api/webhook/telegram.js',

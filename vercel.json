@@ -1,6 +1,20 @@
 {
   "version": 2,
   "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/pages/index.html"
+    },
+    {
+      "source": "/:page(admin-dashboard|admin-login|api-docs|checkout|confirm|contact|dashboard|ecommerce|index|individuals|login|marketplaces|online-vendors|privacy|reset-password|signup|terms|users-dashboard|verify)",
+      "destination": "/pages/:page.html"
+    },
+    {
+      "source": "/:page(admin-dashboard|admin-login|api-docs|checkout|confirm|contact|dashboard|ecommerce|index|individuals|login|marketplaces|online-vendors|privacy|reset-password|signup|terms|users-dashboard|verify).html",
+      "destination": "/pages/:page.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

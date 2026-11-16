@@ -5,16 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>TrustLink Escrow - Protected Mobile Money Payments for Social Sales</title>
-    <link rel="icon" href="img/logo.png">
+    <link rel="icon" href="../img/logo.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;900&family=Lora:ital,wght@0,500;0,600;0,700;1,500&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="landing.css">
-    <link rel="stylesheet" href="ui-states.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/landing.css">
+    <link rel="stylesheet" href="../css/ui-states.css">
 
     <meta name="description"
         content="TrustLink Escrow: Protected Mobile Money payment infrastructure for social media vendors and buyers in Ghana. Create secure payment links for DM sales on Instagram, WhatsApp, TikTok, and X.">
@@ -50,7 +50,7 @@
     ]
     </script>
     <!-- PWA Meta Tags -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="TrustLink">
@@ -61,8 +61,7 @@
         <nav class="navbar">
             <div class="container nav-container">
                 <a href="index.html" class="logo">
-                    <img src="img/logo.png" alt="TrustLink Logo"
-                        style="height: 68px; width: auto; max-width: 280px; object-fit: contain;">
+                    <img src="../img/logo-wordmark.png" alt="TrustLink" class="site-logo site-logo--nav" width="449" height="101">
                 </a>
                 <div class="nav-links">
                     <div class="nav-dropdown">
@@ -140,24 +139,52 @@
         </nav>
 
         <main>
-            <!-- Hero Section: full-bleed editorial photo treatment -->
-            <section class="hero-photo">
-                <div class="hero-photo-bg"
-                    style="background-image: url('https://images.unsplash.com/photo-1649532345697-12f864b9062b?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1920');"
-                    role="img" aria-label="A Ghanaian social-media vendor checking an order on his phone"></div>
-                <div class="hero-photo-overlay"></div>
-                <div class="container hero-photo-content">
-                    <div class="badge badge-on-dark fade-up">Powered by Moolre <img src="moolre.webp" alt="Moolre Logo" class="badge-logo"
-                            style="display:inline-block; vertical-align:middle; margin-left: 6px;"></div>
-                    <h1 class="hero-title hero-title-photo fade-up">Protected <span class="text-accent">Mobile
-                            Money</span><br>payments for social-media sales</h1>
-                    <p class="hero-subtitle hero-subtitle-photo fade-up">Create a secure payment link, share it in
-                        any DM, and receive your money after the buyer confirms delivery.</p>
+            <!-- Hero Section: navy brand panel with copy and an example escrow card -->
+            <section class="hero-photo hero-split">
+                <div class="container hero-split-grid">
+                    <div class="hero-photo-content">
+                        <div class="badge badge-on-dark fade-up">Powered by Moolre <img src="../img/moolre.webp" alt="Moolre Logo" class="badge-logo"
+                                style="display:inline-block; vertical-align:middle; margin-left: 6px;"></div>
+                        <h1 class="hero-title hero-title-photo fade-up">Protected <span class="text-accent">Mobile
+                                Money</span> payments for social-media sales</h1>
+                        <p class="hero-subtitle hero-subtitle-photo fade-up">Create a secure payment link, share it in
+                            any DM, and receive your money after the buyer confirms delivery.</p>
 
-                    <div class="hero-cta fade-up">
-                        <a href="signup.html" class="btn btn-primary btn-large">Create a TrustLink</a>
-                        <a href="#how-it-works" class="btn btn-outline btn-large btn-outline-on-dark">See how it
-                            works</a>
+                        <div class="hero-cta fade-up">
+                            <a href="signup.html" class="btn btn-primary btn-large">Create a TrustLink</a>
+                            <a href="#how-it-works" class="btn btn-outline btn-large btn-outline-on-dark">See how it
+                                works</a>
+                        </div>
+                    </div>
+
+                    <!-- Decorative example of an escrow in progress (not live data) -->
+                    <div class="hero-demo fade-up">
+                        <img class="hero-demo-photo"
+                            src="https://images.unsplash.com/photo-1649532345697-12f864b9062b?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1200"
+                            alt="A Ghanaian social-media vendor checking an order on his phone" width="1200" height="1500">
+                        <div class="hero-demo-card" aria-hidden="true">
+                            <div class="hero-demo-head">
+                                <span class="hero-demo-label">Example payment link</span>
+                                <span class="hero-demo-chip">Funds escrowed</span>
+                            </div>
+                            <div class="hero-demo-item">
+                                <span class="hero-demo-thumb">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                                </span>
+                                <span class="hero-demo-item-text">
+                                    <strong>Ankara print dress</strong>
+                                    <small>Paid with MTN MoMo</small>
+                                </span>
+                                <span class="hero-demo-amount">GH&#8373;450.00</span>
+                            </div>
+                            <ol class="hero-demo-steps">
+                                <li class="is-done"><span class="hero-demo-dot"></span>Buyer paid</li>
+                                <li class="is-done"><span class="hero-demo-dot"></span>Funds held in escrow</li>
+                                <li class="is-now"><span class="hero-demo-dot"></span>Seller ships the order</li>
+                                <li><span class="hero-demo-dot"></span>Buyer confirms delivery</li>
+                                <li><span class="hero-demo-dot"></span>Payout released to seller</li>
+                            </ol>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -168,7 +195,7 @@
                     <p class="trust-strip-label">Powered by Ghana's trusted Mobile Money rails</p>
                     <div class="trust-strip-grid fade-up stagger">
                         <div class="trust-strip-card">
-                            <img src="moolre.webp" alt="" class="trust-strip-logo" aria-hidden="true">
+                            <img src="../img/moolre.webp" alt="" class="trust-strip-logo" aria-hidden="true">
                             <span>Moolre</span>
                         </div>
                         <div class="trust-strip-card">
@@ -281,7 +308,7 @@
                             </div>
 
                             <div class="showcase-right-col" style="display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
-                                <img src="img/hero-vendor.png" alt="TrustLink on Mobile" style="width: 100%; height: auto; max-width: 500px; object-fit: contain; margin: 0 auto; display: block;">
+                                <img src="../img/hero-vendor.png" alt="TrustLink on Mobile" style="width: 100%; height: auto; max-width: 500px; object-fit: contain; margin: 0 auto; display: block;">
                             </div>
                         </div>
 
@@ -306,7 +333,7 @@
                             </div>
 
                             <div class="showcase-right-col" style="display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
-                                <img src="img/hero-online-vendors.png" alt="Online Vendor Social Sales" style="width: 100%; height: auto; max-width: 500px; object-fit: contain; margin: 0 auto; display: block; border-radius: 20px;">
+                                <img src="../img/hero-online-vendors.png" alt="Online Vendor Social Sales" style="width: 100%; height: auto; max-width: 500px; object-fit: contain; margin: 0 auto; display: block; border-radius: 20px;">
                             </div>
                         </div>
 
@@ -572,47 +599,67 @@
                         <p>Four simple steps to build trust between you and your customers on any platform.</p>
                     </div>
 
-                    <div class="steps-grid fade-up stagger"
-                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 60px;">
-                        <!-- Step 1 -->
-                        <div class="bento-card" style="padding: 32px; min-height: 250px;">
-                            <div
-                                style="width: 48px; height: 48px; border-radius: 50%; background: #F1F5F9; color: #0F172A; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
-                                1</div>
-                            <h4 style="font-size: 1.25rem; margin-bottom: 8px;">Create a Link</h4>
-                            <p style="color: #64748B; font-size: 0.95rem;">Provide the buyer's details along with the
-                                price. Our system automatically sends the secure payment link to the buyer via SMS,
-                                Email, or WhatsApp.</p>
-                        </div>
+                    <div class="hiw-grid fade-up" data-hiw>
+                        <ol class="hiw-steps">
+                            <li>
+                                <button type="button" class="hiw-step is-active" data-step="1" aria-pressed="true">
+                                    <span class="hiw-step-num">1</span>
+                                    <span class="hiw-step-body">
+                                        <span class="hiw-step-title">Create a Link</span>
+                                        <span class="hiw-step-desc">Provide the buyer's details along with the price. Our system automatically sends the secure payment link to the buyer via SMS, Email, or WhatsApp.</span>
+                                    </span>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="hiw-step" data-step="2" aria-pressed="false">
+                                    <span class="hiw-step-num">2</span>
+                                    <span class="hiw-step-body">
+                                        <span class="hiw-step-title">Buyer Deposits</span>
+                                        <span class="hiw-step-desc">The buyer pays securely via Mobile Money. The payment enters a protected transaction flow that both parties can track.</span>
+                                    </span>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="hiw-step" data-step="3" aria-pressed="false">
+                                    <span class="hiw-step-num">3</span>
+                                    <span class="hiw-step-body">
+                                        <span class="hiw-step-title">Ship &amp; Fulfill</span>
+                                        <span class="hiw-step-desc">Deliver the product or service with confidence. Both parties receive automated progress alerts.</span>
+                                    </span>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="hiw-step" data-step="4" aria-pressed="false">
+                                    <span class="hiw-step-num">4</span>
+                                    <span class="hiw-step-body">
+                                        <span class="hiw-step-title">Get Paid</span>
+                                        <span class="hiw-step-desc">Once the buyer confirms receipt, funds are released to your wallet. Clear release and dispute rules protect both sides.</span>
+                                    </span>
+                                </button>
+                            </li>
+                        </ol>
 
-                        <!-- Step 2 -->
-                        <div class="bento-card" style="padding: 32px; min-height: 250px;">
-                            <div
-                                style="width: 48px; height: 48px; border-radius: 50%; background: #F1F5F9; color: #0F172A; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
-                                2</div>
-                            <h4 style="font-size: 1.25rem; margin-bottom: 8px;">Buyer Deposits</h4>
-                            <p style="color: #64748B; font-size: 0.95rem;">The buyer pays securely via Mobile Money. The
-                                payment enters a protected transaction flow that both parties can track.</p>
-                        </div>
-
-                        <!-- Step 3 -->
-                        <div class="bento-card" style="padding: 32px; min-height: 250px;">
-                            <div
-                                style="width: 48px; height: 48px; border-radius: 50%; background: #F1F5F9; color: #0F172A; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
-                                3</div>
-                            <h4 style="font-size: 1.25rem; margin-bottom: 8px;">Ship & Fulfill</h4>
-                            <p style="color: #64748B; font-size: 0.95rem;">Deliver the product or service with
-                                confidence. Both parties receive automated progress alerts.</p>
-                        </div>
-
-                        <!-- Step 4 -->
-                        <div class="bento-card" style="padding: 32px; min-height: 250px;">
-                            <div
-                                style="width: 48px; height: 48px; border-radius: 50%; background: #F1F5F9; color: #0F172A; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
-                                4</div>
-                            <h4 style="font-size: 1.25rem; margin-bottom: 8px;">Get Paid</h4>
-                            <p style="color: #64748B; font-size: 0.95rem;">Once the buyer confirms receipt, funds are
-                                released to your wallet. Clear release and dispute rules protect both sides.</p>
+                        <!-- Illustrative chat showing one sale from first message to payout (not a real conversation) -->
+                        <div class="hiw-phone" aria-hidden="true">
+                            <div class="hiw-phone-head">
+                                <span class="hiw-avatar">AC</span>
+                                <span class="hiw-phone-title"><strong>Ama's Closet</strong><small>Direct message &middot; example</small></span>
+                            </div>
+                            <div class="hiw-chat">
+                                <p class="hiw-msg hiw-msg--in" data-step="1">Hi, is the Ankara dress still available?</p>
+                                <p class="hiw-msg hiw-msg--out" data-step="1">Yes, GH&#8373;450. Here is a protected payment link.</p>
+                                <div class="hiw-link hiw-msg--out" data-step="1">
+                                    <span class="hiw-link-brand">TrustLink</span>
+                                    <strong>Ankara print dress</strong>
+                                    <span class="hiw-link-row"><span>GH&#8373;450.00</span><span class="hiw-link-btn">Pay securely</span></span>
+                                </div>
+                                <p class="hiw-note" data-step="2">Paid with Mobile Money &middot; funds held in escrow</p>
+                                <p class="hiw-msg hiw-msg--in" data-step="2">Done, I have paid.</p>
+                                <p class="hiw-msg hiw-msg--out" data-step="3">Thanks! Your order is on its way.</p>
+                                <p class="hiw-note" data-step="3">Marked as shipped &middot; both sides notified</p>
+                                <p class="hiw-msg hiw-msg--in" data-step="4">Received it, I love it.</p>
+                                <p class="hiw-note hiw-note--done" data-step="4">Delivery confirmed &middot; payment released to seller</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -628,8 +675,9 @@
                     </div>
 
                     <div class="protection-grid fade-up stagger">
-                        <div class="protection-card">
+                        <div class="protection-card protection-card--buyer">
                             <span class="protection-tag protection-tag-buyer">Buyer Protection</span>
+                            <h3 class="protection-title">Pay first, without the fear.</h3>
                             <ul class="protection-list">
                                 <li>
                                     <span class="protection-icon" style="background:#EFF6FF; color:#2563EB;">
@@ -661,8 +709,17 @@
                             </ul>
                         </div>
 
-                        <div class="protection-card">
+                        <!-- The escrow sits between the two sides -->
+                        <div class="protection-vault" aria-hidden="true">
+                            <span class="protection-vault-ring">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            </span>
+                            <span class="protection-vault-label">Escrow</span>
+                        </div>
+
+                        <div class="protection-card protection-card--seller">
                             <span class="protection-tag protection-tag-seller">Seller Protection</span>
+                            <h3 class="protection-title">Ship knowing the money is there.</h3>
                             <ul class="protection-list">
                                 <li>
                                     <span class="protection-icon" style="background:#DCFCE7; color:#15803D;">
@@ -700,23 +757,31 @@
             <!-- Ghana Coverage Section -->
             <section class="coverage-section" style="padding-top: 100px;">
                 <div class="container">
-                    <div class="section-header fade-up" style="max-width: 700px;">
-                        <h2 style="font-size: clamp(2rem, 4vw, 3rem);">Built for all of Ghana</h2>
-                        <p>Wherever your buyer's Mobile Money network reaches, TrustLink works.</p>
-                    </div>
+                    <div class="coverage-band fade-up">
+                        <div class="coverage-band-copy">
+                            <span class="coverage-eyebrow">Coverage</span>
+                            <h2>Built for all of Ghana</h2>
+                            <p>Wherever your buyer's Mobile Money network reaches, TrustLink works.</p>
+                            <ul class="coverage-networks" aria-label="Supported Mobile Money networks">
+                                <li><span style="background:#FFCC08;"></span>MTN MoMo</li>
+                                <li><span style="background:#E4002B;"></span>Telecel Cash</li>
+                                <li><span style="background:#FFFFFF;"></span>AT Money</li>
+                            </ul>
+                        </div>
 
-                    <div class="coverage-grid fade-up stagger">
-                        <div class="coverage-stat">
-                            <h3>16</h3>
-                            <p>Regions of Ghana covered - anywhere MTN, Telecel, or AT Money reaches</p>
-                        </div>
-                        <div class="coverage-stat">
-                            <h3>3</h3>
-                            <p>Mobile Money networks supported: MTN MoMo, Telecel Cash, and AT Money</p>
-                        </div>
-                        <div class="coverage-stat">
-                            <h3>24/7</h3>
-                            <p>Create a link, get paid, and confirm delivery any time, day or night</p>
+                        <div class="coverage-grid">
+                            <div class="coverage-stat">
+                                <h3><span data-count="16">16</span></h3>
+                                <p>Regions of Ghana covered - anywhere MTN, Telecel, or AT Money reaches</p>
+                            </div>
+                            <div class="coverage-stat">
+                                <h3><span data-count="3">3</span></h3>
+                                <p>Mobile Money networks supported: MTN MoMo, Telecel Cash, and AT Money</p>
+                            </div>
+                            <div class="coverage-stat">
+                                <h3>24/7</h3>
+                                <p>Create a link, get paid, and confirm delivery any time, day or night</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -745,31 +810,30 @@
             <div class="container footer-container">
                 <div class="footer-brand">
                     <a href="index.html" class="logo">
-                        <img src="img/logo.png" alt="TrustLink Logo"
-                            style="height: 56px; width: auto; max-width: 200px; object-fit: contain;">
+                        <img src="../img/logo-wordmark.png" alt="TrustLink" class="site-logo site-logo--footer" width="449" height="101">
                     </a>
                     <p>Protected payments for social commerce in Ghana.</p>
                     <nav class="footer-social" aria-label="Follow TrustLink on social media">
                         <a class="footer-social-link" href="https://www.linkedin.com/company/trustlinkescrow/"
                             target="_blank" rel="noopener noreferrer external" aria-label="TrustLink on LinkedIn">
-                            <img src="img/social/linkedin.svg" alt="" aria-hidden="true" width="19" height="19">
+                            <img src="../img/social/linkedin.svg" alt="" aria-hidden="true" width="19" height="19">
                             <span class="sr-only">LinkedIn</span>
                         </a>
                         <a class="footer-social-link"
                             href="https://www.instagram.com/trustlinkescrow?igsh=bnpybzFlNHp3aGVt" target="_blank"
                             rel="noopener noreferrer external" aria-label="TrustLink on Instagram">
-                            <img src="img/social/instagram.svg" alt="" aria-hidden="true" width="19" height="19">
+                            <img src="../img/social/instagram.svg" alt="" aria-hidden="true" width="19" height="19">
                             <span class="sr-only">Instagram</span>
                         </a>
                         <a class="footer-social-link"
                             href="https://www.tiktok.com/@trustlinkescrow?_r=1&amp;_t=ZS-98bbA6OlrSn" target="_blank"
                             rel="noopener noreferrer external" aria-label="TrustLink on TikTok">
-                            <img src="img/social/tiktok.svg" alt="" aria-hidden="true" width="19" height="19">
+                            <img src="../img/social/tiktok.svg" alt="" aria-hidden="true" width="19" height="19">
                             <span class="sr-only">TikTok</span>
                         </a>
                         <a class="footer-social-link" href="https://www.facebook.com/share/19WoRaHJwp/" target="_blank"
                             rel="noopener noreferrer external" aria-label="TrustLink on Facebook">
-                            <img src="img/social/facebook.svg" alt="" aria-hidden="true" width="19" height="19">
+                            <img src="../img/social/facebook.svg" alt="" aria-hidden="true" width="19" height="19">
                             <span class="sr-only">Facebook</span>
                         </a>
                     </nav>
@@ -806,9 +870,9 @@
             </div>
         </footer>
 
-        <script src="ui-states.js"></script>
-        <script src="script.js"></script>
-        <script type="module" src="auth-handler.js"></script>
+        <script src="../js/ui-states.js"></script>
+        <script src="../js/script.js"></script>
+        <script type="module" src="../js/auth-handler.js"></script>
     </div>
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">

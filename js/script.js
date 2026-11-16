@@ -335,3 +335,81 @@ if ('serviceWorker' in navigator) {
         }
     });
 }
+
+/* How it works: the steps drive an example chat. Auto-plays while on screen;
+   choosing a step yourself stops the auto-play. */
+(function () {
+    var root = document.querySelector('[data-hiw]');
+    if (!root) return;
+    var steps = Array.prototype.slice.call(root.querySelectorAll('.hiw-step'));
+    var items = Array.prototype.slice.call(root.querySelectorAll('.hiw-chat > [data-step]'));
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var current = 0, timer = null, userChose = false, visible = false;
+    var HOLD = 3400;
+
+    function show(n) {
+        current = n;
+        steps.forEach(function (btn) {
+            var on = Number(btn.dataset.step) === n;
+            btn.classList.toggle('is-active', on);
+            btn.setAttribute('aria-pressed', String(on));
+        });
+        items.forEach(function (el) {
+            el.classList.toggle('is-shown', Number(el.dataset.step) <= n);
+        });
+    }
+
+    function stop() {
+        clearTimeout(timer);
+        timer = null;
+        root.classList.remove('is-playing');
+    }
+
+    function play() {
+        if (reduce || userChose || !visible || timer) return;
+        root.classList.add('is-playing');
+        timer = setTimeout(function tick() {
+            show(current >= steps.length ? 1 : current + 1);
+            timer = setTimeout(tick, HOLD);
+        }, HOLD);
+    }
+
+    steps.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            userChose = true;
+            stop();
+            show(Number(btn.dataset.step));
+        });
+    });
+
+    show(reduce ? steps.length : 1);
+
+    if ('IntersectionObserver' in window && !reduce) {
+        new IntersectionObserver(function (entries) {
+            visible = entries[0].isIntersecting;
+            if (visible) play(); else stop();
+        }, { threshold: 0.35 }).observe(root);
+    }
+})();
+
+/* Coverage stats: count up once when they scroll into view. */
+(function () {
+    var nums = document.querySelectorAll('[data-count]');
+    if (!nums.length || !('IntersectionObserver' in window)) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            io.unobserve(entry.target);
+            var el = entry.target, target = Number(el.dataset.count), start = null, dur = 900;
+            el.textContent = '0';
+            requestAnimationFrame(function step(ts) {
+                if (start === null) start = ts;
+                var t = Math.min(1, (ts - start) / dur);
+                el.textContent = String(Math.round(target * (1 - Math.pow(1 - t, 3))));
+                if (t < 1) requestAnimationFrame(step);
+            });
+        });
+    }, { threshold: 0.6 });
+    nums.forEach(function (n) { io.observe(n); });
+})();
